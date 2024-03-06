@@ -24,7 +24,7 @@ for choice in "${choices_array[@]}"; do
             ;;
         4)
             echo "𝕊𝕖𝕥𝕦𝕡 𝕍𝕊ℂ𝕠𝕕𝕖, 𝕖𝕩𝕥𝕖𝕟𝕤𝕚𝕠𝕟𝕤 𝕒𝕟𝕕 𝕤𝕖𝕥𝕥𝕚𝕟𝕘𝕤\n"
-            # Add VSCode setup commands here
+            sh ./vscode/setup.sh
             ;;
         *)
             echo "Invalid choice: $choice"
