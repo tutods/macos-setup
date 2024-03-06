@@ -1,0 +1,1 @@
+bind \ew backward-kill-line
