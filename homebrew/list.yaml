@@ -10,6 +10,7 @@ casks:
   - github
   - hiddenbar
   - hyper
+  - kap
   - iina
   - imageoptim
   - jetbrains-toolbox
@@ -25,6 +26,8 @@ casks:
   - warp
 formulaes:
   - asdf
+  - bat
+  - consize
   - docker-compose
   - eza
   - ffmpeg
