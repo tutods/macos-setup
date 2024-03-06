@@ -8,10 +8,9 @@
 
 echo "3) Install extensions"
 DIR=$(dirname "$(readlink -f "$0")")
-YAML_FILE="$DIR/configs/list.yaml"
+YAML_FILE="$DIR/list.yaml"
 EXTENSIONS=$(yq '.extensions[]' $YAML_FILE)
 
-echo $EXTENSIONS
 for extension in $EXTENSIONS; do
-  code --install-extension $EXTENSIONS
+  code --install-extension $extension
 done

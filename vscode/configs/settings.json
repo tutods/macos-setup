@@ -10,7 +10,7 @@
   "workbench.statusBar.visible": false,
   "workbench.layoutControl.enabled": false,
   // Theme & Icons
-  "workbench.colorTheme": "Omni",
+  "workbench.colorTheme": "Night Wolf (dark blue)",
   "workbench.iconTheme": "symbols",
   "workbench.productIconTheme": "fluent-icons",
   // Fonts
