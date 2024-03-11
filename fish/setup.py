@@ -1,18 +1,15 @@
 import inquirer
 import subprocess
-import platform
+import os
 
-
-# Function to get the Python command based on the macOS version
-def get_python_command():
-    return 'python3' if platform.system() == 'Darwin' and int(platform.release().split('.')[0]) >= 20 else 'python'
-
+# Get the path for this file
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # List of options to print and respective shell script to run
 options = {
-    'Install': 'install.py',
-    'Copy config.': 'config.py',
-    'Oh-my-fish': 'omf.py',
+    'Install': 'sh scripts/install.sh',
+    'Copy config.': 'sh scripts/config.sh',
+    'Oh-my-fish': 'sh scripts/omf.sh',
 }
 
 questions = [
@@ -20,6 +17,7 @@ questions = [
         "options",
         message="Which steps you want to execute to setup your shell using Fish?",
         choices=list(options.keys()),
+        default=["Install", "Copy config.", "Oh-my-fish"]
     ),
 ]
 
@@ -31,13 +29,18 @@ if len(selected_options) == 0:
     print("No selected options!")
     exit(-1)
 
+# print(os.getcwd())
+
 # Loop on selected options
 for option in selected_options:
-    command = options.get(option)
+    script_to_run = options.get(option)
+    print(current_dir, script_to_run)
 
-    if command:
-        subprocess.run([get_python_command(), command])
-        # output = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        #                         text=True)
+    if script_to_run:
+        print("👉 Running:", option)
+        process = subprocess.run(script_to_run, shell=True, check=True, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 text=True, cwd=current_dir)
+        print(process.stdout)
     else:
         print("No command for {option}")
