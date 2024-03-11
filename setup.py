@@ -41,7 +41,6 @@ for option in selected_options:
             print("PY")
             subprocess.run([get_python_command(), command])
         else:
-            print("SH")
             process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                      text=True)
             print(process.stdout)
