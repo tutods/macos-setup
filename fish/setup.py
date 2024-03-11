@@ -15,7 +15,7 @@ options = {
 questions = [
     inquirer.Checkbox(
         "options",
-        message="Which steps you want to execute to setup your shell using Fish?",
+        message="Which steps you want to execute to setup your shell using Fish",
         choices=list(options.keys()),
         default=["Install", "Copy config.", "Oh-my-fish"]
     ),

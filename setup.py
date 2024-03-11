@@ -37,10 +37,13 @@ for option in selected_options:
     command = options.get(option)
 
     if command:
-        subprocess.run([get_python_command(), command])
-        # print(command)
-        # output = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        #                         text=True)
-        # print(output.stdout)
+        if command.endswith('.py'):
+            print("PY")
+            subprocess.run([get_python_command(), command])
+        else:
+            print("SH")
+            process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                     text=True)
+            print(process.stdout)
     else:
         print("No command for {option}")
