@@ -10,10 +10,11 @@ def get_python_command():
 
 # List of options to print and respective shell script to run
 options = {
-    'Homebrew': 'sh ./homebrew/setup.sh',
+    'Homebrew': 'homebrew/setup.sh',
     'Shell (using Fish)': 'fish/setup.py',
-    'VSCode': 'sh ./vscode/setup.sh',
-    'Hyper': 'sh ./hyper/setup.sh'
+    'Node.js': "node/setup.sh",
+    'VSCode': 'vscode/setup.sh',
+    'Hyper': 'hyper/setup.sh'
 }
 
 try:
@@ -40,13 +41,9 @@ try:
 
             if command:
                 if command.endswith('.py'):
-                    print("PY")
                     subprocess.run([get_python_command(), command])
                 else:
-                    process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE,
-                                             stderr=subprocess.PIPE,
-                                             text=True)
-                    print(process.stdout)
+                    subprocess.run(['sh', command], shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             else:
                 print("No command for {option}")
 except KeyboardInterrupt:

@@ -25,7 +25,6 @@ casks:
   - visual-studio-code
   - warp
 formulaes:
-  - asdf
   - bat
   - consize
   - docker-compose

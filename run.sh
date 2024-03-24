@@ -12,7 +12,7 @@ source env/bin/activate
 
 # Install pipenv
 if command -v python3 &> /dev/null; then
-    python3 -m pip3 install inquirer # using Python 3.x
+    python3 -m pip install inquirer # using Python 3.x
     python3 setup.py
 elif command -v python &> /dev/null; then
     python -m pip install inquirer # using Python 2.x
