@@ -28,4 +28,7 @@ only for the things that are possible to run via terminal.
 
 ## ⏯️ How to execute
 
-To 
+To execute this **macOS Setup** utility is very simple:
+- Clone or download the repository;
+- Open your terminal and navigate to the folder containing this repository;
+- Run `sh run.sh` on the root folder of this repository.
