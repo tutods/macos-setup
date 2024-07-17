@@ -1,6 +1,7 @@
 import inquirer
 import subprocess
 import platform
+from inquirer.themes import GreenPassion
 
 
 # Function to get the Python command based on the macOS version
@@ -25,7 +26,7 @@ try:
             choices=list(options.keys()),
         ),
     ]
-    answers = inquirer.prompt(questions)
+    answers = inquirer.prompt(questions, theme=GreenPassion())
 
     if answers and 'options' in answers:
         selected_options = answers['options']

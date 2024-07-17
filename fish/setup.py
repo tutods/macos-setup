@@ -1,6 +1,7 @@
 import inquirer
 import subprocess
 import os
+from inquirer.themes import GreenPassion
 
 # Get the path for this file
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +22,7 @@ try:
             default=["Install", "Copy config.", "Oh-my-fish"]
         ),
     ]
-    answers = inquirer.prompt(questions)
+    answers = inquirer.prompt(questions, theme=GreenPassion())
 
     if answers and 'options' in answers:
         selected_options = answers['options']
