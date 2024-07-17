@@ -1,5 +1,5 @@
 # Install fnm formula (if not installed)
-if ! brew list | grep -q fnm; then
+if ! brew list | grep fnm; then
   brew install fnm
 fi
 
