@@ -35,4 +35,5 @@ only for the things that are possible to run via terminal.
 To execute this **macOS Setup** utility is very simple:
 - Clone or download the repository;
 - Open your terminal and navigate to the folder containing this repository;
-- Run `sh run.sh` on the root folder of this repository.
+- Run `sh run.sh` on the root folder of this repository;
+- Select the options that you want to run.
