@@ -9,8 +9,12 @@ This repository contains a bundle of **Python** and **Shell** files/scripts to h
 The setup allows you to choose what you want to execute, including:
 
 - Install [**Homebrew**](https://brew.sh/)
-- Install and setup shell using **Fish** and **Oh-my-fish**;
-- Install **Node.js** <small>(using [**asdf**](https://asdf-vm.com/))</small>;
+- Install and setup shell using **Fish**:
+  - Install and configure **Oh-my-fish**;
+  - Install and configure **Zoxide** and **fzf** (*fuzzy finder*);
+- Install **Node.js**:
+  - using [**asdf**](https://asdf-vm.com);
+  - or, using [**fnm**](https://github.com/Schniz/fnm?tab=readme-ov-file).
 - Install and setup **Visual Studio Code** <small>(including extensions)</small>;
 - Install and setup **Hyper** terminal;
 
