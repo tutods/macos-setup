@@ -12,9 +12,9 @@ def get_python_command():
 options = {
     'Homebrew': 'homebrew/setup.sh',
     'Shell (using Fish)': 'fish/setup.py',
-    'Node.js': "node/setup.sh",
-    'VSCode': 'vscode/setup.sh',
-    'Hyper': 'hyper/setup.sh'
+    'Node.js': 'node/setup.py',
+    'VSCode': 'sh ./vscode/setup.sh',
+    'Hyper': 'sh ./hyper/setup.sh'
 }
 
 try:
@@ -43,7 +43,8 @@ try:
                 if command.endswith('.py'):
                     subprocess.run([get_python_command(), command])
                 else:
-                    subprocess.run(['sh', command], shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                    subprocess.run(['sh', command], shell=True, check=True, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True)
             else:
                 print("No command for {option}")
 except KeyboardInterrupt:
