@@ -47,6 +47,7 @@ try:
             subprocess.run([get_python_command(), node_manager_cmd])
         else:
             subprocess.run(['sh', node_manager_cmd], cwd=current_dir)
+
     else:
         print("No command for {node_manager}")
 
