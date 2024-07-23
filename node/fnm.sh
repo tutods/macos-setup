@@ -8,7 +8,15 @@ touch ~/.config/fish/conf.d/fnm.fish
 echo -e "fnm env --use-on-cd | source" >> ~/.config/fish/conf.d/fnm.fish
 
 # Enable completions and setup env
-fnm completions
+if [[ $SHELL == *"fish"* ]]; then
+  fnm completions --shell fish
+elif [[ $SHELL == *"bash"* ]]; then
+  fnm completions --shell bash
+elif [[ $SHELL == *"zsh"* ]]; then
+  fnm completions --shell zsh
+else
+  fnm completions
+fi
 fnm env
 
 # Install lts version
