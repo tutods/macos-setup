@@ -11,8 +11,8 @@ def get_python_command():
 
 # List of options to print and respective shell script to run
 options = {
-    'Use FNM': 'node/fnm.sh',
-    'Use ASDF': 'node/asdf.sh',
+    'Use FNM': 'fnm.sh',
+    'Use ASDF': 'asdf.sh',
 }
 
 global_packages_options = {
@@ -44,7 +44,7 @@ try:
         if node_manager_cmd.endswith('.py'):
             subprocess.run([get_python_command(), node_manager_cmd])
         else:
-            subprocess.run(['sh', node_manager_cmd])
+            subprocess.run(['sh', node_manager_cmd], cwd=current_dir)
     else:
         print("No command for {node_manager}")
 

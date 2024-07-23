@@ -8,9 +8,9 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # List of options to print and respective shell script to run
 options = {
-    'Install': 'sh scripts/install.sh',
-    'Copy config.': 'sh scripts/config.sh',
-    'Oh-my-fish': 'sh scripts/omf.sh',
+    'Install': 'scripts/install.sh',
+    'Copy config.': 'scripts/config.sh',
+    'Oh-my-fish': 'scripts/omf.sh',
 }
 
 try:
@@ -39,10 +39,7 @@ try:
 
             if script_to_run:
                 print("👉 Running:", option)
-                process = subprocess.run(script_to_run, shell=True, check=True, stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE,
-                                         text=True, cwd=current_dir)
-                print(process.stdout)
+                subprocess.run(["sh", script_to_run], cwd=current_dir)
             else:
                 print("No command for {option}")
 
