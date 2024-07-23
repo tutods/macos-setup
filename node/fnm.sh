@@ -5,6 +5,9 @@ fi
 
 eval "$(fnm env)"
 
+# Install lts version
+fnm install --lts --corepack-enabled
+
 # Enable completions and setup env
 if [[ $SHELL == *"fish"* ]]; then
   fnm completions --shell fish
@@ -28,8 +31,7 @@ else
   fnm completions
 fi
 
-# Install lts version
-fnm install --lts --corepack-enabled
+# Use version
 fnm use --install-if-missing --silent-if-unchanged $(fnm ls | head -n 1)
 
 # Enable Corepack (for Yarn and PNPM)
