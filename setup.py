@@ -14,8 +14,8 @@ options = {
     'Homebrew': 'homebrew/setup.sh',
     'Shell (using Fish)': 'fish/setup.py',
     'Node.js': 'node/setup.py',
-    'VSCode': 'sh ./vscode/setup.sh',
-    'Hyper': 'sh ./hyper/setup.sh'
+    'VSCode': 'vscode/setup.sh',
+    'Hyper': 'hyper/setup.sh'
 }
 
 try:
@@ -30,6 +30,7 @@ try:
 
     if answers and 'options' in answers:
         selected_options = answers['options']
+        print(selected_options)
 
         # If the user don't have any selected option, don't run any script
         if len(selected_options) == 0:
@@ -44,8 +45,7 @@ try:
                 if command.endswith('.py'):
                     subprocess.run([get_python_command(), command])
                 else:
-                    subprocess.run(['sh', command], shell=True, check=True, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, text=True)
+                    subprocess.run(['sh', command])
             else:
                 print("No command for {option}")
 except KeyboardInterrupt:
