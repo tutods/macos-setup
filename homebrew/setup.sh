@@ -1,5 +1,7 @@
 echo "1) Installing Homebrew..."
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo "export PATH=/usr/local/bin:$PATH" >> ~/.bash_profile && source ~/.bash_profile
+
 
 # Install yq formula (if not installed)
 echo "2) Install necessary formulas"
