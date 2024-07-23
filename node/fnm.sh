@@ -19,21 +19,22 @@ if [[ $SHELL == *"fish"* ]]; then
 elif [[ $SHELL == *"bash"* ]]; then
   echo "SETUP FOR BASH"
   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
+  fnm completions --shell bash
 
   bash -c "source ~/.bashrc"
-  # fnm completions --shell bash
 elif [[ $SHELL == *"zsh"* ]]; then
   echo "SETUP FOR ZSH"
   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.zshrc
+  fnm completions --shell zsh
 
   zsh -c "source ~/.zshrc"
-  # fnm completions --shell zsh
 else
   fnm completions
 fi
 
 # Use version
-fnm use --install-if-missing --silent-if-unchanged $(fnm ls | head -n 1)
+echo "USE VERSION"
+fnm use --install-if-missing $(fnm ls | head -n 1)
 
 # Enable Corepack (for Yarn and PNPM)
 corepack enable
