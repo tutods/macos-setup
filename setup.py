@@ -30,7 +30,6 @@ try:
 
     if answers and 'options' in answers:
         selected_options = answers['options']
-        print(selected_options)
 
         # If the user don't have any selected option, don't run any script
         if len(selected_options) == 0:
