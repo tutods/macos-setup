@@ -1,8 +1,10 @@
 import inquirer
 import subprocess
-import platform
+import os
 from inquirer.themes import GreenPassion
 
+# Get the path for this file
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Function to get the Python command based on the macOS version
 def get_python_command():
