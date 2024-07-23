@@ -36,10 +36,10 @@ fnm install --lts --corepack-enabled
 echo "4) Use installed version as default"
 case $(basename $SHELL) in
     fish)
-        fish -c "fnm use $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
+        fish -c "fnm default --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
         ;;
     zsh | bash)
-        $(basename $SHELL) -c "fnm use $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
+        $(basename $SHELL) -c "fnm default --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
         ;;
     *)
         echo "Unknown shell: $(basename $SHELL)"
