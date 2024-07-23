@@ -11,13 +11,13 @@ case $(basename $SHELL) in
     fish)
         echo "Fish shell detected"
         echo 'fnm env --use-on-cd | source' > ~/.config/fish/conf.d/fnm.fish
-        source ~/.config/fish/conf.d/fnm.fish
-        source ~/.config/fish/config.fish
+        source ${HOME}/.config/fish/conf.d/fnm.fish
+        source ${HOME}/.config/fish/config.fish
         ;;
     zsh | bash)
         echo "${basename $SHELL} shell detected"
         echo 'eval "$(fnm env --use-on-cd)"' >> ~/.$(basename $SHELL)rc
-        source ~/.$(basename $SHELL)rc
+        source ${HOME}/.$(basename $SHELL)rc
         ;;
     *)
         echo "Unknown shell: $(basename $SHELL)"
