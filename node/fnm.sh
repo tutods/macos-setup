@@ -6,59 +6,41 @@ if ! brew list 2>/dev/null | grep -q 'fnm'; then
 fi
 
 # Install lts version
+echo "1) Install lts version"
 fnm install --lts --corepack-enabled
 
 # Set up for the current shell
-if [[ $SHELL == *"fish"* ]]; then
-  echo 'fnm env --use-on-cd | source' > ~/.config/fish/conf.d/fnm.fish
-  fnm completions --shell fish
+echo "2) Setup shell environment"
+case $(basename $SHELL) in
+    fish)
+        echo "Fish shell detected"
+        echo 'fnm env --use-on-cd | source' > ~/.config/fish/conf.d/fnm.fish
+        fish
+        ;;
+    zsh)
+        echo "Zsh shell detected"
+        echo 'eval "$(fnm env --use-on-cd)"' >> ~/.zshrc
+        zsh
+        ;;
+    bash)
+        echo "Bash shell detected"
+        echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
+        bash
+        ;;
+    *)
+        echo "Unknown shell: $(basename $SHELL)"
+        ;;
+esac
 
-  # Reload the terminal
-  source ~/.config/fish/conf.d/fnm.fish && fish
-elif [[ $SHELL == *"bash"* ]]; then
-  echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
-  fnm completions --shell bash
-  
-  # Reload the terminal
-  source ~/.bashrc && bash
-elif [[ $SHELL == *"zsh"* ]]; then
-  echo 'eval "$(fnm env --use-on-cd)"' >> ~/.zshrc
-  fnm completions --shell zsh
 
-  # Reload the terminal
-  source ~/.zshrc && zsh
-fi
-
-
-# Enable completions and setup env
-# if [[ $SHELL == *"fish"* ]]; then
-#   fnm completions --shell fish
-#   echo "fnm env --use-on-cd | source" > ~/.config/fish/conf.d/fnm.fish
-
-#   fish -c "source ~/.config/fish/conf.d/fnm.fish"
-#   fish
-# elif [[ $SHELL == *"bash"* ]]; then
-#   echo "SETUP FOR BASH"
-#   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
-#   fnm completions --shell bash
-
-#   bash -c "source ~/.bashrc"
-#   bash
-# elif [[ $SHELL == *"zsh"* ]]; then
-#   echo "SETUP FOR ZSH"
-#   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.zshrc
-#   fnm completions --shell zsh
-
-#   zsh -c "source ~/.zshrc"
-#   zsh
-# else
-#   fnm completions
-# fi
+# Set up for the current shell
+fnm completions --log-level quiet --shell $(basename $SHELL)
 
 # Use version
-echo "USE VERSION"
-fnm use --install-if-missing $(fnm ls | head -n 1)
+echo "3) Set default version to use"
+fnm default $(fnm ls | head -n 1)
 
 # Enable Corepack (for Yarn and PNPM)
+echo "4) Enable Corepack"
 corepack enable
 corepack prepare pnpm@latest --activate

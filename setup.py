@@ -3,7 +3,6 @@ import subprocess
 import platform
 from inquirer.themes import GreenPassion
 
-
 # Function to get the Python command based on the macOS version
 def get_python_command():
     return 'python3' if platform.system() == 'Darwin' and int(platform.release().split('.')[0]) >= 20 else 'python'
