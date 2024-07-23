@@ -10,23 +10,24 @@ fnm install --lts --corepack-enabled
 
 # Enable completions and setup env
 if [[ $SHELL == *"fish"* ]]; then
-  fnm completions --shell fish
-  touch ~/.config/fish/conf.d/fnm.fish
-  echo "fnm env --use-on-cd | source" >> ~/.config/fish/conf.d/fnm.fish
+    # Create the fnm.fish file with the specified content
+  echo "fnm env --use-on-cd | source" > ~/.config/fish/conf.d/fnm.fish
 
-  source ~/.config/fish/conf.d/fnm.fish
+  # Source the fnm.fish file in Fish shell
+  fish -c "source ~/.config/fish/conf.d/fnm.fish"
+  # fnm completions --shell fish
 elif [[ $SHELL == *"bash"* ]]; then
   echo "SETUP FOR BASH"
   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
 
-  source ~/.bashrc
-  fnm completions --shell bash
+  bash -c "source ~/.bashrc"
+  # fnm completions --shell bash
 elif [[ $SHELL == *"zsh"* ]]; then
   echo "SETUP FOR ZSH"
   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.zshrc
 
-  source ~/.zshrc
-  fnm completions --shell zsh
+  zsh -c "source ~/.zshrc"
+  # fnm completions --shell zsh
 else
   fnm completions
 fi
