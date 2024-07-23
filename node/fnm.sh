@@ -13,7 +13,7 @@ fnm env
 
 # Install lts version
 fnm install --lts --corepack-enabled
-fnm use -- --lts
+fnm use --install-if-missing --silent-if-unchanged $(fnm ls | head -n 1)
 
 # Enable Corepack (for Yarn and PNPM)
 corepack enable
