@@ -11,8 +11,8 @@ def get_python_command():
 
 # List of options to print and respective shell script to run
 options = {
-    'Use FNM': 'sh ./fnm.sh',
-    'Use ASDF': 'sh ./asdf.sh',
+    'Use FNM': 'node/fnm.sh',
+    'Use ASDF': 'node/asdf.sh',
 }
 
 global_packages_options = {
@@ -44,10 +44,7 @@ try:
         if node_manager_cmd.endswith('.py'):
             subprocess.run([get_python_command(), node_manager_cmd])
         else:
-            process = subprocess.run(node_manager_cmd, shell=True, check=True, stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     text=True)
-            print(process.stdout)
+            subprocess.run(['sh', node_manager_cmd])
     else:
         print("No command for {node_manager}")
 
@@ -55,9 +52,9 @@ try:
     global_packages = answers["global-packages"]
     if len(global_packages) != 0:
         selected_values = [global_packages_options[key] for key in global_packages]
-        joined_valeus = ' '.join(selected_values)
+        joined_values = ' '.join(selected_values)
 
-        process = subprocess.run(f"npm i -g {joined_valeus}", shell=True, check=True,
+        subprocess.run(f"npm i -g {joined_values}", shell=True, check=True,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  text=True)

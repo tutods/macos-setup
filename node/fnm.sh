@@ -12,7 +12,7 @@ fnm completions
 fnm env
 
 # Install lts version
-fnm install --lts --corepack-enable
+fnm install --lts --corepack-enabled
 fnm use -- --lts
 
 # Enable Corepack (for Yarn and PNPM)
