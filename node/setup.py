@@ -20,7 +20,9 @@ options = {
 global_packages_options = {
     "Commitizen": "commitizen",
     "NPM Check": "npm-check",
-    "Lerna": "lerna"
+    "Lerna": "lerna",
+    "Biome": "@biomejs/biome",
+    "Prettier": "prettier"
 }
 
 try:
