@@ -54,10 +54,7 @@ try:
         selected_values = [global_packages_options[key] for key in global_packages]
         joined_values = ' '.join(selected_values)
 
-        subprocess.run(f"npm i -g {joined_values}", shell=True, check=True,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 text=True)
+        subprocess.run(f"npm i -g {joined_values}")
 
 except KeyboardInterrupt:
     print("CTRL+C pressed. Exiting... 👋")

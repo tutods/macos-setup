@@ -3,13 +3,13 @@ if ! brew list | grep fnm; then
   brew install fnm
 fi
 
-# Add asdf to fish
-touch ~/.config/fish/conf.d/fnm.fish
-echo -e "fnm env --use-on-cd | source" >> ~/.config/fish/conf.d/fnm.fish
+eval "$(fnm env)"
 
 # Enable completions and setup env
 if [[ $SHELL == *"fish"* ]]; then
   fnm completions --shell fish
+  touch ~/.config/fish/conf.d/fnm.fish
+  echo -e "fnm env --use-on-cd | source" >> ~/.config/fish/conf.d/fnm.fish
 elif [[ $SHELL == *"bash"* ]]; then
   fnm completions --shell bash
 elif [[ $SHELL == *"zsh"* ]]; then
