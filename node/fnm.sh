@@ -11,7 +11,6 @@ case $(basename $SHELL) in
     fish)
         echo "Fish shell detected"
         echo 'fnm env --use-on-cd | source' > ~/.config/fish/conf.d/fnm.fish
-        source ${HOME}/.config/fish/conf.d/fnm.fish
         source ${HOME}/.config/fish/config.fish
         ;;
     zsh | bash)
@@ -24,8 +23,6 @@ case $(basename $SHELL) in
         ;;
 esac
 
-eval "$(fnm env --use-on-cd)"
-
 # Set up for the current shell
 echo "2) Setup shell completions"
 fnm completions --log-level quiet --shell $(basename $SHELL)
@@ -37,7 +34,17 @@ fnm install --lts --corepack-enabled
 #fnm env --use-on-cd --shell "$(basename $SHELL)"
 #fnm use --install-if-missing --corepack-enabled $(fnm ls | head -n 1)
 echo "4) Use installed version as default"
-fnm use $(fnm ls | head -n 1)
+case $(basename $SHELL) in
+    fish)
+        fish -c "fnm use $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
+        ;;
+    zsh | bash)
+        $(basename $SHELL) -c "fnm use $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
+        ;;
+    *)
+        echo "Unknown shell: $(basename $SHELL)"
+        ;;
+esac
 
 # Enable Corepack (for Yarn and PNPM)
 echo "5) Enable Corepack"
