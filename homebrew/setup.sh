@@ -5,7 +5,7 @@ echo "export PATH=/usr/local/bin:$PATH" >> ~/.bash_profile && source ~/.bash_pro
 
 # Install yq formula (if not installed)
 echo "2) Install necessary formulas"
-brew ls --versions yq || brew ixnstall yq
+brew ls --versions yq || brew install yq
 
 # File with Formulaes and Casks
 DIR=$(dirname "$(readlink -f "$0")")
