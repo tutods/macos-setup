@@ -16,18 +16,21 @@ if [[ $SHELL == *"fish"* ]]; then
   # Source the fnm.fish file in Fish shell
   fish -c "source ~/.config/fish/conf.d/fnm.fish"
   # fnm completions --shell fish
+  fish
 elif [[ $SHELL == *"bash"* ]]; then
   echo "SETUP FOR BASH"
   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
   fnm completions --shell bash
 
   bash -c "source ~/.bashrc"
+  bash
 elif [[ $SHELL == *"zsh"* ]]; then
   echo "SETUP FOR ZSH"
   echo 'eval "$(fnm env --use-on-cd)"' >> ~/.zshrc
   fnm completions --shell zsh
 
   zsh -c "source ~/.zshrc"
+  zsh
 else
   fnm completions
 fi
