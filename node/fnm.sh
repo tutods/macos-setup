@@ -10,12 +10,12 @@ echo "1) Setup shell environment"
 case $(basename $SHELL) in
     fish)
         echo "Fish shell detected"
-        echo 'fnm env --use-on-cd | source' > ~/.config/fish/conf.d/fnm.fish
+        echo 'fnm env --use-on-cd | source' > $HOME/.config/fish/conf.d/fnm.fish
         source ${HOME}/.config/fish/config.fish
         ;;
     zsh | bash)
         echo "${basename $SHELL} shell detected"
-        echo 'eval "$(fnm env --use-on-cd)"' >> ~/.$(basename $SHELL)rc
+        echo 'eval "$(fnm env --use-on-cd)"' >> $HOME/.$(basename $SHELL)rc
         source ${HOME}/.$(basename $SHELL)rc
         ;;
     *)
@@ -48,5 +48,5 @@ esac
 
 # Enable Corepack (for Yarn and PNPM)
 echo "5) Enable Corepack"
-corepack enable
-corepack prepare pnpm@latest --activate
+fish -c "corepack enable"
+fish -c "corepack prepare pnpm@latest --activate"
