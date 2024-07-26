@@ -1,7 +1,23 @@
 echo "1) Installing Homebrew..."
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-echo "export PATH=/usr/local/bin:$PATH" >> ~/.bash_profile && source ~/.bash_profile
 
+case $(basename $SHELL) in
+    zsh)
+        $(basename $SHELL) -c "(echo; echo 'eval \"$(/opt/homebrew/bin/brew shellenv)\"') >> $HOME/.zprofile && eval \"$(/opt/homebrew/bin/brew shellenv)\""
+        ;;
+    bash)
+        $(basename $SHELL) -c "(echo; echo 'eval \"$(/opt/homebrew/bin/brew shellenv)\"') >> $HOME/.bash_profile && eval \"$(/opt/homebrew/bin/brew shellenv)\""
+        ;;
+    *)
+        echo "Unknown shell: $(basename $SHELL)"
+        ;;
+esac
+
+echo "Setup environment"
+
+
+# Check if it's everything ok
+brew doctor
 
 # Install yq formula (if not installed)
 echo "2) Install necessary formulas"
