@@ -1,17 +1,18 @@
-echo "1) Installing Homebrew..."
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# echo "1) Installing Homebrew..."
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-case $(basename $SHELL) in
-    zsh)
-        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.zprofile && eval "$(/opt/homebrew/bin/brew shellenv)"
-        ;;
-    bash)
-        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.bash_profile && eval "$(/opt/homebrew/bin/brew shellenv)"
-        ;;
-    *)
-        echo "Unknown shell: $(basename $SHELL)"
-        ;;
-esac
+# case $(basename $SHELL) in
+#     zsh)
+#         (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.zprofile && eval "$(/opt/homebrew/bin/brew shellenv)"
+#         ;;
+#     bash)
+#         (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.bash_profile && eval "$(/opt/homebrew/bin/brew shellenv)"
+#         ;;
+#     *)
+#         echo "Unknown shell: $(basename $SHELL)"
+#         ;;
+# esac
+
 
 # Check if it's everything ok
 brew doctor
@@ -22,11 +23,13 @@ brew ls --versions yq || brew install yq
 
 # File with Formulaes and Casks
 DIR=$(dirname "$(readlink -f "$0")")
-YAML_FILE="./list.yaml"
+echo $DIR
+YAML_FILE="$DIR/list.yaml"
 
 # Install formulaes
 echo "3) Installing formulaes..."
 FORMULAES=$(yq '.formulaes[]' $YAML_FILE)
+echo $FORMULAES
 brew install $FORMULAES
 
 # Install casks
