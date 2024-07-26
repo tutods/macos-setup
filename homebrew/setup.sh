@@ -3,8 +3,8 @@
 
 case $(basename $SHELL) in
     fish)
-        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.config/fish/config.fish
-            eval "$(/opt/homebrew/bin/brew shellenv)"
+        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.config/fish/config.fish && eval "$(/opt/homebrew/bin/brew shellenv)"
+        ;;
     zsh)
         (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') > $HOME/.zprofile && eval "$(/opt/homebrew/bin/brew shellenv)"
         ;;
