@@ -3,10 +3,10 @@ echo "1) Installing Homebrew..."
 
 case $(basename $SHELL) in
     zsh)
-        $(basename $SHELL) -c "(echo; echo 'eval \"$(/opt/homebrew/bin/brew shellenv)\"') >> $HOME/.zprofile && eval \"$(/opt/homebrew/bin/brew shellenv)\""
+        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.zprofile && eval "$(/opt/homebrew/bin/brew shellenv)"
         ;;
     bash)
-        $(basename $SHELL) -c "(echo; echo 'eval \"$(/opt/homebrew/bin/brew shellenv)\"') >> $HOME/.bash_profile && eval \"$(/opt/homebrew/bin/brew shellenv)\""
+        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.bash_profile && eval "$(/opt/homebrew/bin/brew shellenv)"
         ;;
     *)
         echo "Unknown shell: $(basename $SHELL)"
