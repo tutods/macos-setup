@@ -3,10 +3,10 @@
 
 case $(basename $SHELL) in
     zsh)
-        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.zprofile && eval "$(/opt/homebrew/bin/brew shellenv)"
+        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') > $HOME/.zprofile && eval "$(/opt/homebrew/bin/brew shellenv)"
         ;;
     bash)
-        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> $HOME/.bash_profile && eval "$(/opt/homebrew/bin/brew shellenv)"
+        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') > $HOME/.bash_profile && eval "$(/opt/homebrew/bin/brew shellenv)"
         ;;
     *)
         echo "Unknown shell: $(basename $SHELL)"
@@ -24,7 +24,7 @@ brew ls --versions yq || brew install yq
 
 # File with Formulaes and Casks
 DIR=$(dirname "$(readlink -f "$0")")
-echo $DIR
+echo $DIR
 YAML_FILE="$DIR/list.yaml"
 
 # Install formulaes
