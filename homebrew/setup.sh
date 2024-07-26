@@ -13,9 +13,6 @@ case $(basename $SHELL) in
         ;;
 esac
 
-echo "Setup environment"
-
-
 # Check if it's everything ok
 brew doctor
 
@@ -25,7 +22,7 @@ brew ls --versions yq || brew install yq
 
 # File with Formulaes and Casks
 DIR=$(dirname "$(readlink -f "$0")")
-YAML_FILE="$DIR/list.yaml"
+YAML_FILE="./list.yaml"
 
 # Install formulaes
 echo "3) Installing formulaes..."
