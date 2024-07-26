@@ -3,7 +3,7 @@ casks:
   - arc
   - bitwarden
   - figma
-  - firefox-developer-edition
+  - firefox@developer-edition
   - font-inter
   - font-jetbrains-mono
   - font-jetbrains-mono-nerd-font
