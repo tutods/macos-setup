@@ -8,5 +8,5 @@ fish -c "curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin
 cp -f $OMF_FILE ~/.config/fish/conf.d
 
 # Install plugins
-omf install git
-omf install pisces
+fish -c "omf install git"
+fish -c "omf install pisces"
