@@ -21,6 +21,7 @@ try:
             "extensions",
             message="Which casks you want to install?",
             choices=list(extensions),
+            default=list(extensions)
         ),
     ]
     answers = inquirer.prompt(questions, theme=GreenPassion())
