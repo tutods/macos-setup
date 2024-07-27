@@ -61,7 +61,7 @@ try:
         selected_values = [global_packages_options[key] for key in global_packages]
         joined_values = ' '.join(selected_values)
 
-        subprocess.run(f"npm i -g {joined_values}", check=True)
+        subprocess.run(f"npm i -g {joined_values}", check=True, shell=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
