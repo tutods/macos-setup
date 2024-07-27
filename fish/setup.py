@@ -25,7 +25,6 @@ try:
     if answers is None:
         print("No answers to proceed!")
     else:
-        # Install Homebrew
         if answers["install"]:
             print("1) Installing Fish...")
             subprocess.run(['sh', 'scripts/install.sh'],

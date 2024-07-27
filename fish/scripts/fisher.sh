@@ -1,5 +1,6 @@
 #!/bin/bash
-# Install OMF
+
+# Install fisher
 curl https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish --create-dirs -sLo ~/.config/fish/functions/fisher.fish
 fish -c "source ~/.config/fish/functions/fisher.fish"
 fish -c "fisher install jorgebucaran/fisher"

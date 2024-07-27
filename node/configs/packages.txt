@@ -1,0 +1,5 @@
+Commitizen:commitizen
+NPM Check:npm-check
+Lerna:lerna
+Biome:@biomejs/biome
+Prettier:prettier

@@ -1,28 +1,28 @@
 import inquirer
 import subprocess
 import os
+import platform
 from inquirer.themes import GreenPassion
-
-# Get the path for this file
-current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Function to get the Python command based on the macOS version
 def get_python_command():
     return 'python3' if platform.system() == 'Darwin' and int(platform.release().split('.')[0]) >= 20 else 'python'
 
+# Get the path for this file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(current_dir)
+
+global_packages_options = {}
+
+with open('configs/packages.txt', 'r') as file:
+    for line in file:
+        package, command = line.strip().split(':')
+        global_packages_options[package.strip()] = command.strip()
 
 # List of options to print and respective shell script to run
 options = {
-    'Use FNM': 'fnm.sh',
-    'Use ASDF': 'asdf.sh',
-}
-
-global_packages_options = {
-    "Commitizen": "commitizen",
-    "NPM Check": "npm-check",
-    "Lerna": "lerna",
-    "Biome": "@biomejs/biome",
-    "Prettier": "prettier"
+    'Use FNM': 'scripts/fnm.sh',
+    'Use ASDF': 'scripts/asdf.sh',
 }
 
 try:
