@@ -47,10 +47,11 @@ try:
         node_manager = answers["node-version-manager"]
         if node_manager:
             node_manager_cmd = options.get(node_manager)
-            print(node_manager_cmd)
-            subprocess.run(f"sh {node_manager_cmd}", check=True, cwd=current_dir)
+            subprocess.run(['sh', node_manager_cmd],
+                check=True)
         else:
             print("No command for {node_manager}")
+
         # Install NPM global packages
         global_packages = answers["global-packages"]
         if len(global_packages) != 0:
