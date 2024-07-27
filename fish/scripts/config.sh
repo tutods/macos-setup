@@ -7,3 +7,5 @@ CONF_D_FILES="./configs/conf.d"
 cp -f $CONFIG_FILE ~/.config/fish/config.fish
 cp -f -r $FUNCTION_FILES ~/.config/fish/
 cp -f -r $CONF_D_FILES ~/.config/fish/
+
+eval "$(source ~/.config/fish)"
