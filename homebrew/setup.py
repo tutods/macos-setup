@@ -44,8 +44,7 @@ try:
         install_brew = answers["install"]
         if answers["install"]:
             print("1) Installing Homebrew...")
-            install_brew_cmd = options.get(install_brew)
-            subprocess.run(['sh', install_brew_cmd],
+            subprocess.run(['sh', './scripts/install.sh'],
                 shell=True,
                 check=True,
                 stdout=subprocess.PIPE,
@@ -70,6 +69,14 @@ try:
         if len(formulaes_to_install) != 0:
             print("3) Installing selected formulaes")
             joined_values = ' '.join(formulaes_to_install)
+
+            if "consize" in formulaes_to_install:
+                subprocess.run(f"brew tap shinokada/consize",
+                    shell=True,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True)
 
             subprocess.run(f"brew install --force --cask {joined_values}",
                 shell=True,
