@@ -44,8 +44,7 @@ try:
         install_brew = answers["install"]
         if answers["install"]:
             print("1) Installing Homebrew...")
-            install_result = subprocess.run(['sh', './scripts/install.sh'],
-                shell=True,
+            install_result = subprocess.run(['sh', 'scripts/install.sh'],
                 check=True)
 
         # Install casks
