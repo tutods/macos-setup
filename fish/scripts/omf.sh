@@ -8,7 +8,7 @@ curl -f https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/insta
 
 # eval "$(fish $HOME/.local/install --path=$HOME/.local/share/omf --config=$HOME/.config/omf)"
 # rm $HOME/.local/install
-fish -c "$OMF_PATH/init.fish"
+fish -c "source $OMF_PATH/init.fish"
 
 # Copy OMF config
 # cp -f $OMF_FILE ~/.config/fish/conf.d
