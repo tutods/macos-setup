@@ -5,10 +5,11 @@ OMF_FILE="$DIR/configs/omf.fish"
 # curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install
 
 curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > install
-fish -c "fish install --path=~/.local/share/omf --config=~/.config/omf" &
+fish install --path=~/.local/share/omf --config=~/.config/omf &
 
 
-rm -rf install
+eval "$(source $HOME/.config/config.fish)"
+eval "$(source $HOME/.config/conf.d/omf.fish)"
 # eval "$(fish $HOME/.local/install --path=$HOME/.local/share/omf --config=$HOME/.config/omf)"
 # rm $HOME/.local/install
 # eval "$(source $OMF_PATH/init.fish)"
@@ -18,5 +19,5 @@ rm -rf install
 # eval "$(source $HOME/.config/fish/config.fish)"
 
 # Install plugins
-eval "$(omf install https://github.com/jhillyerd/plugin-git)"
-eval "$(omf install pisces)"
+omf install https://github.com/jhillyerd/plugin-git
+omf install pisces
