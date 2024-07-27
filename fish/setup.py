@@ -39,7 +39,7 @@ try:
         if answers["fisher"]:
             print("3) Installing and configuring fisher...")
             subprocess.run(['sh', 'scripts/fisher.sh'],
-                check=True, cwd=current_dir)
+                check=True, shell=True, cwd=current_dir)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
