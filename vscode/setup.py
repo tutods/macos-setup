@@ -33,7 +33,7 @@ try:
         if answers["install"]:
             print("1) Installing Visual Studio Code...")
             subprocess.run(['sh', 'scripts/install.sh'],
-                check=True, shell=True, cwd=current_dir)
+                check=True)
 
         if answers["config"]:
             print("2) Copying configuration...")
