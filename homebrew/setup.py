@@ -53,14 +53,7 @@ try:
             print("2) Installing selected casks")
             joined_values = ' '.join(casks_to_install)
 
-            casks_result = subprocess.run(f"brew install --force --cask {joined_values}",
-                shell=True,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True)
-
-            print(casks_result.stdout)
+            subprocess.run(f"brew install --force --cask {joined_values}", check=True)
 
         formulaes_to_install = answers["formulaes"]
         if len(formulaes_to_install) != 0:
@@ -68,21 +61,9 @@ try:
             joined_values = ' '.join(formulaes_to_install)
 
             if "consize" in formulaes_to_install:
-                subprocess.run(f"brew tap shinokada/consize",
-                    shell=True,
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True)
+                subprocess.run(f"brew tap shinokada/consize", check=True)
 
-            formulaes_result = subprocess.run(f"brew install --force {joined_values}",
-                shell=True,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True)
-
-            print(formulaes_result.stdout)
+            subprocess.run(f"brew install --force {joined_values}", check=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here

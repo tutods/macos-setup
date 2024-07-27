@@ -38,14 +38,9 @@ try:
 
             if script_to_run:
                 print("👉 Running:", option)
-                result = subprocess.run(["sh", script_to_run], shell=True,
+                result = subprocess.run(["sh", script_to_run],
                     check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
                     cwd=current_dir)
-
-                print(result.stdout)
 
             else:
                 print("No command for {option}")

@@ -17,7 +17,7 @@
 #         echo "Unknown shell: $(basename $SHELL)"
 #         ;;
 # esac
-eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$(/usr/local/bin/brew shellenv)"
 
 
 # Check if it's everything ok

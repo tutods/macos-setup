@@ -46,20 +46,10 @@ try:
         node_manager_cmd = options.get(node_manager)
 
         if node_manager_cmd.endswith('.py'):
-            node_manager_result = subprocess.run([get_python_command(), node_manager_cmd], shell=True,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True)
+            subprocess.run([get_python_command(), node_manager_cmd], check=True)
         else:
-            node_manager_result = subprocess.run(['sh', node_manager_cmd], shell=True,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
+            subprocess.run(['sh', node_manager_cmd], check=True,
                 cwd=current_dir)
-
-        print(node_manager_result.stdout)
 
     else:
         print("No command for {node_manager}")
@@ -71,14 +61,7 @@ try:
         selected_values = [global_packages_options[key] for key in global_packages]
         joined_values = ' '.join(selected_values)
 
-        global_packages_result = subprocess.run(f"npm i -g {joined_values}",
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True)
-
-        print(global_packages_result.stdout)
+        subprocess.run(f"npm i -g {joined_values}", check=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
