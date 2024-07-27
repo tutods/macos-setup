@@ -6,7 +6,7 @@ curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install
 
 fish -c "curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > $HOME/.local/install"
 
-eval "$(fish $HOME/.local/install --path=~/.local/share/omf --config=~/.config/omf)"
+eval "$(fish $HOME/.local/install --path=$HOME/.local/share/omf --config=$HOME/.config/omf)"
 rm $HOME/.local/install
 
 # eval "$(source $HOME/.config/fish/config.fish)"
