@@ -5,6 +5,7 @@ OMF_FILE="$DIR/configs/omf.fish"
 
 # Install OMF
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > $HOME/.local/fisher.fish
+source fisher.fish
 fisher install jorgebucaran/fisher
 
 # rm -rf $HOME/.local/fisher.fish
