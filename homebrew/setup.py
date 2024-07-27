@@ -49,8 +49,7 @@ try:
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True,
-                cwd=current_dir)
+                text=True)
 
             print(install_result.stdout)
 
