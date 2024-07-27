@@ -22,6 +22,7 @@ case $(basename $SHELL) in
         echo "Unknown shell: $(basename $SHELL)"
         ;;
 esac
+eval "$(fnm env)"
 
 # Set up for the current shell
 echo "2) Setup shell completions"
@@ -34,19 +35,10 @@ fnm install --lts --corepack-enabled
 #fnm env --use-on-cd --shell "$(basename $SHELL)"
 #fnm use --install-if-missing --corepack-enabled $(fnm ls | head -n 1)
 echo "4) Use installed version as default"
-case $(basename $SHELL) in
-    fish)
-        fish -c "fnm default --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
-        ;;
-    zsh | bash)
-        $(basename $SHELL) -c "fnm default --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')"
-        ;;
-    *)
-        echo "Unknown shell: $(basename $SHELL)"
-        ;;
-esac
+eval "$(fnm default --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v'))"
+eval "$(fnm use --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v'))"
 
 # Enable Corepack (for Yarn and PNPM)
 echo "5) Enable Corepack"
-fish -c "corepack enable"
-fish -c "corepack prepare pnpm@latest --activate"
+eval "$(corepack enable)"
+eval "$(corepack prepare pnpm@latest --activate)"
