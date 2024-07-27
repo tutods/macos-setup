@@ -37,43 +37,46 @@ try:
     ]
     answers = inquirer.prompt(questions, theme=GreenPassion())
 
-    # Install Homebrew
-    install_brew = answers["install"]
-    if answers["install"]:
-      print("1) Installing Homebrew...")
-      install_brew_cmd = options.get(install_brew)
-      subprocess.run(['sh', install_brew_cmd],
-        shell=True,
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        cwd=current_dir)
+    if answers is None:
+        print("No answers to proceed!")
+    else:
+        # Install Homebrew
+        install_brew = answers["install"]
+        if answers["install"]:
+            print("1) Installing Homebrew...")
+            install_brew_cmd = options.get(install_brew)
+            subprocess.run(['sh', install_brew_cmd],
+                shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=current_dir)
 
-    # Install casks
-    casks_to_install = answers["casks"]
-    if len(casks_to_install) != 0:
-        print("2) Installing selected casks")
-        joined_values = ' '.join(casks_to_install)
+        # Install casks
+        casks_to_install = answers["casks"]
+        if len(casks_to_install) != 0:
+            print("2) Installing selected casks")
+            joined_values = ' '.join(casks_to_install)
 
-        subprocess.run(f"brew install --force --cask {joined_values}",
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True)
+            subprocess.run(f"brew install --force --cask {joined_values}",
+                shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True)
 
-    formulaes_to_install = answers["formulaes"]
-    if len(formulaes_to_install) != 0:
-        print("3) Installing selected formulaes")
-        joined_values = ' '.join(formulaes_to_install)
+        formulaes_to_install = answers["formulaes"]
+        if len(formulaes_to_install) != 0:
+            print("3) Installing selected formulaes")
+            joined_values = ' '.join(formulaes_to_install)
 
-        subprocess.run(f"brew install --force --cask {joined_values}",
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True)
+            subprocess.run(f"brew install --force --cask {joined_values}",
+                shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
