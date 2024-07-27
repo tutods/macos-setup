@@ -46,9 +46,18 @@ try:
         node_manager_cmd = options.get(node_manager)
 
         if node_manager_cmd.endswith('.py'):
-            subprocess.run([get_python_command(), node_manager_cmd])
+            subprocess.run([get_python_command(), node_manager_cmd], shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True)
         else:
-            subprocess.run(['sh', node_manager_cmd], cwd=current_dir)
+            subprocess.run(['sh', node_manager_cmd], shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=current_dir)
 
     else:
         print("No command for {node_manager}")
@@ -67,6 +76,12 @@ try:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True)
+
+except subprocess.CalledProcessError as e:
+  # Handle the error here
+  print(f"An error occurred: {e}")
+  # Stop the execution or raise an exception to halt the script
+  raise SystemExit(1)  # Exit the script with an error code
 
 except KeyboardInterrupt:
     print("CTRL+C pressed. Exiting... 👋")

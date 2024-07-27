@@ -48,5 +48,11 @@ try:
             else:
                 print("No command for {option}")
 
+except subprocess.CalledProcessError as e:
+  # Handle the error here
+  print(f"An error occurred: {e}")
+  # Stop the execution or raise an exception to halt the script
+  raise SystemExit(1)  # Exit the script with an error code
+
 except KeyboardInterrupt:
     print("CTRL+C pressed. Exiting... 👋")
