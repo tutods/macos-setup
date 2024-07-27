@@ -35,10 +35,10 @@ fnm install --lts --corepack-enabled
 #fnm env --use-on-cd --shell "$(basename $SHELL)"
 #fnm use --install-if-missing --corepack-enabled $(fnm ls | head -n 1)
 echo "4) Use installed version as default"
-eval "$(fnm default --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v'))"
-eval "$(fnm use --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v'))"
+fnm default --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')
+fnm use --corepack-enabled $(fnm ls | head -n 1 | cut -d' ' -f2 | tr -d 'v')
 
 # Enable Corepack (for Yarn and PNPM)
 echo "5) Enable Corepack"
-eval "$(corepack enable)"
-eval "$(corepack prepare pnpm@latest --activate)"
+corepack enable
+corepack prepare pnpm@latest --activate
