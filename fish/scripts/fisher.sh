@@ -7,7 +7,7 @@ OMF_FILE="$DIR/configs/omf.fish"
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > $HOME/.local/fisher.fish
 fisher install jorgebucaran/fisher
 
-rm -rf $HOME/.local/fisher.fish
+# rm -rf $HOME/.local/fisher.fish
 
 # curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > install
 # fish install --path=~/.local/share/omf --config=~/.config/omf
