@@ -29,17 +29,17 @@ try:
         if answers["install"]:
             print("1) Installing Fish...")
             subprocess.run(['sh', 'scripts/install.sh'],
-                check=True)
+                check=True, cwd=current_dir)
 
         if answers["configs"]:
             print("2) Copying configurations...")
             subprocess.run(['sh', 'scripts/config.sh'],
-                check=True)
+                check=True, cwd=current_dir)
 
         if answers["fisher"]:
             print("3) Installing and configuring fisher...")
             subprocess.run(['sh', 'scripts/fisher.sh'],
-                check=True)
+                check=True, cwd=current_dir)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
