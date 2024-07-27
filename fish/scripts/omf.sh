@@ -4,10 +4,10 @@ OMF_FILE="$DIR/configs/omf.fish"
 # Install OMF
 # curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install
 
-fish -c "curl -f https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish"
+fish -c "curl -f https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install"
 
-# eval "$(source $HOME/.config/fish/config.fish)"
-# eval "$(source $HOME/.config/fish/conf.d/omf.fish)"
+eval "$(source $HOME/.config/fish/config.fish)"
+eval "$(source $HOME/.config/fish/conf.d/omf.fish)"
 
 # Copy OMF config
 # cp -f $OMF_FILE ~/.config/fish/conf.d
