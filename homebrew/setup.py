@@ -61,7 +61,7 @@ try:
             joined_values = ' '.join(formulaes_to_install)
 
             if "consize" in formulaes_to_install:
-                subprocess.run(f"brew tap shinokada/consize", check=True)
+                subprocess.run(f"brew tap shinokada/consize", check=True, shell=True)
 
             subprocess.run(f"brew install --force {joined_values}", check=True, shell=True)
 
