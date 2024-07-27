@@ -2,7 +2,7 @@ DIR=$(dirname "$(dirname "$(readlink -f "$0")")")
 OMF_FILE="$DIR/configs/omf.fish"
 
 # Install OMF
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+eval "$(curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher)"
 
 # curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > install
 # fish install --path=~/.local/share/omf --config=~/.config/omf
