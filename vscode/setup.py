@@ -46,7 +46,7 @@ try:
             print("3) Installing extensions...")
 
             for extension in extensions_to_install:
-                subprocess.run(f"code --install-extension {extension} --force", check=True, shell=True)
+                subprocess.run(f"code --install-extension {extension} --force", check=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
