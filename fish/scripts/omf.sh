@@ -15,5 +15,5 @@ eval "$(source $OMF_PATH/init.fish)"
 # eval "$(source $HOME/.config/fish/config.fish)"
 
 # Install plugins
-fish -c "omf install https://github.com/jhillyerd/plugin-git"
-fish -c "omf install pisces"
+eval "$(omf install https://github.com/jhillyerd/plugin-git)"
+eval "$(omf install pisces)"
