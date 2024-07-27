@@ -49,6 +49,7 @@ try:
             node_manager_cmd = options.get(node_manager)
             subprocess.run(['sh', node_manager_cmd],
                 check=True)
+            subprocess.run(f'eval "$(source ~/.config/fish)"', check=True)
         else:
             print("No command for {node_manager}")
 
