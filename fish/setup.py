@@ -6,44 +6,40 @@ from inquirer.themes import GreenPassion
 # Get the path for this file
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# List of options to print and respective shell script to run
-options = {
-    'Install': 'scripts/install.sh',
-    'Copy config.': 'scripts/config.sh',
-    'Oh-my-fish': 'scripts/omf.sh',
-}
-
 try:
     questions = [
-        inquirer.Checkbox(
-            "options",
-            message="Which steps you want to execute to setup your shell using Fish",
-            choices=list(options.keys()),
-            default=["Install", "Copy config.", "Oh-my-fish"]
+        inquirer.Confirm("install", message="Do you want to install fish?", default=True),
+        inquirer.Confirm(
+            "configs",
+            message="Do you want to copy the fish configurations?",
+            default=True,
+        ),
+        inquirer.Confirm(
+            "fisher",
+            message="Do you want to install fisher to manage fish plugins?",
+            default=True,
         ),
     ]
     answers = inquirer.prompt(questions, theme=GreenPassion())
 
-    if answers and 'options' in answers:
-        selected_options = answers['options']
+    if answers is None:
+        print("No answers to proceed!")
+    else:
+        # Install Homebrew
+        if answers["install"]:
+            print("1) Installing Fish...")
+            subprocess.run(['sh', 'scripts/install.sh'],
+                check=True)
 
-        # If the user don't have any selected option, don't run any script
-        if len(selected_options) == 0:
-            print("No selected options!")
-            exit(-1)
+        if answers["configs"]:
+            print("2) Copying configurations...")
+            subprocess.run(['sh', 'scripts/config.sh'],
+                check=True)
 
-        # Loop on selected options
-        for option in selected_options:
-            script_to_run = options.get(option)
-
-            if script_to_run:
-                print("👉 Running:", option)
-                result = subprocess.run(["sh", script_to_run],
-                    check=True,
-                    cwd=current_dir)
-
-            else:
-                print("No command for {option}")
+        if answers["fisher"]:
+            print("3) Installing and configuring fisher...")
+            subprocess.run(['sh', 'scripts/fisher.sh'],
+                check=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here

@@ -2,14 +2,11 @@ DIR=$(dirname "$(dirname "$(readlink -f "$0")")")
 OMF_FILE="$DIR/configs/omf.fish"
 
 # Install OMF
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source  && fisher install jorgebucaran/fisher
 
 # curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > install
 # fish install --path=~/.local/share/omf --config=~/.config/omf
 # Wait for the installation to complete before proceeding
-while [ ! -d $HOME/.local/share/omf ]; do
-    sleep 1
-done
 
 # eval "$(source $HOME/.config/config.fish)"
 # eval "$(source $HOME/.config/conf.d/omf.fish)"
@@ -23,4 +20,4 @@ done
 
 # Install plugins
 fisher install jhillyerd/plugin-git
-fisher install pisces
+fisher install laughedelic/pisces

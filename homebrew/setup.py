@@ -7,10 +7,6 @@ from inquirer.themes import GreenPassion
 current_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_dir)
 
-# Function to get the Python command based on the macOS version
-def get_python_command():
-    return 'python3' if platform.system() == 'Darwin' and int(platform.release().split('.')[0]) >= 20 else 'python'
-
 # Get all casks from file
 with open('configs/casks.txt', 'r') as file:
     options = file.readlines()
@@ -41,10 +37,9 @@ try:
         print("No answers to proceed!")
     else:
         # Install Homebrew
-        install_brew = answers["install"]
         if answers["install"]:
             print("1) Installing Homebrew...")
-            install_result = subprocess.run(['sh', 'scripts/install.sh'],
+            subprocess.run(['sh', 'scripts/install.sh'],
                 check=True)
 
         # Install casks
