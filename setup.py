@@ -10,7 +10,7 @@ def get_python_command():
 
 # List of options to print and respective shell script to run
 options = {
-    'Homebrew': 'homebrew/setup.sh',
+    'Homebrew': 'homebrew/setup.py',
     'Shell (using Fish)': 'fish/setup.py',
     'Node.js': 'node/setup.py',
     'VSCode': 'vscode/setup.sh',
