@@ -1,8 +1,4 @@
 #!/bin/bash
-
-DIR=$(dirname "$(dirname "$(readlink -f "$0")")")
-OMF_FILE="$DIR/configs/omf.fish"
-
 # Install OMF
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish > $HOME/.local/fisher.fish
 eval "$(source $HOME/.local/fisher.fish)"
