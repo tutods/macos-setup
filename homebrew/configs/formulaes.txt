@@ -1,4 +1,3 @@
-git
 bat
 consize
 docker-compose
