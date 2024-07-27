@@ -4,7 +4,7 @@ OMF_FILE="$DIR/configs/omf.fish"
 # Install OMF
 # curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install
 
-fish -c "curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > $HOME/.local/install"
+curl -f https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > $HOME/.local/install
 
 eval "$(fish $HOME/.local/install --path=$HOME/.local/share/omf --config=$HOME/.config/omf)"
 rm $HOME/.local/install
