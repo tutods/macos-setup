@@ -35,16 +35,18 @@ try:
         # Loop on selected options
         for option in selected_options:
             script_to_run = options.get(option)
-            print(current_dir, script_to_run)
 
             if script_to_run:
                 print("👉 Running:", option)
-                subprocess.run(["sh", script_to_run], shell=True,
+                result = subprocess.run(["sh", script_to_run], shell=True,
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
                     cwd=current_dir)
+
+                print(result.stdout)
+
             else:
                 print("No command for {option}")
 

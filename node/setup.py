@@ -46,22 +46,23 @@ try:
         node_manager_cmd = options.get(node_manager)
 
         if node_manager_cmd.endswith('.py'):
-            subprocess.run([get_python_command(), node_manager_cmd], shell=True,
+            node_manager_result = subprocess.run([get_python_command(), node_manager_cmd], shell=True,
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True)
         else:
-            subprocess.run(['sh', node_manager_cmd], shell=True,
+            node_manager_result = subprocess.run(['sh', node_manager_cmd], shell=True,
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
                 cwd=current_dir)
 
+        print(node_manager_result.stdout)
+
     else:
         print("No command for {node_manager}")
-
     # Install NPM global packages
     global_packages = answers["global-packages"]
     if len(global_packages) != 0:
@@ -70,12 +71,14 @@ try:
         selected_values = [global_packages_options[key] for key in global_packages]
         joined_values = ' '.join(selected_values)
 
-        subprocess.run(f"npm i -g {joined_values}",
+        global_packages_result = subprocess.run(f"npm i -g {joined_values}",
             shell=True,
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True)
+
+        print(global_packages_result.stdout)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here

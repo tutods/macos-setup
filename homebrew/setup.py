@@ -44,7 +44,7 @@ try:
         install_brew = answers["install"]
         if answers["install"]:
             print("1) Installing Homebrew...")
-            subprocess.run(['sh', './scripts/install.sh'],
+            install_result = subprocess.run(['sh', './scripts/install.sh'],
                 shell=True,
                 check=True,
                 stdout=subprocess.PIPE,
@@ -52,18 +52,22 @@ try:
                 text=True,
                 cwd=current_dir)
 
+            print(install_result.stdout)
+
         # Install casks
         casks_to_install = answers["casks"]
         if len(casks_to_install) != 0:
             print("2) Installing selected casks")
             joined_values = ' '.join(casks_to_install)
 
-            subprocess.run(f"brew install --force --cask {joined_values}",
+            casks_result = subprocess.run(f"brew install --force --cask {joined_values}",
                 shell=True,
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True)
+
+            print(casks_result.stdout)
 
         formulaes_to_install = answers["formulaes"]
         if len(formulaes_to_install) != 0:
@@ -78,12 +82,14 @@ try:
                     stderr=subprocess.PIPE,
                     text=True)
 
-            subprocess.run(f"brew install --force --cask {joined_values}",
+            formulaes_result = subprocess.run(f"brew install --force {joined_values}",
                 shell=True,
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True)
+
+            print(formulaes_result.stdout)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
