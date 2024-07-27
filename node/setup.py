@@ -40,28 +40,26 @@ try:
     ]
     answers = inquirer.prompt(questions, theme=GreenPassion())
 
-    # Install node manager
-    node_manager = answers["node-version-manager"]
-    if node_manager:
-        node_manager_cmd = options.get(node_manager)
-
-        if node_manager_cmd.endswith('.py'):
-            subprocess.run([get_python_command(), node_manager_cmd], check=True)
-        else:
-            subprocess.run(['sh', node_manager_cmd], check=True,
-                cwd=current_dir)
-
+    if answers is None:
+        print("No answers to proceed!")
     else:
-        print("No command for {node_manager}")
-    # Install NPM global packages
-    global_packages = answers["global-packages"]
-    if len(global_packages) != 0:
-        print("Installing global NPM packages")
+        # Install node manager
+        node_manager = answers["node-version-manager"]
+        if node_manager:
+            node_manager_cmd = options.get(node_manager)
+            subprocess.run(f"sh {node_manager_cmd}", check=True, cwd=current_dir)
 
-        selected_values = [global_packages_options[key] for key in global_packages]
-        joined_values = ' '.join(selected_values)
+        else:
+            print("No command for {node_manager}")
+        # Install NPM global packages
+        global_packages = answers["global-packages"]
+        if len(global_packages) != 0:
+            print("Installing global NPM packages")
 
-        subprocess.run(f"npm i -g {joined_values}", check=True, shell=True)
+            selected_values = [global_packages_options[key] for key in global_packages]
+            joined_values = ' '.join(selected_values)
+
+            subprocess.run(f"npm i -g {joined_values}", check=True, shell=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here

@@ -13,7 +13,7 @@ options = {
     'Homebrew': 'homebrew/setup.py',
     'Shell (using Fish)': 'fish/setup.py',
     'Node.js': 'node/setup.py',
-    'VSCode': 'vscode/setup.sh',
+    'VSCode': 'vscode/setup.py',
     'Hyper': 'hyper/setup.sh'
 }
 
