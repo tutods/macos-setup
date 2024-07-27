@@ -27,7 +27,6 @@ brew ls --versions yq || brew install yq
 
 # File with Formulaes and Casks
 DIR=$(dirname "$(readlink -f "$0")")
-echo $DIR
 YAML_FILE="$DIR/list.yaml"
 
 # Install formulaes
