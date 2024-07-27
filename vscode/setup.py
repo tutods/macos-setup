@@ -40,13 +40,13 @@ try:
             subprocess.run(['sh', 'scripts/config.sh'],
                 check=True, cwd=current_dir)
 
-        # Install casks
+        # Install extensions
         extensions_to_install = answers["extensions"]
         if len(extensions_to_install) != 0:
             print("3) Installing extensions...")
 
             for extension in extensions_to_install:
-                subprocess.run(f"code --install-extension {extension} --force", check=True)
+                subprocess.run(f"code --install-extension {extension} --force", check=True, shell=True)
 
 except subprocess.CalledProcessError as e:
   # Handle the error here
