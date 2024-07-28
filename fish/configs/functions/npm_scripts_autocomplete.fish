@@ -17,7 +17,7 @@ function npm_scripts_autocomplete
     set -l scripts $(jq '.scripts' package.json)
     set -l cmd_prefix $(echo "$package_manager run")
     set -l user_defined_scripts $(echo $scripts | jq -r 'to_entries | .[] | (.key + "\t|\t" + "\"" + .value + "\"")')
-    begin
+    begin 
       printf $cmd_prefix' %s\n' $user_defined_scripts | column -t -s "$(printf '\t')"
     end | fzf -e --info=hidden --prompt "\$ " --height=80% --layout=reverse | awk 'BEGIN {FS="|"}; {print $1}'| awk '{$1=$1};1' | read script
   end
