@@ -4,8 +4,8 @@ FUNCTION_FILES="./configs/functions"
 CONF_D_FILES="./configs/conf.d"
 
 # Copy config files
-cp -f $CONFIG_FILE ~/.config/fish/config.fish
-cp -f -r $FUNCTION_FILES ~/.config/fish/
-cp -f -r $CONF_D_FILES ~/.config/fish/
+cp -f $CONFIG_FILE $HOME/.config/fish/config.fish
+cp -f -r $FUNCTION_FILES $HOME/.config/fish/
+cp -f -r $CONF_D_FILES $HOME/.config/fish/
 
-eval "$(source ~/.config/fish)"
+fish -c "source $HOME/.config/fish/config.fish"

@@ -5,6 +5,7 @@ eza
 ffmpeg
 fish
 fzf
+jq
 git
 gh
 htop

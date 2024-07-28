@@ -13,6 +13,11 @@ if ! brew list 2>/dev/null | grep -q zoxide; then
   brew install zoxide
 fi
 
+# Check if jq is installed, if not install it
+if ! brew list 2>/dev/null | grep -q jq; then
+  brew install jq
+fi
+
 # Set as default shell
 echo $(which fish) | sudo tee -a /etc/shells
 chsh -s $(which fish)
