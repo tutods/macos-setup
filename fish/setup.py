@@ -19,6 +19,11 @@ try:
             message="Do you want to install fisher to manage fish plugins?",
             default=True,
         ),
+        inquirer.Confirm(
+            "starship",
+            message="Do you want to install and configure starship theme?",
+            default=True
+        )
     ]
     answers = inquirer.prompt(questions, theme=GreenPassion())
 
@@ -38,6 +43,11 @@ try:
         if answers["fisher"]:
             print("3) Installing and configuring fisher...")
             subprocess.run(['sh', 'scripts/fisher.sh'],
+                check=True, cwd=current_dir)
+
+        if answers["starship"]:
+            print("4) Installing and configuring starship...")
+            subprocess.run(['sh', 'scripts/starship.sh'],
                 check=True, cwd=current_dir)
 
 except subprocess.CalledProcessError as e:
