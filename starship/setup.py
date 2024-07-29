@@ -8,20 +8,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 try:
     questions = [
-        inquirer.Confirm("install", message="Do you want to install fish?", default=True),
-        inquirer.Confirm(
-            "configs",
-            message="Do you want to copy the fish configurations?",
-            default=True,
-        ),
-        inquirer.Confirm(
-            "fisher",
-            message="Do you want to install fisher to manage fish plugins?",
-            default=True,
-        ),
+        inquirer.Confirm("install", message="Do you want to install Starship theme?", default=True),
         inquirer.List(
-            "starship",
-            message="Do you want to configure starship theme? If yes, please select the theme you desire.",
+            "theme",
+            message="Which color schema do you want to use?",
             choices=[
                 ("None", "none"),
                 ("Dracula colors", "dracula"),
@@ -36,37 +26,17 @@ try:
         print("No answers to proceed!")
     else:
         if answers["install"]:
-            print("1) Installing Fish...")
+            print("1) Installing Starship...")
             subprocess.run(['sh', 'scripts/install.sh'],
                 check=True, cwd=current_dir)
 
-        if answers["configs"]:
-            print("2) Copying configurations...")
-            subprocess.run(['sh', 'scripts/config.sh'],
-                check=True, cwd=current_dir)
-
-        if answers["fisher"]:
-            print("3) Installing and configuring fisher...")
-            subprocess.run(['sh', 'scripts/fisher.sh'],
-                check=True, cwd=current_dir)
-
-        if answers["starship"] == "dracula":
-            print("4) Installing and configuring starship...")
-            subprocess.run([
-                "cp",
-                "-f",
-                "./configs/startship-dracula.toml",
-                "$HOME/.config/startship.toml"
-            ], check=True, cwd=current_dir)
+        if answers["theme"] == "dracula":
+            print("4) Configuring Starship colors...")
+            subprocess.run(['sh', 'scripts/dracula-theme.sh'], check=True, cwd=current_dir)
         
-        if answers["starship"] == "terminal":
-            print("4) Installing and configuring starship...")
-            subprocess.run([
-                "cp",
-                "-f",
-                "./configs/startship-default.toml",
-                "$HOME/.config/startship.toml"
-            ], check=True, cwd=current_dir)
+        if answers["theme"] == "terminal":
+            print("4) Configuring Starship colors...")
+            subprocess.run(['sh', 'scripts/default-theme.sh'], check=True, cwd=current_dir)
             
 except subprocess.CalledProcessError as e:
   # Handle the error here
