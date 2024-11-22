@@ -15,7 +15,7 @@ options = {
     'Starship theme': 'starship/setup.py',
     'Node.js': 'node/setup.py',
     'VSCode': 'vscode/setup.py',
-    'Hyper': 'hyper/setup.sh',
+    'Hyper': 'hyper/setup.py',
 }
 
 try:
