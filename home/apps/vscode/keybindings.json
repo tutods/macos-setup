@@ -1,0 +1,52 @@
+[
+  {
+    "key": "cmd+n",
+    "command": "-workbench.action.files.newUntitledFile"
+  },
+  {
+    "key": "cmd+n",
+    "command": "explorer.newFile"
+  },
+  {
+    "key": "cmd+w",
+    "command": "-workbench.action.terminal.killEditor",
+    "when": "terminalEditorFocus && terminalFocus && terminalHasBeenCreated || terminalEditorFocus && terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "alt+k",
+    "command": "workbench.action.terminal.killEditor"
+  },
+  {
+    "key": "alt+k",
+    "command": "workbench.action.terminal.kill"
+  },
+  {
+    "key": "cmd+w",
+    "command": "workbench.action.terminal.kill",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "cmd+w",
+    "command": "workbench.action.closeActiveEditor",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+h",
+    "command": "workbench.action.showPreviousWindowTab",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.showNextWindowTab",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+t",
+    "command": "workbench.action.newWindowTab"
+  },
+  {
+    "key": "cmd+k",
+    "command": "workbench.action.terminal.clear",
+    "when": "terminalFocus"
+  }
+]
