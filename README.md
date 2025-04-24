@@ -2,7 +2,7 @@
 
 This repo contains my **NixOS** configuration to setup my **macOS** machines using **NixOs** with **Nix Darwin**, **Nix Homebrew** and **Home Manager**.
 
-This configuration is based on **[KTZ Systems](https://github.com/ironicbadger/nix-config)** configuration that is explain on [this video](https://www.youtube.com/watch?v=qUmZtC6ts0M).
+This configuration is based on **[@ironicbadger](https://github.com/ironicbadger/nix-config)** configuration that is explain on [this video](https://www.youtube.com/watch?v=qUmZtC6ts0M).
 
 Thanks [@ironicbadger](https://github.com/ironicbadger) 🙏!
 
