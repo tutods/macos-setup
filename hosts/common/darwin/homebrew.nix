@@ -87,8 +87,6 @@
       "Xnip" = 1221250572;
       "Elmedia Video Player" = 1044549675;
       "SnippetsLab" = 1006087419;
-      
-      # Installed via homebrew casks
       "Tailscale" = 1475387142;
     };
   };

@@ -45,7 +45,7 @@
     enable = true;
     enableCompletion = true;
     autosuggestion.enable = true;
-    initExtra = (builtins.readFile ../data/mac-dot-zshrc);
+    initContent = (builtins.readFile ../data/mac-dot-zshrc);
   };
 
   programs.home-manager.enable = true;

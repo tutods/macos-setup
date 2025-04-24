@@ -98,9 +98,9 @@
     };
   };
 
-  system.activationScripts.postUserActivation.text = ''
-    defaults -currentHost write com.apple.screensaver idleTime -int 60
-  '';
+  # system.activationScripts.postUserActivation.text = ''
+  #   defaults -currentHost write com.apple.screensaver idleTime -int 60
+  # '';
   # Following line should allow us to avoid a logout/login cycle
   # /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 }

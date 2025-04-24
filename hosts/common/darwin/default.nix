@@ -1,4 +1,4 @@
-{ inputs, outputs, config, lib, hostname, system, username, pkgs, ... }:
+{ inputs, config, lib, system, pkgs, ... }:
 let
   inherit (inputs) nixpkgs;
 in
@@ -7,7 +7,6 @@ in
     ./homebrew.nix
     ./settings.nix
     ./security.nix
-    # ./virtualization.nix
     ./networking.nix
   ];
 
