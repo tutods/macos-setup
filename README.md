@@ -19,6 +19,12 @@ Thanks [@ironicbadger](https://github.com/ironicbadger) 🙏!
      * `nix run nix-darwin/master#darwin-rebuild -- switch --flake ".#<host>"`
      - Don't forget to replace `<host>` with one of the available hosts (details above).
 
+To turn the second an the third step easier, I added a shell file (`nix.sh`) where is only necessary to run `sh nix.sh` after install **NixOS**.
+
+### Notes:
+
+I didn't find a way of install a few **VSCode extensions** and configure **Hyper** terminal. So for that, run `sh post-nix.sh` to copy the `.hyper.js` configuration and install the missing **VSCode extensions**.
+
 ## 📃 Roadmap
 
 - [ ] Prepare my configuration to work with **Linux** machines;
