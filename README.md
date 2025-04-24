@@ -30,3 +30,6 @@ I didn't find a way of install a few **VSCode extensions** and configure **Hyper
 - [ ] Prepare my configuration to work with **Linux** machines;
 - [ ] Finish my working machine configuration;
 - [ ] Cleanup configurations and reorganize a few parts;
+- [ ] Add the possibility of choose which shell I want to use:
+  - **Fish**;
+  - **ZSH**.
