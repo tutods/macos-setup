@@ -11,13 +11,13 @@ Thanks [@ironicbadger](https://github.com/ironicbadger) 🙏!
 1. Install **NixOS**: `sh <(curl -L https://nixos.org/nix/install)`;
   * Check if **NixOS** is working (in a new terminal) running `nix-shell -p neofetch --run neofetch`.
 2. Build the configuration using: `nix --extra-experimental-features 'nix-command flakes'  build ".#darwinConfigurations.<host>.system"`;
-  * Don't forget to replace `<host>` with one of the available hosts:
-    - `macbook` for my person machine configuration;
-    - `mindera` for my working machine - ⚠️ **IN PROGRESS**;
+     * Don't forget to replace `<host>` with one of the available hosts:
+       - `macbook` for my person machine configuration;
+       - `mindera` for my working machine - ⚠️ **IN PROGRESS**;
 3. Run one of the commands above to apply the configuration:
-  * `./result/sw/bin/darwin-rebuild switch --flake ".#<host>"`
-  * `nix run nix-darwin/master#darwin-rebuild -- switch --flake ".#<host>"`
-  - Don't forget to replace `<host>` with one of the available hosts (details above).
+     * `./result/sw/bin/darwin-rebuild switch --flake ".#<host>"`
+     * `nix run nix-darwin/master#darwin-rebuild -- switch --flake ".#<host>"`
+     - Don't forget to replace `<host>` with one of the available hosts (details above).
 
 ## 📃 Roadmap
 
