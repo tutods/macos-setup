@@ -6,6 +6,21 @@ This configuration is based on **[@ironicbadger](https://github.com/ironicbadger
 
 Thanks [@ironicbadger](https://github.com/ironicbadger) 🙏!
 
+## ➕ What is included?
+
+Running this configuration, you will have:
+- My shell setup (for now only with **ZSH**), with plugins, alias, etc.;
+- **Homebrew** and casks/formulaes;
+- **FNM** for **Node.js** version manager;
+- Change most of my **macOS** settings, like:
+  - Setup my dock;
+  - Change networking settings to include **Google DNS**;
+  - Use touch id for `sudo` commands on terminal;
+  - Set timezone;
+  - ...
+
+
+
 ## ▶️ How to run
 
 1. Install **NixOS**: `sh <(curl -L https://nixos.org/nix/install)`;

@@ -82,6 +82,12 @@
         # Privacy: don't send search queries to Apple
         UniversalSearchEnabled = false;
         SuppressSearchSuggestions = true;
+
+        # Don't open downloads (like `zip` files)
+        AutoOpenSafeDownloads = false;
+
+        # Enable developer tools
+        WebKitDeveloperExtrasEnabledPreferenceKey = true;
       };
       "com.apple.AdLib" = {
         allowApplePersonalizedAdvertising = false;
