@@ -34,7 +34,7 @@ Running this configuration, you will have:
      * `nix run nix-darwin/master#darwin-rebuild -- switch --flake ".#<host>"`
      - Don't forget to replace `<host>` with one of the available hosts (details above).
 
-To turn the second an the third step easier, I added a shell file (`nix.sh`) where is only necessary to run `sh nix.sh` after install **NixOS**.
+To turn the second an the third step easier, I added a shell file (`nix.sh`) where is only necessary to run `sh nix.sh <host>` after install **NixOS**.
 
 ### Notes:
 
