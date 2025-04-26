@@ -17,5 +17,5 @@
   # VPNS
   "Tailscale" = 1475387142;
   # "Passepartout" = 1433648537;
-  "Twingate" = 1501592214;
+  # "Twingate" = 1501592214;
 }

@@ -26,7 +26,13 @@
             home-manager.users.${username} = {
               imports = [ ./../home/${username}.nix ]; 
               home.activation.post = ''
-                sh post-nix.sh
+                # create Developer directory if it doesn't exist
+                if [ ! -d "/Users/${username}/Developer" ]; then
+                  echo "↣ Create Developer directory"
+                  mkdir -p "/Users/${username}/Developer"
+                else
+                  echo "↣ Developer directory already exists"
+                fi
               '';
             };
             # home-manager.users.${username}.home = "/Users/${username}/";
