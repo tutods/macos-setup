@@ -26,6 +26,9 @@
             home-manager.users.${username} = {
               imports = [ ./../home/${username}.nix ]; 
             };
+            home.activation.name = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+              sh post-nix.sh
+            '';
             # home-manager.users.${username}.home = "/Users/${username}/";
         }
         inputs.nix-homebrew.darwinModules.nix-homebrew {
@@ -37,7 +40,6 @@
             user = "${username}";
           };
         }
-
       ];
     };
 }

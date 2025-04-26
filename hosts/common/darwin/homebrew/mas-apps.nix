@@ -14,5 +14,8 @@
   "Xnip" = 1221250572;
   "Elmedia Video Player" = 1044549675;
   "SnippetsLab" = 1006087419;
+  # VPNS
   "Tailscale" = 1475387142;
+  # "Passepartout" = 1433648537;
+  "Twingate" = 1501592214;
 }

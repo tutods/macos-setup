@@ -28,5 +28,11 @@
   "marta"
   # "vlc"
   #"balenaetcher"
+  # "raspberry-pi-imager"
   # "keycastr"
+  "keka"
+  "kap"
+  # "time-out"
+  # "shottr"
+  "synology-drive"
 ]
