@@ -25,10 +25,10 @@
             home-manager.extraSpecialArgs = { inherit inputs; };
             home-manager.users.${username} = {
               imports = [ ./../home/${username}.nix ]; 
+              home.activation.post = ''
+                sh post-nix.sh
+              '';
             };
-            home.activation.name = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-              sh post-nix.sh
-            '';
             # home-manager.users.${username}.home = "/Users/${username}/";
         }
         inputs.nix-homebrew.darwinModules.nix-homebrew {

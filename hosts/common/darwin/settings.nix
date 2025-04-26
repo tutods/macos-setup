@@ -78,6 +78,14 @@
         DSDontWriteNetworkStores = true;
         DSDontWriteUSBStores = true;
       };
+      "com.apple.finder" = {
+        # Sort by name by default
+        FXPreferredSortOrder = "name";
+        # Show all file extensions
+        AppleShowAllExtensions = true;
+        # Show hidden files
+        AppleShowAllFiles = true;
+      };
       "com.apple.Safari" = {
         # Privacy: don't send search queries to Apple
         UniversalSearchEnabled = false;

@@ -20,6 +20,6 @@ in
       "webp"
     ];
     casks = developmentCasks ++ utilsCasks ++ webCasks;
-    masApps = import ./mas-apps.nix;
+    masApps = import ./mas.nix;
   };
 }
