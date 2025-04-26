@@ -121,7 +121,8 @@
 
     activationScripts.postActivation.text = ''
       # Restart automatically if the computer freezes
-      sudo systemsetup -setrestartfreeze on
+      # TODO: not working
+      # sudo systemsetup -setrestartfreeze on
       ########################
       # SSD-specific tweaks
       ########################
