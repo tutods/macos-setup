@@ -1,6 +1,9 @@
+# copy Hyper terminal config
+echo "↣ Copy Hyper terminal config"
 cp -r data/hyper.js $HOME/.hyper.js
 
 # Install remaining VSCode extensions
+echo "↣ Installing remaining VSCode extensions"
 code --install-extension chakrounanas.turbo-console-log 
 code --install-extension wallabyjs.console-ninjarors
 code --install-extension streetsidesoftware.code-spell-checker-portuguese
