@@ -45,13 +45,11 @@
 
   # programs.bash.enable = true;
 
-  programs.home-manager.enable = true;
-  programs.nix-index.enable = true;
+  # programs.home-manager.enable = true;
+  # programs.nix-index.enable = true;
 
   programs.bat = {
     enable = true;
     # config.theme = "Catppuccin Mocha";
-  };
-
-  programs.zoxide.enable = true;
+  }
 }
