@@ -22,6 +22,7 @@
       ignoreSpace = true;
       expireDuplicatesFirst = true;
       share = true;
+      ignorePatterns = ["rm *" "pkill *" "cp *"];
       path = "${config.home.homeDirectory}/.zsh_history";
     };
     
