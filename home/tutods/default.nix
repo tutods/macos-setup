@@ -5,15 +5,15 @@
   
   imports = [
     # Apps
-    ./programs/apps/vscode
+    ../programs/apps/vscode
     # CLI tools
-    ./programs/cli/eza.nix
-    ./programs/cli/bat.nix
-    ./programs/cli/git.nix
-    ./programs/cli/htop.nix
-    ./programs/cli/oh-my-posh
+    ../programs/cli/eza.nix
+    ../programs/cli/bat.nix
+    ../programs/cli/git.nix
+    ../programs/cli/htop.nix
+    ../programs/cli/oh-my-posh
     # Shell
-    ./programs/shell/zsh
+    ../programs/shell/zsh
   ];
 
   # list of programs
