@@ -4,7 +4,7 @@
   home.homeDirectory = lib.mkForce "/Users/tutods";
   
   imports = [
-    ../programs.nix
+    ../programs
   ];
 
   # list of programs
