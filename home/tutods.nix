@@ -7,7 +7,7 @@
     # Apps
     ./apps/vscode
     # CLI tools
-    ./cli/fzf.nix
+    # ./cli/fzf.nix
     ./cli/eza.nix
     ./cli/git.nix
     ./cli/htop.nix
@@ -51,5 +51,5 @@
   programs.bat = {
     enable = true;
     # config.theme = "Catppuccin Mocha";
-  }
+  };
 }
