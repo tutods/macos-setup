@@ -24,13 +24,14 @@ zinit light Aloxaf/fzf-tab
 zinit light hlissner/zsh-autopair
 
 # Add in snippets
-zinit snippet OMZP::alias-finder
+zinit snippet OMZL::git.zsh
 zinit snippet OMZP::git
+zinit snippet OMZP::alias-finder
 zinit snippet OMZP::brew
 zinit snippet OMZP::command-not-found
 
 # Load completions
-autoload -U compinit && compinit
+autoload -Uz compinit && compinit
 
 zinit cdreplay -q
 
@@ -100,6 +101,3 @@ function goMain() {
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 eval "$(fnm env --use-on-cd --corepack-enabled --shell zsh)"
-
-# Console Ninja
-PATH=~/.console-ninja/.bin:$PATH
