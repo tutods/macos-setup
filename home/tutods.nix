@@ -4,12 +4,16 @@
   home.homeDirectory = lib.mkForce "/Users/tutods";
   
   imports = [
+    # Apps
     ./apps/vscode
+    # CLI tools
     ./cli/fzf.nix
     ./cli/eza.nix
     ./cli/git.nix
     ./cli/htop.nix
     ./cli/oh-my-posh
+    # Shell
+    ./shell/zsh
   ];
 
   # list of programs
@@ -22,7 +26,7 @@
   #   })
   # ];
 
-  programs.gpg.enable = true;
+  # programs.gpg.enable = true;
 
   # programs.direnv = {
   #   enable = true;
@@ -40,13 +44,6 @@
   # };
 
   # programs.bash.enable = true;
-
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    initContent = (builtins.readFile ../data/mac-dot-zshrc);
-  };
 
   programs.home-manager.enable = true;
   programs.nix-index.enable = true;
