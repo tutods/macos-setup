@@ -19,14 +19,16 @@
         dockConf
         inputs.home-manager.darwinModules.home-manager {
             networking.hostName = hostname;
+            
             home-manager.backupFileExtension = "bkp";
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = { inherit inputs; };
+
             home-manager.users.${username} = {
-              imports = [ ./../home/${username}.nix ]; 
+              imports = [ ./../home/${username}/default.nix ]; 
               home.activation.post = ''
-                # create Developer directory if it doesn't exist
+                # Create Developer directory if it doesn't exist
                 if [ ! -d "/Users/${username}/Developer" ]; then
                   echo "↣ Create Developer directory"
                   mkdir -p "/Users/${username}/Developer"
@@ -35,7 +37,6 @@
                 fi
               '';
             };
-            # home-manager.users.${username}.home = "/Users/${username}/";
         }
         inputs.nix-homebrew.darwinModules.nix-homebrew {
           nix-homebrew = {

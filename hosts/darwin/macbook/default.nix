@@ -1,6 +1,3 @@
 { ... }:
 {
-  # imports = [
-  #   ./custom-dock.nix
-  # ];
 }

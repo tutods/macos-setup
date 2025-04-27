@@ -7,6 +7,7 @@
     # Homebrew package manager
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
+    # Home manager
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -21,9 +22,14 @@
       # macOS Configurations
       darwinConfigurations = {
         # personal
-        macbook = libx.mkDarwin { hostname = "macbook"; };
+        macbook = libx.mkDarwin { 
+          hostname = "macbook"; 
+        };
         # work
-        mindera = libx.mkDarwin { hostname = "work"; };
+        mindera = libx.mkDarwin { 
+          hostname = "work"; 
+          username = "daniel.a.sousa"; 
+        };
       };
 
     };
