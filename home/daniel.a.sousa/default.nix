@@ -7,11 +7,11 @@
     # Apps
     ../programs/apps/vscode
     # CLI tools
-    ./git.nix
     ../programs/cli/eza.nix
     ../programs/cli/bat.nix
     ../programs/cli/htop.nix
     ../programs/cli/oh-my-posh
+    ./git.nix
     # Shell
     ../programs/shell/zsh
   ];
