@@ -73,6 +73,9 @@
       zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --color=always --icons $realpath'
       zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --color=always --icons $realpath'
 
+      # Load FNM
+      eval "$(fnm env --use-on-cd --shell zsh --corepack-enabled)"
+
       function commt() {
         git add .
         git commit -m "$1"
