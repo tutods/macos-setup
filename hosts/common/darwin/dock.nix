@@ -21,6 +21,7 @@ in {
         };
       }
       "/Applications/Cursor.app"
+      "/Applications/Windsurf.app"
       "/Applications/Visual Studio Code.app"
       "/Applications/Hyper.app"
       {
