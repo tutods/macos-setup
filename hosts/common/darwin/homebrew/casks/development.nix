@@ -7,7 +7,6 @@
   "hyper"
   "warp"
   "orbstack"
-  "jetbrains-toolbox"
   "bruno"
   "httpie"
   "insomnia"
