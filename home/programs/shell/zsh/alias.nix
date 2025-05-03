@@ -1,7 +1,7 @@
 {
   # Common alias
   ls="eza --color=always --icons";
-  ...="cd ../..";
+  "..."="cd ../..";
   
   # Brew alias
   bsearch="brew search";
