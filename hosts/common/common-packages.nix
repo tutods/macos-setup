@@ -22,9 +22,6 @@ in
     jpegoptim
     optipng
     ffmpeg
-
-    # Development tools
-    jetbrains.idea-ultimate
   ];
 
   fonts.packages = with pkgs; [

@@ -15,6 +15,9 @@
       #   conflictStyle = "diff3";
       #   tool = "meld";
       # };
+      push = { 
+        autoSetupRemote = true; 
+      };
       pull = {
         rebase = true;
       };
