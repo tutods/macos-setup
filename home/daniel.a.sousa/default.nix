@@ -7,7 +7,6 @@
     # Apps
     ../programs/apps/vscode
     # CLI tools
-    ../programs/cli/eza.nix
     ../programs/cli/bat.nix
     ../programs/cli/htop.nix
     ../programs/cli/oh-my-posh
