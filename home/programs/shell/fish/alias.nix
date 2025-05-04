@@ -27,8 +27,8 @@
   # Navigation Alias
   work="cd ~/Developer";
   home="cd ~";
-  ..="cd ..";
-  ...="cd ../..";
+  ".."="cd ..";
+  "..."="cd ../..";
 
   # Eza on LS
   ls="eza";

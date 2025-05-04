@@ -20,11 +20,23 @@
       bind \cf npm_scripts_autocomplete
     '';
 
-    plugins = with pkgs; [
-      fishPlugins.fzf-fish
-      fishPlugins.z.src
-      fishPlugins.pisces.src
-      # fishPlugins.puffer.src
+    plugins = [
+      # {
+      #   name = "fzf-fish";
+      #   src = pkgs.fishPlugins.fzf-fish;
+      # }
+      {
+        name = "z";
+        src = pkgs.fishPlugins.z.src;
+      }
+      {
+        name = "pisces";
+        src = pkgs.fishPlugins.pisces.src;
+      }
+      {
+        name = "puffer";
+        src = pkgs.fishPlugins.puffer.src;
+      }
     ];
   };
 }
