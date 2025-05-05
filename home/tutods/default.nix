@@ -2,6 +2,8 @@
 {
   home.username = "tutods";
   home.homeDirectory = "/Users/tutods";
+  home.stateVersion = "23.11"; # Prevents future breaking changes
+  
   # Add your home-manager options here
   home.packages = with pkgs; [
     fish
@@ -31,5 +33,7 @@
   programs.fzf.enable = true;
   programs.bat.enable = true;
 
-  home.shell = pkgs.fish;
+  # To set fish as your default shell in macOS, you need to:
+  # 1. Add fish to /etc/shells
+  # 2. Run chsh -s /run/current-system/sw/bin/fish
 } 
