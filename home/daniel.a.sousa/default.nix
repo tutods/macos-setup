@@ -1,8 +1,21 @@
 { pkgs, lib, ... }:
-{
+
+let 
+  homeDirectory = "/Users/daniel.a.sousa";
+in {
   home.username = "daniel.a.sousa";
-  home.homeDirectory = lib.mkForce "/Users/daniel.a.sousa";
+  home.homeDirectory = lib.mkForce homeDirectory;
   home.stateVersion = "23.11"; # Prevents future breaking changes
+
+  home.activation.post = ''
+    # Create Developer directory if it doesn't exist
+    if [ ! -d "${homeDirectory}/Developer" ]; then
+      echo "↣ Create Developer directory"
+      mkdir -p "${homeDirectory}/Developer"
+    else
+      echo "↣ Developer directory already exists"
+    fi
+  '';
 
   # Add your home-manager options here
   home.packages = with pkgs; [
