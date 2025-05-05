@@ -4,7 +4,6 @@
   "windsurf"
   "trae"
   "visual-studio-code"
-  "jetbrains-toolbox"
   "hyper"
   "warp"
   "orbstack"

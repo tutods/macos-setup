@@ -6,16 +6,19 @@ in
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
-    yt-dlp
+    jetbrains.idea-ultimate
+    jetbrains.datagrip
+    #jetbrains.webstorm
     gh
-    mkalias
     bat
     fnm
     oh-my-posh
+    mkalias
     duf
     fd
     doppler
     speedtest-cli
+    yt-dlp
 
     # Image optimization tools
     imagemagick
