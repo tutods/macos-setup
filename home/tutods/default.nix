@@ -8,13 +8,14 @@
     ../programs
   ];
 
-  # # Add your home-manager options here
-  # home.packages = with pkgs; [
-  #   fish
-  #   # fzf
-  #   # zoxide
-  #   # bat
-  # ];
+  # Add your home-manager options here
+  home.packages = with pkgs; [
+    # Dependencies for fzf.fish plugin
+    fzf
+    fd
+    bat
+    zoxide
+  ];
 
   # programs.fish = {
   #   enable = true;

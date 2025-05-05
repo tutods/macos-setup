@@ -21,16 +21,27 @@
 
   programs.fish = {
     enable = true;
-    shellAliases = import ./alias.nix;
+      shellAliases = import ./alias.nix;
     shellAbbrs = import ./abbrs.nix;
     functions = import ./functions.nix;
 
     interactiveShellInit = ''
       bind \ew backward-kill-line
       bind \cf npm_scripts_autocomplete
+      
+      # Set up fzf for Fish
+      set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
+      set -gx FZF_CTRL_T_COMMAND "$FZF_DEFAULT_COMMAND"
+      set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
+      set -gx FZF_DEFAULT_OPTS '--height 40% --layout=reverse --border'
+      
+      # Enable fzf key bindings if available
+      if functions -q fzf_key_bindings
+        fzf_key_bindings
+      end
     '';
 
-    plugins = import ./plugins.nix;
+    # Plugins are now defined in plugins.nix
 
     # plugins = [
     #   #   # fishPlugins.done
