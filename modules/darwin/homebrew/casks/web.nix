@@ -1,9 +1,13 @@
 [
-  # Web browsers and web-related tools
-  "google-chrome"
+  # Web
+  "arc"
   "firefox"
+  "zen-browser"
+  "google-chrome"
   "brave-browser"
-  "slack"
+  "qbittorrent"
   "discord"
-  "zoom"
+  "telegram"
+  "whatsapp"
+  "slack"
 ]

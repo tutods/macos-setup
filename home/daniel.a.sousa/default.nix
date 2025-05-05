@@ -7,9 +7,6 @@
   # Add your home-manager options here
   home.packages = with pkgs; [
     fish
-    fzf
-    zoxide
-    bat
   ];
 
   programs.fish = {

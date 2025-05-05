@@ -1,12 +1,15 @@
 [
-  # Development tools
+  # Developer tools
+  "cursor"
+  "windsurf"
+  "trae"
   "visual-studio-code"
   "jetbrains-toolbox"
-  "docker"
-  "postman"
-  "dbeaver-community"
-  "figma"
-  "insomnia"
-  "mongodb-compass"
+  "hyper"
   "warp"
+  "iterm2"
+  "orbstack"
+  "bruno"
+  "httpie"
+  "insomnia"
 ]

@@ -1,11 +1,38 @@
 [
-  # Utility applications
-  "rectangle"
-  "raycast"
-  "appcleaner"
-  "the-unarchiver"
-  "keka"
+  # Design
+  "figma"
+
+  # Tools
   "stats"
-  "iterm2"
-  "1password"
+  "onyx"
+  "pearcleaner"
+  
+  # Remote control
+  "teamviewer"
+  "anydesk"
+
+  # Notes
+  "notion"
+  # "obsidian"
+  
+  # VPNs
+  # "tailscale"
+  # ----
+  "imageoptim"
+  "bitwarden"
+  "raycast"
+  "airbuddy"
+  "iina"
+  "jordanbaird-ice"
+  "logi-options+"
+  "marta"
+  # "vlc"
+  #"balenaetcher"
+  # "raspberry-pi-imager"
+  # "keycastr"
+  "keka"
+  "kap"
+  # "time-out"
+  # "shottr"
+  "synology-drive"
 ]

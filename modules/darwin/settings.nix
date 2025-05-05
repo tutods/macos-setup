@@ -93,17 +93,17 @@
           # Sort by name by default
           FXPreferredSortOrder = "name";
         };
-        "com.apple.Safari" = {
-          # Privacy: don't send search queries to Apple
-          UniversalSearchEnabled = false;
-          SuppressSearchSuggestions = true;
+        # "com.apple.Safari" = {
+        #   # Privacy: don't send search queries to Apple
+        #   UniversalSearchEnabled = false;
+        #   SuppressSearchSuggestions = true;
 
-          # Don't open downloads (like `zip` files)
-          AutoOpenSafeDownloads = false;
+        #   # Don't open downloads (like `zip` files)
+        #   AutoOpenSafeDownloads = false;
 
-          # Enable developer tools
-          WebKitDeveloperExtrasEnabledPreferenceKey = true;
-        };
+        #   # Enable developer tools
+        #   WebKitDeveloperExtrasEnabledPreferenceKey = true;
+        # };
         "com.apple.AdLib" = {
           allowApplePersonalizedAdvertising = false;
         };

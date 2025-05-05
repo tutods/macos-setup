@@ -3,6 +3,7 @@
 {
   imports = [
     ./extra.nix
+    ./plugins.nix
   ];
 
   # users.defaultUserShell = pkgs.fish;
@@ -29,13 +30,15 @@
       bind \cf npm_scripts_autocomplete
     '';
 
-    plugins = [
-      #   # fishPlugins.done
-      # pkgs.fishPlugins.fzf-fish
-      # pkgs.fishPlugins.pisces
-      # fishPlugins.autopair
-      # fishPlugins.hydro
-    ];
+    plugins = import ./plugins.nix;
+
+    # plugins = [
+    #   #   # fishPlugins.done
+    #   # pkgs.fishPlugins.fzf-fish
+    #   # pkgs.fishPlugins.pisces
+    #   # fishPlugins.autopair
+    #   # fishPlugins.hydro
+    # ];
 
     # plugins = [
     #   # {

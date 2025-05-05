@@ -26,8 +26,12 @@
   outputs = { self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
     let
       system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
-      
+      pkgs = import nixpkgs {
+        inherit system;
+        config = {
+          allowUnfree = true;
+        };
+      };
 
       # Common configuration for all Darwin systems
       darwinCommonModules = [
