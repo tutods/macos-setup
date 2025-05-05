@@ -1,4 +1,14 @@
 {
+  # Custom function to enhance cd with fzf
+  "fzf-cd" = {
+    body = ''      
+      set -l directory (fd --type d --hidden --follow --exclude .git | fzf --preview 'ls -la {}')
+      if test -n "$directory"
+          cd "$directory"
+      end
+    '';
+    description = "Navigate to a directory using fzf";
+  };
   goMain = '' 
     function goMain -d "Switch to main branch"
       git checkout main
