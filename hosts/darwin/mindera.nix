@@ -1,9 +1,5 @@
 { pkgs, nixpkgs, home-manager, nix-homebrew, ... }:
 {
-  # Import common configuration
-  imports = [
-    ../../modules/common.nix
-  ];
 
   # Host-specific configuration
   networking.hostName = "mindera-mbp";

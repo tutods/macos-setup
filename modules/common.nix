@@ -17,6 +17,8 @@
   # Nix configuration
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
-    auto-optimise-store = true;
   };
+  
+  # Nix store optimization
+  nix.optimise.automatic = true;
 }

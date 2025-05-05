@@ -1,16 +1,26 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   home.username = "tutods";
-  home.homeDirectory = "/Users/tutods";
+  home.homeDirectory = lib.mkForce "/Users/tutods";
   home.stateVersion = "23.11"; # Prevents future breaking changes
   
   # Add your home-manager options here
   home.packages = with pkgs; [
     fish
-    fzf
-    zoxide
-    bat
+    # fzf
+    # zoxide
+    # bat
   ];
+
+  programs.bash = {
+    extraInit = ''
+      if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
+      then
+        shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
+        exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
+      fi
+    '';
+  };
 
   programs.fish = {
     enable = true;

@@ -1,7 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   home.username = "daniel.a.sousa";
-  home.homeDirectory = "/Users/daniel.a.sousa";
+  home.homeDirectory = lib.mkForce "/Users/daniel.a.sousa";
+  home.stateVersion = "23.11"; # Prevents future breaking changes
+
   # Add your home-manager options here
   home.packages = with pkgs; [
     fish

@@ -1,9 +1,5 @@
 { pkgs, nixpkgs, home-manager, nix-homebrew, ... }:
 {
-  # Import common configuration
-  imports = [
-    ../../modules/common.nix
-  ];
 
   # Host-specific configuration
   networking.hostName = "tutods-macbook";
@@ -15,6 +11,7 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
+    extraSpecialArgs = { inherit pkgs; };
     users.tutods = import ../../home/tutods/default.nix;
   };
 
