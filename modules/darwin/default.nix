@@ -5,6 +5,7 @@ in
 {
   imports = [
     ./homebrew
+    ./dock.nix
     ./settings.nix
     ./security.nix
     ./networking.nix

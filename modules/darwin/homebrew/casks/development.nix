@@ -7,7 +7,6 @@
   "jetbrains-toolbox"
   "hyper"
   "warp"
-  "iterm2"
   "orbstack"
   "bruno"
   "httpie"

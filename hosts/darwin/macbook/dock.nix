@@ -1,8 +1,6 @@
-{ config, username, ... }:
+{ config, ... }:
 
-let
-  homeDir = "/Users/${username}";
-in {
+{
   system.defaults.dock = {
     persistent-apps = [
       "/System/Applications/Launchpad.app"
@@ -31,8 +29,8 @@ in {
       }
     ];
     persistent-others = [
-      "${homeDir}/Downloads"
-      "${homeDir}/Developer"
+      "${config.users.users.tutods.home}/Downloads"
+      "${config.users.users.tutods.home}/Developer"
     ];
   };
 }

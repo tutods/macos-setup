@@ -18,8 +18,11 @@
   };
 
   # Nix configuration
-  nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
+  nix = {
+    settings = {
+      experimental-features = [ "nix-command" "flakes" ];
+      warn-dirty = false;
+    };
   };
   
   # Nix store optimization

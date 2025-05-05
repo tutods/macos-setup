@@ -1,5 +1,8 @@
 { pkgs, nixpkgs, home-manager, nix-homebrew, ... }:
 {
+  imports = [
+    ./dock.nix
+  ];
 
   # Host-specific configuration
   networking.hostName = "tutods-macbook";
