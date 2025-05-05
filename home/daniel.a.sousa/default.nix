@@ -1,20 +1,35 @@
-{ config, inputs, pkgs, lib, ... }:
+{ pkgs, ... }:
 {
-  home.stateVersion = "23.11";
-  home.homeDirectory = lib.mkForce "/Users/daniel.a.sousa";
-
-  imports = [
-    # Apps
-    ../programs/apps/vscode
-    # CLI tools
-    ../programs/cli/bat.nix
-    ../programs/cli/htop.nix
-    ../programs/cli/oh-my-posh
-    ./git.nix
-    # Shell
-    ../programs/shell/zsh
+  home.username = "daniel.a.sousa";
+  home.homeDirectory = "/Users/daniel.a.sousa";
+  # Add your home-manager options here
+  home.packages = with pkgs; [
+    fish
+    fzf
+    zoxide
+    bat
   ];
 
-  # list of programs
-  # https://mipmip.github.io/home-manager-option-search
-}
+  programs.fish = {
+    enable = true;
+    shellInit = ''
+      # fzf key bindings
+      set -gx FZF_DEFAULT_COMMAND 'fd --type f'
+      set -gx FZF_CTRL_T_COMMAND "$FZF_DEFAULT_COMMAND"
+      set -gx FZF_ALT_C_COMMAND 'fd --type d'
+      set -gx FZF_DEFAULT_OPTS '--height 40% --layout=reverse --border'
+      # zoxide init
+      zoxide init fish | source
+    '';
+    interactiveShellInit = ''
+      # bat as default cat
+      alias cat='bat'
+    '';
+  };
+
+  programs.zoxide.enable = true;
+  programs.fzf.enable = true;
+  programs.bat.enable = true;
+
+  home.shell = pkgs.fish;
+} 

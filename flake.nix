@@ -1,36 +1,56 @@
 {
+  description = "Multi-device, multi-user Nix Darwin + Home Manager setup";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nix-darwin.url = "github:nix-darwin/nix-darwin/master";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Nix Darwin
+    nix-darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Homebrew package manager
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    nix-homebrew = {
+      url = "github:zhaofengli-wip/nix-homebrew";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Home manager
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { ... }@inputs:
-    with inputs;
+  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
     let
-      inherit (self) outputs;
-      libx = import ./lib { inherit inputs outputs stateVersion; };
-
-    in {
-      # macOS Configurations
-      darwinConfigurations = {
-        # personal
-        macbook = libx.mkDarwin { 
-          hostname = "macbook"; 
-        };
-        # work
-        mindera = libx.mkDarwin { 
-          hostname = "work"; 
-          username = "daniel.a.sousa"; 
+      system = "aarch64-darwin";
+      pkgs = nixpkgs.legacyPackages.${system};
+      
+      mkDarwin = hostFile: nix-darwin.lib.darwinSystem {
+        inherit system;
+        modules = [
+          # Host-specific configuration
+          (import (./. + "/${hostFile}"))
+          
+          # Home-manager module
+          home-manager.darwinModules.home-manager
+          
+          # Homebrew module
+          nix-homebrew.darwinModules.nix-homebrew
+        ];
+        
+        specialArgs = {
+          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew;
         };
       };
-
+    in {
+      darwinConfigurations = {
+        "macbook" = mkDarwin "./hosts/darwin/macbook.nix";
+        "mindera" = mkDarwin "./hosts/darwin/mindera.nix";
+        # "mac-mini" = mkDarwin "./hosts/darwin/mac-mini.nix";
+      };
+      # Optionally, homeConfigurations for non-darwin systems
     };
-}
+} 
