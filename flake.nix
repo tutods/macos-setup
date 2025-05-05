@@ -49,7 +49,7 @@
       };
     in {
       darwinConfigurations = {
-        "macbook" = mkDarwin "./hosts/darwin/macbook.nix";
+        "macbook" = mkDarwin "./hosts/darwin/macbook";
         "mindera" = mkDarwin "./hosts/darwin/mindera.nix";
         # "mac-mini" = mkDarwin "./hosts/darwin/mac-mini.nix";
       };
