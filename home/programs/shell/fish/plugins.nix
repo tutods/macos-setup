@@ -16,7 +16,19 @@
       name = "plugin-git";
       src = pkgs.fishPlugins.plugin-git.src;
     }
-    
-    # Add more fish plugins here as needed
+    {
+      name = "pisces";
+      src = pkgs.fishPlugins.pisces.src;
+    }
+    # zoxide plugin for Fish
+    {
+      name = "zoxide";
+      src = pkgs.fetchFromGitHub {
+        owner = "kidonng";
+        repo = "zoxide.fish";
+        rev = "fd17bbf41d821eeddd33c6fe883faa7a48fb7230"; # Latest commit as of May 2023
+        sha256 = "sha256-xAGDQ0Wd5qFcSQQEAUu0hHYeXHiEjmzmRFbGjhNL/9I=";
+      };
+    }
   ];
 }
