@@ -4,6 +4,7 @@
   imports = [
     ./extra.nix
     ./plugins.nix
+    ./fzf.nix
   ];
 
   # users.defaultUserShell = pkgs.fish;
@@ -35,10 +36,19 @@
       set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
       set -gx FZF_DEFAULT_OPTS '--height 40% --layout=reverse --border'
       
-      # Enable fzf key bindings if available
-      if functions -q fzf_key_bindings
+      # Make sure fzf_key_bindings is available
+      if type -q fzf_key_bindings
         fzf_key_bindings
       end
+      
+      # Enable Alt+C for directory navigation with fzf
+      bind \ec 'fzf-cd-widget'
+      
+      # Enable Ctrl+T for file selection with fzf
+      bind \ct 'fzf-file-widget'
+      
+      # Enable Ctrl+R for history search with fzf
+      bind \cr 'fzf-history-widget'
     '';
 
     # Plugins are now defined in plugins.nix
