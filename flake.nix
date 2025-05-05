@@ -2,7 +2,7 @@
   description = "Multi-device, multi-user Nix Darwin + Home Manager setup";
 
   inputs = {
-    	nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 

@@ -29,8 +29,8 @@
       }
     ];
     persistent-others = [
-      "${config.users.users.tutods.home}/Downloads"
-      "${config.users.users.tutods.home}/Developer"
+      "/Users/tutods/Downloads"
+      "/Users/tutods/Developer"
     ];
   };
 }

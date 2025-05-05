@@ -13,12 +13,15 @@
     ignoreShellProgramCheck = true;
   }; # Most config in home-manager
   
+  # Add Fish to /etc/shells
+  environment.shells = [ pkgs.fish ];
+  
   # Home Manager configuration
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = { inherit pkgs; };
-    users.tutods = import ../../home/tutods/default.nix;
+    users.tutods = import ../../../home/tutods/default.nix;
   };
 
   # Homebrew configuration
