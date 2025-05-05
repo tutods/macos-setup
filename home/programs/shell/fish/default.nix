@@ -31,8 +31,8 @@
 
     plugins = [
       #   # fishPlugins.done
-      pkgs.fishPlugins.fzf-fish
-      pkgs.fishPlugins.pisces
+      # pkgs.fishPlugins.fzf-fish
+      # pkgs.fishPlugins.pisces
       # fishPlugins.autopair
       # fishPlugins.hydro
     ];

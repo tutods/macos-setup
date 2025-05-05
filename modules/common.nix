@@ -1,5 +1,7 @@
 { pkgs, nixpkgs, ... }:
 {
+  nixpkgs.config.allowUnfree = true;
+
   # Import shared modules
   imports = [
     ./packages/common-packages.nix

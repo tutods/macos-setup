@@ -5,8 +5,11 @@
   networking.hostName = "tutods-macbook";
 
   # User configuration
-  users.users.tutods = { }; # Most config in home-manager
-
+  users.users.tutods = {
+    shell = pkgs.fish; # Set Fish as default shell
+    ignoreShellProgramCheck = true;
+  }; # Most config in home-manager
+  
   # Home Manager configuration
   home-manager = {
     useGlobalPkgs = true;

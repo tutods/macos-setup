@@ -1,6 +1,5 @@
 { pkgs, nixpkgs, ... }:
 {
-  nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
     yt-dlp

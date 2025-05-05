@@ -28,6 +28,7 @@
       system = "aarch64-darwin";
       pkgs = nixpkgs.legacyPackages.${system};
       
+
       # Common configuration for all Darwin systems
       darwinCommonModules = [
         # Base darwin configuration
@@ -45,10 +46,7 @@
         modules = [
           # Host-specific configuration
           (import (./. + "/${hostFile}"))
-          
-          # Common configuration for all Darwin systems
-          darwinCommonModules
-        ];
+        ] ++ darwinCommonModules;
         
         specialArgs = {
           inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew;
