@@ -24,6 +24,10 @@
     users.tutods = import ../../../home/tutods/default.nix;
   };
 
+  programs.fish = {
+    enable = true;
+  };
+
   # Homebrew configuration
   nix-homebrew = {
     enable = true;

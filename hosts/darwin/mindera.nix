@@ -7,6 +7,9 @@
   # User configuration
   users.users."daniel.a.sousa" = { };
 
+  # Add Fish to /etc/shells
+  environment.shells = [ pkgs.fish ];
+
   # Home Manager configuration
   home-manager = {
     useGlobalPkgs = true;
