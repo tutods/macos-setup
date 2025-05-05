@@ -8,6 +8,6 @@
     ./cli/htop.nix
     ./cli/oh-my-posh
     # Shell
-    ./shell/zsh
+    ./shell/fish
   ];
 }
