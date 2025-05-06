@@ -38,10 +38,10 @@
       
       mkDarwin = hostFile: nix-darwin.lib.darwinSystem {
         inherit system;
-        modules = [
+        modules = darwinCommonModules ++ [
           # Host-specific configuration
           (import (./. + "/${hostFile}"))
-        ] ++ darwinCommonModules;
+        ];
         
         specialArgs = {
           inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew;
