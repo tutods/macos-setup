@@ -1,45 +1,48 @@
 {
-  # Custom function to enhance cd with fzf
-  "fzf-cd" = {
-    body = ''      
-      set -l directory (fd --type d --hidden --follow --exclude .git | fzf --preview 'ls -la {}')
-      if test -n "$directory"
-          cd "$directory"
-      end
-    '';
-    description = "Navigate to a directory using fzf";
-  };
-  goMain = '' 
-    function goMain -d "Switch to main branch"
+  goMain = {
+    body = '' 
       git checkout main
       git pull
-    end      
-  '';  
+    '';  
+    description = "Switch to main branch and pull changes";
+  };
 
-  goMaster = ''
-    function goMaster -d "Switch to master branch"
+  goMaster = {
+    body = ''
       git checkout master
       git pull
-    end
-  '';
+    '';
+    description = "Switch to master branch and pull changes";
+  };
 
-  goBranch = ''
-    function goBranch -d "Switch to a specific branch"
+  goBranch = {
+    body = ''
       git checkout "$argv"
       git pull
-    end
-  '';
+    '';
+    description = "Switch to specified branch and pull changes";
+  };
 
-  commt = ''
-    function commt -d "Run a full commit, stagin files, do the commit message and push"
+  stashAndPull = {
+    body = ''
+      git stash
+      git pull
+      git stash pop
+    '';
+    description = "Stash changes and pull latest";
+  };
+
+  commt = {
+    body = ''
       git add .
       git commit -m "$argv"
       git push
-    end
-  '';
+    '';
+    description = "Add all changes, commit with message and push";
+  };
 
-  ytd = '' 
-    function ytd
+  ytd = {
+    body = '' 
       yt-dlp -f bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best -o '%(upload_date)s - %(channel)s - %(id)s - %(title)s.%(ext)s' \
       --sponsorblock-mark "all" \
       --geo-bypass \
@@ -48,6 +51,7 @@
       --embed-metadata \
       --convert-subs 'srt' \
       $argv
-    end
-  '';
+    '';
+    description = "Download YouTube videos with optimal settings";
+  };
 }
