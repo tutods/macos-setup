@@ -27,6 +27,9 @@
 
       # Set directory preview command for fzf
       set fzf_preview_dir_cmd eza --all --color=always
+
+      # FNM
+      fnm env --use-on-cd --shell fish --corepack-enabled | source
     '';
   };
 }
