@@ -34,5 +34,4 @@
   "kap"
   # "time-out"
   # "shottr"
-  "synology-drive"
 ]

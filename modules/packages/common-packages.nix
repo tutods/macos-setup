@@ -13,6 +13,10 @@
     doppler
     speedtest-cli
 
+    # JetBrains development tools
+    jetbrains.idea-ultimate
+    jetbrains.datagrip
+
     # Image optimization tools
     imagemagick
     jpegoptim
