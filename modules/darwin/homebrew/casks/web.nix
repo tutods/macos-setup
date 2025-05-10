@@ -2,7 +2,7 @@
   # Web
   "arc"
   "firefox"
-  "zen-browser"
+  "zen"
   "google-chrome"
   "brave-browser"
   "qbittorrent"
