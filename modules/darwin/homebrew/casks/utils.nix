@@ -34,4 +34,5 @@
   "kap"
   # "time-out"
   # "shottr"
+  "balenaetcher"
 ]

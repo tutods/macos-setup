@@ -10,4 +10,5 @@
   "telegram"
   "whatsapp"
   "slack"
+  "tempbox"
 ]
