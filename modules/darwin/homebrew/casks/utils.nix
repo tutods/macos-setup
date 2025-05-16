@@ -35,4 +35,5 @@
   # "time-out"
   # "shottr"
   "balenaetcher"
+  "numi"
 ]
