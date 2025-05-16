@@ -13,6 +13,9 @@
     doppler
     speedtest-cli
 
+    # DevOps
+    terraform
+
     # JetBrains development tools
     jetbrains.idea-ultimate
     jetbrains.datagrip
