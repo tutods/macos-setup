@@ -18,4 +18,5 @@
   "Tailscale" = 1475387142;
   # "Passepartout" = 1433648537;
   # "Twingate" = 1501592214;
+  "Wireguard" = 1451685025;
 }
