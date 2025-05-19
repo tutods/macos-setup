@@ -4,6 +4,9 @@
     ./dock.nix
   ];
 
+  # Primary user
+  system.primaryUser = "tutods";
+
   # Host-specific configuration
   networking.hostName = "tutods-macbook";
 
