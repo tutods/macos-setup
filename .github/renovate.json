@@ -2,7 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    "schedule:daily",
     "schedule:automergeDaily",
     ":automergeStableNonMajor",
     ":automergePr",
@@ -12,6 +11,7 @@
     ":semanticCommits",
     ":renovatePrefix"
   ],
+  "schedule": ["at 10:00am"],
   "lockFileMaintenance": {
     "enabled": true,
     "extends": ["schedule:weekly"]
