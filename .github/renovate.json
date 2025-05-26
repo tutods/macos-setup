@@ -11,6 +11,7 @@
     ":semanticCommits",
     ":renovatePrefix"
   ],
+  "timezone": "Europe/Lisbon",
   "schedule": ["* 0-3 * * *"],
   "lockFileMaintenance": {
     "enabled": true,
