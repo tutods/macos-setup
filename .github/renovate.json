@@ -11,7 +11,7 @@
     ":semanticCommits",
     ":renovatePrefix"
   ],
-  "schedule": ["at 10:00am"],
+  "schedule": ["* 0-3 * * *"],
   "lockFileMaintenance": {
     "enabled": true,
     "extends": ["schedule:weekly"]
