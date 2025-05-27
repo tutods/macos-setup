@@ -17,7 +17,7 @@
     terraform
 
     # JetBrains development tools
-    jetbrains.idea-ultimate
+    jetbrains.webstorm
     jetbrains.datagrip
 
     # Image optimization tools
