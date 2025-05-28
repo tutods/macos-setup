@@ -18,6 +18,7 @@
 
     # JetBrains development tools
     jetbrains.webstorm
+    jetbrains.idea-ultimate
     jetbrains.datagrip
 
     # Image optimization tools

@@ -3,7 +3,6 @@
   "cursor"
   "windsurf"
   "trae"
-  "zed"
   "visual-studio-code"
   "hyper"
   "warp"
