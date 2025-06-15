@@ -10,4 +10,5 @@
   "bruno"
   "httpie"
   "insomnia"
+  "beekeeper-studio"
 ]
