@@ -18,6 +18,7 @@ in
     brews = [
       "mas"
       "webp"
+      "qpdf"
     ];
     casks = developmentCasks ++ utilsCasks ++ webCasks;
     masApps = import ./mas.nix;
