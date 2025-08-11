@@ -4,10 +4,10 @@ let
 in
 {
   imports = [
-    ./homebrew
-    ./settings.nix
     ./security.nix
+    ./settings.nix
     ./networking.nix
+    ./homebrew
   ];
 
   system.keyboard = {

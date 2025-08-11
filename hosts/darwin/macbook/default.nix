@@ -10,14 +10,15 @@
   # Host-specific configuration
   networking.hostName = "tutods-macbook";
 
+  # Add Fish to /etc/shells
+  environment.shells = [ pkgs.fish ];
+
   # User configuration
   users.users.tutods = {
     shell = pkgs.fish; # Set Fish as default shell
     ignoreShellProgramCheck = true;
   }; # Most config in home-manager
   
-  # Add Fish to /etc/shells
-  environment.shells = [ pkgs.fish ];
   
   # Home Manager configuration
   home-manager = {

@@ -13,6 +13,9 @@
     doppler
     speedtest-cli
 
+    # Development
+    vscode
+
     # DevOps
     terraform
 
