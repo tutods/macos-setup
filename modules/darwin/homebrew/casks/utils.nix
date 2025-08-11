@@ -36,4 +36,5 @@
   # "shottr"
   "balenaetcher"
   "numi"
+  "surfshark"
 ]
