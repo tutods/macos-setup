@@ -19,6 +19,7 @@ in
       "mas"
       "webp"
       "qpdf"
+      "smartmontools"
     ];
     casks = developmentCasks ++ utilsCasks ++ webCasks;
     masApps = import ./mas.nix;

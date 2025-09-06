@@ -105,8 +105,10 @@
         "**/.git": true,
         ".vscode": true
     },
+    "workbench.iconTheme": "symbols",
     "update.mode": "manual",
     "terminal.integrated.gpuAcceleration": "off",
+    "terminal.integrated.defaultProfile.osx": "fish",
     "window.commandCenter": true,
     "git.openRepositoryInParentFolders": "always",
     "symbols.hidesExplorerArrows": false,
@@ -229,6 +231,9 @@
     "typescript.suggest.jsdoc.generateReturns": true,
     "javascript.suggest.completeJSDocs": true,
     "typescript.suggest.completeJSDocs": true,
+    "yaml.schemas": {
+        "file:///Users/danielsousa/.vscode/extensions/atlassian.atlascode-3.0.10/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml"
+    },
     "versionlens.suggestions.showOnStartup": true,
     "extensions.autoUpdate": "onlyEnabledExtensions",
     "terminal.integrated.cursorStyle": "line",
@@ -242,6 +247,7 @@
         "**/dist": true,
         "**/coverage": true
     },
+    "workbench.colorTheme": "Catppuccin Mocha",
     "javascript.preferences.renameMatchingJsxTags": true,
     "typescript.preferences.renameMatchingJsxTags": true,
     "[json]": {
@@ -249,13 +255,22 @@
     },
     "editor.linkedEditing": true,
     "git.autofetch": true,
-    "workbench.colorTheme": "Catppuccin Mocha",
-    "workbench.iconTheme": "catppuccin-mocha",
-    "sync.gist": "791cae575e0e68a015e6f079bf93cf87",
-    "sync.autoUpload": true,
-    "sync.quietSync": true,
-    "sync.syncExtensions": true,
-    "sync.autoDownload": true,
-    "terminal.integrated.defaultProfile.osx": "zsh",
-    "typescript.preferences.useAliasesForRenames": false
+    "typescript.preferences.useAliasesForRenames": false,
+    "[css]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "tailwindCSS.classFunctions": [
+        "cva",
+        "cn",
+        "cx",
+        "twMerge",
+        "tv"
+    ],
+    "[mdx]": {
+        "editor.defaultFormatter": "unifiedjs.vscode-mdx"
+    },
+    "biome.suggestInstallingGlobally": false
 }

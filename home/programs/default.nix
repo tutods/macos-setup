@@ -1,7 +1,7 @@
 {
   imports = [
     # Apps
-    #./apps/vscode
+    ./apps/vscode
     # CLI tools
     ./cli/bat.nix
     ./cli/git.nix

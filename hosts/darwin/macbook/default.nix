@@ -25,6 +25,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = { inherit pkgs; };
+    backupFileExtension = "backup";
     users.tutods = import ../../../home/tutods/default.nix;
   };
 

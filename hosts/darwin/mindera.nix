@@ -14,6 +14,7 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
+    backupFileExtension = "backup";
     users."daniel.a.sousa" = import ../../home/daniel.a.sousa/default.nix;
   };
 

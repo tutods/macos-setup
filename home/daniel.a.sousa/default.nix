@@ -22,6 +22,7 @@ in {
     fish
   ];
 
+  # TODO: check
   programs.fish = {
     enable = true;
     shellInit = ''
