@@ -116,3 +116,9 @@ result
 
 # Intellij
 .idea
+
+# Nix secrets
+secrets.nix
+**/secrets.nix
+secrets.fish
+**/secrets.fish

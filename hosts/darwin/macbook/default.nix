@@ -19,7 +19,6 @@
     ignoreShellProgramCheck = true;
   }; # Most config in home-manager
   
-  
   # Home Manager configuration
   home-manager = {
     useGlobalPkgs = true;
