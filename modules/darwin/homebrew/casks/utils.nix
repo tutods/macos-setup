@@ -37,4 +37,5 @@
   "balenaetcher"
   "numi"
   "surfshark"
+  "microsoft-teams"
 ]
