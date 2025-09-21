@@ -17,4 +17,5 @@
   # "Passepartout" = 1433648537;
   # "Twingate" = 1501592214;
   "Wireguard" = 1451685025;
+  "Velja" = 1607635845;
 }
