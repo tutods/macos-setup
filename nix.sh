@@ -1,4 +1,5 @@
-# build config
-nix --extra-experimental-features 'nix-command flakes' build ".#darwinConfigurations.$1.system"
+# build config with --rebuild flag to force rebuild
+nix --extra-experimental-features 'nix-command flakes' build ".#darwinConfigurations.$1.system" --rebuild
+
 # apply the config
-nix --extra-experimental-features 'nix-command flakes' run nix-darwin/master#darwin-rebuild -- switch --flake ".#$1"
+sudo nix --extra-experimental-features 'nix-command flakes' run nix-darwin/master#darwin-rebuild -- switch --flake ".#$1"
