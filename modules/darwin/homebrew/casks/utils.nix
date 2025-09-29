@@ -13,30 +13,32 @@
 
   # Notes
   "notion"
-  # "obsidian"
-  
-  # VPNs
-  # "tailscale"
-  # ----
+
+  # Others
   "imageoptim"
   "bitwarden"
   "raycast"
   "airbuddy"
   "iina"
-  # "jordanbaird-ice"
   "bartender"
   "logi-options+"
   "marta"
-  # "vlc"
-  #"balenaetcher"
-  # "raspberry-pi-imager"
-  # "keycastr"
   "keka"
   "kap"
-  # "time-out"
-  # "shottr"
   "balenaetcher"
   "numi"
   "surfshark"
-  "microsoft-teams"
 ]
+  
+# "obsidian"
+
+# VPNs
+# "tailscale"
+# ----
+# "jordanbaird-ice"
+# "vlc"
+#"balenaetcher"
+# "raspberry-pi-imager"
+# "keycastr"
+# "time-out"
+# "shottr"

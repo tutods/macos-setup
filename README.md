@@ -37,3 +37,8 @@ This repository manages multiple macOS devices and users using Nix, nix-darwin, 
 ---
 
 See each file for more details. 
+
+
+````
+nix-collect-garbage -d
+```

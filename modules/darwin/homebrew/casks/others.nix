@@ -1,0 +1,4 @@
+[
+  "microsoft-teams"
+  "zoom"
+]
