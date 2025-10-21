@@ -1,26 +1,37 @@
 { ... }:
 
 {
+  programs.diff-so-fancy = {
+    enable = true;
+    enableGitIntegration = true;
+  };
+  
   programs.git = {
     enable = true;
-    userEmail = "jdaniel.asousa@gmail.com";
-    userName = "Daniel Sousa @TutoDS";
-    diff-so-fancy.enable = true;
-    lfs.enable = true;
-    extraConfig = {
-      init = {
-        defaultBranch = "main";
+
+    settings = {
+      user = {
+        email = "jdaniel.asousa@gmail.com";
+        name = "Daniel Sousa @TutoDS";
       };
-      # merge = {
-      #   conflictStyle = "diff3";
-      #   tool = "meld";
-      # };
-      push = { 
-        autoSetupRemote = true; 
-      };
-      pull = {
-        rebase = true;
+
+      extraConfig = {
+        init = {
+          defaultBranch = "main";
+        };
+        # merge = {
+        #   conflictStyle = "diff3";
+        #   tool = "meld";
+        # };
+        push = {
+          autoSetupRemote = true;
+        };
+        pull = {
+          rebase = true;
+        };
       };
     };
+
+    lfs.enable = true;
   };
 }

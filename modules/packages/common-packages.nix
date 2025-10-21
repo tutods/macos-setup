@@ -35,5 +35,9 @@
     nerd-fonts.jetbrains-mono
     nerd-fonts.fira-code
     nerd-fonts.fira-mono
-  ]; 
+    pkgs.montserrat
+    pkgs.poppins
+    pkgs.roboto
+    pkgs.lato
+  ];
 }
