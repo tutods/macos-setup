@@ -1,5 +1,6 @@
 [
   "applepi-baker"
+  "mounty"
 
   # Meetings
   "microsoft-teams"
