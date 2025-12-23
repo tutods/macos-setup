@@ -9,4 +9,7 @@
   # Fonts
   "font-satisfy"
   "font-josefin-sans"
+
+  # CLI Tools
+  "copilot-cli"
 ]
