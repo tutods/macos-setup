@@ -7,7 +7,7 @@ in
     ./security.nix
     ./settings.nix
     ./networking.nix
-    ./homebrew
+    # ./homebrew # Comment to add different homebrew casks and packages on each host
   ];
 
   system.keyboard = {

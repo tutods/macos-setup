@@ -2,6 +2,7 @@
 {
   imports = [
     ./dock.nix
+    ./homebrew
   ];
 
   # Primary user
