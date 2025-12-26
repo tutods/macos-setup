@@ -9,8 +9,8 @@
           small = false;
         };
       }
-      "/Applications/Safari.app"
       "/Applications/Firefox.app"
+      "/Applications/Safari.app"
       "/Applications/Arc.app"
       "/Applications/Google Chrome.app"
       "/System/Applications/Mail.app"
