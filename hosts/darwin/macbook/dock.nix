@@ -10,8 +10,8 @@
         };
       }
       "/Applications/Safari.app"
+      "/Applications/Firefox.app"
       "/Applications/Arc.app"
-      "/Applications/Zen.app"
       "/Applications/Google Chrome.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Calendar.app"
