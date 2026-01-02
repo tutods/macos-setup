@@ -2,22 +2,67 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    "schedule:automergeDaily",
-    ":automergeStableNonMajor",
-    ":automergePr",
-    ":rebaseStalePrs",
-    ":combinePatchMinorReleases",
-    ":configMigration",
+    ":dependencyDashboard",
     ":semanticCommits",
     ":renovatePrefix"
   ],
   "timezone": "Europe/Lisbon",
-  "schedule": ["* 0-3 * * *"],
+  "schedule": ["after 11pm and before 6am every weekday", "every weekend"],
+  "labels": ["dependencies", "automated"],
+  "assignAutomerge": false,
   "lockFileMaintenance": {
     "enabled": true,
-    "extends": ["schedule:weekly"]
+    "schedule": ["before 6am on Monday"]
   },
   "nix": {
     "enabled": true
-  }
+  },
+  "packageRules": [
+    {
+      "description": "Automerge non-major Nix flake updates",
+      "matchDatasources": ["nix-flake"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group all Nix flake updates together",
+      "matchDatasources": ["nix-flake"],
+      "groupName": "nix flake inputs",
+      "schedule": ["after 11pm and before 6am every weekday"]
+    },
+    {
+      "description": "Require manual approval for major updates",
+      "matchDatasources": ["nix-flake"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["major-update", "requires-review"]
+    },
+    {
+      "description": "Separate nixpkgs updates for visibility",
+      "matchDatasources": ["nix-flake"],
+      "matchPackageNames": ["NixOS/nixpkgs"],
+      "groupName": "nixpkgs",
+      "additionalBranchPrefix": "nixpkgs-",
+      "commitMessagePrefix": "nix(nixpkgs):",
+      "semanticCommitType": "build",
+      "schedule": ["after 11pm and before 6am every weekday"]
+    },
+    {
+      "description": "Group home-manager, nix-darwin and nix-homebrew together",
+      "matchDatasources": ["nix-flake"],
+      "matchPackageNames": [
+        "nix-community/home-manager",
+        "nix-darwin/nix-darwin",
+        "zhaofengli/nix-homebrew"
+      ],
+      "groupName": "nix system modules",
+      "additionalBranchPrefix": "nix-modules-",
+      "commitMessagePrefix": "nix(modules):"
+    }
+  ],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 0,
+  "rebaseWhen": "conflicted"
 }
