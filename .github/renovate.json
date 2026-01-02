@@ -7,12 +7,21 @@
     ":renovatePrefix"
   ],
   "timezone": "Europe/Lisbon",
-  "schedule": ["after 11pm and before 6am every weekday", "every weekend"],
-  "labels": ["🔄 dependencies", "🤖 automated"],
+  "schedule": [
+    "after 11pm every weekday",
+    "every weekend",
+    "before 6am every weekday"
+  ],
+  "labels": [
+    "🔄 dependencies",
+    "🤖 automated"
+  ],
   "assignAutomerge": false,
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on Monday"]
+    "schedule": [
+      "before 6am on Monday"
+    ]
   },
   "nix": {
     "enabled": true
@@ -20,41 +29,80 @@
   "packageRules": [
     {
       "description": "✨ Automerge non-major Nix flake updates",
-      "matchDatasources": ["nix-flake"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchDatasources": [
+        "nix-flake"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true,
-      "labels": ["✨ automerge", "❄️ nix"]
+      "labels": [
+        "✨ automerge",
+        "❄️ nix"
+      ]
     },
     {
       "description": "📦 Group all Nix flake updates together",
-      "matchDatasources": ["nix-flake"],
+      "matchDatasources": [
+        "nix-flake"
+      ],
       "groupName": "❄️ nix flake inputs",
-      "schedule": ["after 11pm and before 6am every weekday"],
-      "labels": ["❄️ nix", "📦 flakes"]
+      "schedule": [
+        "after 11pm every weekday",
+        "before 6am every weekday"
+      ],
+      "labels": [
+        "❄️ nix",
+        "📦 flakes"
+      ]
     },
     {
       "description": "⚠️ Require manual approval for major updates",
-      "matchDatasources": ["nix-flake"],
-      "matchUpdateTypes": ["major"],
+      "matchDatasources": [
+        "nix-flake"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false,
-      "labels": ["⚠️ major-update", "👀 requires-review", "❄️ nix"]
+      "labels": [
+        "⚠️ major-update",
+        "👀 requires-review",
+        "❄️ nix"
+      ]
     },
     {
       "description": "📌 Separate nixpkgs updates for visibility",
-      "matchDatasources": ["nix-flake"],
-      "matchPackageNames": ["NixOS/nixpkgs"],
+      "matchDatasources": [
+        "nix-flake"
+      ],
+      "matchPackageNames": [
+        "NixOS/nixpkgs"
+      ],
       "groupName": "📦 nixpkgs",
       "additionalBranchPrefix": "nixpkgs-",
       "commitMessagePrefix": "nix(nixpkgs):",
       "semanticCommitType": "build",
-      "schedule": ["after 11pm and before 6am every weekday"],
-      "labels": ["📦 nixpkgs", "❄️ nix", "🏗️ build"]
+      "schedule": [
+        "after 11pm every weekday",
+        "before 6am every weekday"
+      ],
+      "labels": [
+        "📦 nixpkgs",
+        "❄️ nix",
+        "🏗️ build"
+      ]
     },
     {
       "description": "🏠 Group home-manager, nix-darwin and nix-homebrew together",
-      "matchDatasources": ["nix-flake"],
+      "matchDatasources": [
+        "nix-flake"
+      ],
       "matchPackageNames": [
         "nix-community/home-manager",
         "nix-darwin/nix-darwin",
@@ -63,7 +111,11 @@
       "groupName": "🏠 nix system modules",
       "additionalBranchPrefix": "nix-modules-",
       "commitMessagePrefix": "nix(modules):",
-      "labels": ["🏠 system", "❄️ nix", "🔧 config"]
+      "labels": [
+        "🏠 system",
+        "❄️ nix",
+        "🔧 config"
+      ]
     }
   ],
   "prConcurrentLimit": 3,
