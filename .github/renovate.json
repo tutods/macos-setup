@@ -121,7 +121,7 @@
   "prConcurrentLimit": 3,
   "prHourlyLimit": 0,
   "rebaseWhen": "conflicted",
-  "commitMessagePrefix": "🔄",
+  "commitMessagePrefix": "🔄 deps:",
   "commitMessageAction": "update",
   "commitMessageTopic": "{{depName}}",
   "prTitle": "{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{#if isSingleVersion}}to {{newVersion}}{{/if}}",
