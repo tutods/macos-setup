@@ -29,7 +29,7 @@
         FXDefaultSearchScope = "SCcf";
         FXEnableExtensionChangeWarning = false;
       };
-    
+
       loginwindow = {
         GuestEnabled = false;
       };
@@ -58,7 +58,7 @@
         NSDocumentSaveNewDocumentsToCloud = false;
         "com.apple.mouse.tapBehavior" = 1;
 
-        # TODO: test 
+        # TODO: test
         # NSAutomaticCapitalizationEnabled = false;
         # NSAutomaticDashSubstitutionEnabled = false;
         # NSAutomaticPeriodSubstitutionEnabled = false;

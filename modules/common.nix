@@ -2,7 +2,7 @@
 {
   # Allow unfree packages (like VSCode)
   nixpkgs.config.allowUnfree = true;
-  
+
   # Import shared modules
   imports = [
     ./packages/common-packages.nix
@@ -24,7 +24,7 @@
       warn-dirty = false;
     };
   };
-  
+
   # Nix store optimization
   nix.optimise.automatic = true;
 }

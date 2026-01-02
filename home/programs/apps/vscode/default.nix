@@ -13,7 +13,7 @@
         vscode-extensions.aaron-bond.better-comments
         vscode-extensions.adpyke.codesnap
         vscode-extensions.alefragnani.project-manager
-        vscode-extensions.bierner.color-info
+#        vscode-extensions.bierner.color-info
         vscode-extensions.biomejs.biome
         vscode-extensions.bradlc.vscode-tailwindcss
         vscode-extensions.catppuccin.catppuccin-vsc

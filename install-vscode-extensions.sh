@@ -17,3 +17,4 @@ code --install-extension swiftlydaniel.oklch-color-visualiser
 code --install-extension wallabyjs.console-ninja
 code --install-extension yutengjing.vscode-classic-experience
 code --install-extension zignd.html-css-class-completion
+code --install-extension bierner.color-info
