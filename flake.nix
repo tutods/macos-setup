@@ -52,7 +52,7 @@
         ];
 
         specialArgs = {
-          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew;
+          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew ghostty;
         };
       };
     in {
