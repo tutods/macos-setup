@@ -10,6 +10,6 @@
     # Shell
     ./shell/fish
     # Terminal
-    ./apps/terminal/ghostty.nix
+    ./apps/terminal/ghostty
   ];
 }

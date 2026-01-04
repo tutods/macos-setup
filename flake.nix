@@ -16,13 +16,9 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-    };
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ghostty, ... }:
+  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
     let
       system = "aarch64-darwin";
       pkgs = import nixpkgs {
@@ -53,7 +49,7 @@
         ];
 
         specialArgs = {
-          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew ghostty;
+          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew;
         };
       };
     in {

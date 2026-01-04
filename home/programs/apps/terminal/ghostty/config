@@ -1,0 +1,24 @@
+# Window settings
+window-inherit-working-directory = true
+window-theme = dark
+window-save-state = always
+
+# Theme
+theme = catppuccin-mocha
+
+# Mouse settings
+#mouse-hide-while-typing = true
+#copy-on-select = true
+
+# Font and cursor settings
+font-family = "JetBrainsMonoNL Nerd Font"
+font-size = 14
+cursor-style = block
+
+shell-integration-features = no-cursor,sudo,no-title
+adjust-cell-height = 35%
+macos-titlebar-style=tabs
+
+# Window padding
+window-padding-x = 16
+window-padding-y = 16
