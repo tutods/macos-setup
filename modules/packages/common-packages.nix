@@ -13,6 +13,9 @@
     doppler
     speedtest-cli
 
+    # Terminal
+    ghostty
+
     # Development
     vscode
 

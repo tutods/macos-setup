@@ -12,7 +12,4 @@
 
   # CLI Tools
   "copilot-cli"
-
-  # Terminal
-  "ghostty"
 ]
