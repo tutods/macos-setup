@@ -14,5 +14,5 @@
   "copilot-cli"
 
   # Terminal
-  # "ghostty"
+  "ghostty"
 ]
