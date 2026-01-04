@@ -1,35 +1,35 @@
 { pkgs, nixpkgs, ghostty, ... }:
 {
 
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = [
     ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-    yt-dlp
-    gh
-    mkalias
-    bat
-    fnm
-    oh-my-posh
-    duf
-    fd
-    doppler
-    speedtest-cli
+    pkgs.yt-dlp
+    pkgs.gh
+    pkgs.mkalias
+    pkgs.bat
+    pkgs.fnm
+    pkgs.oh-my-posh
+    pkgs.duf
+    pkgs.fd
+    pkgs.doppler
+    pkgs.speedtest-cli
 
     # Development
-    vscode
+    pkgs.vscode
 
     # DevOps
-    terraform
+    pkgs.terraform
 
     # JetBrains development tools
-    jetbrains.webstorm
-    jetbrains.datagrip
+    pkgs.jetbrains.webstorm
+    pkgs.jetbrains.datagrip
 
     # Image optimization tools
-    imagemagick
-    jpegoptim
-    optipng
-    ffmpeg
+    pkgs.imagemagick
+    pkgs.jpegoptim
+    pkgs.optipng
+    pkgs.ffmpeg
   ];
 
   fonts.packages = with pkgs; [
