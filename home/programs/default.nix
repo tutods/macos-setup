@@ -9,5 +9,7 @@
     ./cli/oh-my-posh
     # Shell
     ./shell/fish
+    # Terminal
+    ./apps/terminal/ghostty.nix
   ];
 }
