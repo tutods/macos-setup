@@ -2,6 +2,7 @@
 {
   # Allow unfree packages (like VSCode)
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowBroken = true;
 
   # Import shared modules
   imports = [
