@@ -12,11 +12,17 @@
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
 
     # Home manager
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
+    };
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
+  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ghostty, ... }:
     let
       system = "aarch64-darwin";
       pkgs = import nixpkgs {

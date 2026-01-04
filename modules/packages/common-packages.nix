@@ -1,7 +1,9 @@
-{ pkgs, nixpkgs, ... }:
+{ pkgs, nixpkgs, ghostty, ... }:
 {
 
   environment.systemPackages = with pkgs; [
+    ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
+
     yt-dlp
     gh
     mkalias
@@ -12,9 +14,6 @@
     fd
     doppler
     speedtest-cli
-
-    # Terminal
-    ghostty
 
     # Development
     vscode
