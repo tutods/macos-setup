@@ -1,6 +1,6 @@
 {
   programs.ghostty = {
-    enable = true;
+    enable = false; # Disabled due to broken build in nixpkgs, using Homebrew instead
     enableFishIntegration = true;
     installBatSyntax = true;
 
