@@ -24,7 +24,7 @@
       "/Applications/Windsurf.app"
       "/Applications/Zed.app"
       "/Applications/Nix Apps/Visual Studio Code.app"
-      "/Applications/Hyper.app"
+      "/Applications/Ghostty.app"
       {
         spacer = {
           small = false;
