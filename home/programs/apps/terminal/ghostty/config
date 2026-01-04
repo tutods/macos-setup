@@ -22,3 +22,7 @@ macos-titlebar-style=tabs
 # Window padding
 window-padding-x = 16
 window-padding-y = 16
+
+# Key bindings
+keybind = cmd+f=search:Ghostty
+keybind = shift+cmd+f=search:
