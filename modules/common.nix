@@ -6,7 +6,6 @@
   # Import shared modules
   imports = [
     ./packages/common-packages.nix
-    ./darwin
   ];
 
   # Common system configuration

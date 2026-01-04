@@ -36,6 +36,7 @@
       darwinCommonModules = [
         # Base darwin configuration
         ./modules/common.nix
+        ./modules/darwin
 
         # Home-manager module
         home-manager.darwinModules.home-manager
@@ -58,9 +59,7 @@
     in {
       darwinConfigurations = {
         "macbook" = mkDarwin "./hosts/darwin/macbook";
-        "mindera" = mkDarwin "./hosts/darwin/mindera.nix";
-        # "mac-mini" = mkDarwin "./hosts/darwin/mac-mini.nix";
+        "mindera" = mkDarwin "./hosts/darwin/mindera.nix";´
       };
-      # Optionally, homeConfigurations for non-darwin systems
     };
 }
