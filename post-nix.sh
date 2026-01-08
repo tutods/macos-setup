@@ -7,6 +7,3 @@ echo "↣ Copy Hyper terminal config"
 cp -r data/hyper.js $HOME/.hyper.js
 
 sh ./install-vscode-extensions.sh
-
-#code --install-extension wallabyjs.console-ninjarors
-#code --install-extension maximus136.change-string-case
