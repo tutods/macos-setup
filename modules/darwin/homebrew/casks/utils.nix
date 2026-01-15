@@ -6,7 +6,7 @@
   "stats"
   "onyx"
   "pearcleaner"
-  
+
   # Remote control
   "teamviewer"
   "anydesk"
@@ -28,8 +28,9 @@
   "balenaetcher"
   "numi"
   "surfshark"
+  "1password"
 ]
-  
+
 # "obsidian"
 
 # VPNs

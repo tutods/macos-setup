@@ -2,6 +2,7 @@
   # Developer tools
   "cursor"
   "windsurf"
+  "trae"
   "zed"
   "trae"
   "hyper"
