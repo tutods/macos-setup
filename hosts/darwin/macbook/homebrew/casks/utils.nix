@@ -27,7 +27,6 @@
   "balenaetcher"
   "numi"
   "surfshark"
-  "jordanbaird-ice"
 ]
 
 # "obsidian"
