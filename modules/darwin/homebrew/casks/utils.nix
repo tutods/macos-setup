@@ -20,7 +20,6 @@
   "raycast"
   "airbuddy"
   "iina"
-  "bartender"
   "logi-options+"
   "marta"
   "keka"
@@ -28,7 +27,7 @@
   "balenaetcher"
   "numi"
   "surfshark"
-  "1password"
+  "jordanbaird-ice"
 ]
 
 # "obsidian"

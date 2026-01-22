@@ -6,7 +6,7 @@
   "stats"
   "onyx"
   "pearcleaner"
-  
+
   # Remote control
   "teamviewer"
   "anydesk"
@@ -20,7 +20,6 @@
   "raycast"
   "airbuddy"
   "iina"
-  "bartender"
   "logi-options+"
   "marta"
   "keka"
@@ -28,8 +27,9 @@
   "balenaetcher"
   "numi"
   "surfshark"
+  "jordanbaird-ice"
 ]
-  
+
 # "obsidian"
 
 # VPNs
