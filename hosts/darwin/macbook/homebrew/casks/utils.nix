@@ -27,6 +27,7 @@
   "balenaetcher"
   "numi"
   "surfshark"
+  "1password"
 ]
 
 # "obsidian"
