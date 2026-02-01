@@ -18,7 +18,7 @@
   # "Twingate" = 1501592214;
   "Wireguard" = 1451685025;
   "Velja" = 1607635845;
-  "1Password" = 1333542190;
+  # "1Password" = 1333542190; # Version 7 - app store don't have version 8 available
   "1Password-Safari" = 1569813296;
   "Hidden Bar" = 1452453066;
 }
