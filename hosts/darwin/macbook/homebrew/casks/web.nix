@@ -9,6 +9,5 @@
   "discord"
   "telegram"
   "whatsapp"
-  "slack"
   "tempbox"
 ]
