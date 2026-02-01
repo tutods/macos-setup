@@ -21,9 +21,9 @@
         };
       }
       "/Applications/Cursor.app"
-      "/Applications/Windsurf.app"
       "/Applications/Zed.app"
       "/Applications/Nix Apps/Visual Studio Code.app"
+      "/Applications/Trae.app"
       "/Applications/Ghostty.app"
       {
         spacer = {
