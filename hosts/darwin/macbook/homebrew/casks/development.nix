@@ -1,6 +1,7 @@
 [
   # Developer tools
   "cursor"
+  "windsurf"
   "zed"
   "trae"
   "hyper"
