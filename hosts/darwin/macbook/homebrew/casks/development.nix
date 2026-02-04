@@ -2,6 +2,7 @@
   # Developer tools
   "cursor"
   "windsurf"
+  "antigravity"
   "zed"
   "trae"
   "hyper"
