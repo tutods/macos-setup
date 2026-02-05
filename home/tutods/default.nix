@@ -1,6 +1,6 @@
 { pkgs, lib, ... }:
 
-let 
+let
   homeDirectory = "/Users/tutods";
 in {
   home.username = "tutods";
@@ -19,6 +19,7 @@ in {
 
   imports = [
     ../programs
+    ./cli/git.nix
   ];
 
   # Add your home-manager options here
@@ -31,4 +32,4 @@ in {
   # To set fish as your default shell in macOS, you need to:
   # 1. Add fish to /etc/shells
   # 2. Run chsh -s /run/current-system/sw/bin/fish
-} 
+}

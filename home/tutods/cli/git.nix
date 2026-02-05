@@ -19,10 +19,6 @@
         init = {
           defaultBranch = "main";
         };
-        # merge = {
-        #   conflictStyle = "diff3";
-        #   tool = "meld";
-        # };
         push = {
           autoSetupRemote = true;
         };
