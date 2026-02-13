@@ -38,7 +38,7 @@ show_usage() {
     echo ""
     echo "Configurations:"
     echo "  macbook    - Personal MacBook configuration"
-    echo "  mindera    - Mindera work laptop configuration"
+    echo "  work       - Work laptop configuration"
     echo ""
     echo "Options:"
     echo "  --build-only    Build configuration without applying"
@@ -48,7 +48,7 @@ show_usage() {
     echo "Examples:"
     echo "  $0 macbook"
     echo "  $0 macbook --build-only"
-    echo "  $0 mindera --force"
+    echo "  $0 work --force"
     exit 0
 }
 
@@ -63,9 +63,9 @@ check_directory() {
 # Validate configuration exists
 validate_config() {
     local config="$1"
-    if [[ ! "$config" =~ ^(macbook|mindera)$ ]]; then
+    if [[ ! "$config" =~ ^(macbook|work)$ ]]; then
         print_error "Invalid configuration: $config"
-        echo "Available configurations: macbook, mindera"
+        echo "Available configurations: macbook, work"
         exit 1
     fi
 }

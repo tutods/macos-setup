@@ -54,7 +54,7 @@
     in {
       darwinConfigurations = {
         "macbook" = mkDarwin "./hosts/darwin/macbook";
-        "mindera" = mkDarwin "./hosts/darwin/mindera.nix";
+        "work" = mkDarwin "./hosts/darwin/work.nix";
       };
     };
 }

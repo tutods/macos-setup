@@ -26,7 +26,7 @@
     useUserPackages = true;
     extraSpecialArgs = { inherit pkgs; };
     backupFileExtension = "backup";
-    users.tutods = import ../../../home/daniel.a.sousa/default.nix;
+    users.daniel.a.sousa = import ../../../home/daniel.a.sousa/default.nix;
   };
 
   programs.fish = {
