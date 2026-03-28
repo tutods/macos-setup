@@ -5,16 +5,13 @@
     yt-dlp
     gh
     mkalias
-    bat
     fnm
-    oh-my-posh
     duf
     fd
     doppler
     speedtest-cli
 
     # Development
-    vscode
     claude-code
 
     # DevOps

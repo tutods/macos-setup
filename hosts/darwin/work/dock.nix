@@ -18,7 +18,7 @@
         };
       }
       "/Applications/Zed.app"
-      "/nix/store/li9dhpm0q947dkmy06dn9ln5hfflsiqm-system-applications/Applications/Visual Studio Code.app"
+      "/Applications/Nix Apps/Visual Studio Code.app"
       "/Applications/Hyper.app"
       {
         spacer = {

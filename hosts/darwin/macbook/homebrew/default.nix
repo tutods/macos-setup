@@ -8,18 +8,7 @@ let
 in
 {
   homebrew = {
-    enable = true;
-    onActivation = {
-      cleanup = "uninstall";
-      autoUpdate = true;
-      upgrade = true;
-    };
-    global.autoUpdate = true;
-
     brews = [
-      "mas"
-      "webp"
-      "qpdf"
       "smartmontools"
     ];
     casks = developmentCasks ++ utilsCasks ++ webCasks ++ othersCasks;

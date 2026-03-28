@@ -1,12 +1,4 @@
 [
-  # Design
-  "figma"
-
-  # Tools
-  "stats"
-  "onyx"
-  "pearcleaner"
-
   # Remote control
   "teamviewer"
   "anydesk"
@@ -16,29 +8,11 @@
 
   # Others
   "imageoptim"
-  "bitwarden"
-  "raycast"
   "airbuddy"
-  "iina"
-  "logi-options+"
   "marta"
   "keka"
-  "kap"
   "balenaetcher"
-  "numi"
   "surfshark"
   "1password"
+  "jordanbaird-ice"
 ]
-
-# "obsidian"
-
-# VPNs
-# "tailscale"
-# ----
-# "jordanbaird-ice"
-# "vlc"
-#"balenaetcher"
-# "raspberry-pi-imager"
-# "keycastr"
-# "time-out"
-# "shottr"

@@ -3,6 +3,7 @@
 {
   imports = [
     ./extra.nix
+    ./completions.nix
   ];
 
   programs.fish = {
