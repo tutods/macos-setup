@@ -15,6 +15,7 @@
 
     # Development
     vscode
+    claude-code
 
     # DevOps
     terraform
