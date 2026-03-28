@@ -47,7 +47,7 @@ This builds and applies the full system configuration via `darwin-rebuild switch
 ./post-nix.sh
 ```
 
-This sets fish as the login shell and copies the Hyper terminal config.
+This sets fish as the login shell and installs VSCode extensions not available in nixpkgs.
 
 ### 5. Set up private git identity
 

@@ -19,7 +19,7 @@
       }
       "/Applications/Zed.app"
       "/Applications/Nix Apps/Visual Studio Code.app"
-      "/Applications/Hyper.app"
+      "/Applications/Warp.app"
       {
         spacer = {
           small = false;
