@@ -10,7 +10,7 @@
     shellAliases = import ./alias.nix;
     shellAbbrs = import ./abbrs.nix;
     functions = import ./functions.nix;
-    
+
     # Set environment variables for all fish shells (including non-interactive)
     shellInit = ''
       if test -f ~/.config/fish/secrets.fish
@@ -37,6 +37,8 @@
 
       # FNM
       fnm env --use-on-cd --shell fish --corepack-enabled | source
+
+      export PATH="$HOME/.local/bin:$PATH"
     '';
   };
 }
