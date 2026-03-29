@@ -9,9 +9,7 @@ let
 in
 {
   homebrew = {
-    brews = [
-      "smartmontools"
-    ];
+    brews = [];
     casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks ++ fontCasks;
     masApps = import ./mas.nix;
   };

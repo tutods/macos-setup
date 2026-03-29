@@ -10,8 +10,12 @@
     doppler
     httpie
     jq
+    mas
+    qpdf
+    smartmontools
     speedtest-cli
     tldr
+    libwebp  # cwebp / dwebp CLI tools
     yt-dlp
   ];
 }

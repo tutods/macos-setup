@@ -16,12 +16,7 @@ in
     };
     global.autoUpdate = true;
 
-    brews = [
-      "mas"
-      "webp"
-      "qpdf"
-      "copilot"
-    ];
+    brews = [];
     casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks;
     masApps = import ./mas.nix;
   };
