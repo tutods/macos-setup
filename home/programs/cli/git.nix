@@ -18,6 +18,7 @@
 
   programs.git = {
     enable = true;
+    signing.format = null;
     includes = [{ path = "~/.config/git/private"; }];
     settings.extraConfig = {
       init.defaultBranch   = "main";

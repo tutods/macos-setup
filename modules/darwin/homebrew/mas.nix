@@ -1,7 +1,7 @@
 {
   "Amphetamine" = 937984704;
   "Magnet" = 441258766;
-  "1Blocker" = 1365531024;
+  # "1Blocker" = 1365531024;  # mas cannot install it — install manually from App Store
   "Baking Soda" = 1601151613;
   "Vinegar" = 1591303229;
   "PasteNow" = 1552536109;
