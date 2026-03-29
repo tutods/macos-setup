@@ -34,7 +34,6 @@
         vscode-extensions.mvllow.rose-pine
         vscode-extensions.redhat.vscode-yaml
         vscode-extensions.streetsidesoftware.code-spell-checker
-        vscode-extensions.streetsidesoftware.code-spell-checker-portuguese
         vscode-extensions.teabyii.ayu
         vscode-extensions.unifiedjs.vscode-mdx
         vscode-extensions.usernamehw.errorlens
