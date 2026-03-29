@@ -7,6 +7,9 @@
   "onyx"
   "pearcleaner"
 
+  # Screen sharing
+  "obs"
+
   # Others
   "bitwarden"
   "raycast"
