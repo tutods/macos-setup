@@ -30,6 +30,17 @@
     ignoreShellProgramCheck = true;
   };
 
+  # Set fish as the default shell via dscl (runs as root, no chsh password prompt).
+  # programs.fish.enable already adds fish to /etc/shells.
+  system.activationScripts.setDefaultShell.text = ''
+    fish=/run/current-system/sw/bin/fish
+    current=$(dscl . -read /Users/${username} UserShell 2>/dev/null | awk '{print $2}')
+    if [ "$current" != "$fish" ]; then
+      echo "Setting default shell for ${username} to fish"
+      dscl . -create /Users/${username} UserShell "$fish"
+    fi
+  '';
+
   home-manager = {
     useGlobalPkgs     = true;
     useUserPackages   = true;

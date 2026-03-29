@@ -37,19 +37,11 @@ cd ~/.dotfiles
 ./nix.sh work      # work laptop
 ```
 
-This builds and applies the full system configuration via `darwin-rebuild switch`.
+This builds and applies the full system configuration via `darwin-rebuild switch`. Fish is set as the default shell, App Store apps and VSCode marketplace extensions are all installed automatically — no post-deploy script needed.
 
 > On the **work laptop**, run `./nix.sh work` from `admin.daniel.a.sousa` — the admin user owns Homebrew. Home Manager still configures `daniel.a.sousa` independently.
 
-### 4. Post-deploy setup
-
-```bash
-./post-nix.sh
-```
-
-Runs as the **logged-in user** (not root). Sets fish as the login shell. App Store apps (`mas`) and VSCode marketplace extensions are installed automatically via `home.activation` during `darwin-rebuild switch`.
-
-### 5. Set up private git identity
+### 4. Set up private git identity
 
 Git name and email are not stored in this repo. Set them on each machine:
 
