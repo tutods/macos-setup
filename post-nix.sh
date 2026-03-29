@@ -25,10 +25,3 @@ else
   echo "  ✓ Default shell set to $FISH_PATH"
 fi
 
-# Install VSCode extensions not available in nixpkgs
-if command -v code &>/dev/null; then
-  echo "↣ Installing VSCode extensions (marketplace only)"
-  sh ./install-vscode-extensions.sh
-else
-  echo "↣ VSCode not found — skipping extension install"
-fi

@@ -47,7 +47,7 @@ This builds and applies the full system configuration via `darwin-rebuild switch
 ./post-nix.sh
 ```
 
-Runs as the **logged-in user** (not root). Sets fish as the login shell, installs App Store apps via `mas`, and installs VSCode marketplace extensions.
+Runs as the **logged-in user** (not root). Sets fish as the login shell. App Store apps (`mas`) and VSCode marketplace extensions are installed automatically via `home.activation` during `darwin-rebuild switch`.
 
 ### 5. Set up private git identity
 
