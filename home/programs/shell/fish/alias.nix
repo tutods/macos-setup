@@ -1,6 +1,5 @@
 {
   # Docker
-  #docker="podman" #-> Remove comment if you are using podman;
   dps="docker ps --format '{{.Names}}'";
   dvunused="docker volume ls -q -f 'dangling=true'";
 

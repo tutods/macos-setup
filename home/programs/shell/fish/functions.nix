@@ -7,14 +7,6 @@
     description = "Switch to main branch and pull changes";
   };
 
-  goMaster = {
-    body = ''
-      git checkout master
-      git pull
-    '';
-    description = "Switch to master branch and pull changes";
-  };
-
   goBranch = {
     body = ''
       git checkout "$argv"

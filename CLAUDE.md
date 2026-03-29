@@ -24,9 +24,6 @@ All commands must be run from the repo root (where `flake.nix` lives).
 # Force rebuild
 ./nix.sh macbook --force
 
-# Post-deploy setup (fish shell default, terminal configs, VSCode extensions)
-./post-nix.sh
-
 # Garbage collect old generations
 nix-collect-garbage -d
 ```

@@ -3,7 +3,6 @@
 {
   system.defaults.dock = {
     persistent-apps = [
-      # "/System/Applications/Launchpad.app"
       {
         spacer = {
           small = false;

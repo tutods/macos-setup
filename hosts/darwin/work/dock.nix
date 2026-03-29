@@ -3,7 +3,6 @@
 {
   system.defaults.dock = {
     persistent-apps = [
-      # "/System/Applications/Launchpad.app"
       {
         spacer = {
           small = false;
@@ -18,7 +17,7 @@
         };
       }
       "/Applications/Zed.app"
-      "/Applications/Nix Apps/Visual Studio Code.app"
+      "/Users/daniel.a.sousa/Applications/Home Manager Apps/Visual Studio Code.app"
       "/Applications/Warp.app"
       {
         spacer = {
