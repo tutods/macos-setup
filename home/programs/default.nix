@@ -14,6 +14,8 @@
     ./shell/fish
     # Terminal
     ./apps/terminal/ghostty
+    # App Store
+    ./mas.nix
   ];
 
   # Ensure ~/Developer exists on every machine
