@@ -4,7 +4,7 @@ Git name and email are sensitive and not committed to this repo. The config uses
 
 ## How it works
 
-Both `home/tutods/cli/git.nix` and `home/daniel.a.sousa/cli/git.nix` declare:
+`home/programs/cli/git.nix` (the shared git module imported by all users via `home/programs/default.nix`) declares:
 
 ```nix
 programs.git.includes = [
@@ -12,7 +12,7 @@ programs.git.includes = [
 ];
 ```
 
-Git merges that file into the effective config at runtime. If the file doesn't exist, Git silently ignores it — no errors on a fresh machine before setup.
+Every user automatically inherits this include — no per-user git config is needed. Git merges that file into the effective config at runtime. If the file doesn't exist, Git silently ignores it — no errors on a fresh machine before setup.
 
 ## Setup on a new machine
 

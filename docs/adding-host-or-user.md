@@ -69,27 +69,24 @@ EOF
 ### 1. Create the home config
 
 ```bash
-mkdir -p home/newuser/cli
+mkdir -p home/newuser
 ```
 
 Create `home/newuser/default.nix`:
 
 ```nix
-{ pkgs, lib, ... }:
+{ lib, ... }:
 
-let
-  homeDirectory = "/Users/newuser";
-in {
+{
   home.username      = "newuser";
-  home.homeDirectory = lib.mkForce homeDirectory;
+  home.homeDirectory = lib.mkForce "/Users/newuser";
   home.stateVersion  = "23.11";
 
-  imports = [
-    ../programs
-    ./cli/git.nix
-  ];
+  imports = [ ../programs ];
 }
 ```
+
+`../programs` already imports the shared git config (`home/programs/cli/git.nix`), so no per-user git file is needed.
 
 ### 2. Update the host's `default.nix`
 
