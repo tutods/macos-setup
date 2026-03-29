@@ -14,7 +14,7 @@
   "notion"
 
   # Others
-  "tailscale"
+  "tailscale-app"
   "imageoptim"
   "airbuddy"
   "marta"

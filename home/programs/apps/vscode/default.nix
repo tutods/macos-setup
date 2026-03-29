@@ -46,14 +46,9 @@
   # Marketplace extensions not available in nixpkgs.
   # code CLI is available since home.activation runs as the logged-in user.
   home.activation.installVscodeExtensions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    code=/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code
+    code=/etc/profiles/per-user/${config.home.username}/bin/code
 
     if [ ! -x "$code" ]; then
-      # fallback to PATH
-      code=code
-    fi
-
-    if ! command -v "$code" &>/dev/null && [ ! -x "$code" ]; then
       echo "↣ VSCode not found — skipping marketplace extension install"
     else
       _code_install() {
