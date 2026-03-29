@@ -11,7 +11,7 @@
   "obs"
 
   # Window management
-  "rectanglepro"
+  "rectangle-pro"
 
   # Others
   "bitwarden"
