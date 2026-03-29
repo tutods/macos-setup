@@ -1,0 +1,4 @@
+[
+  "zen"
+  "brave-browser"
+]

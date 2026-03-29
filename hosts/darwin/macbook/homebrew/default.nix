@@ -1,17 +1,18 @@
 {...}:
 
 let
-  developmentCasks = import ./casks/development.nix;
-  utilsCasks = import ./casks/utils.nix;
-  webCasks = import ./casks/web.nix;
-  othersCasks = import ./casks/others.nix;
+  developmentCasks   = import ./casks/development.nix;
+  browserCasks       = import ./casks/browsers.nix;
+  communicationCasks = import ./casks/communication.nix;
+  utilsCasks         = import ./casks/utils.nix;
+  fontCasks          = import ./casks/fonts.nix;
 in
 {
   homebrew = {
     brews = [
       "smartmontools"
     ];
-    casks = developmentCasks ++ utilsCasks ++ webCasks ++ othersCasks;
+    casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks ++ fontCasks;
     masApps = import ./mas.nix;
   };
 }

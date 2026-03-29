@@ -61,7 +61,7 @@ Applying uses `darwin-rebuild switch --flake ".#<config>"` (local binary if pres
 
 ### Homebrew Casks
 
-Shared casks live in `modules/darwin/homebrew/casks/` (applied to every host). Machine-specific additions go in `hosts/darwin/<name>/homebrew/`. The `macbook` host uses category files (`development.nix`, `utils.nix`, `web.nix`, `others.nix`); the `work` host has a single inline list since it only adds `slack`.
+Shared casks live in `modules/darwin/homebrew/casks/` (applied to every host). Machine-specific additions go in `hosts/darwin/<name>/homebrew/`. Both levels use the same category names: `development.nix`, `browsers.nix`, `communication.nix`, `utils.nix`. Macbook also has `fonts.nix`. The `work` host has a single inline list since it only adds `slack`.
 
 ### Shell Configuration
 

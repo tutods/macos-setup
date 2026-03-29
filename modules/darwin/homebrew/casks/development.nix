@@ -1,7 +1,13 @@
 [
-  # Developer tools
-  "zed"
+  # Terminals
+  "ghostty"
   "warp"
+
+  # Editors & IDEs
+  "zed"
+
+  # Dev tools
   "orbstack"
   "beekeeper-studio"
+  "copilot-cli"
 ]

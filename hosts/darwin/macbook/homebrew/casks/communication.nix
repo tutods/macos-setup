@@ -1,9 +1,10 @@
 [
-  "zen"
-  "brave-browser"
-  "qbittorrent"
+  # Messaging
   "discord"
   "telegram"
   "whatsapp"
   "tempbox"
+
+  # Meetings
+  "microsoft-teams"
 ]

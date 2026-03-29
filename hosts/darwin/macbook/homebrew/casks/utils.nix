@@ -1,4 +1,11 @@
 [
+  # Design
+  "figma"
+
+  # Disk tools
+  "applepi-baker"
+  "mounty"
+
   # Remote control
   "teamviewer"
   "anydesk"
@@ -15,4 +22,5 @@
   "surfshark"
   "1password"
   "jordanbaird-ice"
+  "qbittorrent"
 ]
