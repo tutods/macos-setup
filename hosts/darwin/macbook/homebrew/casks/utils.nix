@@ -13,9 +13,6 @@
   # Notes
   "notion"
 
-  # Window management
-  "rectanglepro"
-
   # Others
   "tailscale"
   "imageoptim"

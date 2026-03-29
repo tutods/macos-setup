@@ -10,6 +10,9 @@
   # Screen sharing
   "obs"
 
+  # Window management
+  "rectanglepro"
+
   # Others
   "bitwarden"
   "raycast"
