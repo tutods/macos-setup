@@ -13,6 +13,10 @@
 
     # Development
     claude-code
+    jq
+    tldr
+    httpie
+    mkcert
 
     # DevOps
     terraform

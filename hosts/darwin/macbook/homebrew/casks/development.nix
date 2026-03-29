@@ -5,4 +5,5 @@
   "antigravity"
   "trae"
   "bruno"
+  "responsively"
 ]
