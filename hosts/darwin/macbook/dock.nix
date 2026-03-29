@@ -32,7 +32,13 @@
       }
     ];
     persistent-others = [
-      "/Users/tutods/Downloads"
+      {
+        path        = "/Users/tutods/Downloads";
+        section     = "others";
+        arrangement = 1; # Sort by Name
+        displayas   = 0; # Display as Stack
+        showas      = 2; # View content as Grid
+      }
       "/Users/tutods/Developer"
     ];
   };

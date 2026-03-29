@@ -1,5 +1,5 @@
 {
-  "Amphetamine" = 937984704;
+  # "Amphetamine" = 937984704;  # mas cannot install during sudo — install manually from App Store
   "Magnet" = 441258766;
   # "1Blocker" = 1365531024;  # mas cannot install it — install manually from App Store
   "Baking Soda" = 1601151613;
