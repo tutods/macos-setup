@@ -23,7 +23,7 @@
       fi
     }
 
-    if command -v "$mas" &>/dev/null; then
+    if [ -x "$mas" ]; then
       echo "↣ App Store apps (macbook)"
       _mas_install "Numbers"               409203825
       _mas_install "Pages"                 409201541

@@ -21,7 +21,7 @@
       fi
     }
 
-    if command -v "$mas" &>/dev/null; then
+    if [ -x "$mas" ]; then
       echo "↣ App Store apps (shared)"
       _mas_install "Magnet"       441258766
       _mas_install "Baking Soda"  1601151613
