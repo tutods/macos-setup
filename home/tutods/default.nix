@@ -32,7 +32,6 @@
       _mas_install "Elmedia Video Player"  1044549675
       _mas_install "SnippetsLab"           1006087419
       _mas_install "Velja"                 1607635845
-      _mas_install "Hidden Bar"            1452453066
       # Amphetamine (937984704) — replaced by `caf` (caffeinate) abbreviation
       # 1Blocker (1365531024) — install manually if desired
       # 1Password-Safari (1569813296) — install after 1Password cask is set up

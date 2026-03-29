@@ -28,7 +28,6 @@
       _mas_install "Vinegar"      1591303229
       _mas_install "PasteNow"     1552536109
       _mas_install "Xnip"         1221250572
-      _mas_install "Tailscale"    1475387142
       _mas_install "Wireguard"    1451685025
     else
       echo "↣ mas not found — skipping App Store installs"

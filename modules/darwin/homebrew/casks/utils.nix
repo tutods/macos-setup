@@ -8,6 +8,7 @@
   "pearcleaner"
 
   # Others
+  "tailscale"
   "bitwarden"
   "raycast"
   "iina"
