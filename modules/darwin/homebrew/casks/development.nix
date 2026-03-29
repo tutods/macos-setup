@@ -1,14 +1,12 @@
 [
-  # Developer tools
-  "cursor"
-  "windsurf"
-  "trae"
-  "zed"
-  "trae"
-  "hyper"
+  # Terminals
+  "ghostty"
   "warp"
+
+  # Editors & IDEs
+  "zed"
+
+  # Dev tools
   "orbstack"
-  "bruno"
-  #"httpie"
   "beekeeper-studio"
 ]

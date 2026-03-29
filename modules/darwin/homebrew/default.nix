@@ -1,10 +1,10 @@
 {...}:
 
 let
-  developmentCasks = import ./casks/development.nix;
-  utilsCasks = import ./casks/utils.nix;
-  webCasks = import ./casks/web.nix;
-  othersCasks = import ./casks/others.nix;
+  developmentCasks  = import ./casks/development.nix;
+  browserCasks      = import ./casks/browsers.nix;
+  communicationCasks = import ./casks/communication.nix;
+  utilsCasks        = import ./casks/utils.nix;
 in
 {
   homebrew = {
@@ -16,13 +16,8 @@ in
     };
     global.autoUpdate = true;
 
-    brews = [
-      "mas"
-      "webp"
-      "qpdf"
-      "smartmontools"
-    ];
-    casks = developmentCasks ++ utilsCasks ++ webCasks ++ othersCasks;
+    brews = [];
+    casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks;
     masApps = import ./mas.nix;
   };
 }

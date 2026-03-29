@@ -1,14 +1,11 @@
 [
-  # Developer tools
+  # AI editors
   "cursor"
   "windsurf"
   "antigravity"
-  "zed"
   "trae"
-  "hyper"
-  "warp"
-  "orbstack"
+
+  # API & dev tools
   "bruno"
-  #"httpie"
-  "beekeeper-studio"
+  "responsively"
 ]

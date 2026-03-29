@@ -5,15 +5,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    
-    
 
     # Homebrew package manager
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -29,34 +27,29 @@
         };
       };
 
-      # Common configuration for all Darwin systems
+      mkHost = import ./lib/mkHost.nix;
+
+      # Common modules applied to every host
       darwinCommonModules = [
-        # Base darwin configuration
         ./modules/common.nix
         ./modules/darwin
-
-        # Home-manager module
         home-manager.darwinModules.home-manager
-
-        # Homebrew module
         nix-homebrew.darwinModules.nix-homebrew
       ];
 
-      mkDarwin = hostFile: nix-darwin.lib.darwinSystem {
+      mkDarwin = hostPath: nix-darwin.lib.darwinSystem {
         inherit system;
         modules = darwinCommonModules ++ [
-          # Host-specific configuration
-          (import (./. + "/${hostFile}"))
+          (import (./. + "/${hostPath}"))
         ];
-
         specialArgs = {
-          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew;
+          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew mkHost;
         };
       };
     in {
       darwinConfigurations = {
         "macbook" = mkDarwin "./hosts/darwin/macbook";
-        "work" = mkDarwin "./hosts/darwin/work.nix";
+        "work"    = mkDarwin "./hosts/darwin/work";
       };
     };
 }

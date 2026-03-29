@@ -2,10 +2,9 @@
   # Design
   "figma"
 
-  # Tools
-  "stats"
-  "onyx"
-  "pearcleaner"
+  # Disk tools
+  "applepi-baker"
+  "mounty"
 
   # Remote control
   "teamviewer"
@@ -15,30 +14,14 @@
   "notion"
 
   # Others
+  "tailscale-app"
   "imageoptim"
-  "bitwarden"
-  "raycast"
   "airbuddy"
-  "iina"
-  "logi-options+"
   "marta"
   "keka"
-  "kap"
   "balenaetcher"
-  "numi"
   "surfshark"
   "1password"
+  "jordanbaird-ice"
+  "qbittorrent"
 ]
-
-# "obsidian"
-
-# VPNs
-# "tailscale"
-# ----
-# "jordanbaird-ice"
-# "vlc"
-#"balenaetcher"
-# "raspberry-pi-imager"
-# "keycastr"
-# "time-out"
-# "shottr"

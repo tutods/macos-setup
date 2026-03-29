@@ -32,13 +32,6 @@
       "labels": ["✨ automerge", "❄️ nix"]
     },
     {
-      "description": "📦 Group all Nix flake updates together",
-      "matchDatasources": ["nix-flake"],
-      "groupName": "❄️ nix flake inputs",
-      "schedule": ["after 11pm every weekday", "before 6am every weekday"],
-      "labels": ["❄️ nix", "📦 flakes"]
-    },
-    {
       "description": "⚠️ Require manual approval for major updates",
       "matchDatasources": ["nix-flake"],
       "matchUpdateTypes": ["major"],
@@ -51,8 +44,8 @@
       "matchPackageNames": ["NixOS/nixpkgs"],
       "groupName": "📦 nixpkgs",
       "additionalBranchPrefix": "nixpkgs-",
-      "commitMessagePrefix": "nix(nixpkgs):",
       "semanticCommitType": "build",
+      "semanticCommitScope": "nixpkgs",
       "schedule": ["after 11pm every weekday", "before 6am every weekday"],
       "labels": ["📦 nixpkgs", "❄️ nix", "🏗️ build"]
     },
@@ -66,14 +59,16 @@
       ],
       "groupName": "🏠 nix system modules",
       "additionalBranchPrefix": "nix-modules-",
-      "commitMessagePrefix": "nix(modules):",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "nix-modules",
       "labels": ["🏠 system", "❄️ nix", "🔧 config"]
     }
   ],
   "prConcurrentLimit": 3,
-  "prHourlyLimit": 0,
+  "prHourlyLimit": 2,
   "rebaseWhen": "conflicted",
-  "commitMessagePrefix": "🔄 deps:",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
   "commitMessageAction": "update",
   "commitMessageTopic": "{{depName}}",
   "commitMessageExtra": "to {{newVersion}}",

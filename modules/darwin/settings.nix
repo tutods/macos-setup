@@ -58,14 +58,13 @@
         NSDocumentSaveNewDocumentsToCloud = false;
         "com.apple.mouse.tapBehavior" = 1;
 
-        # TODO: test
-        # NSAutomaticCapitalizationEnabled = false;
-        # NSAutomaticDashSubstitutionEnabled = false;
-        # NSAutomaticPeriodSubstitutionEnabled = false;
-        # NSAutomaticQuoteSubstitutionEnabled = false;
-        # NSAutomaticSpellingCorrectionEnabled = false;
-        # NSNavPanelExpandedStateForSaveMode = true;
-        # NSNavPanelExpandedStateForSaveMode2 = true;
+        NSAutomaticCapitalizationEnabled = false;
+        NSAutomaticDashSubstitutionEnabled = false;
+        NSAutomaticPeriodSubstitutionEnabled = false;
+        NSAutomaticQuoteSubstitutionEnabled = false;
+        NSAutomaticSpellingCorrectionEnabled = false;
+        NSNavPanelExpandedStateForSaveMode = true;
+        NSNavPanelExpandedStateForSaveMode2 = true;
       };
 
       screencapture = {
@@ -82,7 +81,6 @@
         AutomaticallyInstallMacOSUpdates = true;
       };
 
-      # TODO: check this config.
       CustomUserPreferences = {
         "com.apple.desktopservices" = {
           # Avoid creating .DS_Store files on network or USB volumes
@@ -93,17 +91,6 @@
           # Sort by name by default
           FXPreferredSortOrder = "name";
         };
-        # "com.apple.Safari" = {
-        #   # Privacy: don't send search queries to Apple
-        #   UniversalSearchEnabled = false;
-        #   SuppressSearchSuggestions = true;
-
-        #   # Don't open downloads (like `zip` files)
-        #   AutoOpenSafeDownloads = false;
-
-        #   # Enable developer tools
-        #   WebKitDeveloperExtrasEnabledPreferenceKey = true;
-        # };
         "com.apple.AdLib" = {
           allowApplePersonalizedAdvertising = false;
         };
@@ -120,9 +107,6 @@
     };
 
     activationScripts.postActivation.text = ''
-      # Restart automatically if the computer freezes
-      # TODO: not working
-      # sudo systemsetup -setrestartfreeze on
       ########################
       # SSD-specific tweaks
       ########################

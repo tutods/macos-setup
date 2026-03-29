@@ -1,11 +1,8 @@
 { pkgs, nixpkgs, ... }:
 {
-  # Allow unfree packages (like VSCode)
-  nixpkgs.config.allowUnfree = true;
-
   # Import shared modules
   imports = [
-    ./packages/common-packages.nix
+    ./packages
   ];
 
   # Common system configuration
