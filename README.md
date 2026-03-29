@@ -95,7 +95,11 @@ nix-collect-garbage -d
 │   ├── common.nix             # Nix settings, timezone, store optimisation
 │   ├── darwin/                # macOS defaults, security, networking, keyboard
 │   └── packages/
-│       └── common-packages.nix  # System-wide packages and fonts
+│       ├── default.nix        # Imports all package modules
+│       ├── cli.nix            # CLI tools (fd, gh, jq, httpie, …)
+│       ├── development.nix    # Dev tools and IDEs (terraform, WebStorm, …)
+│       ├── media.nix          # Media processing (ffmpeg, imagemagick, …)
+│       └── fonts.nix          # System fonts (JetBrains Mono, Nerd Fonts, …)
 ├── hosts/darwin/
 │   ├── macbook/               # Personal MacBook
 │   │   ├── default.nix        # Calls mkHost with macbook values

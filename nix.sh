@@ -67,12 +67,12 @@ apply_config() {
 
   print_info "Applying configuration: $config"
 
-  local switch_cmd="switch --flake \".#$config\""
-  [[ "$force" == "true" ]] && switch_cmd="$switch_cmd --rebuild"
+  local switch_cmd=("switch" "--flake" ".#$config")
+  [[ "$force" == "true" ]] && switch_cmd+=("--rebuild")
 
   if command -v darwin-rebuild &>/dev/null; then
     print_info "Using local darwin-rebuild"
-    if darwin-rebuild $switch_cmd; then
+    if sudo darwin-rebuild "${switch_cmd[@]}"; then
       print_success "Configuration applied successfully"
     else
       print_error "Failed to apply configuration"
@@ -80,7 +80,7 @@ apply_config() {
     fi
   else
     print_info "Using remote darwin-rebuild"
-    if nix --extra-experimental-features 'nix-command flakes' run nix-darwin/master#darwin-rebuild -- $switch_cmd; then
+    if sudo nix --extra-experimental-features 'nix-command flakes' run nix-darwin/master#darwin-rebuild -- "${switch_cmd[@]}"; then
       print_success "Configuration applied successfully"
     else
       print_error "Failed to apply configuration"

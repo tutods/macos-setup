@@ -8,7 +8,7 @@ FISH_PATH=""
 for candidate in \
   "/run/current-system/sw/bin/fish" \
   "/etc/profiles/per-user/$USER/bin/fish" \
-  "$(which fish 2>/dev/null)"; do
+  "$(command -v fish 2>/dev/null || true)"; do
   if [ -x "$candidate" ]; then
     FISH_PATH="$candidate"
     break

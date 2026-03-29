@@ -59,17 +59,17 @@
   # Kill whatever is running on a given port
   killport = {
     body = ''
-      if test -z "$argv"
+      if test (count $argv) -ne 1
         echo "Usage: killport <port>"
         return 1
       end
-      set pids (lsof -ti tcp:$argv)
+      set pids (lsof -ti tcp:$argv[1])
       if test -z "$pids"
-        echo "Nothing running on port $argv"
+        echo "Nothing running on port $argv[1]"
         return 0
       end
       echo $pids | xargs kill -9
-      echo "Killed process(es) on port $argv"
+      echo "Killed process(es) on port $argv[1]"
     '';
     description = "Kill process running on given port";
   };
