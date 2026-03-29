@@ -1,12 +1,4 @@
 {
-  # "Amphetamine" = 937984704;  # mas cannot install during sudo — install manually from App Store
-  "Magnet" = 441258766;
-  # "1Blocker" = 1365531024;  # mas cannot install it — install manually from App Store
-  "Baking Soda" = 1601151613;
-  "Vinegar" = 1591303229;
-  "PasteNow" = 1552536109;
-  "Xnip" = 1221250572;
-  # VPNs
-  "Tailscale" = 1475387142;
-  "Wireguard" = 1451685025;
+  # All App Store apps are installed via post-nix.sh using mas,
+  # which requires a logged-in App Store session (unavailable under sudo).
 }

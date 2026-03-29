@@ -41,13 +41,13 @@ This builds and applies the full system configuration via `darwin-rebuild switch
 
 > On the **work laptop**, run `./nix.sh work` from `admin.daniel.a.sousa` — the admin user owns Homebrew. Home Manager still configures `daniel.a.sousa` independently.
 
-### 4. Set fish as default shell
+### 4. Post-deploy setup
 
 ```bash
 ./post-nix.sh
 ```
 
-This sets fish as the login shell and installs VSCode extensions not available in nixpkgs.
+Runs as the **logged-in user** (not root). Sets fish as the login shell, installs App Store apps via `mas`, and installs VSCode marketplace extensions.
 
 ### 5. Set up private git identity
 
@@ -69,6 +69,10 @@ See [docs/private-git-config.md](docs/private-git-config.md) for full details.
 ## Daily usage
 
 ```bash
+# Prevent sleep (built-in macOS caffeinate, expanded by fish as abbreviation)
+caf              # prevent display, idle and disk sleep (Ctrl-C to stop)
+caffeinate -t 3600  # prevent sleep for 1 hour
+
 # Rebuild and apply changes
 ./nix.sh macbook
 

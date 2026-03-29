@@ -1,8 +1,9 @@
 {
   # Common abbreviations
-  cp = "cp -i";
-  mv = "mv -i";
+  cp    = "cp -i";
+  mv    = "mv -i";
   mkdir = "mkdir -p";
+  caf   = "caffeinate -dim"; # prevent display, idle and disk sleep
 
   # Git abbreviations
   g    = "git";
