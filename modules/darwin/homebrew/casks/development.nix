@@ -9,5 +9,4 @@
   # Dev tools
   "orbstack"
   "beekeeper-studio"
-  "copilot-cli"
 ]

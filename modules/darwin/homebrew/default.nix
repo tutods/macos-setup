@@ -20,6 +20,7 @@ in
       "mas"
       "webp"
       "qpdf"
+      "copilot-cli"
     ];
     casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks;
     masApps = import ./mas.nix;
