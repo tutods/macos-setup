@@ -45,8 +45,17 @@ On the work laptop `brewUser` differs from `username` because Homebrew is owned 
 
 Three layers manage software — each has a distinct scope:
 
-### 1. System packages (`modules/packages/common-packages.nix`)
-`environment.systemPackages` — available to all users system-wide. Used for CLI tools that every machine needs (gh, fnm, fd, doppler, terraform, JetBrains, etc.) and fonts. VSCode is managed by Home Manager only (not here).
+### 1. System packages (`modules/packages/`)
+`environment.systemPackages` — available to all users system-wide, split into focused files:
+
+| File | Contents |
+|------|----------|
+| `cli.nix` | General CLI tools (gh, fnm, fd, jq, tldr, httpie, doppler, etc.) |
+| `development.nix` | Dev tools (claude-code, terraform, JetBrains IDEs) |
+| `media.nix` | Image/video processing (imagemagick, ffmpeg, jpegoptim, optipng) |
+| `fonts.nix` | System fonts (JetBrains Mono, Fira Code, Montserrat, etc.) |
+
+VSCode is managed by Home Manager only (not here).
 
 ### 2. Homebrew (`modules/darwin/homebrew/` + `hosts/darwin/<name>/homebrew/`)
 GUI apps and casks that aren't in nixpkgs or work better through Homebrew. Split into:

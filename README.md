@@ -160,7 +160,10 @@ nix-collect-garbage -d
 
 | What | Where |
 |------|-------|
-| System-wide CLI tools and fonts | `modules/packages/common-packages.nix` |
+| System-wide CLI tools | `modules/packages/cli.nix` |
+| Development tools and IDEs | `modules/packages/development.nix` |
+| Media processing tools | `modules/packages/media.nix` |
+| Fonts | `modules/packages/fonts.nix` |
 | Shared Homebrew casks (all machines) | `modules/darwin/homebrew/casks/` |
 | Machine-specific Homebrew casks | `hosts/darwin/<name>/homebrew/casks/` |
 | Mac App Store apps (shared) | `modules/darwin/homebrew/mas.nix` |

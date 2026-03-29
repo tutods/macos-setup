@@ -2,7 +2,7 @@
 {
   # Import shared modules
   imports = [
-    ./packages/common-packages.nix
+    ./packages
   ];
 
   # Common system configuration
