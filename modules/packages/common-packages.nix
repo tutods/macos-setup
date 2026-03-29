@@ -16,7 +16,6 @@
     jq
     tldr
     httpie
-    mkcert
 
     # DevOps
     terraform

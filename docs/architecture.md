@@ -72,7 +72,7 @@ home/
 │   │       └── ghostty/    # Config + Catppuccin Mocha theme (via file symlink)
 │   ├── cli/
 │   │   ├── bat.nix
-│   │   ├── git.nix         # Shared git config — identity from ~/.config/git/private
+│   │   ├── git.nix         # Shared git config + delta diff viewer — identity from ~/.config/git/private
 │   │   ├── htop.nix
 │   │   └── oh-my-posh/
 │   └── shell/
