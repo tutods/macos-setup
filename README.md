@@ -51,15 +51,12 @@ Runs as the **logged-in user** (not root). Sets fish as the login shell, install
 
 ### 5. Set up private git identity
 
-Git name and email are not stored in this repo. Create a local file on each machine:
+Git name and email are not stored in this repo. Set them on each machine:
 
 ```bash
 mkdir -p ~/.config/git
-cat > ~/.config/git/private << 'EOF'
-[user]
-    name  = Your Name
-    email = your@email.com
-EOF
+git config --file ~/.config/git/private user.name "Your Name"
+git config --file ~/.config/git/private user.email "your@email.com"
 ```
 
 See [docs/private-git-config.md](docs/private-git-config.md) for full details.

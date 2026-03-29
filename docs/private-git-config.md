@@ -20,12 +20,11 @@ Run this once after deploying:
 
 ```bash
 mkdir -p ~/.config/git
-cat > ~/.config/git/private << 'EOF'
-[user]
-    name  = Your Name
-    email = your@email.com
-EOF
+git config --file ~/.config/git/private user.name "Your Name"
+git config --file ~/.config/git/private user.email "your@email.com"
 ```
+
+Using `git config --file` instead of a heredoc avoids line-break issues that can silently corrupt the file when pasting values in a terminal.
 
 This file is never tracked by Nix or Git — it stays local to the machine.
 
@@ -54,9 +53,6 @@ The private git file must be created under the **normal user's** home:
 ```bash
 # Log in as daniel.a.sousa (not as admin), then:
 mkdir -p ~/.config/git
-cat > ~/.config/git/private << 'EOF'
-[user]
-    name  = Daniel Sousa
-    email = your@company.com
-EOF
+git config --file ~/.config/git/private user.name "Daniel Sousa"
+git config --file ~/.config/git/private user.email "your@company.com"
 ```
