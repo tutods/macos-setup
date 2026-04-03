@@ -23,7 +23,7 @@
 
     if [ -x "$mas" ]; then
       echo "↣ App Store apps (shared)"
-      _mas_install "Magnet"       441258766
+      # _mas_install "Magnet"       441258766
       _mas_install "Baking Soda"  1601151613
       _mas_install "Vinegar"      1591303229
       _mas_install "PasteNow"     1552536109
