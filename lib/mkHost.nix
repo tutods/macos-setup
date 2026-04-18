@@ -70,7 +70,7 @@
       installLines = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: id: ''
         if ! /opt/homebrew/bin/mas list 2>/dev/null | grep -q "^${toString id} "; then
           echo "  ↣ Installing ${name}"
-          sudo --preserve-env=PATH --user=${username} --set-home env PATH="/opt/homebrew/bin:$PATH" /opt/homebrew/bin/mas install ${toString id} \
+          HOME="/Users/${username}" /opt/homebrew/bin/mas install ${toString id} \
             && echo "  ✓ ${name}" \
             || echo "  ✗ ${name} failed — install manually from App Store"
         else
