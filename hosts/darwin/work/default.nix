@@ -1,4 +1,8 @@
-{mkHost, ...}: let
+{
+  mkHost,
+  mkUser,
+  ...
+}: let
   sharedMasApps = import ../../../modules/darwin/homebrew/mas.nix;
 in {
   imports = [
@@ -8,9 +12,11 @@ in {
       username = "daniel.a.sousa";
       hostname = "daniel.a.sousa";
       brewUser = "admin.daniel.a.sousa";
-      homeConfig = import ../../../home/daniel.a.sousa/default.nix;
+      homeConfig = mkUser {
+        username = "daniel.a.sousa";
+        extraImports = [../../../home/programs/work];
+      };
       masApps = sharedMasApps;
     })
   ];
-
 }

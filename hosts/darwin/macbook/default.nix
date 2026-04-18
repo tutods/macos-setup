@@ -1,7 +1,6 @@
 {
-  pkgs,
   mkHost,
-  lib,
+  mkUser,
   ...
 }: let
   sharedMasApps = import ../../../modules/darwin/homebrew/mas.nix;
@@ -11,14 +10,16 @@ in {
     ./dock.nix
     ./homebrew
     ./networking.nix
+    ./packages.nix
     (mkHost {
       username = "tutods";
       hostname = "tutods-macbook";
       brewUser = "tutods";
-      homeConfig = import ../../../home/tutods/default.nix;
+      homeConfig = mkUser {
+        username = "tutods";
+        extraImports = [../../../home/programs/personal];
+      };
       masApps = sharedMasApps // macbookMasApps;
     })
   ];
-
-  environment.systemPackages = [pkgs.pipx];
 }
