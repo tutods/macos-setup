@@ -25,9 +25,9 @@
 
     if [ -x "$mas" ]; then
       echo "↣ App Store apps (macbook)"
-      _mas_install "Numbers"               361304891
-      _mas_install "Pages"                 361309726
-      _mas_install "Keynote"               361285480
+      # _mas_install "Numbers"               361304891
+      # _mas_install "Pages"                 361309726
+      # _mas_install "Keynote"               361285480
       _mas_install "PhotoBulk"             537211143
       _mas_install "Elmedia Video Player"  1044549675
       _mas_install "SnippetsLab"           1006087419

@@ -1,5 +1,5 @@
 # Shell
-command = fish
+#command = fish
 
 # Window settings
 window-inherit-working-directory = true

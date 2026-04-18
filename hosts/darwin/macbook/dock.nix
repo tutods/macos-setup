@@ -19,7 +19,7 @@
           small = false;
         };
       }
-      "/Users/tutods/Applications/Home Manager Apps/Zed.app"
+      "/Applications/Zed.app"
       "/Users/tutods/Applications/Home Manager Apps/Visual Studio Code.app"
       "/Applications/Trae.app"
       "/Applications/Ghostty.app"
