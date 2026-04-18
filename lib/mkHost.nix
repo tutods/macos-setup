@@ -26,18 +26,43 @@
   programs.fish.enable = true;
 
   users.users.${username} = {
-    shell = pkgs.fish;
     ignoreShellProgramCheck = true;
   };
 
   # Set fish as the default shell via dscl (runs as root, no chsh password prompt).
   # programs.fish.enable already adds fish to /etc/shells.
   system.activationScripts.setDefaultShell.text = ''
-    fish=/run/current-system/sw/bin/fish
+    hm_fish="/etc/profiles/per-user/${username}/bin/fish"
+    sys_fish="/run/current-system/sw/bin/fish"
+
+    # Ensure home-manager profile fish is in /etc/shells
+    if [ -x "$hm_fish" ] && ! grep -qx "$hm_fish" /etc/shells 2>/dev/null; then
+      echo "Adding $hm_fish to /etc/shells"
+      echo "$hm_fish" >> /etc/shells
+    fi
+
+    # Prefer home-manager fish, fall back to system fish
+    target_shell="$sys_fish"
+    if [ -x "$hm_fish" ]; then
+      target_shell="$hm_fish"
+    fi
+
     current=$(dscl . -read /Users/${username} UserShell 2>/dev/null | awk '{print $2}')
-    if [ "$current" != "$fish" ]; then
-      echo "Setting default shell for ${username} to fish"
-      dscl . -create /Users/${username} UserShell "$fish"
+    if [ "$current" != "$target_shell" ]; then
+      echo "Setting default shell for ${username} from ${current:-default} to $target_shell"
+      dscl . -create /Users/${username} UserShell "$target_shell"
+    else
+      echo "Default shell for ${username} is already set to $target_shell"
+    fi
+  '';
+
+  system.activationScripts.fixFishCodesign.text = ''
+    fish_bin="/etc/profiles/per-user/${username}/bin/fish"
+    if [ -x "$fish_bin" ]; then
+      if ! codesign -v "$fish_bin" 2>/dev/null; then
+        echo "Re-signing fish binary (invalid code signature detected)"
+        codesign --force --sign - "$fish_bin" 2>/dev/null || true
+      fi
     fi
   '';
 
