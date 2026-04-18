@@ -1,3 +1,6 @@
+# Shell
+command = fish
+
 # Window settings
 window-inherit-working-directory = true
 window-theme = dark
