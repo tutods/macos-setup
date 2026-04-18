@@ -1,4 +1,6 @@
-{mkHost, ...}: {
+{mkHost, ...}: let
+  sharedMasApps = import ../../../modules/darwin/homebrew/mas.nix;
+in {
   imports = [
     ./dock.nix
     ./homebrew
@@ -7,12 +9,10 @@
       hostname = "daniel.a.sousa";
       brewUser = "admin.daniel.a.sousa";
       homeConfig = import ../../../home/daniel.a.sousa/default.nix;
+      masApps = sharedMasApps;
     })
   ];
 
-  # home.activation runs as admin.daniel.a.sousa on this machine, so use
-  # system.activationScripts (runs as root) to create the Developer folder
-  # with the correct owner instead.
   system.activationScripts.createDeveloperDir.text = ''
     if [ ! -d "/Users/daniel.a.sousa/Developer" ]; then
       echo "↣ Create Developer directory for daniel.a.sousa"
