@@ -1,4 +1,7 @@
 {
-  # App Store apps are installed via home.activation (home/programs/mas.nix)
-  # which runs as the logged-in user and has an App Store session.
+  "Baking Soda" = 1601151613;
+  Vinegar = 1591303229;
+  PasteNow = 1552536109;
+  Xnip = 1221250572;
+  WireGuard = 1451685025;
 }

@@ -29,9 +29,6 @@
       inherit system;
       config = {
         allowUnfree = true;
-        # allowBroken needed for packages that haven't been updated
-        # for the current nixpkgs channel yet. Remove when not needed.
-        allowBroken = true;
       };
     };
 

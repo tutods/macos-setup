@@ -7,7 +7,6 @@
     doppler
     httpie
     jq
-    mas
     qpdf
     smartmontools
     speedtest-cli

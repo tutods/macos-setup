@@ -1,4 +1,5 @@
 {
-  # App Store apps are installed via home.activation (home/tutods/default.nix)
-  # which runs as the logged-in user and has an App Store session.
+  PhotoBulk = 537211143;
+  "Elmedia Video Player" = 1044549675;
+  SnippetsLab = 1006087419;
 }
