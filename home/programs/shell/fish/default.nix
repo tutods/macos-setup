@@ -1,10 +1,7 @@
 { config, pkgs, lib, ... }:
 
 {
-  imports = [
-    ./extra.nix
-    ./completions.nix
-  ];
+  imports = [ ./extra.nix ];
 
   programs.fish = {
     enable = true;
@@ -12,7 +9,6 @@
     shellAbbrs = import ./abbrs.nix;
     functions = import ./functions.nix;
 
-    # Set environment variables for all fish shells (including non-interactive)
     shellInit = ''
       if test -f ~/.config/fish/secrets.fish
         source ~/.config/fish/secrets.fish
@@ -31,12 +27,12 @@
     ];
 
     interactiveShellInit = ''
+      set -g fish_complete_path $fish_complete_path ~/.config/fish/completions
+
       bind \ew backward-kill-line
 
-      # Set directory preview command for fzf
       set fzf_preview_dir_cmd eza --all --color=always
 
-      # FNM
       fnm env --use-on-cd --shell fish --corepack-enabled | source
 
       export PATH="$HOME/.local/bin:$PATH"

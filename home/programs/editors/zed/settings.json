@@ -1,0 +1,17 @@
+{
+  "theme": "Catppuccin Mocha",
+  "ui_font_size": 14,
+  "buffer_font_size": 14,
+  "buffer_font_family": "JetBrainsMonoNL Nerd Font",
+  "buffer_line_height": "comfortable",
+  "show_whitespaces": "all",
+  "tab_size": 2,
+  "preferred_line_length": 80,
+  "soft_wrap": "preferred_line_length",
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "vim_mode": false,
+  "auto_update": false
+}

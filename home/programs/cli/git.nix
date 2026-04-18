@@ -18,13 +18,12 @@
 
   programs.git = {
     enable = true;
-    signing.format = null;
     includes = [{ path = "~/.config/git/private"; }];
-    settings.extraConfig = {
+    settings = {
       init.defaultBranch   = "main";
       push.autoSetupRemote = true;
       pull.rebase          = true;
-      merge.conflictstyle  = "diff3";  # delta works best with diff3
+      merge.conflictstyle  = "diff3";
       diff.colorMoved      = "default";
     };
     lfs.enable = true;
