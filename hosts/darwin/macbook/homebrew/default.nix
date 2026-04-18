@@ -10,11 +10,11 @@ in {
     casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks ++ fontCasks;
   };
 
-  system.activationScripts.installMacbookMasApps.text = let
+  system.activationScripts.extraActivation.text = lib.mkAfter (let
     installLines = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: id: ''
       if ! "$mas" list 2>/dev/null | grep -q "^${toString id} "; then
         echo "  ↣ Installing ${name}"
-        "$mas" install ${toString id} 2>/dev/null \
+        "$mas" install ${toString id} \
           && echo "  ✓ ${name}" \
           || echo "  ✗ ${name} failed — install manually from App Store"
       else
@@ -26,6 +26,8 @@ in {
     if [ -x "$mas" ]; then
       echo "↣ App Store apps (macbook)"
     ${installLines}
+    else
+      echo "↣ mas not found at $mas — skipping App Store installs"
     fi
-  '';
+  '');
 }

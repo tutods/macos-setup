@@ -242,7 +242,7 @@ apply_config() {
     print_error "Failed to apply configuration after $elapsed"
     echo ""
     echo -e "  ${DIM}Last output:${NC}"
-    tail -15 "$tmpfile" | sed 's/^/    /'
+    tail -50 "$tmpfile" | sed 's/^/    /'
     rm -f "$tmpfile"
     exit 1
   fi

@@ -34,7 +34,7 @@
 
   # Fix fish code signing before setting it as the default shell,
   # so the system never tries to execute an unsigned binary.
-  system.activationScripts.fixFishCodesign.text = ''
+  system.activationScripts.extraActivation.text = ''
     fish_bin="/etc/profiles/per-user/${username}/bin/fish"
     if [ -x "$fish_bin" ]; then
       if ! codesign -v "$fish_bin" 2>/dev/null; then
@@ -42,21 +42,15 @@
         codesign --force --sign - "$fish_bin" 2>/dev/null || true
       fi
     fi
-  '';
 
-  # Set fish as the default shell via dscl (runs as root, no chsh password prompt).
-  # programs.fish.enable already adds fish to /etc/shells.
-  system.activationScripts.setDefaultShell.text = ''
     hm_fish="/etc/profiles/per-user/${username}/bin/fish"
     sys_fish="/run/current-system/sw/bin/fish"
 
-    # Ensure home-manager profile fish is in /etc/shells
     if [ -x "$hm_fish" ] && ! grep -qx "$hm_fish" /etc/shells 2>/dev/null; then
       echo "Adding $hm_fish to /etc/shells"
       echo "$hm_fish" >> /etc/shells
     fi
 
-    # Prefer home-manager fish, fall back to system fish
     target_shell="$sys_fish"
     if [ -x "$hm_fish" ]; then
       target_shell="$hm_fish"

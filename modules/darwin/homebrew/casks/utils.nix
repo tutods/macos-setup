@@ -6,7 +6,6 @@
   "stats"
   "onyx"
   "pearcleaner"
-  "mas"
 
   # Screen sharing
   "obs"
