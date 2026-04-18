@@ -11,8 +11,6 @@ in {
       autoUpdate = true;
       upgrade = true;
     };
-    global.autoUpdate = true;
-
     brews = ["mas"];
     casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks;
   };

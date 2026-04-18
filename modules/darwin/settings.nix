@@ -54,6 +54,7 @@
         NSDocumentSaveNewDocumentsToCloud = false;
         "com.apple.mouse.tapBehavior" = 1;
 
+        NSAutomaticWindowAnimationsEnabled = false;
         NSAutomaticCapitalizationEnabled = false;
         NSAutomaticDashSubstitutionEnabled = false;
         NSAutomaticPeriodSubstitutionEnabled = false;

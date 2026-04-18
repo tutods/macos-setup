@@ -51,6 +51,7 @@ final_space = true
       commit_icon = "\uf417 "
       fetch_status = true
       fetch_upstream_icon = true
+      cache_duration = "5m"
       merge_icon = "\ue727 "
       no_commits_icon = "\uf0c3 "
       rebase_icon = "\ue728 "

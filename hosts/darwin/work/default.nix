@@ -13,11 +13,4 @@ in {
     })
   ];
 
-  system.activationScripts.extraActivation.text = ''
-    if [ ! -d "/Users/daniel.a.sousa/Developer" ]; then
-      echo "↣ Create Developer directory for daniel.a.sousa"
-      mkdir -p "/Users/daniel.a.sousa/Developer"
-      chown daniel.a.sousa "/Users/daniel.a.sousa/Developer"
-    fi
-  '';
 }

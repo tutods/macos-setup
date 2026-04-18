@@ -16,7 +16,6 @@
       "--group-directories-first"
       "--header"
       "--color=auto"
-      "--icons"
     ];
   };
 

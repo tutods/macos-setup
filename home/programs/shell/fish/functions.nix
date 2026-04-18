@@ -26,11 +26,15 @@
 
   commt = {
     body = ''
-      git add .
-      git commit -m "$argv"
-      git push
+      git status --short
+      read --local --prompt-str "Stage all changes and push? [y/N] " confirm
+      if test "$confirm" = y
+        git add -A
+        git commit -m "$argv"
+        git push
+      end
     '';
-    description = "Add all changes, commit with message and push";
+    description = "Preview, stage all changes, commit with message and push";
   };
 
   repo = {
