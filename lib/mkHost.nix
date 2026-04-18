@@ -68,9 +68,9 @@
     # Install App Store apps via mas
     + lib.optionalString (masApps != {}) (let
       installLines = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: id: ''
-        if ! "$mas" list 2>/dev/null | grep -q "^${toString id} "; then
+        if ! /opt/homebrew/bin/mas list 2>/dev/null | grep -q "^${toString id} "; then
           echo "  ↣ Installing ${name}"
-          "$mas" install ${toString id} \
+          sudo --preserve-env=PATH --user=${username} --set-home env PATH="/opt/homebrew/bin:$PATH" /opt/homebrew/bin/mas install ${toString id} \
             && echo "  ✓ ${name}" \
             || echo "  ✗ ${name} failed — install manually from App Store"
         else
@@ -78,10 +78,9 @@
         fi
       '') masApps);
     in ''
-      mas=/opt/homebrew/bin/mas
-      if [ -x "$mas" ]; then
+      if [ -x /opt/homebrew/bin/mas ]; then
         echo "↣ App Store apps"
-        sudo --preserve-env=PATH --user=${username} --set-home env PATH="/opt/homebrew/bin:$PATH" bash -c '${installLines}'
+      ${installLines}
       fi
     '');
 

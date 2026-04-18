@@ -126,7 +126,7 @@
   gstp = "git stash pop";
   gstshow = "git stash show --text";
   gstall = "git stash --all";
-  gsts = "git stash save";
+  gstpu = "git stash push";
   gsu = "git submodule update";
   gsw = "git switch";
   gswc = "git switch -c";

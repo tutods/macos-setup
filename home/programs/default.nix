@@ -8,7 +8,6 @@
     ./cli/gh.nix
     ./cli/git.nix
     ./cli/htop.nix
-    ./cli/mas.nix
     ./cli/oh-my-posh
     # Shell
     ./shell/fish
