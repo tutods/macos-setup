@@ -1,11 +1,10 @@
-{ lib, ... }:
-
+{lib, ...}:
 # App Store apps installed via mas.
 # home.activation runs as the logged-in user (not root), so the App Store
 # session is available — unlike masApps in the homebrew nix-darwin option
 # which runs under sudo and always fails.
 {
-  home.activation.installMasApps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.installMasApps = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mas=/run/current-system/sw/bin/mas
 
     _mas_install() {

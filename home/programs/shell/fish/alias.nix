@@ -1,14 +1,11 @@
 {
   # Docker
-  dps="docker ps --format '{{.Names}}'";
-  dvunused="docker volume ls -q -f 'dangling=true'";
+  dps = "docker ps --format '{{.Names}}'";
+  dvunused = "docker volume ls -q -f 'dangling=true'";
 
   # Navigation
-  work="cd ~/Developer";
-  home="cd ~";
-  ".."="cd ..";
-  "..."="cd ../..";
-
-  # Eza on LS
-  ls="eza";
+  work = "cd ~/Developer";
+  home = "cd ~";
+  ".." = "cd ..";
+  "..." = "cd ../..";
 }

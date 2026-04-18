@@ -1,7 +1,5 @@
-{...}:
-
-{
+{...}: {
   homebrew = {
-    casks = [ "slack" ];
+    casks = ["slack"];
   };
 }

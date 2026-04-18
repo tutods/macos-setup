@@ -58,10 +58,6 @@ See [docs/private-git-config.md](docs/private-git-config.md) for full details.
 ## Daily usage
 
 ```bash
-# Prevent sleep (built-in macOS caffeinate, expanded by fish as abbreviation)
-caf              # prevent display, idle and disk sleep (Ctrl-C to stop)
-caffeinate -t 3600  # prevent sleep for 1 hour
-
 # Rebuild and apply changes
 ./nix.sh macbook
 
@@ -71,8 +67,8 @@ caffeinate -t 3600  # prevent sleep for 1 hour
 # Force rebuild
 ./nix.sh macbook --force
 
-# Clean up old Nix generations
-nix-collect-garbage -d
+# Format all Nix files
+nix fmt
 ```
 
 ---
@@ -81,16 +77,16 @@ nix-collect-garbage -d
 
 ```
 .
-├── flake.nix                  # Entry point — defines mkDarwin and mkHost
+├── flake.nix                  # Entry point — defines mkDarwin and formatter
 ├── lib/
 │   └── mkHost.nix             # Shared host factory (fish, home-manager, nix-homebrew)
 ├── modules/
-│   ├── common.nix             # Nix settings, timezone, store optimisation
-│   ├── darwin/                # macOS defaults, security, networking, keyboard
+│   ├── common.nix             # Nix settings, timezone, GC, store optimisation
+│   ├── darwin/                # macOS defaults, security, firewall, networking
 │   └── packages/
 │       ├── default.nix        # Imports all package modules
-│       ├── cli.nix            # CLI tools (fd, gh, jq, httpie, …)
-│       ├── development.nix    # Dev tools and IDEs (terraform, WebStorm, …)
+│       ├── cli.nix            # CLI tools (fd, fnm, jq, httpie, doppler, …)
+│       ├── development.nix    # Dev tools and IDEs (claude-code, terraform, …)
 │       ├── media.nix          # Media processing (ffmpeg, imagemagick, …)
 │       └── fonts.nix          # System fonts (JetBrains Mono, Nerd Fonts, …)
 ├── hosts/darwin/
@@ -120,11 +116,12 @@ nix-collect-garbage -d
 
 2. Edit `hosts/darwin/new-machine/default.nix` — update the `mkHost` call:
    ```nix
-   { mkHost, ... }:
+   { pkgs, mkHost, ... }:
    {
      imports = [
        ./dock.nix
        ./homebrew
+       ./networking.nix
        (mkHost {
          username   = "newuser";
          hostname   = "new-machine";
@@ -143,7 +140,7 @@ nix-collect-garbage -d
 
 4. Register in `flake.nix`:
    ```nix
-   "new-machine" = mkDarwin "./hosts/darwin/new-machine";
+   new-machine = mkDarwin ./hosts/darwin/new-machine;
    ```
 
 5. Deploy:
@@ -163,20 +160,28 @@ nix-collect-garbage -d
 | Fonts | `modules/packages/fonts.nix` |
 | Shared Homebrew casks (all machines) | `modules/darwin/homebrew/casks/` |
 | Machine-specific Homebrew casks | `hosts/darwin/<name>/homebrew/casks/` |
-| Mac App Store apps (shared) | `modules/darwin/homebrew/mas.nix` |
-| Mac App Store apps (per machine) | `hosts/darwin/<name>/homebrew/mas.nix` |
+| Mac App Store apps (shared) | `home/programs/cli/mas.nix` (via home.activation) |
+| Mac App Store apps (per machine) | `home/<username>/default.nix` |
 | User programs (shell, editor, etc.) | `home/programs/` |
 
 ---
 
 ## Maintenance
 
+Nix garbage collection runs automatically every Sunday (keeps last 7 days of generations).
+
 ```bash
-# Remove old generations and free disk space
+# Manual clean-up if needed
 nix-collect-garbage -d
 
 # If Homebrew has issues after a rebuild
 brew doctor
+```
+
+Home Manager creates `.backup` files when overwriting existing configs — find and remove stale ones with:
+
+```bash
+find ~ -name "*.backup" -mtime +7
 ```
 
 Dependency updates are automated via [Renovate](.github/renovate.json) — minor and patch updates for `nixpkgs`, `home-manager`, `nix-darwin`, and `nix-homebrew` are auto-merged. Major updates require manual review.

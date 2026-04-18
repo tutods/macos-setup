@@ -1,7 +1,4 @@
 [
-  # Design
-  "figma"
-
   # Disk tools
   "applepi-baker"
   "mounty"
@@ -23,5 +20,5 @@
   "surfshark"
   "1password"
   "jordanbaird-ice"
-  "qbittorrent"
+  "transmission"
 ]

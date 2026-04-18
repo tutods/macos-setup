@@ -1,10 +1,10 @@
-{ ... }:
-
-{
+{...}: {
   system = {
     defaults = {
       dock = {
         autohide = false;
+        # Only takes effect when autohide is enabled; prepared for future toggle
+        autohide-delay = 0.0;
         show-recents = false;
         magnification = true;
         minimize-to-application = true;
@@ -20,18 +20,14 @@
 
       finder = {
         FXPreferredViewStyle = "clmv";
-        _FXSortFoldersFirst= true;
+        _FXSortFoldersFirst = true;
         FXRemoveOldTrashItems = true;
         NewWindowTarget = "Computer";
         ShowPathbar = true;
         ShowStatusBar = true;
-        # When performing a search, search the current folder by default
         FXDefaultSearchScope = "SCcf";
         FXEnableExtensionChangeWarning = false;
-      };
-
-      loginwindow = {
-        GuestEnabled = false;
+        AppleShowAllFiles = true;
       };
 
       controlcenter = {
@@ -74,7 +70,7 @@
 
       screensaver = {
         askForPassword = true;
-        askForPasswordDelay = 60;
+        askForPasswordDelay = 30;
       };
 
       SoftwareUpdate = {
@@ -83,12 +79,10 @@
 
       CustomUserPreferences = {
         "com.apple.desktopservices" = {
-          # Avoid creating .DS_Store files on network or USB volumes
           DSDontWriteNetworkStores = true;
           DSDontWriteUSBStores = true;
         };
         "com.apple.finder" = {
-          # Sort by name by default
           FXPreferredSortOrder = "name";
         };
         "com.apple.AdLib" = {
@@ -96,11 +90,8 @@
         };
         "com.apple.SoftwareUpdate" = {
           AutomaticCheckEnabled = true;
-          # Check for software updates daily, not just once per week
           ScheduleFrequency = 1;
-          # Download newly available updates in background
           AutomaticDownload = 1;
-          # Install System data files & security updates
           CriticalUpdateInstall = 1;
         };
       };
@@ -122,9 +113,6 @@
       ########################
       # Screen
       ########################
-      # Require password immediately after sleep or screen saver begins
-      defaults write com.apple.screensaver askForPassword -int 1
-      defaults write com.apple.screensaver askForPasswordDelay -int 0
       # Disable shadow in screenshots
       defaults write com.apple.screencapture disable-shadow -bool true
       ########################

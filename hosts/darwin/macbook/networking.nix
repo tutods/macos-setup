@@ -1,5 +1,4 @@
-{ ... }:
-
+{...}:
 # Public DNS for personal machine.
 # Not applied to work machine — corporate DNS must resolve internal domains.
 {

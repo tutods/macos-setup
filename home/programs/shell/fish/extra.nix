@@ -15,7 +15,7 @@
     extraOptions = [
       "--group-directories-first"
       "--header"
-      "--color=always"
+      "--color=auto"
       "--icons"
     ];
   };
@@ -23,5 +23,10 @@
   programs.fzf = {
     enable = true;
     enableFishIntegration = true;
+    defaultOptions = [
+      "--height 40%"
+      "--layout=reverse"
+      "--border"
+    ];
   };
 }

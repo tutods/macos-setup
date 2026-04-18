@@ -1,11 +1,8 @@
-{
-  home.file.".config/ghostty/config" = {
+{config, ...}: {
+  xdg.configFile."ghostty/config" = {
     source = ./config;
-    recursive = true;
   };
-
-  home.file.".config/ghostty/themes/catppuccin-mocha" = {
+  xdg.configFile."ghostty/themes/catppuccin-mocha" = {
     source = ./themes/catppuccin-mocha;
-    recursive = true;
   };
 }

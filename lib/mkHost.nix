@@ -16,18 +16,33 @@
 #       })
 #     ];
 #   }
-
-{ username, hostname, brewUser, homeConfig }:
-{ pkgs, ... }: {
+{
+  username,
+  hostname,
+  brewUser,
+  homeConfig,
+}: {pkgs, ...}: {
   networking.hostName = hostname;
-  system.primaryUser  = username;
+  system.primaryUser = username;
 
-  environment.shells = [ pkgs.fish ];
+  environment.shells = [pkgs.fish];
   programs.fish.enable = true;
 
   users.users.${username} = {
     ignoreShellProgramCheck = true;
   };
+
+  # Fix fish code signing before setting it as the default shell,
+  # so the system never tries to execute an unsigned binary.
+  system.activationScripts.fixFishCodesign.text = ''
+    fish_bin="/etc/profiles/per-user/${username}/bin/fish"
+    if [ -x "$fish_bin" ]; then
+      if ! codesign -v "$fish_bin" 2>/dev/null; then
+        echo "Re-signing fish binary (invalid code signature detected)"
+        codesign --force --sign - "$fish_bin" 2>/dev/null || true
+      fi
+    fi
+  '';
 
   # Set fish as the default shell via dscl (runs as root, no chsh password prompt).
   # programs.fish.enable already adds fish to /etc/shells.
@@ -56,30 +71,20 @@
     fi
   '';
 
-  system.activationScripts.fixFishCodesign.text = ''
-    fish_bin="/etc/profiles/per-user/${username}/bin/fish"
-    if [ -x "$fish_bin" ]; then
-      if ! codesign -v "$fish_bin" 2>/dev/null; then
-        echo "Re-signing fish binary (invalid code signature detected)"
-        codesign --force --sign - "$fish_bin" 2>/dev/null || true
-      fi
-    fi
-  '';
-
   home-manager = {
-    useGlobalPkgs     = true;
-    useUserPackages   = true;
-    extraSpecialArgs  = { inherit pkgs; };
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = {inherit pkgs;};
     backupFileExtension = "backup";
     users.${username} = homeConfig;
   };
 
   # Homebrew is owned by brewUser (may differ from the normal user on work machines)
   nix-homebrew = {
-    enable        = true;
-    user          = brewUser;
+    enable = true;
+    user = brewUser;
     enableRosetta = true;
-    autoMigrate   = true;
-    mutableTaps   = true;
+    autoMigrate = true;
+    mutableTaps = true;
   };
 }

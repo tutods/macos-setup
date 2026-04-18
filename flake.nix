@@ -16,40 +16,53 @@
     };
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
-    let
-      system = "aarch64-darwin";
-      pkgs = import nixpkgs {
-        inherit system;
-        config = {
-          allowUnfree = true;
-          allowBroken = true;
-        };
+  outputs = {
+    self,
+    nixpkgs,
+    nix-darwin,
+    home-manager,
+    nix-homebrew,
+    ...
+  }: let
+    system = "aarch64-darwin";
+    pkgs = import nixpkgs {
+      inherit system;
+      config = {
+        allowUnfree = true;
+        # allowBroken needed for packages that haven't been updated
+        # for the current nixpkgs channel yet. Remove when not needed.
+        allowBroken = true;
       };
+    };
 
-      mkHost = import ./lib/mkHost.nix;
+    mkHost = import ./lib/mkHost.nix;
 
-      # Common modules applied to every host
-      darwinCommonModules = [
-        ./modules/common.nix
-        ./modules/darwin
-        home-manager.darwinModules.home-manager
-        nix-homebrew.darwinModules.nix-homebrew
-      ];
+    # Common modules applied to every host
+    darwinCommonModules = [
+      ./modules/common.nix
+      ./modules/darwin
+      home-manager.darwinModules.home-manager
+      nix-homebrew.darwinModules.nix-homebrew
+    ];
 
-      mkDarwin = hostPath: nix-darwin.lib.darwinSystem {
+    mkDarwin = hostPath:
+      nix-darwin.lib.darwinSystem {
         inherit system;
-        modules = darwinCommonModules ++ [
-          (import (./. + "/${hostPath}"))
-        ];
+        modules =
+          darwinCommonModules
+          ++ [
+            hostPath
+          ];
         specialArgs = {
           inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew mkHost;
         };
       };
-    in {
-      darwinConfigurations = {
-        "macbook" = mkDarwin "./hosts/darwin/macbook";
-        "work"    = mkDarwin "./hosts/darwin/work";
-      };
+  in {
+    formatter.${system} = pkgs.alejandra;
+
+    darwinConfigurations = {
+      macbook = mkDarwin ./hosts/darwin/macbook;
+      work = mkDarwin ./hosts/darwin/work;
     };
+  };
 }

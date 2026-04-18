@@ -50,7 +50,7 @@ Three layers manage software — each has a distinct scope:
 
 | File | Contents |
 |------|----------|
-| `cli.nix` | General CLI tools (gh, fnm, fd, jq, tldr, httpie, doppler, etc.) |
+| `cli.nix` | General CLI tools (fnm, fd, jq, tldr, httpie, doppler, etc.) |
 | `development.nix` | Dev tools (claude-code, terraform, JetBrains IDEs) |
 | `media.nix` | Image/video processing (imagemagick, ffmpeg, jpegoptim, optipng) |
 | `fonts.nix` | System fonts (JetBrains Mono, Fira Code, Montserrat, etc.) |
@@ -75,32 +75,34 @@ Per-user programs managed declaratively — fish, VSCode, bat, fzf, zoxide, eza,
 home/
 ├── programs/               # Shared across all users
 │   ├── default.nix         # Imports everything below + creates ~/Developer
-│   ├── apps/
+│   ├── editors/
 │   │   ├── vscode/         # VSCode settings, keybindings, extensions
-│   │   └── terminal/
-│   │       └── ghostty/    # Config + Catppuccin Mocha theme (via file symlink)
+│   │   └── zed/            # Zed editor config + settings
+│   ├── terminal/
+│   │   └── ghostty/       # Config + Catppuccin Mocha theme (via file symlink)
 │   ├── cli/
 │   │   ├── bat.nix
+│   │   ├── gh.nix          # GitHub CLI + copilot extension
 │   │   ├── git.nix         # Shared git config + delta diff viewer — identity from ~/.config/git/private
 │   │   ├── htop.nix
-│   │   └── oh-my-posh/
+│   │   ├── mas.nix         # App Store installs via home.activation (shared apps)
+│   │   └── oh-my-posh/     # Prompt theme (TOML config)
 │   └── shell/
 │       └── fish/
 │           ├── default.nix     # Core: plugins, shellInit, interactiveShellInit
 │           ├── extra.nix       # Tool integrations: zoxide, eza, fzf
-│           ├── completions.nix # fzf key bindings and env vars
 │           ├── alias.nix       # Silent substitutions (ls, .., docker, navigation)
 │           ├── abbrs.nix       # Expanding abbreviations (git, brew)
-│           └── functions.nix   # Multi-step git helpers (goMain, commt, etc.)
+│           └── functions.nix   # Multi-step helpers (goMain, commt, killport, etc.)
 └── <username>/
-    └── default.nix         # Sets username/homeDirectory/stateVersion, imports programs
+    └── default.nix         # Sets username/homeDirectory/stateVersion, imports programs + per-user MAS apps
 ```
 
 ### Aliases vs Abbreviations
 
 Fish supports both. The rule used here:
 
-- **Alias** → silent replacement, runs immediately. Used for `ls` (eza), navigation shortcuts (`..`, `work`), and docker format strings where seeing the expansion adds no value.
+- **Alias** → silent replacement, runs immediately. Used for navigation shortcuts (`..`, `work`) and docker format strings where seeing the expansion adds no value.
 - **Abbreviation** → expands in-line before running. Used for git and brew commands so the full command appears in your terminal and shell history.
 
 ---

@@ -1,7 +1,10 @@
-{ config, pkgs, lib, ... }:
-
 {
-  imports = [ ./extra.nix ];
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
+  imports = [./extra.nix];
 
   programs.fish = {
     enable = true;
@@ -17,10 +20,6 @@
 
     plugins = [
       {
-        name = "plugin-git";
-        src = pkgs.fishPlugins.plugin-git.src;
-      }
-      {
         name = "pisces";
         src = pkgs.fishPlugins.pisces.src;
       }
@@ -35,7 +34,7 @@
 
       fnm env --use-on-cd --shell fish --corepack-enabled | source
 
-      export PATH="$HOME/.local/bin:$PATH"
+      fish_add_path --prepend $HOME/.local/bin
     '';
   };
 }

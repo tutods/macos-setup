@@ -1,5 +1,8 @@
-{ pkgs, nixpkgs, ... }:
 {
+  pkgs,
+  nixpkgs,
+  ...
+}: {
   # Import shared modules
   imports = [
     ./packages
@@ -16,11 +19,16 @@
   # Nix configuration
   nix = {
     settings = {
-      experimental-features = [ "nix-command" "flakes" ];
+      experimental-features = ["nix-command" "flakes"];
       warn-dirty = false;
     };
-  };
 
-  # Nix store optimization
-  nix.optimise.automatic = true;
+    gc = {
+      automatic = true;
+      interval.Weekday = 7;
+      options = "--delete-older-than 7d";
+    };
+
+    optimise.automatic = true;
+  };
 }

@@ -1,8 +1,4 @@
-{ inputs, config, lib, system, pkgs, ... }:
-let
-  inherit (inputs) nixpkgs;
-in
-{
+{...}: {
   imports = [
     ./security.nix
     ./settings.nix

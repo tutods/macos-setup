@@ -1,9 +1,9 @@
 {
   goMain = {
-    body = '' 
+    body = ''
       git checkout main
       git pull
-    '';  
+    '';
     description = "Switch to main branch and pull changes";
   };
 
@@ -33,7 +33,6 @@
     description = "Add all changes, commit with message and push";
   };
 
-  # Open the current git repo in the browser
   repo = {
     body = ''
       set url (git remote get-url origin 2>/dev/null)
@@ -48,7 +47,6 @@
     description = "Open current git repo in browser";
   };
 
-  # Kill whatever is running on a given port
   killport = {
     body = ''
       if test (count $argv) -ne 1
@@ -66,16 +64,15 @@
     description = "Kill process running on given port";
   };
 
-  # Create directory and cd into it
   mkcd = {
     body = ''
-      mkdir -p $argv && cd $argv
+      mkdir -p $argv[1] && cd $argv[1]
     '';
     description = "Create directory and cd into it";
   };
 
   ytd = {
-    body = '' 
+    body = ''
       yt-dlp -f bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best -o '%(upload_date)s - %(channel)s - %(id)s - %(title)s.%(ext)s' \
       --sponsorblock-mark "all" \
       --geo-bypass \

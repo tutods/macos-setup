@@ -1,6 +1,4 @@
-{ ... }:
-
-{
+{...}: {
   networking = {
     knownNetworkServices = [
       "Wi-Fi"
