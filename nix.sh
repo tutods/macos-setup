@@ -163,6 +163,10 @@ validate_config() {
 }
 
 # ── Interactive config picker ─────────────────────────────────────────────────
+# Result is written to SELECTED_CONFIG (not stdout) so the picker can be
+# called without command substitution, keeping terminal output visible.
+SELECTED_CONFIG=""
+
 select_config() {
   local configs=($AVAILABLE_CONFIGS)
   local n=${#configs[@]}
@@ -213,7 +217,7 @@ select_config() {
 
   tput cnorm 2>/dev/null || true
   echo ""
-  echo "${configs[$selected]}"
+  SELECTED_CONFIG="${configs[$selected]}"
 }
 
 # ── Usage ─────────────────────────────────────────────────────────────────────
@@ -407,7 +411,8 @@ main() {
   # No args — show interactive picker
   if [[ $# -eq 0 ]]; then
     check_directory
-    config=$(select_config)
+    select_config
+    config="$SELECTED_CONFIG"
   else
     case "$1" in
       --help|-h) show_usage ;;
@@ -451,7 +456,8 @@ main() {
 
   if [[ -z "$config" ]]; then
     check_directory
-    config=$(select_config)
+    select_config
+    config="$SELECTED_CONFIG"
   fi
 
   if ! validate_config "$config"; then
