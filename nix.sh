@@ -24,11 +24,10 @@ print_divider() { echo -e "  ${DIM}───────────────
 # ── Spinner ───────────────────────────────────────────────────────────────────
 SPINNER_PID=""
 SPINNER_MSG=""
-SPINNER_LAST_LINE=""
 
 _spinner() {
   local chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-  tput civis  # hide cursor
+  tput civis 2>/dev/null || true
   while true; do
     for ((i=0; i<${#chars}; i++)); do
       printf "\r  ${CYAN}%s${NC} %s" "${chars:$i:1}" "$SPINNER_MSG"
@@ -48,7 +47,7 @@ stop_spinner() {
     kill "$SPINNER_PID" 2>/dev/null || true
     wait "$SPINNER_PID" 2>/dev/null || true
     SPINNER_PID=""
-    tput cnorm  # show cursor
+    tput cnorm 2>/dev/null || true
     printf "\r%*s\r" 80 ""
   fi
 }
@@ -61,27 +60,78 @@ _cleanup() {
 }
 trap _cleanup INT TERM
 
-# ── Timer ─────────────────────────────────────────────────────────────────────
-TIMER_START=""
-
-timer_start() {
-  TIMER_START=$(date +%s)
+# ── Elapsed time ──────────────────────────────────────────────────────────────
+_fmt_elapsed() {
+  local secs="$1"
+  local mins=$(( secs / 60 ))
+  secs=$(( secs % 60 ))
+  [[ $mins -gt 0 ]] && echo "${mins}m ${secs}s" || echo "${secs}s"
 }
 
-timer_elapsed() {
-  if [[ -z "$TIMER_START" ]]; then
-    echo "0s"
-    return
-  fi
-  local now=$(date +%s)
-  local diff=$((now - TIMER_START))
-  local mins=$((diff / 60))
-  local secs=$((diff % 60))
-  if [[ $mins -gt 0 ]]; then
-    echo "${mins}m ${secs}s"
+# ── Command runner ────────────────────────────────────────────────────────────
+# Runs a command in the background, streams filtered output live, and correctly
+# preserves the exit code — fixing the silent-failure bug in the old pipeline.
+# The log file path is stored in _CMD_LOG for error display after the call.
+_CMD_LOG=""
+
+run_cmd() {
+  local spinner_msg="$1"
+  shift
+
+  _CMD_LOG=$(mktemp)
+  local cmd_pid exit_code=0
+
+  "$@" >"$_CMD_LOG" 2>&1 &
+  cmd_pid=$!
+  start_spinner "$spinner_msg"
+
+  local shown=0
+  while kill -0 "$cmd_pid" 2>/dev/null; do
+    local total
+    total=$(wc -l <"$_CMD_LOG" 2>/dev/null | awk '{print $1}')
+    if (( total > shown )); then
+      while IFS= read -r line; do
+        if [[ "$line" =~ (building|copying|fetching|activating|error:|warning:) ]]; then
+          stop_spinner
+          printf "  ${DIM}%s${NC}\n" "$line"
+          start_spinner "$spinner_msg"
+        fi
+      done < <(sed -n "$((shown+1)),${total}p" "$_CMD_LOG" 2>/dev/null || true)
+      shown=$total
+    fi
+    sleep 0.3
+  done
+
+  wait "$cmd_pid" || exit_code=$?
+  stop_spinner
+  return "$exit_code"
+}
+
+# ── Error display ─────────────────────────────────────────────────────────────
+show_errors() {
+  local logfile="$1" label="$2"
+  echo ""
+  echo -e "  ${RED}${BOLD}✖ $label failed${NC}"
+  echo ""
+
+  # Try to extract structured nix error lines first
+  local errors
+  errors=$(grep -E "^(error:|       …|       at )" "$logfile" 2>/dev/null | head -25 || true)
+
+  if [[ -n "$errors" ]]; then
+    echo -e "  ${BOLD}Error details:${NC}"
+    while IFS= read -r line; do
+      if [[ "$line" =~ ^error: ]]; then
+        echo -e "  ${RED}$line${NC}"
+      else
+        echo -e "  ${DIM}$line${NC}"
+      fi
+    done <<< "$errors"
   else
-    echo "${secs}s"
+    echo -e "  ${BOLD}Last output:${NC}"
+    tail -20 "$logfile" | sed 's/^/    /'
   fi
+  echo ""
 }
 
 # ── Banner ────────────────────────────────────────────────────────────────────
@@ -95,11 +145,8 @@ print_banner() {
 AVAILABLE_CONFIGS="macbook work"
 
 validate_config() {
-  local config="$1"
   for c in $AVAILABLE_CONFIGS; do
-    if [[ "$c" == "$config" ]]; then
-      return 0
-    fi
+    [[ "$c" == "$1" ]] && return 0
   done
   return 1
 }
@@ -115,13 +162,15 @@ show_usage() {
   echo ""
   echo -e "  ${BOLD}Options${NC}"
   echo "    --build-only    Build without applying"
+  echo "    --dry-run       Preview what would change (no apply)"
   echo "    --force         Force rebuild even if no changes"
   echo "    --help, -h      Show this help message"
   echo ""
   echo -e "  ${BOLD}Examples${NC}"
-  echo "    $0 macbook              Build and apply"
+  echo "    $0 macbook               Build and apply"
   echo "    $0 macbook --build-only  Build only"
-  echo "    $0 work --force         Force rebuild"
+  echo "    $0 macbook --dry-run     Preview changes"
+  echo "    $0 work --force          Force rebuild"
   print_divider
   exit 0
 }
@@ -165,45 +214,71 @@ setup_private_git() {
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 build_config() {
-  local config="$1"
-  local force="$2"
+  local config="$1" force="$2" step="$3"
 
-  print_step "Building configuration"
-  print_info "Config: ${BOLD}$config${NC}"
+  print_step "$step Building"
+  print_dim "Config: ${BOLD}$config${NC}"
 
   local build_cmd=(nix --extra-experimental-features 'nix-command flakes' build ".#darwinConfigurations.$config.system")
   [[ "$force" == "true" ]] && build_cmd+=(--rebuild)
 
-  print_dim "Running: ${build_cmd[*]}"
+  local t0=$SECONDS exit_code=0
+  run_cmd "Building $config…" "${build_cmd[@]}" || exit_code=$?
 
-  timer_start
-  start_spinner "Building $config..."
-
-  if "${build_cmd[@]}" 2>&1 | while IFS= read -r line; do
-    if [[ "$line" =~ (building|copying|error) ]]; then
-      stop_spinner
-      echo -e "  ${DIM}$line${NC}"
-      start_spinner "Building $config..."
-    fi
-  done; then
-    stop_spinner
-    local elapsed=$(timer_elapsed)
-    print_success "Build completed in ${BOLD}$elapsed${NC}"
+  if [[ $exit_code -eq 0 ]]; then
+    print_success "Built in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
+    rm -f "$_CMD_LOG"
   else
-    stop_spinner
-    local elapsed=$(timer_elapsed)
-    print_error "Build failed after $elapsed"
+    show_errors "$_CMD_LOG" "Build"
+    rm -f "$_CMD_LOG"
+    exit 1
+  fi
+}
+
+# ── Dry run ───────────────────────────────────────────────────────────────────
+dry_run_config() {
+  local config="$1" step="$2"
+
+  print_step "$step Previewing changes"
+  print_dim "Showing what would be built or fetched (no changes applied)"
+
+  local dry_cmd=(nix --extra-experimental-features 'nix-command flakes' build --dry-run ".#darwinConfigurations.$config.system")
+
+  local t0=$SECONDS exit_code=0
+  run_cmd "Previewing $config…" "${dry_cmd[@]}" || exit_code=$?
+
+  if [[ $exit_code -eq 0 ]]; then
+    print_success "Preview completed in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
+    echo ""
+
+    local changes
+    changes=$(grep -E "^(these [0-9]+ derivations?|these [0-9]+ paths?|  /nix/store)" "$_CMD_LOG" 2>/dev/null | head -30 || true)
+    if [[ -n "$changes" ]]; then
+      echo -e "  ${BOLD}Changes:${NC}"
+      while IFS= read -r line; do
+        if [[ "$line" =~ ^these ]]; then
+          echo -e "  ${CYAN}$line${NC}"
+        else
+          echo -e "  ${DIM}$line${NC}"
+        fi
+      done <<< "$changes"
+    else
+      echo -e "  ${DIM}Nothing to build — already up to date.${NC}"
+    fi
+    rm -f "$_CMD_LOG"
+  else
+    show_errors "$_CMD_LOG" "Preview"
+    rm -f "$_CMD_LOG"
     exit 1
   fi
 }
 
 # ── Apply ─────────────────────────────────────────────────────────────────────
 apply_config() {
-  local config="$1"
-  local force="$2"
+  local config="$1" force="$2" step="$3"
 
-  print_step "Applying configuration"
-  print_info "Config: ${BOLD}$config${NC}"
+  print_step "$step Applying"
+  print_dim "Config: ${BOLD}$config${NC}"
 
   local switch_cmd=(switch --flake ".#$config")
   [[ "$force" == "true" ]] && switch_cmd+=(--rebuild)
@@ -217,11 +292,7 @@ apply_config() {
     rebuild_cmd=(sudo nix --extra-experimental-features 'nix-command flakes' run nix-darwin/nix-darwin-25.11#darwin-rebuild -- "${switch_cmd[@]}")
   fi
 
-  print_dim "Running: darwin-rebuild ${switch_cmd[*]}"
-
-  # Pre-authenticate with sudo so the password prompt is separate from
-  # darwin-rebuild output. Once authenticated, sudo credentials are cached
-  # for ~5 minutes and the spinner can run uninterrupted.
+  # Pre-authenticate so the password prompt appears before the spinner starts.
   echo ""
   echo -e "  ${DIM}Authentication required — enter sudo password if prompted${NC}"
   if ! sudo -v; then
@@ -230,32 +301,31 @@ apply_config() {
   fi
   echo ""
 
-  timer_start
-  start_spinner "Applying $config..."
-
-  # Redirect output to a temp file while spinner runs
-  local tmpfile
-  tmpfile=$(mktemp)
-  local exit_code=0
-
-  "${rebuild_cmd[@]}" > "$tmpfile" 2>&1 || exit_code=$?
-
-  stop_spinner
+  local t0=$SECONDS exit_code=0
+  run_cmd "Applying $config…" "${rebuild_cmd[@]}" || exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
-    local elapsed=$(timer_elapsed)
-    print_success "Configuration applied in ${BOLD}$elapsed${NC}"
+    print_success "Applied in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
+    rm -f "$_CMD_LOG"
   else
-    local elapsed=$(timer_elapsed)
-    print_error "Failed to apply configuration after $elapsed"
-    echo ""
-    echo -e "  ${DIM}Last output:${NC}"
-    tail -50 "$tmpfile" | sed 's/^/    /'
-    rm -f "$tmpfile"
+    show_errors "$_CMD_LOG" "Apply"
+    rm -f "$_CMD_LOG"
     exit 1
   fi
+}
 
-  rm -f "$tmpfile"
+# ── Summary ───────────────────────────────────────────────────────────────────
+print_summary() {
+  local config="$1" mode="$2" total_secs="$3"
+  echo ""
+  print_divider
+  echo ""
+  echo -e "  ${GREEN}${BOLD}✔  All done${NC}"
+  echo ""
+  printf "  ${DIM}%-9s${NC}  ${BOLD}${CYAN}%s${NC}\n" "Config"  "$config"
+  printf "  ${DIM}%-9s${NC}  %s\n"                    "Mode"    "$mode"
+  printf "  ${DIM}%-9s${NC}  %s\n"                    "Time"    "$(_fmt_elapsed "$total_secs")"
+  echo ""
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -266,8 +336,7 @@ main() {
   fi
 
   local config="$1"
-  local build_only=false
-  local force=false
+  local build_only=false dry_run=false force=false
 
   case "$config" in
     --help|-h) show_usage ;;
@@ -285,6 +354,7 @@ main() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --build-only) build_only=true ;;
+      --dry-run)    dry_run=true ;;
       --force)      force=true ;;
       --help|-h)    show_usage ;;
       *) print_error "Unknown option: $1"; show_usage ;;
@@ -295,31 +365,36 @@ main() {
   check_directory
 
   print_banner
-  print_info "Configuration: ${BOLD}$config${NC}"
+  printf "  ${BOLD}%-9s${NC}  ${CYAN}%s${NC}\n" "Config" "$config"
   if [[ "$build_only" == "true" ]]; then
-    print_dim "Mode: build only (no apply)"
+    print_dim "Mode: build only"
+  elif [[ "$dry_run" == "true" ]]; then
+    print_dim "Mode: dry run (preview only)"
   elif [[ "$force" == "true" ]]; then
     print_dim "Mode: force rebuild"
   fi
   print_divider
 
-  if [[ "$build_only" == "false" ]]; then
-    setup_private_git
-  fi
+  local total_start=$SECONDS
 
-  if [[ "$build_only" == "true" ]]; then
-    build_config "$config" "$force"
+  if [[ "$dry_run" == "true" ]]; then
+    dry_run_config "$config" "[1/1]"
+    print_summary "$config" "dry run" $(( SECONDS - total_start ))
+
+  elif [[ "$build_only" == "true" ]]; then
+    build_config "$config" "$force" "[1/1]"
+    print_summary "$config" "build only" $(( SECONDS - total_start ))
+    echo -e "  ${DIM}Run ${BOLD}$0 $config${NC}${DIM} to apply.${NC}"
     echo ""
-    print_success "Build complete! Run ${BOLD}$0 $config${NC} to apply."
+
   else
-    build_config "$config" "$force"
-    apply_config "$config" "$force"
+    setup_private_git
+    build_config  "$config" "$force" "[1/2]"
+    apply_config  "$config" "$force" "[2/2]"
+    print_summary "$config" "build + apply" $(( SECONDS - total_start ))
+    echo -e "  ${DIM}Tip: run ${BOLD}brew doctor${NC}${DIM} if you encounter Homebrew issues.${NC}"
     echo ""
-    print_divider
-    print_success "Done! Run ${BOLD}brew doctor${NC} if you encounter Homebrew issues."
   fi
-
-  echo ""
 }
 
 main "$@"
