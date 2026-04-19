@@ -223,7 +223,7 @@ build_config() {
   [[ "$force" == "true" ]] && build_cmd+=(--rebuild)
 
   local t0=$SECONDS exit_code=0
-  run_cmd "Building $config…" "${build_cmd[@]}" || exit_code=$?
+  run_cmd "Building ${config}…" "${build_cmd[@]}" || exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
     print_success "Built in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
@@ -245,7 +245,7 @@ dry_run_config() {
   local dry_cmd=(nix --extra-experimental-features 'nix-command flakes' build --dry-run ".#darwinConfigurations.$config.system")
 
   local t0=$SECONDS exit_code=0
-  run_cmd "Previewing $config…" "${dry_cmd[@]}" || exit_code=$?
+  run_cmd "Previewing ${config}…" "${dry_cmd[@]}" || exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
     print_success "Preview completed in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
@@ -302,7 +302,7 @@ apply_config() {
   echo ""
 
   local t0=$SECONDS exit_code=0
-  run_cmd "Applying $config…" "${rebuild_cmd[@]}" || exit_code=$?
+  run_cmd "Applying ${config}…" "${rebuild_cmd[@]}" || exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
     print_success "Applied in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
