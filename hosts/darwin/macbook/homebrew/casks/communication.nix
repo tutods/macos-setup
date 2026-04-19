@@ -4,7 +4,4 @@
   "telegram"
   "whatsapp"
   "tempbox"
-
-  # Meetings
-  "microsoft-teams"
 ]
