@@ -69,10 +69,8 @@ _fmt_elapsed() {
 }
 
 # ── Command runner ────────────────────────────────────────────────────────────
-# Runs a command in the background, streams filtered output live, and correctly
-# preserves the exit code — fixing the silent-failure bug in the old pipeline.
-# The log file path is stored in _CMD_LOG for error display after the call.
 _CMD_LOG=""
+LOG_FILE=""   # set via --log <file> to persist full output for debugging
 
 run_cmd() {
   local spinner_msg="$1"
@@ -104,6 +102,15 @@ run_cmd() {
 
   wait "$cmd_pid" || exit_code=$?
   stop_spinner
+
+  # Append to debug log file if requested
+  if [[ -n "$LOG_FILE" ]]; then
+    {
+      printf "\n=== %s | %s ===\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$spinner_msg"
+      cat "$_CMD_LOG"
+    } >> "$LOG_FILE"
+  fi
+
   return "$exit_code"
 }
 
@@ -114,7 +121,6 @@ show_errors() {
   echo -e "  ${RED}${BOLD}✖ $label failed${NC}"
   echo ""
 
-  # Try to extract structured nix error lines first
   local errors
   errors=$(grep -E "^(error:|       …|       at )" "$logfile" 2>/dev/null | head -25 || true)
 
@@ -130,6 +136,11 @@ show_errors() {
   else
     echo -e "  ${BOLD}Last output:${NC}"
     tail -20 "$logfile" | sed 's/^/    /'
+  fi
+
+  if [[ -n "$LOG_FILE" ]]; then
+    echo ""
+    echo -e "  ${DIM}Full output saved to: ${BOLD}$LOG_FILE${NC}"
   fi
   echo ""
 }
@@ -151,26 +162,84 @@ validate_config() {
   return 1
 }
 
+# ── Interactive config picker ─────────────────────────────────────────────────
+select_config() {
+  local configs=($AVAILABLE_CONFIGS)
+  local n=${#configs[@]}
+  local selected=0
+
+  print_banner
+  echo -e "  ${BOLD}Select a machine:${NC}"
+  echo ""
+
+  # Draw initial list
+  for i in "${!configs[@]}"; do
+    if [[ $i -eq $selected ]]; then
+      echo -e "  ${CYAN}▶  ${BOLD}${configs[$i]}${NC}"
+    else
+      echo -e "     ${DIM}${configs[$i]}${NC}"
+    fi
+  done
+
+  tput civis 2>/dev/null || true
+
+  while true; do
+    local key seq
+    IFS= read -rsn1 key
+
+    case "$key" in
+      $'\x1b')
+        IFS= read -rsn2 -t 0.1 seq 2>/dev/null || seq=""
+        case "$seq" in
+          '[A') (( selected > 0 )) && (( selected-- )) ;;       # up
+          '[B') (( selected < n - 1 )) && (( selected++ )) ;;   # down
+        esac
+        ;;
+      '') break ;;                                               # enter
+      q|Q) tput cnorm 2>/dev/null || true; echo ""; exit 0 ;;
+    esac
+
+    # Redraw: move cursor up n lines, reprint
+    printf "\033[%dA" "$n"
+    for i in "${!configs[@]}"; do
+      printf "\033[2K"  # clear line
+      if [[ $i -eq $selected ]]; then
+        echo -e "  ${CYAN}▶  ${BOLD}${configs[$i]}${NC}"
+      else
+        echo -e "     ${DIM}${configs[$i]}${NC}"
+      fi
+    done
+  done
+
+  tput cnorm 2>/dev/null || true
+  echo ""
+  echo "${configs[$selected]}"
+}
+
 # ── Usage ─────────────────────────────────────────────────────────────────────
 show_usage() {
   print_banner
-  echo -e "  ${BOLD}Usage:${NC} $0 <configuration> [options]"
+  echo -e "  ${BOLD}Usage:${NC} $0 [configuration] [options]"
   echo ""
   echo -e "  ${BOLD}Configurations${NC} ${DIM}(defined in flake.nix)${NC}"
   echo "    macbook      Personal MacBook"
   echo "    work         Work laptop"
+  echo -e "  ${DIM}  Omit to get an interactive picker.${NC}"
   echo ""
   echo -e "  ${BOLD}Options${NC}"
-  echo "    --build-only    Build without applying"
-  echo "    --dry-run       Preview what would change (no apply)"
-  echo "    --force         Force rebuild even if no changes"
-  echo "    --help, -h      Show this help message"
+  echo "    --build-only      Build without applying"
+  echo "    --dry-run         Preview what would change (no apply)"
+  echo "    --force           Force rebuild even if no changes"
+  echo "    --log <file>      Save full command output to file for debugging"
+  echo "    --help, -h        Show this help message"
   echo ""
   echo -e "  ${BOLD}Examples${NC}"
-  echo "    $0 macbook               Build and apply"
-  echo "    $0 macbook --build-only  Build only"
-  echo "    $0 macbook --dry-run     Preview changes"
-  echo "    $0 work --force          Force rebuild"
+  echo "    $0                        Interactive machine picker"
+  echo "    $0 macbook                Build and apply"
+  echo "    $0 macbook --build-only   Build only"
+  echo "    $0 macbook --dry-run      Preview changes"
+  echo "    $0 macbook --log out.log  Build, apply, save full log"
+  echo "    $0 work --force           Force rebuild"
   print_divider
   exit 0
 }
@@ -292,7 +361,6 @@ apply_config() {
     rebuild_cmd=(sudo nix --extra-experimental-features 'nix-command flakes' run nix-darwin/nix-darwin-25.11#darwin-rebuild -- "${switch_cmd[@]}")
   fi
 
-  # Pre-authenticate so the password prompt appears before the spinner starts.
   echo ""
   echo -e "  ${DIM}Authentication required — enter sudo password if prompted${NC}"
   if ! sudo -v; then
@@ -325,42 +393,73 @@ print_summary() {
   printf "  ${DIM}%-9s${NC}  ${BOLD}${CYAN}%s${NC}\n" "Config"  "$config"
   printf "  ${DIM}%-9s${NC}  %s\n"                    "Mode"    "$mode"
   printf "  ${DIM}%-9s${NC}  %s\n"                    "Time"    "$(_fmt_elapsed "$total_secs")"
+  if [[ -n "$LOG_FILE" ]]; then
+    printf "  ${DIM}%-9s${NC}  %s\n"                  "Log"     "$LOG_FILE"
+  fi
   echo ""
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 main() {
-  if [[ $# -eq 0 ]]; then
-    print_error "No configuration specified"
-    show_usage
-  fi
-
-  local config="$1"
+  local config=""
   local build_only=false dry_run=false force=false
 
-  case "$config" in
-    --help|-h) show_usage ;;
-  esac
+  # No args — show interactive picker
+  if [[ $# -eq 0 ]]; then
+    check_directory
+    config=$(select_config)
+  else
+    case "$1" in
+      --help|-h) show_usage ;;
+    esac
 
-  if ! validate_config "$config"; then
-    print_error "Unknown configuration: ${BOLD}$config${NC}"
-    echo ""
-    echo -e "  Available: ${CYAN}$AVAILABLE_CONFIGS${NC}"
-    echo -e "  Run ${BOLD}$0 --help${NC} for more information"
-    exit 1
+    # First arg is a config name or a flag
+    if validate_config "$1"; then
+      config="$1"
+      shift
+    fi
   fi
 
-  shift
+  # Parse remaining flags
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --build-only) build_only=true ;;
       --dry-run)    dry_run=true ;;
       --force)      force=true ;;
-      --help|-h)    show_usage ;;
-      *) print_error "Unknown option: $1"; show_usage ;;
+      --log)
+        shift
+        if [[ $# -eq 0 || "$1" == --* ]]; then
+          print_error "--log requires a file path"
+          exit 1
+        fi
+        LOG_FILE="$1"
+        # Initialise / clear the log file
+        printf "# nix.sh log — %s\n\n" "$(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
+        ;;
+      --help|-h) show_usage ;;
+      *)
+        if [[ -z "$config" ]] && validate_config "$1"; then
+          config="$1"
+        else
+          print_error "Unknown option: $1"
+          show_usage
+        fi
+        ;;
     esac
     shift
   done
+
+  if [[ -z "$config" ]]; then
+    check_directory
+    config=$(select_config)
+  fi
+
+  if ! validate_config "$config"; then
+    print_error "Unknown configuration: ${BOLD}$config${NC}"
+    echo ""
+    echo -e "  Available: ${CYAN}$AVAILABLE_CONFIGS${NC}"
+    exit 1
+  fi
 
   check_directory
 
@@ -373,6 +472,7 @@ main() {
   elif [[ "$force" == "true" ]]; then
     print_dim "Mode: force rebuild"
   fi
+  [[ -n "$LOG_FILE" ]] && print_dim "Log:  $LOG_FILE"
   print_divider
 
   local total_start=$SECONDS
