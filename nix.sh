@@ -210,7 +210,7 @@ select_config() {
       '')  # enter
         break
         ;;
-      q|Q)
+      $'\x1b'|q|Q)
         tput cnorm 2>/dev/null || true
         echo ""
         exit 0
