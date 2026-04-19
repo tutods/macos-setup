@@ -53,6 +53,14 @@ stop_spinner() {
   fi
 }
 
+_cleanup() {
+  stop_spinner
+  echo ""
+  print_warning "Interrupted"
+  exit 130
+}
+trap _cleanup INT TERM
+
 # ── Timer ─────────────────────────────────────────────────────────────────────
 TIMER_START=""
 
