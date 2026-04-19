@@ -172,47 +172,53 @@ select_config() {
   local n=${#configs[@]}
   local selected=0
 
-  print_banner
-  echo -e "  ${BOLD}Select a machine:${NC}"
-  echo ""
-
-  # Draw initial list
-  for i in "${!configs[@]}"; do
-    if [[ $i -eq $selected ]]; then
-      echo -e "  ${CYAN}▶  ${BOLD}${configs[$i]}${NC}"
-    else
-      echo -e "     ${DIM}${configs[$i]}${NC}"
-    fi
-  done
-
-  tput civis 2>/dev/null || true
-
-  while true; do
-    local key seq
-    IFS= read -rsn1 key
-
-    case "$key" in
-      $'\x1b')
-        IFS= read -rsn2 -t 0.1 seq 2>/dev/null || seq=""
-        case "$seq" in
-          '[A') (( selected > 0 )) && (( selected-- )) ;;       # up
-          '[B') (( selected < n - 1 )) && (( selected++ )) ;;   # down
-        esac
-        ;;
-      '') break ;;                                               # enter
-      q|Q) tput cnorm 2>/dev/null || true; echo ""; exit 0 ;;
-    esac
-
-    # Redraw: move cursor up n lines, reprint
-    printf "\033[%dA" "$n"
+  _menu_draw() {
     for i in "${!configs[@]}"; do
-      printf "\033[2K"  # clear line
+      printf "\033[2K"
       if [[ $i -eq $selected ]]; then
         echo -e "  ${CYAN}▶  ${BOLD}${configs[$i]}${NC}"
       else
         echo -e "     ${DIM}${configs[$i]}${NC}"
       fi
     done
+  }
+
+  print_banner
+  echo -e "  ${BOLD}Select a machine:${NC}"
+  echo ""
+  _menu_draw
+  tput civis 2>/dev/null || true
+
+  while true; do
+    local key=""
+    IFS= read -rsn1 key
+
+    # Read the full escape sequence (ESC [ X) as one unit
+    if [[ "$key" == $'\x1b' ]]; then
+      local rest=""
+      IFS= read -rsn2 -t 0.05 rest 2>/dev/null || true
+      key="${key}${rest}"
+    fi
+
+    case "$key" in
+      $'\x1b[A')  # up arrow
+        [[ $selected -gt 0 ]] && selected=$(( selected - 1 ))
+        ;;
+      $'\x1b[B')  # down arrow
+        [[ $selected -lt $(( n - 1 )) ]] && selected=$(( selected + 1 ))
+        ;;
+      '')  # enter
+        break
+        ;;
+      q|Q)
+        tput cnorm 2>/dev/null || true
+        echo ""
+        exit 0
+        ;;
+    esac
+
+    printf "\033[%dA" "$n"
+    _menu_draw
   done
 
   tput cnorm 2>/dev/null || true
