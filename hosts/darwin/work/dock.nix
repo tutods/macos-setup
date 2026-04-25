@@ -6,7 +6,7 @@
           small = false;
         };
       }
-      "/Applications/Firefox.app"
+      "/Applications/Zen.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Calendar.app"
       {

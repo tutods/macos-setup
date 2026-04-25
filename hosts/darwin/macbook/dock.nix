@@ -6,7 +6,7 @@
           small = false;
         };
       }
-      "/Applications/Firefox.app"
+      "/Applications/Zen.app"
       "/Applications/Safari.app"
       "/Applications/Arc.app"
       "/Applications/Google Chrome.app"

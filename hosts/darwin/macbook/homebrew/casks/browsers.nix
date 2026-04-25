@@ -1,4 +1,3 @@
 [
-  "zen"
   "brave-browser"
 ]

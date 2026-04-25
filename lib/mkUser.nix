@@ -9,8 +9,7 @@
 {
   username,
   extraImports ? [],
-}:
-{lib, ...}: {
+}: {lib, ...}: {
   home.username = username;
   home.homeDirectory = lib.mkForce "/Users/${username}";
   home.stateVersion = "23.11";
