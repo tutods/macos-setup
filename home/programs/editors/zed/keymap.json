@@ -1,0 +1,8 @@
+[
+  {
+    "context": "Workspace",
+    "unbind": {
+      "ctrl-<": "terminal_panel::Toggle",
+    },
+  },
+]
