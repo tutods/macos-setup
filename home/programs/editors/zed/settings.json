@@ -1,12 +1,3 @@
-// settings.json, generated at Tue Apr 07 2026 10:06:53 GMT+0800 (Singapore Standard Time)
-// Zed settings
-//
-// For information on how to configure Zed, see the Zed
-// documentation: https://zed.dev/docs/configuring-zed
-//
-// To see all of Zed's default settings without changing your
-// custom settings, run the `open default settings` command
-// from the command palette or from `Zed` application menu.
 {
   "edit_predictions": {
     "provider": "zed",
@@ -73,9 +64,6 @@
   },
   // NOTE: Change the font family to your preference
   "buffer_font_family": "Maple Mono NF",
-  // Vim mode settings
-  "vim_mode": true,
-  "vim": {},
   "which_key": {
     "enabled": true,
   },
