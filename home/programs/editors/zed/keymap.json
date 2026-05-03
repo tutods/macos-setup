@@ -1,8 +1,31 @@
 [
   {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-shift-`": "terminal_panel::ToggleFocus",
+    },
+  },
+  {
     "context": "Workspace",
-    "unbind": {
-      "ctrl-<": "terminal_panel::Toggle",
+    "bindings": {
+      "ctrl-`": "terminal_panel::Toggle",
+    },
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "cmd-/": [
+        "editor::ToggleComments",
+        {
+          "advance_downwards": false,
+        },
+      ],
+    },
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-space": "editor::ShowCompletions",
     },
   },
 ]
