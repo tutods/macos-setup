@@ -1,1 +1,37 @@
-{}
+{
+  "project_panel": {
+    "dock": "left",
+  },
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry",
+    },
+  },
+  "git_panel": {
+    "sort_by_path": true,
+    "tree_view": true,
+  },
+  "diff_view_style": "split",
+  "ui_font_size": 15,
+  "buffer_font_size": 14.0,
+  "buffer_line_height": "comfortable",
+  "base_keymap": "VSCode",
+  "relative_line_numbers": "disabled",
+  "terminal": {
+    "font_family": "JetBrainsMonoNL Nerd Font Mono",
+    "font_size": 12.0,
+    "cursor_shape": "bar",
+    "env": {
+      "EDITOR": "zed --wait",
+    },
+    "toolbar": { "breadcrumbs": false },
+  },
+  "buffer_font_family": "JetBrains Mono",
+  "ui_font_family": ".SystemUIFont",
+  "icon_theme": "Warm Charmed Icons",
+  "theme": {
+    "mode": "dark",
+    "light": "GitHub Light",
+    "dark": "Rosé Pine Moon",
+  },
+}
