@@ -72,9 +72,6 @@
   "disable_ai": false,
   "show_edit_predictions": true,
   "format_on_save": "on",
-  "notification_panel": {
-    "dock": "right",
-  },
   "collaboration_panel": {
     "button": false,
   },
