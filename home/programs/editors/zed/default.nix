@@ -1,8 +1,8 @@
 {config, ...}: {
-  home.file."Library/Application Support/Zed/settings.json" = {
+  xdg.configFile."zed/settings.json" = {
     source = ./settings.json;
   };
-  home.file."Library/Application Support/Zed/keymap.json" = {
+  xdg.configFile."zed/keymap.json" = {
     source = ./keymap.json;
   };
 }
