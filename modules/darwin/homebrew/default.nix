@@ -3,6 +3,7 @@
   browserCasks = import ./casks/browsers.nix;
   communicationCasks = import ./casks/communication.nix;
   utilsCasks = import ./casks/utils.nix;
+  fontsCasks = import ./casks/fonts.nix;
 in {
   homebrew = {
     enable = true;
@@ -15,6 +16,6 @@ in {
       "mas"
       "rtk" #  High-performance CLI proxy that reduces LLM token consumption by 60-90%
     ];
-    casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks;
+    casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks ++ fontsCasks;
   };
 }
