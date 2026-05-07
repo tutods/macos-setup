@@ -2,6 +2,7 @@
   description = "Multi-device, multi-user Nix Darwin + Home Manager setup";
 
   inputs = {
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
@@ -19,6 +20,7 @@
   outputs = {
     self,
     nixpkgs,
+    nixpkgs-unstable,
     nix-darwin,
     home-manager,
     nix-homebrew,
@@ -26,6 +28,12 @@
   }: let
     system = "aarch64-darwin";
     pkgs = import nixpkgs {
+      inherit system;
+      config = {
+        allowUnfree = true;
+      };
+    };
+    pkgsUnstable = import nixpkgs-unstable {
       inherit system;
       config = {
         allowUnfree = true;
@@ -52,7 +60,7 @@
             hostPath
           ];
         specialArgs = {
-          inherit pkgs nixpkgs nix-darwin home-manager nix-homebrew mkHost mkUser;
+          inherit pkgs pkgsUnstable nixpkgs nix-darwin home-manager nix-homebrew mkHost mkUser;
         };
       };
   in {

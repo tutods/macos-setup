@@ -17,7 +17,7 @@ in {
       brewUser = "tutods";
       homeConfig = mkUser {
         username = "tutods";
-        extraImports = [../../../home/users/tutods];
+        role = "personal";
       };
       masApps = sharedMasApps // macbookMasApps;
     })

@@ -53,8 +53,9 @@ Applying uses `darwin-rebuild switch --flake ".#<config>"` (local binary if pres
 |------|------|
 | `modules/` | Shared system-level config (applied to every host) |
 | `hosts/darwin/<name>/` | Per-machine config: system settings, dock, Homebrew casks |
-| `home/<username>/` | Per-user Home Manager config; imports from `home/programs/` |
-| `home/programs/` | Shared program configs (shell, CLI tools, apps) reused across users |
+| `home/common/` | Shared Home Manager config (shell, CLI tools, editors) — every user gets this |
+| `home/roles/` | Context-specific Home Manager config (`personal.nix`, `work.nix`) |
+| `home/identity/` | Person-specific overrides (GPG keys, email) — rarely used |
 
 ### Homebrew Casks
 
@@ -62,7 +63,7 @@ Shared casks live in `modules/darwin/homebrew/casks/` (applied to every host). M
 
 ### Shell Configuration
 
-Fish shell is the primary shell, configured in `home/programs/shell/fish/` with separate files for aliases (`alias.nix`), abbreviations (`abbrs.nix`), functions (`functions.nix`), completions (`completions.nix`), and extra tool integrations (`extra.nix`).
+Fish shell is the primary shell, configured in `home/common/shell/fish/` with separate files for aliases (`alias.nix`), abbreviations (`abbrs.nix`), functions (`functions.nix`), completions (`completions.nix`), and extra tool integrations (`extra.nix`).
 
 ### Adding a New Host
 
@@ -72,14 +73,14 @@ Fish shell is the primary shell, configured in `home/programs/shell/fish/` with 
 
 ### Adding a New User
 
-1. Create `home/<username>/default.nix` (set `home.username`, `home.homeDirectory`, `home.stateVersion`, import `../programs`)
+1. Create `home/identity/<username>.nix` for person-specific overrides (if needed)
 2. Pass it to `mkHost` in the host's `default.nix`:
    ```nix
-   mkHost {
-     username   = "<username>";
-     homeConfig = import ../../../home/<username>/default.nix;
-     ...
-   }
+   homeConfig = mkUser {
+     username     = "<username>";
+     role         = "personal";  # or "work"
+     extraImports = [ ../../../home/identity/<username>.nix ];
+   };
    ```
 
 ## CI

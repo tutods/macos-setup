@@ -14,7 +14,7 @@ in {
       brewUser = "admin.daniel.a.sousa";
       homeConfig = mkUser {
         username = "daniel.a.sousa";
-        extraImports = [../../../home/users/daniel.a.sousa];
+        role = "work";
       };
       masApps = sharedMasApps;
     })

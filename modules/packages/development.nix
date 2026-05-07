@@ -1,7 +1,8 @@
-{pkgs, ...}: {
-  environment.systemPackages = with pkgs; [
+{pkgsUnstable, ...}: {
+  environment.systemPackages = with pkgsUnstable; [
     claude-code
     opencode
+    copilot-cli
     pipx
   ];
 }
