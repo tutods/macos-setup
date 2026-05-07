@@ -4,16 +4,15 @@
   inputs = {
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
-    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    # # Homebrew package manager — override pinned brew to avoid cask bugs
-    # nix-homebrew = {
-    #   url = "github:zhaofengli/nix-homebrew";
-    #   inputs.brew-src.url = "github:Homebrew/brew/5.1.10";
-    # };
+    nix-homebrew = {
+      url = "github:zhaofengli/nix-homebrew";
+    };
 
     # Home manager
     home-manager = {
