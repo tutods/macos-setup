@@ -3,6 +3,7 @@
     claude-code
     opencode
     copilot-cli
+    ollama
     pipx
   ];
 }
