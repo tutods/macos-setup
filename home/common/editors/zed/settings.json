@@ -1,37 +1,105 @@
 {
+  // UI & View
+  "theme": {
+    "mode": "dark",
+    "light": "GitHub Light",
+    "dark": "Rosé Pine Moon"
+  },
+  "icon_theme": "Warm Charmed Icons",
+  "diff_view_style": "split",
   "project_panel": {
     "dock": "left",
-  },
-  "agent_servers": {
-    "claude-acp": {
-      "type": "registry",
-    },
+    "auto_fold_dirs": true,
+    "auto_reveal_entries": false
   },
   "git_panel": {
     "sort_by_path": true,
-    "tree_view": true,
+    "tree_view": true
   },
-  "diff_view_style": "split",
-  "ui_font_size": 15,
-  "buffer_font_size": 14.0,
-  "buffer_line_height": "comfortable",
+
+  // Editor
   "base_keymap": "VSCode",
   "relative_line_numbers": "disabled",
+  "ui_font_family": ".SystemUIFont",
+  "ui_font_size": 15,
+  "buffer_font_family": "JetBrains Mono",
+  "buffer_font_size": 14.0,
+  "buffer_line_height": "comfortable",
+
+  // Workspace & Files
+  "autosave": "on_focus_change",
+  "format_on_save": "on",
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/node_modules",
+    "**/.next",
+    "**/dist",
+    "**/out",
+    "**/build"
+  ],
+
+  // Languages & LSP
+  "inlay_hints": {
+    "enabled": true
+  },
+  "languages": {
+    "TypeScript": {
+      "formatter": "language_server"
+    },
+    "TSX": {
+      "formatter": "language_server"
+    },
+    "JavaScript": {
+      "formatter": "language_server"
+    },
+    "Nix": {
+      "formatter": {
+        "external": {
+          "command": "alejandra"
+        }
+      }
+    }
+  },
+  "lsp": {
+    "tailwindcss-language-server": {
+      "initialization_options": {
+        "userLanguages": {
+          "rust": "html"
+        }
+      },
+      "settings": {
+        "tailwindCSS": {
+          "experimental": {
+            "classRegex": [
+              ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+              ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+              ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+              ["twMerge\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+              ["tv\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+            ]
+          }
+        }
+      }
+    }
+  },
+
+  // Terminal
   "terminal": {
     "font_family": "JetBrainsMonoNL Nerd Font Mono",
     "font_size": 12.0,
     "cursor_shape": "bar",
     "env": {
-      "EDITOR": "zed --wait",
+      "EDITOR": "zed --wait"
     },
-    "toolbar": { "breadcrumbs": false },
+    "toolbar": {
+      "breadcrumbs": false
+    }
   },
-  "buffer_font_family": "JetBrains Mono",
-  "ui_font_family": ".SystemUIFont",
-  "icon_theme": "Warm Charmed Icons",
-  "theme": {
-    "mode": "dark",
-    "light": "GitHub Light",
-    "dark": "Rosé Pine Moon",
-  },
+
+  // Extension/Agent
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  }
 }
