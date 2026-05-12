@@ -4,4 +4,5 @@
   "beekeeper-studio"
   "zed"
   "ghostty"
+  "copilot-cli"
 ]

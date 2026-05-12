@@ -2,7 +2,7 @@
   environment.systemPackages = with pkgsUnstable; [
     claude-code
     opencode
-    copilot-cli
+    codex
     ollama
     pipx
   ];
