@@ -7,7 +7,7 @@
         };
       }
       "/Applications/Zen.app"
-      "/System/Applications/Slack.app"
+      "/Applications/Slack.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Calendar.app"
       {
