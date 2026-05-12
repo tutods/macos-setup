@@ -263,7 +263,24 @@ check_directory() {
 }
 
 setup_private_git() {
-  local private_file="$HOME/.config/git/private"
+  local config="$1"
+  local target_user="${USER:-$(id -un)}"
+
+  case "$config" in
+    macbook) target_user="tutods" ;;
+    work) target_user="daniel.a.sousa" ;;
+  esac
+
+  local target_home="/Users/$target_user"
+  if [[ "$target_user" == "${USER:-}" ]]; then
+    target_home="$HOME"
+  fi
+
+  local private_file="$target_home/.config/git/private"
+
+  if [[ "$target_user" != "${USER:-}" ]]; then
+    print_info "Using git identity for ${target_user}"
+  fi
 
   if [[ -f "$private_file" ]]; then
     print_dim "Private git config found ✓"
@@ -284,9 +301,15 @@ setup_private_git() {
     return 1
   fi
 
-  mkdir -p "$(dirname "$private_file")"
-  git config --file "$private_file" user.name "$name"
-  git config --file "$private_file" user.email "$email"
+  if [[ "$target_user" == "${USER:-}" ]]; then
+    mkdir -p "$(dirname "$private_file")"
+    git config --file "$private_file" user.name "$name"
+    git config --file "$private_file" user.email "$email"
+  else
+    sudo -u "$target_user" mkdir -p "$(dirname "$private_file")"
+    sudo -u "$target_user" git config --file "$private_file" user.name "$name"
+    sudo -u "$target_user" git config --file "$private_file" user.email "$email"
+  fi
 
   print_success "Private git config created at $private_file"
 }
@@ -500,7 +523,7 @@ main() {
     echo ""
 
   else
-    setup_private_git
+    setup_private_git "$config"
     build_config  "$config" "$force" "[1/2]"
     apply_config  "$config" "$force" "[2/2]"
     print_summary "$config" "build + apply" $(( SECONDS - total_start ))
