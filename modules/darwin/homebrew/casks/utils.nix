@@ -16,7 +16,6 @@
   # Others
   "bitwarden"
   "raycast"
-  "iina"
   "logi-options+"
   "kap"
   "numi"

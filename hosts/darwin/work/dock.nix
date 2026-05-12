@@ -7,6 +7,7 @@
         };
       }
       "/Applications/Zen.app"
+      "/System/Applications/Slack.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Calendar.app"
       {
@@ -16,6 +17,7 @@
       }
       "/Applications/Zed.app"
       "/Users/daniel.a.sousa/Applications/Home Manager Apps/Visual Studio Code.app"
+      "/Applications/Ghostty.app"
       "/Applications/Warp.app"
       {
         spacer = {

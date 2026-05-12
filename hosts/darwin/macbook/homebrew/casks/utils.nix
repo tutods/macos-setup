@@ -21,4 +21,5 @@
   "1password"
   "jordanbaird-ice"
   "transmission"
+  "iina"
 ]
