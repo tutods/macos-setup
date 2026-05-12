@@ -1,9 +1,9 @@
 {...}: {
   homebrew = {
     brews = [
-      "google-cloud-sdk"
     ];
     casks = [
+      "gcloud-cli"
       "slack"
       "warp"
       "openvpn-connect"
