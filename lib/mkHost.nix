@@ -29,6 +29,7 @@
 }: {
   networking.hostName = hostname;
   system.primaryUser = username;
+  homebrew.user = brewUser;
 
   environment.shells = [pkgs.fish];
   programs.fish.enable = true;
