@@ -1,7 +1,7 @@
 {...}: {
   homebrew = {
     brews = [
-      "google-cloud-sdk
+      "google-cloud-sdk"
     ];
     casks = [
       "slack"
