@@ -80,12 +80,6 @@
             sha256 = "sha256-WiX5gf1TNHaCtFedwg4pv7rW/W4LfQxPVi0Fe4CmYqQ=";
           }
           {
-            name = "vscode-versionlens";
-            publisher = "pflannery";
-            version = "1.28.0";
-            sha256 = "sha256-IZjTHE51hdrQpDndsz5bBCKre0zmWkCAJa/v8k4iLy0=";
-          }
-          {
             name = "vscode-gitignore-generator";
             publisher = "piotrpalarz";
             version = "1.0.4";

@@ -486,7 +486,7 @@ post_apply_hooks() {
         ;;
       ' ')
         if [[ " ${selected[*]} " == *" ${hooks[$cur]} "* ]]; then
-          selected=()
+          local new_sel=()
           for s in "${selected[@]}"; do [[ "$s" != "${hooks[$cur]}" ]] && new_sel+=("$s"); done
           selected=("${new_sel[@]}")
         else
