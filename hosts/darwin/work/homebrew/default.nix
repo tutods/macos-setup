@@ -1,6 +1,10 @@
 {...}: {
   homebrew = {
+    taps = [
+      "atlassian/homebrew-acli"
+    ];
     brews = [
+      "acli"
     ];
     casks = [
       "gcloud-cli"
