@@ -11,7 +11,7 @@ cp -r hosts/darwin/macbook hosts/darwin/new-machine
 ### 2. Update `hosts/darwin/new-machine/default.nix`
 
 ```nix
-{ mkHost, ... }:
+{ mkHost, mkUser, ... }:
 
 {
   imports = [
@@ -20,20 +20,19 @@ cp -r hosts/darwin/macbook hosts/darwin/new-machine
     (mkHost {
       username   = "newuser";
       hostname   = "new-machine";
-      brewUser   = "newuser";      # use a different value if an admin owns Homebrew
-      homeConfig = import ../../../home/newuser/default.nix;
+      brewUser   = "newuser";
+      homeConfig = mkUser {
+        username = "newuser";
+        role     = "personal"; # or "work"
+      };
     })
   ];
 }
 ```
 
-### 3. Create a home config
+### 3. (Optional) Add role-specific overrides
 
-```bash
-cp -r home/tutods home/newuser
-```
-
-Edit `home/newuser/default.nix` — set the correct `username` and `homeDirectory`.
+If the new user needs overrides beyond the shared `home/common/` config, create or edit a role file in `home/roles/`. Otherwise, `mkUser` with `role = "personal"` or `"work"` is sufficient — no per-user directory needed.
 
 ### 4. Register in `flake.nix`
 
@@ -66,27 +65,20 @@ EOF
 
 ## New user on an existing host
 
-### 1. Create the home config
+### 1. Add a role (if needed)
 
-```bash
-mkdir -p home/newuser
-```
+If the new user needs overrides beyond `home/common/`, create a role file `home/roles/<role>.nix`. Otherwise, use an existing role (`personal` or `work`).
 
-Create `home/newuser/default.nix`:
+In the host's `default.nix`, use `mkUser`:
 
 ```nix
-{ lib, ... }:
-
-{
-  home.username      = "newuser";
-  home.homeDirectory = lib.mkForce "/Users/newuser";
-  home.stateVersion  = "23.11";
-
-  imports = [ ../programs ];
-}
+homeConfig = mkUser {
+  username = "newuser";
+  role     = "personal"; # or "work", or a new role name
+};
 ```
 
-`../programs` already imports the shared git config (`home/programs/cli/git.nix`), so no per-user git file is needed.
+`mkUser` (defined in `lib/mkUser.nix`) handles `home.username`, `home.homeDirectory`, and imports — no per-user directory needed unless you have identity-specific overrides.
 
 ### 2. Update the host's `default.nix`
 
@@ -103,7 +95,10 @@ mkHost {
   username   = "normal.user";
   hostname   = "machine-name";
   brewUser   = "admin.user";     # owns /opt/homebrew
-  homeConfig = import ../../../home/normal.user/default.nix;
+  homeConfig = mkUser {
+    username = "normal.user";
+    role     = "work";
+  };
 }
 ```
 

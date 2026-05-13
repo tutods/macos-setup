@@ -5,5 +5,6 @@
     codex
     ollama
     pipx
+    rtk
   ];
 }

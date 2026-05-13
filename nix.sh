@@ -415,6 +415,168 @@ apply_config() {
   fi
 }
 
+# ── Post-apply hooks ──────────────────────────────────────────────────────────
+post_apply_hooks() {
+  echo ""
+  print_step "Post-apply setup"
+  echo -e "  ${DIM}Optional tools that need one-time initialization after deploy.${NC}"
+  echo ""
+
+  local hooks=()
+  local labels=()
+  local descs=()
+
+  hooks+=("ai_skills_sync");     labels+=("ai-skills-sync");                      descs+=("Install AI skills from manifest (npx skills add) into Claude Code & opencode")
+  hooks+=("rtk_init_copilot");   labels+=("rtk init (Claude + Copilot)");         descs+=("Configure rtk proxy for Claude Code & Copilot CLI")
+  hooks+=("rtk_init_opencode");  labels+=("rtk init --opencode");                 descs+=("Configure rtk proxy for opencode")
+  hooks+=("rtk_init_codex");     labels+=("rtk init --codex");                    descs+=("Configure rtk proxy for Codex")
+  hooks+=("pipx_review");        labels+=("pipx install code-review-graph");       descs+=("Install code-review-graph CLI tool")
+
+  local n=${#hooks[@]}
+  local selected=()
+
+  _hooks_draw() {
+    tput cuu "$((n + 2))" 2>/dev/null || true
+    for i in "${!hooks[@]}"; do
+      printf "\033[2K"
+      if [[ " ${selected[*]} " == *" ${hooks[$i]} "* ]]; then
+        echo -e "  ${GREEN}✔${NC}  ${BOLD}${labels[$i]}${NC}"
+        echo -e "     ${DIM}${descs[$i]}${NC}"
+      else
+        echo -e "  ${DIM}○  ${labels[$i]}${NC}"
+        echo -e "     ${DIM}${descs[$i]}${NC}"
+      fi
+    done
+  }
+
+  _hooks_draw_initial() {
+    for i in "${!hooks[@]}"; do
+      echo -e "  ${DIM}○  ${labels[$i]}${NC}"
+      echo -e "     ${DIM}${descs[$i]}${NC}"
+    done
+    echo ""
+    echo -e "  ${DIM}↑↓ navigate  space select  ↵ confirm  q skip${NC}"
+  }
+
+  echo -e "  ${BOLD}Select hooks to run:${NC}"
+  echo ""
+  _hooks_draw_initial
+
+  local cur=0
+  tput civis 2>/dev/null || true
+
+  while true; do
+    local key=""
+    IFS= read -rsn1 key
+    if [[ "$key" == $'\x1b' ]]; then
+      local rest=""
+      IFS= read -rsn2 -t 0.05 rest 2>/dev/null || true
+      key="${key}${rest}"
+    fi
+
+    case "$key" in
+      $'\x1b[A')
+        [[ $cur -gt 0 ]] && cur=$(( cur - 1 ))
+        ;;
+      $'\x1b[B')
+        [[ $cur -lt $(( n - 1 )) ]] && cur=$(( cur + 1 ))
+        ;;
+      '')
+        break
+        ;;
+      ' ')
+        if [[ " ${selected[*]} " == *" ${hooks[$cur]} "* ]]; then
+          selected=()
+          for s in "${selected[@]}"; do [[ "$s" != "${hooks[$cur]}" ]] && new_sel+=("$s"); done
+          selected=("${new_sel[@]}")
+        else
+          selected+=("${hooks[$cur]}")
+        fi
+        _hooks_draw
+        ;;
+      q|Q|$'\x1b')
+        tput cnorm 2>/dev/null || true
+        echo -e "\n  ${DIM}Skipped post-apply hooks.${NC}"
+        return 0
+        ;;
+    esac
+  done
+
+  tput cnorm 2>/dev/null || true
+  echo ""
+
+  if [[ ${#selected[@]} -eq 0 ]]; then
+    echo -e "  ${DIM}No hooks selected — skipping.${NC}"
+    return 0
+  fi
+
+  echo ""
+  for hook in "${selected[@]}"; do
+    case "$hook" in
+      ai_skills_sync)
+        print_info "Running ai-skills-sync…"
+        if command -v fish &>/dev/null; then
+          if fish -c "ai-skills-sync" 2>&1 | sed 's/^/    /'; then
+            print_success "ai-skills-sync done"
+          else
+            print_warning "ai-skills-sync failed"
+          fi
+        else
+          print_warning "fish not found — run ai-skills-sync manually after shell restart"
+        fi
+        ;;
+      rtk_init_copilot)
+        print_info "Running rtk init -g (Claude + Copilot)…"
+        if command -v rtk &>/dev/null; then
+          if rtk init -g 2>&1 | sed 's/^/    /'; then
+            print_success "rtk init -g done"
+          else
+            print_warning "rtk init -g failed"
+          fi
+        else
+          print_warning "rtk not found — skip or run manually after PATH refresh"
+        fi
+        ;;
+      rtk_init_opencode)
+        print_info "Running rtk init -g --opencode…"
+        if command -v rtk &>/dev/null; then
+          if rtk init -g --opencode 2>&1 | sed 's/^/    /'; then
+            print_success "rtk init -g --opencode done"
+          else
+            print_warning "rtk init -g --opencode failed"
+          fi
+        else
+          print_warning "rtk not found — skip or run manually after PATH refresh"
+        fi
+        ;;
+      rtk_init_codex)
+        print_info "Running rtk init -g --codex…"
+        if command -v rtk &>/dev/null; then
+          if rtk init -g --codex 2>&1 | sed 's/^/    /'; then
+            print_success "rtk init -g --codex done"
+          else
+            print_warning "rtk init -g --codex failed"
+          fi
+        else
+          print_warning "rtk not found — skip or run manually after PATH refresh"
+        fi
+        ;;
+      pipx_review)
+        print_info "Installing code-review-graph via pipx…"
+        if command -v pipx &>/dev/null; then
+          if pipx install code-review-graph 2>&1 | sed 's/^/    /'; then
+            print_success "code-review-graph installed"
+          else
+            print_warning "pipx install code-review-graph failed"
+          fi
+        else
+          print_warning "pipx not found — skip or run manually after PATH refresh"
+        fi
+        ;;
+    esac
+  done
+}
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 print_summary() {
   local config="$1" mode="$2" total_secs="$3"
@@ -526,6 +688,7 @@ main() {
     setup_private_git "$config"
     build_config  "$config" "$force" "[1/2]"
     apply_config  "$config" "$force" "[2/2]"
+    post_apply_hooks
     print_summary "$config" "build + apply" $(( SECONDS - total_start ))
     echo -e "  ${DIM}Tip: run ${BOLD}brew doctor${NC}${DIM} if you encounter Homebrew issues.${NC}"
     echo ""

@@ -99,9 +99,8 @@ nix fmt
 │       ├── dock.nix
 │       └── homebrew/          # Work-specific casks (shared base from modules/)
 ├── home/
-│   ├── programs/              # Shared Home Manager programs (fish, VSCode, etc.)
-│   ├── tutods/                # tutods user config
-│   └── daniel.a.sousa/        # Work user config
+│   ├── common/                # Shared Home Manager config (shell, editors, CLI)
+│   └── roles/                 # Role overrides (personal.nix, work.nix)
 └── docs/                      # Additional documentation
 ```
 
@@ -116,7 +115,7 @@ nix fmt
 
 2. Edit `hosts/darwin/new-machine/default.nix` — update the `mkHost` call:
    ```nix
-   { pkgs, mkHost, ... }:
+   { mkHost, mkUser, ... }:
    {
      imports = [
        ./dock.nix
@@ -126,17 +125,16 @@ nix fmt
          username   = "newuser";
          hostname   = "new-machine";
          brewUser   = "newuser";
-         homeConfig = import ../../../home/newuser/default.nix;
+         homeConfig = mkUser {
+           username = "newuser";
+           role      = "personal"; # or "work"
+         };
        })
      ];
    }
    ```
 
-3. Create the home config:
-   ```bash
-   cp -r home/tutods home/newuser
-   # edit home/newuser/default.nix to set the correct username/homeDirectory
-   ```
+3. (Optional) Add role-specific overrides in `home/roles/` if needed.
 
 4. Register in `flake.nix`:
    ```nix
@@ -160,9 +158,9 @@ nix fmt
 | Fonts | `modules/packages/fonts.nix` |
 | Shared Homebrew casks (all machines) | `modules/darwin/homebrew/casks/` |
 | Machine-specific Homebrew casks | `hosts/darwin/<name>/homebrew/casks/` |
-| Mac App Store apps (shared) | `home/programs/cli/mas.nix` (via home.activation) |
-| Mac App Store apps (per machine) | `home/<username>/default.nix` |
-| User programs (shell, editor, etc.) | `home/programs/` |
+| Mac App Store apps (shared) | `modules/darwin/homebrew/mas.nix` (via mkHost activation) |
+| Mac App Store apps (per machine) | `hosts/darwin/<name>/homebrew/mas.nix` |
+| User programs (shell, editor, etc.) | `home/common/` |
 
 ---
 

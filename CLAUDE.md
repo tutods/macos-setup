@@ -86,3 +86,18 @@ Fish shell is the primary shell, configured in `home/common/shell/fish/` with se
 ## CI
 
 GitHub Actions (`flake-checker.yaml`) validates the flake on push and daily. Renovate auto-merges minor/patch updates for `nixpkgs`, `home-manager`, `nix-darwin`, and `nix-homebrew`.
+
+## Fast CLI Tool Preferences
+
+When working in this repo or on this machine, prefer these fast tools:
+
+| Use | Instead of | Why |
+|-----|-----------|-----|
+| `rg` | `grep` | 10x faster content search |
+| `fd` | `find` | 10x faster file finding |
+| `bat --style=plain` | `cat` | Syntax highlighting, Git integration |
+| `jq` | Manual JSON parsing | Native fast JSON processing |
+| `rtk` | Raw commands | Token proxy, reduces LLM token usage |
+| `eza` | `ls` | Icons, Git status, tree view |
+| `delta` | `diff` | Better diff rendering |
+| `htop` | `top` | Interactive process viewer |

@@ -16,10 +16,8 @@ in {
 
     brews = [
       "mas"
-      "rtk" #  High-performance CLI proxy that reduces LLM token consumption by 60-90%
     ];
 
     casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks ++ fontsCasks;
-
   };
 }

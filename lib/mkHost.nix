@@ -24,6 +24,7 @@
   masApps ? {},
 }: {
   pkgs,
+  pkgsUnstable,
   lib,
   ...
 }: {
@@ -93,7 +94,9 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    extraSpecialArgs = {inherit pkgs;};
+    extraSpecialArgs = {
+      inherit pkgs pkgsUnstable;
+    };
     backupFileExtension = "backup";
     users.${username} = homeConfig;
   };

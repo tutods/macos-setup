@@ -8,6 +8,7 @@
     httpie
     jq
     qpdf
+    ripgrep
     smartmontools
     speedtest-cli
     tldr

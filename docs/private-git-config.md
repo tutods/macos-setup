@@ -4,7 +4,7 @@ Git name and email are sensitive and not committed to this repo. The config uses
 
 ## How it works
 
-`home/programs/cli/git.nix` (the shared git module imported by all users via `home/programs/default.nix`) declares:
+`home/common/cli/git.nix` (the shared git module imported by all users via `home/common/default.nix`) declares:
 
 ```nix
 programs.git.includes = [

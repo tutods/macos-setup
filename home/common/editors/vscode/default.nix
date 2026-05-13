@@ -1,7 +1,6 @@
 {
-  config,
-  lib,
   pkgs,
+  pkgsUnstable,
   ...
 }: {
   programs.vscode = {
@@ -11,79 +10,142 @@
       userSettings = pkgs.lib.importJSON ./settings.json;
       keybindings = pkgs.lib.importJSON ./keybindings.json;
 
-      # Extensions available in nixpkgs — managed declaratively.
-      # Extensions NOT in nixpkgs are installed via home.activation below.
-      extensions = with pkgs; [
-        vscode-extensions.aaron-bond.better-comments
-        vscode-extensions.adpyke.codesnap
-        vscode-extensions.alefragnani.project-manager
-        vscode-extensions.bbenoist.nix
-        vscode-extensions.bierner.color-info
-        vscode-extensions.bierner.github-markdown-preview
-        vscode-extensions.biomejs.biome
-        vscode-extensions.bradlc.vscode-tailwindcss
-        vscode-extensions.catppuccin.catppuccin-vsc
-        vscode-extensions.catppuccin.catppuccin-vsc-icons
-        vscode-extensions.christian-kohler.npm-intellisense
-        vscode-extensions.eamodio.gitlens
-        vscode-extensions.enkia.tokyo-night
-        vscode-extensions.formulahendry.auto-close-tag
-        vscode-extensions.formulahendry.auto-rename-tag
-        vscode-extensions.foxundermoon.shell-format
-        vscode-extensions.github.github-vscode-theme
-        vscode-extensions.jock.svg
-        vscode-extensions.meganrogge.template-string-converter
-        vscode-extensions.ms-azuretools.vscode-docker
-        vscode-extensions.mvllow.rose-pine
-        vscode-extensions.redhat.vscode-yaml
-        vscode-extensions.streetsidesoftware.code-spell-checker
-        vscode-extensions.teabyii.ayu
-        vscode-extensions.unifiedjs.vscode-mdx
-        vscode-extensions.usernamehw.errorlens
-        vscode-extensions.yoavbls.pretty-ts-errors
-        vscode-extensions.yzhang.markdown-all-in-one
-      ];
+      # Fully declarative extension management:
+      # - stable nixpkgs extensions
+      # - extra extensions available only in nixpkgs-unstable
+      # - remaining marketplace extensions pinned by version + hash
+      extensions =
+        (with pkgs.vscode-extensions; [
+          aaron-bond.better-comments
+          adpyke.codesnap
+          alefragnani.project-manager
+          bbenoist.nix
+          bierner.color-info
+          bierner.github-markdown-preview
+          biomejs.biome
+          bradlc.vscode-tailwindcss
+          catppuccin.catppuccin-vsc
+          catppuccin.catppuccin-vsc-icons
+          christian-kohler.npm-intellisense
+          eamodio.gitlens
+          enkia.tokyo-night
+          formulahendry.auto-close-tag
+          formulahendry.auto-rename-tag
+          foxundermoon.shell-format
+          github.github-vscode-theme
+          jock.svg
+          meganrogge.template-string-converter
+          ms-azuretools.vscode-docker
+          mvllow.rose-pine
+          redhat.vscode-yaml
+          streetsidesoftware.code-spell-checker
+          teabyii.ayu
+          unifiedjs.vscode-mdx
+          usernamehw.errorlens
+          yoavbls.pretty-ts-errors
+          yzhang.markdown-all-in-one
+        ])
+        ++ (with pkgsUnstable.vscode-extensions; [
+          miguelsolorio.fluent-icons
+        ])
+        ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+          {
+            name = "shades-of-purple";
+            publisher = "ahmadawais";
+            version = "7.3.6";
+            sha256 = "sha256-22ZywGew1Qh4YPi51JWTNQLKuz/nzx/iprUK96DQfYU=";
+          }
+          {
+            name = "auto-add-brackets";
+            publisher = "aliariff";
+            version = "0.12.2";
+            sha256 = "sha256-DH1NfneJTMC7BmOP4IiUG8J7BQtwOj4/k5Qn62DkZ7Q=";
+          }
+          {
+            name = "vscode-version-lens";
+            publisher = "anaer";
+            version = "26.312.1110";
+            sha256 = "sha256-lVr+otAWdP5+AmFlC09GXRmOxC5CypokpmLoHc1NiM4=";
+          }
+          {
+            name = "code-spell-checker-portuguese";
+            publisher = "streetsidesoftware";
+            version = "2.0.4";
+            sha256 = "sha256-ZC2sucAiWTz8IVPLlJVegLy7u2keUFZMAVKvVG3X3DY=";
+          }
+          {
+            name = "turbo-console-log";
+            publisher = "chakrounanas";
+            version = "3.21.2";
+            sha256 = "sha256-WiX5gf1TNHaCtFedwg4pv7rW/W4LfQxPVi0Fe4CmYqQ=";
+          }
+          {
+            name = "vscode-versionlens";
+            publisher = "pflannery";
+            version = "1.28.0";
+            sha256 = "sha256-IZjTHE51hdrQpDndsz5bBCKre0zmWkCAJa/v8k4iLy0=";
+          }
+          {
+            name = "vscode-gitignore-generator";
+            publisher = "piotrpalarz";
+            version = "1.0.4";
+            sha256 = "sha256-lTpvivD1+FMyn05CswHAFgjfvPDJnFDaQXKg8/J0Pag=";
+          }
+          {
+            name = "postcss";
+            publisher = "csstools";
+            version = "1.0.9";
+            sha256 = "sha256-5pGDKme46uT1/35WkTGL3n8ecc7wUBkHVId9VpT7c2U=";
+          }
+          {
+            name = "aura-theme";
+            publisher = "daltonmenezes";
+            version = "2.1.2";
+            sha256 = "sha256-r6pPpvJ1AZsM0RYF+xHsZ4b4QTszN+wELr1SENsUDFA=";
+          }
+          {
+            name = "auto-complete-tag";
+            publisher = "formulahendry";
+            version = "0.1.0";
+            sha256 = "sha256-X7/LdajN98ySJs7XbnRzW/09TbJ23ZZo1J/yEzh9tZM=";
+          }
+          {
+            name = "change-string-case";
+            publisher = "maximus136";
+            version = "1.1.2";
+            sha256 = "sha256-6luPBsjy8FljwKhJKvtjBiik05KfOATG3ag/4sre654=";
+          }
+          {
+            name = "symbols";
+            publisher = "miguelsolorio";
+            version = "0.0.25";
+            sha256 = "sha256-nhymeLPfgGKyg3krHqRYs2iWNINF6IFBtTAp5HcwMs8=";
+          }
+          {
+            name = "oklch-color-visualiser";
+            publisher = "swiftlydaniel";
+            version = "1.0.3";
+            sha256 = "sha256-eSvG0gf3LNTB/HlZL/08f5LJhayp1HlpkA4Cs+uc2RU=";
+          }
+          {
+            name = "console-ninja";
+            publisher = "wallabyjs";
+            version = "1.0.527";
+            sha256 = "sha256-zQ/56HbcLxVKa2X37mnvdVEhVGYm9RQ01J0m34sA9sU=";
+          }
+          {
+            name = "vscode-classic-experience";
+            publisher = "yutengjing";
+            version = "7.0.0";
+            sha256 = "sha256-UNfsKasCJnoCiTPELu3bneRNLaFxpPScCXnDvKFoRRY=";
+          }
+          {
+            name = "html-css-class-completion";
+            publisher = "zignd";
+            version = "1.20.0";
+            sha256 = "sha256-3BEppTBc+gjZW5XrYLPpYUcx3OeHQDPW8z7zseJrgsE=";
+          }
+        ];
     };
   };
-
-  # Marketplace extensions not available in nixpkgs.
-  # code CLI is available since home.activation runs as the logged-in user.
-  home.activation.installVscodeExtensions = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    code=/etc/profiles/per-user/${config.home.username}/bin/code
-
-    if [ ! -x "$code" ]; then
-      echo "↣ VSCode not found — skipping marketplace extension install"
-    else
-      _code_install() {
-        local ext="$1"
-        if "$code" --list-extensions 2>/dev/null | grep -qi "^$ext$"; then
-          echo "  ✓ $ext already installed"
-        else
-          echo "  ↣ Installing $ext"
-          "$code" --install-extension "$ext" --force 2>/dev/null \
-            && echo "  ✓ $ext" \
-            || echo "  ✗ $ext failed"
-        fi
-      }
-
-      echo "↣ VSCode marketplace extensions"
-      _code_install "ahmadawais.shades-of-purple"
-      _code_install "aliariff.auto-add-brackets"
-      _code_install "anaer.vscode-version-lens"
-      _code_install "streetsidesoftware.code-spell-checker-portuguese"
-      _code_install "chakrounanas.turbo-console-log"
-      _code_install "miguelsolorio.fluent-icons"
-      _code_install "pflannery.vscode-versionlens"
-      _code_install "piotrpalarz.vscode-gitignore-generator"
-      _code_install "csstools.postcss"
-      _code_install "daltonmenezes.aura-theme"
-      _code_install "formulahendry.auto-complete-tag"
-      _code_install "maximus136.change-string-case"
-      _code_install "miguelsolorio.symbols"
-      _code_install "swiftlydaniel.oklch-color-visualiser"
-      _code_install "wallabyjs.console-ninja"
-      _code_install "yutengjing.vscode-classic-experience"
-      _code_install "zignd.html-css-class-completion"
-    fi
-  '';
 }

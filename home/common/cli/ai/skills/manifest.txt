@@ -1,0 +1,27 @@
+# AI Skills Manifest
+# Installed via: npx skills add <source> -g -a claude-code -a opencode -y
+# Last synced: 2025-05-13
+#
+# Format: <source> # comma-separated skill names from this source
+
+# --- Skills from GitHub packages ---
+anthropics/knowledge-work-plugins    # code-review
+anthropics/skills                    # frontend-design
+better-auth/skills                   # better-auth-best-practices
+JuliusBrussee/caveman               # caveman-commit, caveman-compress, caveman-help, caveman-review, compress
+Leonxlnx/taste-skill                # brandkit, design-taste-frontend, full-output-enforcement, gpt-taste, high-end-visual-design, image-to-code, imagegen-frontend-mobile, imagegen-frontend-web, industrial-brutalist-ui, minimalist-ui, redesign-existing-projects, stitch-design-taste
+mattpocock/skills -s caveman -s grill-with-docs  # caveman, grill-with-docs
+mindrally/skills                    # sanity
+oakoss/agent-skills                  # tanstack-start
+obra/superpowers                    # brainstorming, requesting-code-review, systematic-debugging, test-driven-development, using-superpowers, writing-plans
+pbakaus/impeccable                  # impeccable
+prisma/skills                      # prisma-postgres
+resciencelab/opc-skills             # seo-geo
+secondsky/claude-skills             # tailwind-v4-shadcn
+shadcn/ui                           # shadcn
+squirrelscan/skills                 # audit-website
+tanstack/router                    # start-core
+vercel-labs/agent-skills            # web-design-guidelines
+vercel-labs/skills                  # find-skills
+vercel/turborepo                   # turborepo
+wshobson/agents                    # api-design-principles, nodejs-backend-patterns, responsive-design
