@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 # ── Colors ────────────────────────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-DIM='\033[2m'
-NC='\033[0m'
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 
 # ── Print helpers ─────────────────────────────────────────────────────────────
 print_info()    { echo -e "  ${BLUE}➜${NC}  $1"; }
@@ -23,37 +16,35 @@ print_divider() { echo -e "  ${DIM}───────────────
 
 # ── Spinner ───────────────────────────────────────────────────────────────────
 SPINNER_PID=""
-SPINNER_MSG=""
 
-_spinner() {
-  local chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-  tput civis 2>/dev/null || true
+_spinner_loop() {
+  local chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' msg="$1"
+  printf '\033[?25l'
   while true; do
     for ((i=0; i<${#chars}; i++)); do
-      printf "\r  ${CYAN}%s${NC} %s" "${chars:$i:1}" "$SPINNER_MSG"
+      printf "\r  ${CYAN}%s${NC}  %s" "${chars:$i:1}" "$msg"
       sleep 0.08
     done
   done
 }
 
-start_spinner() {
-  SPINNER_MSG="$1"
-  _spinner &
-  SPINNER_PID=$!
-}
+start_spinner() { _spinner_loop "$1" & SPINNER_PID=$!; }
 
 stop_spinner() {
-  if [[ -n "$SPINNER_PID" ]]; then
-    kill "$SPINNER_PID" 2>/dev/null || true
-    wait "$SPINNER_PID" 2>/dev/null || true
-    SPINNER_PID=""
-    tput cnorm 2>/dev/null || true
-    printf "\r%*s\r" 80 ""
-  fi
+  [[ -z "$SPINNER_PID" ]] && return
+  kill "$SPINNER_PID" 2>/dev/null || true
+  wait "$SPINNER_PID" 2>/dev/null || true
+  SPINNER_PID=""
+  printf '\033[?25h'
+  printf "\r%*s\r" 80 ""
 }
+
+# ── Cleanup on interrupt ──────────────────────────────────────────────────────
+_BACKGROUND_PID=""
 
 _cleanup() {
   stop_spinner
+  [[ -n "$_BACKGROUND_PID" ]] && kill "$_BACKGROUND_PID" 2>/dev/null || true
   echo ""
   print_warning "Interrupted"
   exit 130
@@ -62,26 +53,23 @@ trap _cleanup INT TERM
 
 # ── Elapsed time ──────────────────────────────────────────────────────────────
 _fmt_elapsed() {
-  local secs="$1"
-  local mins=$(( secs / 60 ))
-  secs=$(( secs % 60 ))
+  local mins=$(( $1 / 60 )) secs=$(( $1 % 60 ))
   [[ $mins -gt 0 ]] && echo "${mins}m ${secs}s" || echo "${secs}s"
 }
 
 # ── Command runner ────────────────────────────────────────────────────────────
 _CMD_LOG=""
-LOG_FILE=""   # set via --log <file> to persist full output for debugging
+LOG_FILE=""
 
 run_cmd() {
-  local spinner_msg="$1"
-  shift
-
+  local title="$1"; shift
   _CMD_LOG=$(mktemp)
-  local cmd_pid exit_code=0
+  local exit_code=0
 
   "$@" >"$_CMD_LOG" 2>&1 &
-  cmd_pid=$!
-  start_spinner "$spinner_msg"
+  _BACKGROUND_PID=$!
+  local cmd_pid=$_BACKGROUND_PID
+  start_spinner "$title"
 
   local shown=0
   while kill -0 "$cmd_pid" 2>/dev/null; do
@@ -92,7 +80,7 @@ run_cmd() {
         if [[ "$line" =~ (building|copying|fetching|activating|error:|warning:) ]]; then
           stop_spinner
           printf "  ${DIM}%s${NC}\n" "$line"
-          start_spinner "$spinner_msg"
+          start_spinner "$title"
         fi
       done < <(sed -n "$((shown+1)),${total}p" "$_CMD_LOG" 2>/dev/null || true)
       shown=$total
@@ -102,11 +90,10 @@ run_cmd() {
 
   wait "$cmd_pid" || exit_code=$?
   stop_spinner
+  _BACKGROUND_PID=""
 
-  # Append to debug log file if requested
   if [[ -n "$LOG_FILE" ]]; then
-    {
-      printf "\n=== %s | %s ===\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$spinner_msg"
+    { printf "\n=== %s | %s ===\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$title"
       cat "$_CMD_LOG"
     } >> "$LOG_FILE"
   fi
@@ -127,11 +114,7 @@ show_errors() {
   if [[ -n "$errors" ]]; then
     echo -e "  ${BOLD}Error details:${NC}"
     while IFS= read -r line; do
-      if [[ "$line" =~ ^error: ]]; then
-        echo -e "  ${RED}$line${NC}"
-      else
-        echo -e "  ${DIM}$line${NC}"
-      fi
+      [[ "$line" =~ ^error: ]] && echo -e "  ${RED}$line${NC}" || echo -e "  ${DIM}$line${NC}"
     done <<< "$errors"
   else
     echo -e "  ${BOLD}Last output:${NC}"
@@ -140,7 +123,7 @@ show_errors() {
 
   if [[ -n "$LOG_FILE" ]]; then
     echo ""
-    echo -e "  ${DIM}Full output saved to: ${BOLD}$LOG_FILE${NC}"
+    echo -e "  ${DIM}Full output: ${BOLD}$LOG_FILE${NC}"
   fi
   echo ""
 }
@@ -150,6 +133,7 @@ print_banner() {
   echo ""
   echo -e "  ${BOLD}${CYAN}❄${NC}  ${BOLD}nix · darwin · deploy${NC}"
   print_divider
+  echo ""
 }
 
 # ── Available configs ─────────────────────────────────────────────────────────
@@ -170,9 +154,65 @@ validate_config() {
   return 1
 }
 
+# ── Pure-bash arrow-key menu ──────────────────────────────────────────────────
+# Result written to _TUI_SELECTED.  Returns 1 if user pressed q/ESC.
+_TUI_SELECTED=""
+
+_tui_select() {
+  local items=("$@") sel=0 count=$#
+  local k1 k2 k3
+
+  _tui_draw() {
+    local i
+    for ((i = 0; i < count; i++)); do
+      if ((i == sel)); then
+        printf "  \033[1;36m▸ %s\033[0m\n" "${items[$i]}"
+      else
+        printf "    \033[2m%s\033[0m\n" "${items[$i]}"
+      fi
+    done
+  }
+
+  printf '\033[?25l'
+  _tui_draw
+
+  while true; do
+    IFS= read -rsn1 k1
+    if [[ $k1 == $'\x1b' ]]; then
+      IFS= read -rsn1 -t 0.1 k2 || true
+      IFS= read -rsn1 -t 0.1 k3 || true
+      if [[ $k2 == '[' ]]; then
+        case $k3 in
+          A) ((sel > 0))         && ((sel--)) ;;
+          B) ((sel < count - 1)) && ((sel++)) ;;
+        esac
+      else
+        # bare ESC — quit
+        printf '\033[?25h\n'
+        printf "\033[%dA\033[J" "$count"
+        unset -f _tui_draw
+        return 1
+      fi
+    elif [[ $k1 == '' ]]; then
+      break
+    elif [[ $k1 == q || $k1 == Q ]]; then
+      printf '\033[?25h\n'
+      printf "\033[%dA\033[J" "$count"
+      unset -f _tui_draw
+      return 1
+    fi
+    printf "\033[%dA" "$count"
+    _tui_draw
+  done
+
+  printf '\033[?25h'
+  printf "\033[%dA\033[J" "$count"
+  unset -f _tui_draw
+  _TUI_SELECTED="${items[$sel]}"
+}
+
 # ── Interactive config picker ─────────────────────────────────────────────────
-# Result is written to SELECTED_CONFIG (not stdout) so the picker can be
-# called without command substitution, keeping terminal output visible.
+# Result written to SELECTED_CONFIG (not stdout) so terminal output stays intact.
 SELECTED_CONFIG=""
 
 select_config() {
@@ -190,10 +230,11 @@ select_config() {
       --header="↑/↓ navigate  ENTER select  ESC quit") || true
     [[ -z "$SELECTED_CONFIG" ]] && { echo ""; exit 0; }
   else
-    # fallback for bootstrap (fzf not yet installed)
-    select SELECTED_CONFIG in $AVAILABLE_CONFIGS; do
-      [[ -n "$SELECTED_CONFIG" ]] && break
-    done
+    echo -e "  ${DIM}↑/↓ navigate  ENTER select  q quit${NC}"
+    echo ""
+    # shellcheck disable=SC2086
+    _tui_select $AVAILABLE_CONFIGS || exit 0
+    SELECTED_CONFIG="$_TUI_SELECTED"
   fi
 }
 
@@ -211,8 +252,7 @@ show_usage() {
   echo "    --build-only      Build without applying"
   echo "    --dry-run         Preview what would change (no apply)"
   echo "    --force           Force rebuild even if no changes"
-  echo "    --skip-hooks      Skip post-apply initialization steps"
-  echo "    --log <file>      Save full command output to file for debugging"
+  echo "    --log <file>      Save full command output to file"
   echo "    --help, -h        Show this help message"
   echo ""
   echo -e "  ${BOLD}Examples${NC}"
@@ -220,7 +260,7 @@ show_usage() {
   echo "    $0 macbook                Build and apply"
   echo "    $0 macbook --build-only   Build only"
   echo "    $0 macbook --dry-run      Preview changes"
-  echo "    $0 macbook --log out.log  Build, apply, save full log"
+  echo "    $0 macbook --log out.log  Save full log"
   echo "    $0 work --force           Force rebuild"
   print_divider
   exit 0
@@ -232,23 +272,21 @@ check_directory() {
     print_error "Must be run from the .dotfiles directory (flake.nix not found)"
     exit 1
   fi
+  git config core.hooksPath .hooks 2>/dev/null || true
 }
 
+# ── Git identity setup ────────────────────────────────────────────────────────
 setup_private_git() {
   local config="$1"
   local target_user
   target_user=$(get_target_user "$config")
 
   local target_home="/Users/$target_user"
-  if [[ "$target_user" == "${USER:-}" ]]; then
-    target_home="$HOME"
-  fi
+  [[ "$target_user" == "${USER:-}" ]] && target_home="$HOME"
 
   local private_file="$target_home/.config/git/private"
 
-  if [[ "$target_user" != "${USER:-}" ]]; then
-    print_info "Using git identity for ${target_user}"
-  fi
+  [[ "$target_user" != "${USER:-}" ]] && print_info "Using git identity for ${target_user}"
 
   if [[ -f "$private_file" ]]; then
     print_dim "Private git config found ✓"
@@ -257,7 +295,7 @@ setup_private_git() {
 
   print_warning "Private git config not found at $private_file"
   echo -e "     ${YELLOW}Git user.name and user.email are required.${NC}"
-  echo -e "     ${YELLOW}See docs/private-git-config.md for details.${NC}"
+  echo -e "     ${YELLOW}See docs/secrets.md for details.${NC}"
   echo ""
 
   local name email
@@ -287,7 +325,7 @@ build_config() {
   local config="$1" force="$2" step="$3"
 
   print_step "$step Building"
-  print_dim "Config: ${BOLD}$config${NC}"
+  print_dim "Config: $config"
 
   local build_cmd=(nix --extra-experimental-features 'nix-command flakes' build ".#darwinConfigurations.$config.system")
   [[ "$force" == "true" ]] && build_cmd+=(--rebuild)
@@ -296,7 +334,7 @@ build_config() {
   run_cmd "Building ${config}…" "${build_cmd[@]}" || exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
-    print_success "Built in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
+    print_success "Built in $(_fmt_elapsed $(( SECONDS - t0 )))"
     rm -f "$_CMD_LOG"
   else
     show_errors "$_CMD_LOG" "Build"
@@ -318,7 +356,7 @@ dry_run_config() {
   run_cmd "Previewing ${config}…" "${dry_cmd[@]}" || exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
-    print_success "Preview completed in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
+    print_success "Preview completed in $(_fmt_elapsed $(( SECONDS - t0 )))"
     echo ""
 
     local changes
@@ -326,14 +364,10 @@ dry_run_config() {
     if [[ -n "$changes" ]]; then
       echo -e "  ${BOLD}Changes:${NC}"
       while IFS= read -r line; do
-        if [[ "$line" =~ ^these ]]; then
-          echo -e "  ${CYAN}$line${NC}"
-        else
-          echo -e "  ${DIM}$line${NC}"
-        fi
+        [[ "$line" =~ ^these ]] && echo -e "  ${CYAN}$line${NC}" || echo -e "  ${DIM}$line${NC}"
       done <<< "$changes"
     else
-      echo -e "  ${DIM}Nothing to build — already up to date.${NC}"
+      print_dim "Nothing to build — already up to date."
     fi
     rm -f "$_CMD_LOG"
   else
@@ -348,7 +382,7 @@ apply_config() {
   local config="$1" force="$2" step="$3"
 
   print_step "$step Applying"
-  print_dim "Config: ${BOLD}$config${NC}"
+  print_dim "Config: $config"
 
   local switch_cmd=(switch --flake ".#$config")
   [[ "$force" == "true" ]] && switch_cmd+=(--rebuild)
@@ -363,7 +397,7 @@ apply_config() {
   fi
 
   echo ""
-  echo -e "  ${DIM}Authentication required — enter sudo password if prompted${NC}"
+  print_dim "Authentication required — enter sudo password if prompted"
   if ! sudo -v; then
     print_error "Sudo authentication failed"
     exit 1
@@ -374,67 +408,12 @@ apply_config() {
   run_cmd "Applying ${config}…" "${rebuild_cmd[@]}" || exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
-    print_success "Applied in ${BOLD}$(_fmt_elapsed $(( SECONDS - t0 )))${NC}"
+    print_success "Applied in $(_fmt_elapsed $(( SECONDS - t0 )))"
     rm -f "$_CMD_LOG"
   else
     show_errors "$_CMD_LOG" "Apply"
     rm -f "$_CMD_LOG"
     exit 1
-  fi
-}
-
-# ── Post-apply hooks ──────────────────────────────────────────────────────────
-post_apply_hooks() {
-  local target_user="${1:-${USER:-$(id -un)}}"
-  local target_home
-  target_home=$(eval echo "~${target_user}")
-
-  echo ""
-  print_step "Post-apply setup"
-  echo -e "  ${DIM}Running one-time initialization steps for ${BOLD}${target_user}${NC}${DIM}.${NC}"
-  echo ""
-
-  # Run a command as the target user (sudo -H when user differs)
-  _as_user() {
-    if [[ "$target_user" == "${USER:-$(id -un)}" ]]; then
-      "$@"
-    else
-      sudo -H -u "$target_user" "$@"
-    fi
-  }
-
-  # Run a labeled command, print output indented, report success/failure
-  _hook() {
-    local label="$1"; shift
-    print_info "${label}…"
-    local output rc=0
-    output=$(_as_user "$@" 2>&1) || rc=$?
-    [[ -n "$output" ]] && echo "$output" | sed 's/^/    /'
-    if [[ $rc -eq 0 ]]; then
-      print_success "${label}"
-    else
-      print_warning "${label} failed — run manually after shell restart"
-    fi
-  }
-
-  # rtk proxy init (fast, idempotent)
-  if _as_user command -v rtk &>/dev/null; then
-    _as_user mkdir -p "${target_home}/.claude" "${target_home}/.config/opencode" "${target_home}/.codex" 2>/dev/null || true
-    _hook "rtk init (Claude + Copilot)"  rtk init -g
-    _hook "rtk init (opencode)"          rtk init -g --opencode
-    _hook "rtk init (Codex)"             rtk init -g --codex
-  else
-    print_warning "rtk not found — run 'rtk init' manually after PATH refresh"
-  fi
-
-  # AI skills sync via fish
-  if _as_user command -v fish &>/dev/null; then
-    _hook "AI skills sync"  fish -c "ai-skills-sync"
-  fi
-
-  # pipx code-review-graph
-  if _as_user command -v pipx &>/dev/null; then
-    _hook "code-review-graph (pipx)"  pipx install code-review-graph
   fi
 }
 
@@ -449,18 +428,16 @@ print_summary() {
   printf "  ${DIM}%-9s${NC}  ${BOLD}${CYAN}%s${NC}\n" "Config"  "$config"
   printf "  ${DIM}%-9s${NC}  %s\n"                    "Mode"    "$mode"
   printf "  ${DIM}%-9s${NC}  %s\n"                    "Time"    "$(_fmt_elapsed "$total_secs")"
-  if [[ -n "$LOG_FILE" ]]; then
-    printf "  ${DIM}%-9s${NC}  %s\n"                  "Log"     "$LOG_FILE"
-  fi
+  [[ -n "$LOG_FILE" ]] && printf "  ${DIM}%-9s${NC}  %s\n" "Log" "$LOG_FILE"
   echo ""
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 main() {
   local config=""
-  local build_only=false dry_run=false force=false skip_hooks=false
+  local build_only=false dry_run=false force=false
 
-  # No args — show interactive picker
+  # No args — interactive picker
   if [[ $# -eq 0 ]]; then
     check_directory
     select_config
@@ -470,7 +447,6 @@ main() {
       --help|-h) show_usage ;;
     esac
 
-    # First arg is a config name or a flag
     if validate_config "$1"; then
       config="$1"
       shift
@@ -483,7 +459,6 @@ main() {
       --build-only)  build_only=true ;;
       --dry-run)     dry_run=true ;;
       --force)       force=true ;;
-      --skip-hooks)  skip_hooks=true ;;
       --log)
         shift
         if [[ $# -eq 0 || "$1" == --* ]]; then
@@ -491,7 +466,6 @@ main() {
           exit 1
         fi
         LOG_FILE="$1"
-        # Initialise / clear the log file
         printf "# nix.sh log — %s\n\n" "$(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
         ;;
       --help|-h) show_usage ;;
@@ -514,7 +488,7 @@ main() {
   fi
 
   if ! validate_config "$config"; then
-    print_error "Unknown configuration: ${BOLD}$config${NC}"
+    print_error "Unknown configuration: $config"
     echo ""
     echo -e "  Available: ${CYAN}$AVAILABLE_CONFIGS${NC}"
     exit 1
@@ -524,14 +498,10 @@ main() {
 
   print_banner
   printf "  ${BOLD}%-9s${NC}  ${CYAN}%s${NC}\n" "Config" "$config"
-  if [[ "$build_only" == "true" ]]; then
-    print_dim "Mode: build only"
-  elif [[ "$dry_run" == "true" ]]; then
-    print_dim "Mode: dry run (preview only)"
-  elif [[ "$force" == "true" ]]; then
-    print_dim "Mode: force rebuild"
-  fi
-  [[ -n "$LOG_FILE" ]] && print_dim "Log:  $LOG_FILE"
+  [[ "$build_only" == "true" ]] && print_dim "Mode: build only"
+  [[ "$dry_run" == "true" ]]    && print_dim "Mode: dry run (preview only)"
+  [[ "$force" == "true" ]]      && print_dim "Mode: force rebuild"
+  [[ -n "$LOG_FILE" ]]          && print_dim "Log:  $LOG_FILE"
   print_divider
 
   local total_start=$SECONDS
@@ -543,16 +513,15 @@ main() {
   elif [[ "$build_only" == "true" ]]; then
     build_config "$config" "$force" "[1/1]"
     print_summary "$config" "build only" $(( SECONDS - total_start ))
-    echo -e "  ${DIM}Run ${BOLD}$0 $config${NC}${DIM} to apply.${NC}"
+    print_dim "Run $0 $config to apply."
     echo ""
 
   else
     setup_private_git "$config"
-    build_config  "$config" "$force" "[1/2]"
-    apply_config  "$config" "$force" "[2/2]"
-    [[ "$skip_hooks" == "false" ]] && post_apply_hooks "$(get_target_user "$config")"
+    build_config "$config" "$force" "[1/2]"
+    apply_config "$config" "$force" "[2/2]"
     print_summary "$config" "build + apply" $(( SECONDS - total_start ))
-    echo -e "  ${DIM}Tip: run ${BOLD}brew doctor${NC}${DIM} if you encounter Homebrew issues.${NC}"
+    print_dim "Tip: run brew doctor if you encounter Homebrew issues."
     echo ""
   fi
 }

@@ -9,15 +9,32 @@
     hooks.PreToolUse = [
       {
         matcher = "Bash";
-        hooks = [{type = "command"; command = "rtk hook claude";}];
+        hooks = [
+          {
+            type = "command";
+            command = "rtk hook claude";
+          }
+        ];
       }
     ];
 
     extraKnownMarketplaces = {
-      caveman.source = {source = "github"; repo = "JuliusBrussee/caveman";};
-      "claude-code-warp".source = {source = "github"; repo = "warpdotdev/claude-code-warp";};
-      "agricidaniel-seo".source = {source = "github"; repo = "AgriciDaniel/claude-seo";};
-      "openai-codex".source = {source = "github"; repo = "openai/codex-plugin-cc";};
+      caveman.source = {
+        source = "github";
+        repo = "JuliusBrussee/caveman";
+      };
+      "claude-code-warp".source = {
+        source = "github";
+        repo = "warpdotdev/claude-code-warp";
+      };
+      "agricidaniel-seo".source = {
+        source = "github";
+        repo = "AgriciDaniel/claude-seo";
+      };
+      "openai-codex".source = {
+        source = "github";
+        repo = "openai/codex-plugin-cc";
+      };
     };
 
     # Baseline plugins — preserved from existing file on re-deploy (see activation script).

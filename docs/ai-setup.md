@@ -15,9 +15,8 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 | `codex` | Isolated one-shot scripting tasks |
 | `ollama` | Local/offline models (no network, no logs) |
 | `repomix` | Pack repo into AI-readable file |
-| `ttok` | Count LLM tokens before sending |
 | `rtk` | Token proxy — reduces LLM token usage 60–90% |
-| `pipx` | Installs `code-review-graph` post-deploy |
+| `pipx` | Installs `code-review-graph`, `ttok` post-deploy |
 
 ### When to use which tool
 
@@ -178,21 +177,20 @@ These come with the Claude Code harness and are always available. Cannot be adde
 
 ---
 
-## Post-deploy Hooks
+## Initialization (Home Manager Activations)
 
-`./nix.sh macbook` (and `./nix.sh work`) runs post-apply hooks automatically after deploy.
+Managed in `home/common/cli/ai/init.nix`. Runs automatically on every `darwin-rebuild switch` as the correct user. Each step is guarded — only acts when the tool or package is not yet set up.
 
-Hooks run as the **target user** (e.g. `daniel.a.sousa` even if script runs as `admin.daniel.a.sousa`).
+| Step | Condition | What it does |
+|------|-----------|-------------|
+| `rtk init -g` | `rtk` in PATH | Configure rtk proxy for Claude Code + Copilot |
+| `rtk init -g --opencode` | `rtk` in PATH | Configure rtk proxy for opencode |
+| `rtk init -g --codex` | `rtk` in PATH | Configure rtk proxy for Codex |
+| `pipx install code-review-graph` | not in `pipx list` | Install code-review-graph CLI |
+| `pipx install ttok` | not in `pipx list` | Install ttok (LLM token counter — not in nixpkgs) |
+| `ai-skills-sync` | `fish` in PATH | Install all skills from `manifest.txt` |
 
-| Hook | What it does |
-|------|-------------|
-| `rtk init -g` | Configure rtk proxy for Claude Code + Copilot |
-| `rtk init -g --opencode` | Configure rtk proxy for opencode |
-| `rtk init -g --codex` | Configure rtk proxy for Codex |
-| `ai-skills-sync` | Install all skills from `manifest.txt` |
-| `pipx install code-review-graph` | Install code-review-graph CLI |
-
-Skip hooks: `./nix.sh macbook --skip-hooks`
+Runs after `writeBoundary` — `mkdir -p` at the top of the script creates any missing config dirs before tools run.
 
 ---
 

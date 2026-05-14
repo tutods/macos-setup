@@ -7,6 +7,5 @@
     pipx
     rtk
     repomix # pack repo into AI-readable file (repomix --output /tmp/ctx.md)
-    ttok    # count LLM tokens (cat file | ttok)
   ];
 }

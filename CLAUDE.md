@@ -24,9 +24,6 @@ All commands must be run from the repo root (where `flake.nix` lives).
 # Force rebuild
 ./nix.sh macbook --force
 
-# Skip post-apply hooks (rtk init, ai-skills-sync, pipx)
-./nix.sh macbook --skip-hooks
-
 # Garbage collect old generations
 nix-collect-garbage -d
 ```

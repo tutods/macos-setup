@@ -19,7 +19,10 @@
     body = ''
       git stash; or return 1
       git pull; or return 1
-      git stash pop; or return 1
+      git stash pop; or begin
+        echo "Stash pop had conflicts — resolve manually, then: git stash drop"
+        return 1
+      end
     '';
     description = "Stash changes and pull latest";
   };
@@ -28,7 +31,7 @@
     body = ''
       git status --short
       read --local --prompt-str "Stage all changes and push? [y/N] " confirm
-      if test "$confirm" = y
+      if string match -qi 'y' -- "$confirm"
         git add -A
         git commit -m "$argv"
         git push

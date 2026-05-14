@@ -67,8 +67,18 @@
   # File: ~/.config/opencode/opencode.json  (mcp key, type = "local" for stdio)
   # Merged into existing config — preserves plugin, experimental, share, context7.
   opencodeMcpServers = {
-    filesystem = filesystemServer // {type = "local"; enabled = true;};
-    github = githubServer // {type = "local"; enabled = true;};
+    filesystem =
+      filesystemServer
+      // {
+        type = "local";
+        enabled = true;
+      };
+    github =
+      githubServer
+      // {
+        type = "local";
+        enabled = true;
+      };
   };
 
   opencodeBaseConfig = {
@@ -156,10 +166,10 @@ in {
         return 1
       end
 
-      set -l entry (printf '{"type":"remote","url":"https://mcp.context7.com/mcp","enabled":true,"headers":{"CONTEXT7_API_KEY":"%s"}}' "$key")
-      ${pkgs.jq}/bin/jq --argjson ctx $entry \
-        '.mcp.context7 = $ctx' "$target" \
-        > "$target.tmp"; and mv "$target.tmp" "$target"
+      ${pkgs.jq}/bin/jq \
+        --arg key "$key" \
+        '.mcp.context7 = {type:"remote",url:"https://mcp.context7.com/mcp",enabled:true,headers:{CONTEXT7_API_KEY:$key}}' \
+        "$target" > "$target.tmp"; and mv "$target.tmp" "$target"
 
       echo "context7 MCP key updated in $target"
     '';
