@@ -62,10 +62,10 @@
             sha256 = "sha256-DH1NfneJTMC7BmOP4IiUG8J7BQtwOj4/k5Qn62DkZ7Q=";
           }
           {
-            name = "vscode-version-lens";
-            publisher = "anaer";
-            version = "26.312.1110";
-            sha256 = "sha256-lVr+otAWdP5+AmFlC09GXRmOxC5CypokpmLoHc1NiM4=";
+            name = "vscode-versionlens";
+            publisher = "pflannery";
+            version = "1.28.0";
+            sha256 = "sha256-IZjTHE51hdrQpDndsz5bBCKre0zmWkCAJa/v8k4iLy0=";
           }
           {
             name = "code-spell-checker-portuguese";
