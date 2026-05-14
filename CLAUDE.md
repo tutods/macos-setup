@@ -95,6 +95,7 @@ When working in this repo or on this machine, prefer these fast tools:
 |-----|-----------|-----|
 | `rg` | `grep` | 10x faster content search |
 | `fd` | `find` | 10x faster file finding |
+| `fzf` | Manual selection | Fuzzy finder for interactive search, multi-select, filtering |
 | `bat --style=plain` | `cat` | Syntax highlighting, Git integration |
 | `jq` | Manual JSON parsing | Native fast JSON processing |
 | `rtk` | Raw commands | Token proxy, reduces LLM token usage |
