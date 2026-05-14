@@ -14,16 +14,6 @@ Always prefer these tools over slower alternatives:
 | `delta` | `diff` | Better diff rendering |
 | `htop` | `top` | Interactive process viewer |
 
-## Repository Conventions
-
-- Always check `flake.nix` and `CLAUDE.md` before suggesting package changes
-- Validate changes with `./nix.sh <host> --build-only`
-- Only commit when explicitly asked
-- Do not add comments unless requested
-- Packages go in `modules/packages/` (system) or `home/common/` (Home Manager)
-- Homebrew casks go in `modules/darwin/homebrew/casks/` (shared) or `hosts/darwin/<name>/homebrew/casks/` (per-machine)
-- Private data (secrets, git identity) is never committed — see `docs/secrets.md`
-
 ## General Workflow
 
 - Use `rg` for searching file contents, `fd` for finding files by name
