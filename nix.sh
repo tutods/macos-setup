@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
-BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; ITALIC='\033[3m'; NC='\033[0m'
 
 # ── Print helpers ─────────────────────────────────────────────────────────────
 print_info()    { echo -e "  ${BLUE}➜${NC}  $1"; }
@@ -131,8 +131,9 @@ show_errors() {
 # ── Banner ────────────────────────────────────────────────────────────────────
 print_banner() {
   echo ""
-  echo -e "  ${BOLD}${CYAN}❄${NC}  ${BOLD}nix · darwin · deploy${NC}"
-  print_divider
+  echo -e "  ${CYAN}╭────────────────────────────╮${NC}"
+  echo -e "  ${CYAN}│${NC}  ${BOLD}${CYAN}❄${NC}  ${BOLD}nix · darwin · deploy${NC}  ${CYAN}│${NC}"
+  echo -e "  ${CYAN}╰────────────────────────────╯${NC}"
   echo ""
 }
 
@@ -155,25 +156,32 @@ validate_config() {
 }
 
 # ── Pure-bash arrow-key menu ──────────────────────────────────────────────────
-# Result written to _TUI_SELECTED.  Returns 1 if user pressed q/ESC.
+# _tui_draw / _tui_select use these globals so _tui_draw can be top-level.
 _TUI_SELECTED=""
+_TUI_ITEMS=()
+_TUI_SEL=0
 
+_tui_draw() {
+  local i count=${#_TUI_ITEMS[@]}
+  for ((i = 0; i < count; i++)); do
+    if ((i == _TUI_SEL)); then
+      printf "  \033[96m▸ %s\033[0m\n" "${_TUI_ITEMS[$i]}"
+    else
+      printf "    \033[2m%s\033[0m\n" "${_TUI_ITEMS[$i]}"
+    fi
+  done
+}
+
+# Returns 1 if user pressed q/ESC; result written to _TUI_SELECTED.
 _tui_select() {
-  local items=("$@") sel=0 count=$#
-  local k1 k2 k3
+  _TUI_ITEMS=("$@")
+  _TUI_SEL=0
+  local count=$# k1 k2 k3 quit=0
+  local stty_save
+  stty_save=$(stty -g 2>/dev/null) || stty_save=""
 
-  _tui_draw() {
-    local i
-    for ((i = 0; i < count; i++)); do
-      if ((i == sel)); then
-        printf "  \033[1;36m▸ %s\033[0m\n" "${items[$i]}"
-      else
-        printf "    \033[2m%s\033[0m\n" "${items[$i]}"
-      fi
-    done
-  }
-
-  printf '\033[?25l'
+  [[ -n "$stty_save" ]] && stty -echo 2>/dev/null || true
+  printf '\033[?25l\033[?7l'
   _tui_draw
 
   while true; do
@@ -183,32 +191,26 @@ _tui_select() {
       IFS= read -rsn1 -t 0.1 k3 || true
       if [[ $k2 == '[' ]]; then
         case $k3 in
-          A) ((sel > 0))         && ((sel--)) ;;
-          B) ((sel < count - 1)) && ((sel++)) ;;
+          A) ((_TUI_SEL > 0))          && ((_TUI_SEL--)) ;;
+          B) ((_TUI_SEL < count - 1))  && ((_TUI_SEL++)) ;;
         esac
       else
-        # bare ESC — quit
-        printf '\033[?25h\n'
-        printf "\033[%dA\033[J" "$count"
-        unset -f _tui_draw
-        return 1
+        quit=1; break
       fi
     elif [[ $k1 == '' ]]; then
       break
     elif [[ $k1 == q || $k1 == Q ]]; then
-      printf '\033[?25h\n'
-      printf "\033[%dA\033[J" "$count"
-      unset -f _tui_draw
-      return 1
+      quit=1; break
     fi
     printf "\033[%dA" "$count"
     _tui_draw
   done
 
-  printf '\033[?25h'
+  [[ -n "$stty_save" ]] && stty "$stty_save" 2>/dev/null || true
+  printf '\033[?25h\033[?7h'
   printf "\033[%dA\033[J" "$count"
-  unset -f _tui_draw
-  _TUI_SELECTED="${items[$sel]}"
+  ((quit)) && return 1
+  _TUI_SELECTED="${_TUI_ITEMS[$_TUI_SEL]}"
 }
 
 # ── Interactive config picker ─────────────────────────────────────────────────
@@ -230,7 +232,7 @@ select_config() {
       --header="↑/↓ navigate  ENTER select  ESC quit") || true
     [[ -z "$SELECTED_CONFIG" ]] && { echo ""; exit 0; }
   else
-    echo -e "  ${DIM}↑/↓ navigate  ENTER select  q quit${NC}"
+    echo -e "  ${DIM}${ITALIC}↑/↓ navigate  ENTER select  q quit${NC}"
     echo ""
     # shellcheck disable=SC2086
     _tui_select $AVAILABLE_CONFIGS || exit 0
@@ -272,7 +274,7 @@ check_directory() {
     print_error "Must be run from the .dotfiles directory (flake.nix not found)"
     exit 1
   fi
-  git config core.hooksPath .hooks 2>/dev/null || true
+  [[ -d ".hooks" ]] && git config core.hooksPath .hooks 2>/dev/null || true
 }
 
 # ── Git identity setup ────────────────────────────────────────────────────────
