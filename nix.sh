@@ -155,6 +155,14 @@ print_banner() {
 # ── Available configs ─────────────────────────────────────────────────────────
 AVAILABLE_CONFIGS="macbook work"
 
+get_target_user() {
+  case "$1" in
+    macbook) echo "tutods" ;;
+    work)    echo "daniel.a.sousa" ;;
+    *)       echo "${USER:-$(id -un)}" ;;
+  esac
+}
+
 validate_config() {
   for c in $AVAILABLE_CONFIGS; do
     [[ "$c" == "$1" ]] && return 0
@@ -168,62 +176,25 @@ validate_config() {
 SELECTED_CONFIG=""
 
 select_config() {
-  local configs=($AVAILABLE_CONFIGS)
-  local n=${#configs[@]}
-  local selected=0
-
-  _menu_draw() {
-    for i in "${!configs[@]}"; do
-      printf "\033[2K"
-      if [[ $i -eq $selected ]]; then
-        echo -e "  ${CYAN}▶  ${BOLD}${configs[$i]}${NC}"
-      else
-        echo -e "     ${DIM}${configs[$i]}${NC}"
-      fi
-    done
-  }
-
   print_banner
   echo -e "  ${BOLD}Select a machine:${NC}"
   echo ""
-  _menu_draw
-  tput civis 2>/dev/null || true
 
-  while true; do
-    local key=""
-    IFS= read -rsn1 key
-
-    # Read the full escape sequence (ESC [ X) as one unit
-    if [[ "$key" == $'\x1b' ]]; then
-      local rest=""
-      IFS= read -rsn2 -t 0.05 rest 2>/dev/null || true
-      key="${key}${rest}"
-    fi
-
-    case "$key" in
-      $'\x1b[A')  # up arrow
-        [[ $selected -gt 0 ]] && selected=$(( selected - 1 ))
-        ;;
-      $'\x1b[B')  # down arrow
-        [[ $selected -lt $(( n - 1 )) ]] && selected=$(( selected + 1 ))
-        ;;
-      '')  # enter
-        break
-        ;;
-      $'\x1b'|q|Q)
-        tput cnorm 2>/dev/null || true
-        echo ""
-        exit 0
-        ;;
-    esac
-
-    printf "\033[%dA" "$n"
-    _menu_draw
-  done
-
-  tput cnorm 2>/dev/null || true
-  echo ""
-  SELECTED_CONFIG="${configs[$selected]}"
+  if command -v fzf &>/dev/null; then
+    SELECTED_CONFIG=$(printf '%s\n' $AVAILABLE_CONFIGS | fzf \
+      --height=~40% \
+      --layout=reverse \
+      --border=rounded \
+      --prompt="  Machine > " \
+      --color="border:cyan,pointer:cyan,header:cyan" \
+      --header="↑/↓ navigate  ENTER select  ESC quit") || true
+    [[ -z "$SELECTED_CONFIG" ]] && { echo ""; exit 0; }
+  else
+    # fallback for bootstrap (fzf not yet installed)
+    select SELECTED_CONFIG in $AVAILABLE_CONFIGS; do
+      [[ -n "$SELECTED_CONFIG" ]] && break
+    done
+  fi
 }
 
 # ── Usage ─────────────────────────────────────────────────────────────────────
@@ -240,6 +211,7 @@ show_usage() {
   echo "    --build-only      Build without applying"
   echo "    --dry-run         Preview what would change (no apply)"
   echo "    --force           Force rebuild even if no changes"
+  echo "    --skip-hooks      Skip post-apply initialization steps"
   echo "    --log <file>      Save full command output to file for debugging"
   echo "    --help, -h        Show this help message"
   echo ""
@@ -264,12 +236,8 @@ check_directory() {
 
 setup_private_git() {
   local config="$1"
-  local target_user="${USER:-$(id -un)}"
-
-  case "$config" in
-    macbook) target_user="tutods" ;;
-    work) target_user="daniel.a.sousa" ;;
-  esac
+  local target_user
+  target_user=$(get_target_user "$config")
 
   local target_home="/Users/$target_user"
   if [[ "$target_user" == "${USER:-}" ]]; then
@@ -417,113 +385,57 @@ apply_config() {
 
 # ── Post-apply hooks ──────────────────────────────────────────────────────────
 post_apply_hooks() {
+  local target_user="${1:-${USER:-$(id -un)}}"
+  local target_home
+  target_home=$(eval echo "~${target_user}")
+
   echo ""
   print_step "Post-apply setup"
-  echo -e "  ${DIM}Optional tools that need one-time initialization after deploy.${NC}"
+  echo -e "  ${DIM}Running one-time initialization steps for ${BOLD}${target_user}${NC}${DIM}.${NC}"
   echo ""
 
-  if ! command -v fzf &>/dev/null; then
-    echo -e "  ${YELLOW}⚠  fzf not found — skipping post-apply hooks.${NC}"
-    echo -e "  ${DIM}Install fzf or run hooks manually.${NC}"
-    return 0
+  # Run a command as the target user (sudo -H when user differs)
+  _as_user() {
+    if [[ "$target_user" == "${USER:-$(id -un)}" ]]; then
+      "$@"
+    else
+      sudo -H -u "$target_user" "$@"
+    fi
+  }
+
+  # Run a labeled command, print output indented, report success/failure
+  _hook() {
+    local label="$1"; shift
+    print_info "${label}…"
+    local output rc=0
+    output=$(_as_user "$@" 2>&1) || rc=$?
+    [[ -n "$output" ]] && echo "$output" | sed 's/^/    /'
+    if [[ $rc -eq 0 ]]; then
+      print_success "${label}"
+    else
+      print_warning "${label} failed — run manually after shell restart"
+    fi
+  }
+
+  # rtk proxy init (fast, idempotent)
+  if _as_user command -v rtk &>/dev/null; then
+    _as_user mkdir -p "${target_home}/.claude" "${target_home}/.config/opencode" "${target_home}/.codex" 2>/dev/null || true
+    _hook "rtk init (Claude + Copilot)"  rtk init -g
+    _hook "rtk init (opencode)"          rtk init -g --opencode
+    _hook "rtk init (Codex)"             rtk init -g --codex
+  else
+    print_warning "rtk not found — run 'rtk init' manually after PATH refresh"
   fi
 
-  local selected
-  selected=$(fzf --multi \
-    --height=~40% \
-    --layout=reverse \
-    --border=rounded \
-    --cycle \
-    --header="Select hooks to run (TAB to toggle, ENTER to confirm)" \
-    --color="border:cyan,header:cyan,pointer:cyan,marker:green:bold" \
-    --marker="✔" \
-    --prompt=" Hooks > " \
-    <<'EOF'
-ai_skills_sync   │ Install AI skills from manifest (npx skills add) into Claude Code & opencode
-rtk_init_copilot │ Configure rtk proxy for Claude Code & Copilot CLI
-rtk_init_opencode│ Configure rtk proxy for opencode
-rtk_init_codex   │ Configure rtk proxy for Codex
-pipx_review      │ Install code-review-graph CLI tool
-EOF
-  ) || true
-
-  if [[ -z "$selected" ]]; then
-    echo -e "  ${DIM}No hooks selected — skipping.${NC}"
-    return 0
+  # AI skills sync via fish
+  if _as_user command -v fish &>/dev/null; then
+    _hook "AI skills sync"  fish -c "ai-skills-sync"
   fi
 
-  echo ""
-  while IFS= read -r line; do
-    local hook
-    hook=$(echo "$line" | awk '{print $1}')
-    case "$hook" in
-      ai_skills_sync)
-        print_info "Running ai-skills-sync…"
-        # Reload Nix profile so fish picks up newly deployed functions
-        eval "$(/nix/var/nix/profiles/default/bin/nix print-dev-env nixpkgs 2>/dev/null)" 2>/dev/null || true
-        if command -v fish &>/dev/null; then
-          if fish -c "source ~/.config/fish/config.fish 2>/dev/null; and ai-skills-sync" 2>&1 | sed 's/^/    /'; then
-            print_success "ai-skills-sync done"
-          else
-            print_warning "ai-skills-sync failed — run manually after restarting your shell"
-          fi
-        else
-          print_warning "fish not found — run ai-skills-sync manually after shell restart"
-        fi
-        ;;
-      rtk_init_copilot)
-        print_info "Running rtk init -g (Claude + Copilot)…"
-        if command -v rtk &>/dev/null; then
-          mkdir -p "$HOME/.claude" 2>/dev/null
-          if rtk init -g 2>&1 | sed 's/^/    /'; then
-            print_success "rtk init -g done"
-          else
-            print_warning "rtk init -g failed — run manually after PATH refresh"
-          fi
-        else
-          print_warning "rtk not found — skip or run manually after PATH refresh"
-        fi
-        ;;
-      rtk_init_opencode)
-        print_info "Running rtk init -g --opencode…"
-        if command -v rtk &>/dev/null; then
-          mkdir -p "$HOME/.config/opencode" 2>/dev/null
-          if rtk init -g --opencode 2>&1 | sed 's/^/    /'; then
-            print_success "rtk init -g --opencode done"
-          else
-            print_warning "rtk init -g --opencode failed — run manually after PATH refresh"
-          fi
-        else
-          print_warning "rtk not found — skip or run manually after PATH refresh"
-        fi
-        ;;
-      rtk_init_codex)
-        print_info "Running rtk init -g --codex…"
-        if command -v rtk &>/dev/null; then
-          mkdir -p "$HOME/.codex" 2>/dev/null
-          if rtk init -g --codex 2>&1 | sed 's/^/    /'; then
-            print_success "rtk init -g --codex done"
-          else
-            print_warning "rtk init -g --codex failed — run manually after PATH refresh"
-          fi
-        else
-          print_warning "rtk not found — skip or run manually after PATH refresh"
-        fi
-        ;;
-      pipx_review)
-        print_info "Installing code-review-graph via pipx…"
-        if command -v pipx &>/dev/null; then
-          if pipx install code-review-graph 2>&1 | sed 's/^/    /'; then
-            print_success "code-review-graph installed"
-          else
-            print_warning "pipx install code-review-graph failed"
-          fi
-        else
-          print_warning "pipx not found — skip or run manually after PATH refresh"
-        fi
-        ;;
-    esac
-  done <<< "$selected"
+  # pipx code-review-graph
+  if _as_user command -v pipx &>/dev/null; then
+    _hook "code-review-graph (pipx)"  pipx install code-review-graph
+  fi
 }
 
 # ── Summary ───────────────────────────────────────────────────────────────────
@@ -546,7 +458,7 @@ print_summary() {
 # ── Main ──────────────────────────────────────────────────────────────────────
 main() {
   local config=""
-  local build_only=false dry_run=false force=false
+  local build_only=false dry_run=false force=false skip_hooks=false
 
   # No args — show interactive picker
   if [[ $# -eq 0 ]]; then
@@ -568,9 +480,10 @@ main() {
   # Parse remaining flags
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --build-only) build_only=true ;;
-      --dry-run)    dry_run=true ;;
-      --force)      force=true ;;
+      --build-only)  build_only=true ;;
+      --dry-run)     dry_run=true ;;
+      --force)       force=true ;;
+      --skip-hooks)  skip_hooks=true ;;
       --log)
         shift
         if [[ $# -eq 0 || "$1" == --* ]]; then
@@ -637,7 +550,7 @@ main() {
     setup_private_git "$config"
     build_config  "$config" "$force" "[1/2]"
     apply_config  "$config" "$force" "[2/2]"
-    post_apply_hooks
+    [[ "$skip_hooks" == "false" ]] && post_apply_hooks "$(get_target_user "$config")"
     print_summary "$config" "build + apply" $(( SECONDS - total_start ))
     echo -e "  ${DIM}Tip: run ${BOLD}brew doctor${NC}${DIM} if you encounter Homebrew issues.${NC}"
     echo ""

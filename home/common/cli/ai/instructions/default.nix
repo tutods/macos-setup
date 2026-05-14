@@ -7,9 +7,17 @@
   shared = builtins.readFile ./shared-instructions.md;
   context7 = builtins.readFile ./context7-prefix.md;
   extra = config.home.ai.extraInstructions;
-  content = if extra != "" then context7 + "\n" + shared + "\n\n" + extra else context7 + "\n" + shared;
+  content =
+    context7 + "\n\n" + shared
+    + (if extra != "" then "\n\n" + extra else "")
+    + "\n";
 in {
-  xdg.configFile."opencode/AGENTS.md" = {
-    text = content;
-  };
+  # opencode — full instructions (context7 + shared + role extras)
+  xdg.configFile."opencode/AGENTS.md".text = content;
+
+  # Claude Code — shared + role extras only (context7 already in ~/.claude/rules/context7.md)
+  home.file.".claude/rules/workflow.md".text =
+    shared
+    + (if extra != "" then "\n\n" + extra else "")
+    + "\n";
 }

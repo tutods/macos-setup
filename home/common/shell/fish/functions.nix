@@ -1,25 +1,25 @@
 {
   goMain = {
     body = ''
-      git checkout main
-      git pull
+      git checkout main; or return 1
+      git pull; or return 1
     '';
     description = "Switch to main branch and pull changes";
   };
 
   goBranch = {
     body = ''
-      git checkout "$argv"
-      git pull
+      git checkout "$argv"; or return 1
+      git pull; or return 1
     '';
     description = "Switch to specified branch and pull changes";
   };
 
   stashAndPull = {
     body = ''
-      git stash
-      git pull
-      git stash pop
+      git stash; or return 1
+      git pull; or return 1
+      git stash pop; or return 1
     '';
     description = "Stash changes and pull latest";
   };

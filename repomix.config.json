@@ -1,0 +1,11 @@
+{
+  "output": {
+    "filePath": "/tmp/dotfiles-context.md",
+    "style": "markdown",
+    "showLineNumbers": false
+  },
+  "ignore": {
+    "useGitignore": true,
+    "patterns": ["*.lock", "result", ".direnv", "node_modules"]
+  }
+}

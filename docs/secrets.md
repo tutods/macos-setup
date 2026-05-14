@@ -28,9 +28,29 @@ git config --list --show-origin | grep user
 
 ```bash
 touch ~/.config/fish/secrets.fish
-# Add env vars as needed:
-# set -gx DOPPLER_TOKEN "..."
-# set -gx GITHUB_TOKEN "..."
+chmod 600 ~/.config/fish/secrets.fish
+```
+
+Known secrets to configure:
+
+| Variable | Purpose | Where to get it |
+|----------|---------|----------------|
+| `GITHUB_TOKEN` | GitHub MCP server, GitHub CLI ops | https://github.com/settings/tokens/new (scopes: `repo`, `read:org`, `read:user`) |
+| `CONTEXT7_API_KEY` | Context7 MCP server for opencode | https://context7.com/settings |
+| `DOPPLER_TOKEN` | Doppler secrets manager (personal machine) | `doppler login` |
+
+Example:
+
+```fish
+set -gx GITHUB_TOKEN       "ghp_xxxxxxxxxxxxxxxxxxxx"
+set -gx CONTEXT7_API_KEY   "ctx7sk-xxxxxxxxxxxxxxxxxxxx"
+set -gx DOPPLER_TOKEN      "dp.st.xxxxxxxxxxxxxxxxxxxx"
+```
+
+After setting `CONTEXT7_API_KEY`, inject it into opencode:
+
+```fish
+opencode-context7-setup
 ```
 
 ## Validation
