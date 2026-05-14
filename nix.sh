@@ -434,35 +434,44 @@ post_apply_hooks() {
 
   local n=${#hooks[@]}
   local selected=()
+  local cur=0
 
   _hooks_draw() {
-    tput cuu "$((n + 2))" 2>/dev/null || true
+    tput cuu "$((2 * n + 2))" 2>/dev/null || true
     for i in "${!hooks[@]}"; do
       printf "\033[2K"
       if [[ " ${selected[*]} " == *" ${hooks[$i]} "* ]]; then
-        echo -e "  ${GREEN}✔${NC}  ${BOLD}${labels[$i]}${NC}"
-        echo -e "     ${DIM}${descs[$i]}${NC}"
+        if [[ $i -eq $cur ]]; then
+          echo -e "  ${CYAN}▶${NC} ${GREEN}✔${NC}  ${BOLD}${labels[$i]}${NC}"
+        else
+          echo -e "     ${GREEN}✔${NC}  ${BOLD}${labels[$i]}${NC}"
+        fi
       else
-        echo -e "  ${DIM}○  ${labels[$i]}${NC}"
-        echo -e "     ${DIM}${descs[$i]}${NC}"
+        if [[ $i -eq $cur ]]; then
+          echo -e "  ${CYAN}▶${NC} ${DIM}○  ${labels[$i]}${NC}"
+        else
+          echo -e "     ${DIM}○  ${labels[$i]}${NC}"
+        fi
       fi
-    done
-  }
-
-  _hooks_draw_initial() {
-    for i in "${!hooks[@]}"; do
-      echo -e "  ${DIM}○  ${labels[$i]}${NC}"
+      printf "\033[2K"
       echo -e "     ${DIM}${descs[$i]}${NC}"
     done
-    echo ""
+    printf "\033[2K"
     echo -e "  ${DIM}↑↓ navigate  space select  ↵ confirm  q skip${NC}"
   }
 
   echo -e "  ${BOLD}Select hooks to run:${NC}"
   echo ""
-  _hooks_draw_initial
+  for i in "${!hooks[@]}"; do
+    if [[ $i -eq $cur ]]; then
+      echo -e "  ${CYAN}▶${NC} ${DIM}○  ${labels[$i]}${NC}"
+    else
+      echo -e "     ${DIM}○  ${labels[$i]}${NC}"
+    fi
+    echo -e "     ${DIM}${descs[$i]}${NC}"
+  done
+  echo -e "  ${DIM}↑↓ navigate  space select  ↵ confirm  q skip${NC}"
 
-  local cur=0
   tput civis 2>/dev/null || true
 
   while true; do
@@ -477,9 +486,11 @@ post_apply_hooks() {
     case "$key" in
       $'\x1b[A')
         [[ $cur -gt 0 ]] && cur=$(( cur - 1 ))
+        _hooks_draw
         ;;
       $'\x1b[B')
         [[ $cur -lt $(( n - 1 )) ]] && cur=$(( cur + 1 ))
+        _hooks_draw
         ;;
       '')
         break
@@ -496,6 +507,7 @@ post_apply_hooks() {
         ;;
       q|Q|$'\x1b')
         tput cnorm 2>/dev/null || true
+        _hooks_draw
         echo -e "\n  ${DIM}Skipped post-apply hooks.${NC}"
         return 0
         ;;
