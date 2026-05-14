@@ -24,4 +24,5 @@ tanstack/router                    # start-core
 vercel-labs/agent-skills            # web-design-guidelines
 vercel-labs/skills                  # find-skills
 vercel/turborepo                   # turborepo
+kadajett/agent-nestjs-skills -s nestjs-best-practices  # nestjs-best-practices
 wshobson/agents                    # api-design-principles, nodejs-backend-patterns, responsive-design
