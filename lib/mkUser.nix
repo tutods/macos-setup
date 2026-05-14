@@ -4,8 +4,8 @@
   extraImports ? [],
 }: {lib, ...}: let
   roleModule = {
-    personal = ../home/roles/personal.nix;
-    work = ../home/roles/work.nix;
+    personal = ../home/roles/personal;
+    work = ../home/roles/work;
   };
 in {
   home.username = username;

@@ -54,7 +54,7 @@ Applying uses `darwin-rebuild switch --flake ".#<config>"` (local binary if pres
 | `modules/` | Shared system-level config (applied to every host) |
 | `hosts/darwin/<name>/` | Per-machine config: system settings, dock, Homebrew casks |
 | `home/common/` | Shared Home Manager config (shell, CLI tools, editors) — every user gets this |
-| `home/roles/` | Context-specific Home Manager config (`personal.nix`, `work.nix`) |
+| `home/roles/` | Context-specific Home Manager config (`personal/`, `work/`) — each role is a directory with `default.nix` and optional `ai/` submodule |
 | `home/identity/` | Person-specific overrides (GPG keys, email) — rarely used |
 
 ### Homebrew Casks
@@ -64,6 +64,18 @@ Shared casks live in `modules/darwin/homebrew/casks/` (applied to every host). M
 ### Shell Configuration
 
 Fish shell is the primary shell, configured in `home/common/shell/fish/` with separate files for aliases (`alias.nix`), abbreviations (`abbrs.nix`), functions (`functions.nix`), completions (`completions.nix`), and extra tool integrations (`extra.nix`).
+
+### AI Instructions Architecture
+
+AI instructions are split into shared and role-specific:
+
+- `home/common/cli/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.config/opencode/AGENTS.md`)
+- `home/common/cli/ai/instructions/context7-prefix.md` — opencode-specific context7 docs prefix
+- `home/common/cli/ai/options.nix` — defines `home.ai.extraInstructions` option (default `""`)
+- `home/roles/personal/ai/instructions.md` — personal-specific additions (e.g., `doppler`)
+- `home/roles/work/` — no AI-specific instructions currently
+
+The common module concatenates: context7 + shared + role extras (if set). Role modules set `home.ai.extraInstructions` via their `ai/default.nix`.
 
 ### Adding a New Host
 

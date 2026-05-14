@@ -459,11 +459,13 @@ EOF
     case "$hook" in
       ai_skills_sync)
         print_info "Running ai-skills-sync…"
+        # Reload Nix profile so fish picks up newly deployed functions
+        eval "$(/nix/var/nix/profiles/default/bin/nix print-dev-env nixpkgs 2>/dev/null)" 2>/dev/null || true
         if command -v fish &>/dev/null; then
-          if fish -c "ai-skills-sync" 2>&1 | sed 's/^/    /'; then
+          if fish -c "source ~/.config/fish/config.fish 2>/dev/null; and ai-skills-sync" 2>&1 | sed 's/^/    /'; then
             print_success "ai-skills-sync done"
           else
-            print_warning "ai-skills-sync failed"
+            print_warning "ai-skills-sync failed — run manually after restarting your shell"
           fi
         else
           print_warning "fish not found — run ai-skills-sync manually after shell restart"
@@ -472,10 +474,11 @@ EOF
       rtk_init_copilot)
         print_info "Running rtk init -g (Claude + Copilot)…"
         if command -v rtk &>/dev/null; then
+          mkdir -p "$HOME/.claude" 2>/dev/null
           if rtk init -g 2>&1 | sed 's/^/    /'; then
             print_success "rtk init -g done"
           else
-            print_warning "rtk init -g failed"
+            print_warning "rtk init -g failed — run manually after PATH refresh"
           fi
         else
           print_warning "rtk not found — skip or run manually after PATH refresh"
@@ -484,10 +487,11 @@ EOF
       rtk_init_opencode)
         print_info "Running rtk init -g --opencode…"
         if command -v rtk &>/dev/null; then
+          mkdir -p "$HOME/.config/opencode" 2>/dev/null
           if rtk init -g --opencode 2>&1 | sed 's/^/    /'; then
             print_success "rtk init -g --opencode done"
           else
-            print_warning "rtk init -g --opencode failed"
+            print_warning "rtk init -g --opencode failed — run manually after PATH refresh"
           fi
         else
           print_warning "rtk not found — skip or run manually after PATH refresh"
@@ -496,10 +500,11 @@ EOF
       rtk_init_codex)
         print_info "Running rtk init -g --codex…"
         if command -v rtk &>/dev/null; then
+          mkdir -p "$HOME/.codex" 2>/dev/null
           if rtk init -g --codex 2>&1 | sed 's/^/    /'; then
             print_success "rtk init -g --codex done"
           else
-            print_warning "rtk init -g --codex failed"
+            print_warning "rtk init -g --codex failed — run manually after PATH refresh"
           fi
         else
           print_warning "rtk not found — skip or run manually after PATH refresh"
