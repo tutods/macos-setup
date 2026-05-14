@@ -422,108 +422,40 @@ post_apply_hooks() {
   echo -e "  ${DIM}Optional tools that need one-time initialization after deploy.${NC}"
   echo ""
 
-  local hooks=()
-  local labels=()
-  local descs=()
+  if ! command -v fzf &>/dev/null; then
+    echo -e "  ${YELLOW}⚠  fzf not found — skipping post-apply hooks.${NC}"
+    echo -e "  ${DIM}Install fzf or run hooks manually.${NC}"
+    return 0
+  fi
 
-  hooks+=("ai_skills_sync");     labels+=("ai-skills-sync");                      descs+=("Install AI skills from manifest (npx skills add) into Claude Code & opencode")
-  hooks+=("rtk_init_copilot");   labels+=("rtk init (Claude + Copilot)");         descs+=("Configure rtk proxy for Claude Code & Copilot CLI")
-  hooks+=("rtk_init_opencode");  labels+=("rtk init --opencode");                 descs+=("Configure rtk proxy for opencode")
-  hooks+=("rtk_init_codex");     labels+=("rtk init --codex");                    descs+=("Configure rtk proxy for Codex")
-  hooks+=("pipx_review");        labels+=("pipx install code-review-graph");       descs+=("Install code-review-graph CLI tool")
+  local selected
+  selected=$(fzf --multi \
+    --height=~40% \
+    --layout=reverse \
+    --border=rounded \
+    --cycle \
+    --header="Select hooks to run (TAB to toggle, ENTER to confirm)" \
+    --color="border:cyan,header:cyan,pointer:cyan,marker:green:bold" \
+    --marker="✔" \
+    --prompt=" Hooks > " \
+    <<'EOF'
+ai_skills_sync   │ Install AI skills from manifest (npx skills add) into Claude Code & opencode
+rtk_init_copilot │ Configure rtk proxy for Claude Code & Copilot CLI
+rtk_init_opencode│ Configure rtk proxy for opencode
+rtk_init_codex   │ Configure rtk proxy for Codex
+pipx_review      │ Install code-review-graph CLI tool
+EOF
+  ) || true
 
-  local n=${#hooks[@]}
-  local selected=()
-  local cur=0
-
-  _hooks_draw() {
-    tput cuu "$((2 * n + 2))" 2>/dev/null || true
-    for i in "${!hooks[@]}"; do
-      printf "\033[2K"
-      if [[ " ${selected[*]} " == *" ${hooks[$i]} "* ]]; then
-        if [[ $i -eq $cur ]]; then
-          echo -e "  ${CYAN}▶${NC} ${GREEN}✔${NC}  ${BOLD}${labels[$i]}${NC}"
-        else
-          echo -e "     ${GREEN}✔${NC}  ${BOLD}${labels[$i]}${NC}"
-        fi
-      else
-        if [[ $i -eq $cur ]]; then
-          echo -e "  ${CYAN}▶${NC} ${DIM}○  ${labels[$i]}${NC}"
-        else
-          echo -e "     ${DIM}○  ${labels[$i]}${NC}"
-        fi
-      fi
-      printf "\033[2K"
-      echo -e "     ${DIM}${descs[$i]}${NC}"
-    done
-    printf "\033[2K"
-    echo -e "  ${DIM}↑↓ navigate  space select  ↵ confirm  q skip${NC}"
-  }
-
-  echo -e "  ${BOLD}Select hooks to run:${NC}"
-  echo ""
-  for i in "${!hooks[@]}"; do
-    if [[ $i -eq $cur ]]; then
-      echo -e "  ${CYAN}▶${NC} ${DIM}○  ${labels[$i]}${NC}"
-    else
-      echo -e "     ${DIM}○  ${labels[$i]}${NC}"
-    fi
-    echo -e "     ${DIM}${descs[$i]}${NC}"
-  done
-  echo -e "  ${DIM}↑↓ navigate  space select  ↵ confirm  q skip${NC}"
-
-  tput civis 2>/dev/null || true
-
-  while true; do
-    local key=""
-    IFS= read -rsn1 key
-    if [[ "$key" == $'\x1b' ]]; then
-      local rest=""
-      IFS= read -rsn2 -t 0.05 rest 2>/dev/null || true
-      key="${key}${rest}"
-    fi
-
-    case "$key" in
-      $'\x1b[A')
-        [[ $cur -gt 0 ]] && cur=$(( cur - 1 ))
-        _hooks_draw
-        ;;
-      $'\x1b[B')
-        [[ $cur -lt $(( n - 1 )) ]] && cur=$(( cur + 1 ))
-        _hooks_draw
-        ;;
-      '')
-        break
-        ;;
-      ' ')
-        if [[ " ${selected[*]} " == *" ${hooks[$cur]} "* ]]; then
-          local new_sel=()
-          for s in "${selected[@]}"; do [[ "$s" != "${hooks[$cur]}" ]] && new_sel+=("$s"); done
-          selected=("${new_sel[@]}")
-        else
-          selected+=("${hooks[$cur]}")
-        fi
-        _hooks_draw
-        ;;
-      q|Q|$'\x1b')
-        tput cnorm 2>/dev/null || true
-        _hooks_draw
-        echo -e "\n  ${DIM}Skipped post-apply hooks.${NC}"
-        return 0
-        ;;
-    esac
-  done
-
-  tput cnorm 2>/dev/null || true
-  echo ""
-
-  if [[ ${#selected[@]} -eq 0 ]]; then
+  if [[ -z "$selected" ]]; then
     echo -e "  ${DIM}No hooks selected — skipping.${NC}"
     return 0
   fi
 
   echo ""
-  for hook in "${selected[@]}"; do
+  while IFS= read -r line; do
+    local hook
+    hook=$(echo "$line" | awk '{print $1}')
     case "$hook" in
       ai_skills_sync)
         print_info "Running ai-skills-sync…"
@@ -586,7 +518,7 @@ post_apply_hooks() {
         fi
         ;;
     esac
-  done
+  done <<< "$selected"
 }
 
 # ── Summary ───────────────────────────────────────────────────────────────────
