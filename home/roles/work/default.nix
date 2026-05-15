@@ -1,9 +1,6 @@
 {
   imports = [
     ./ai
+    ./shell
   ];
-
-  programs.fish.shellAliases = {
-    docker = "podman";
-  };
 }

@@ -35,6 +35,11 @@ Always prefer these tools over slower alternatives:
 - Never commit secrets, `.env` files, or credentials
 - Branch names: `feat/`, `fix/`, `chore/` prefixes
 
+## Security & AI Safety
+
+- **Secrets**: Never log output from `doppler` secrets or print plaintext credentials in AI-assisted logs.
+- **Verification**: Always verify AI-generated networking or security commands before executing with `sudo`.
+
 ## AI Tool Selection
 
 - `claude-code` — default for all coding tasks; full context, skills, MCP servers
