@@ -278,45 +278,6 @@ check_directory() {
 }
 
 # ── AI provider key setup ────────────────────────────────────────────────────
-check_ai_keys() {
-  local secrets_file="$HOME/.config/fish/secrets.fish"
-  local any_prompted=0
-
-  _key_exists() {
-    local var="$1"
-    [ -n "${!var:-}" ] && return 0
-    [ -f "$secrets_file" ] && grep -q "set -gx ${var} " "$secrets_file" && return 0
-    return 1
-  }
-
-  _prompt_key() {
-    local var="$1" label="$2"
-    if _key_exists "$var"; then
-      print_dim "$label configured ✓"
-      return
-    fi
-    local value=""
-    read -rp "  Enter $label API key (empty to skip): " value
-    if [ -n "$value" ]; then
-      mkdir -p "$(dirname "$secrets_file")"
-      printf 'set -gx %s "%s"\n' "$var" "$value" >> "$secrets_file"
-      print_success "$label → secrets.fish"
-      any_prompted=1
-    else
-      print_dim "$label skipped"
-    fi
-  }
-
-  echo ""
-  print_step "AI Provider Keys"
-  print_dim "Stored in ~/.config/fish/secrets.fish (never committed)"
-  echo ""
-  _prompt_key "Z_AI_API_KEY"         "z.AI (GLM coding plan)"
-  _prompt_key "OLLAMA_API_KEY"       "Ollama Cloud"
-  _prompt_key "OPENCODE_API_KEY"     "OpenCode Go"
-  _prompt_key "NVIDIA_API_KEY"       "NVIDIA NIM"
-  echo ""
-}
 
 # ── Git identity setup ────────────────────────────────────────────────────────
 setup_private_git() {
@@ -560,7 +521,6 @@ main() {
     echo ""
 
   else
-    check_ai_keys
     setup_private_git "$config"
     build_config "$config" "$force" "[1/2]"
     apply_config "$config" "$force" "[2/2]"
