@@ -4,19 +4,20 @@
   ...
 }: let
   shared = builtins.readFile ./shared-instructions.md;
+  claudeExtra = builtins.readFile ./claude-instructions.md;
   extra = config.home.ai.extraInstructions;
-  content =
-    shared
-    + (
-      if extra != ""
-      then "\n\n" + extra
-      else ""
-    )
-    + "\n";
-in {
-  # opencode — shared instructions + role extras
-  xdg.configFile."opencode/AGENTS.md".text = content;
 
-  # Claude Code — shared instructions + role extras
-  home.file.".claude/rules/workflow.md".text = content;
+  appendIfNonEmpty = s: base:
+    if s != ""
+    then base + "\n\n" + s
+    else base;
+
+  opencodeContent = appendIfNonEmpty extra shared + "\n";
+  claudeContent = appendIfNonEmpty extra (shared + "\n\n" + claudeExtra) + "\n";
+in {
+  # opencode — shared + role extras
+  xdg.configFile."opencode/AGENTS.md".text = opencodeContent;
+
+  # Claude Code — shared + claude-specific + role extras
+  home.file.".claude/rules/workflow.md".text = claudeContent;
 }

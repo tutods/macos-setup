@@ -44,14 +44,6 @@ Always prefer these tools over slower alternatives:
 - `repomix` — pack repo context before switching tools or sharing with non-Claude AI
 - `ccusage` — token usage dashboard (`npx ccusage@latest` or `ccusage` abbreviation)
 
-## Model Selection for Subagents
-
-Pick the least powerful model that fits the task:
-
-- **haiku** — isolated functions, 1-2 files, complete spec, mechanical changes
-- **sonnet** — multi-file coordination, pattern matching, integration work (default)
-- **opus** — architecture decisions, design reviews, complex reasoning
-
 ## Nix Dotfiles (this repo)
 
 - Repo root: `~/.dotfiles` — all commands run from there
