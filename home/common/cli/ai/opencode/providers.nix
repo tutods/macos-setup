@@ -5,6 +5,7 @@
 }: {
   # opencode: ~/.config/opencode/opencode.json  (provider + env blocks)
   # Only writes providers whose API key exists in env or secrets.fish.
+  # Models are auto-discovered from each provider's GET /v1/models endpoint.
   home.activation.opencodeProviders = lib.hm.dag.entryAfter ["writeBoundary" "opencodeConfig"] ''
     target="$HOME/.config/opencode/opencode.json"
     [ -f "$target" ] || exit 0
@@ -32,12 +33,7 @@
         "z-ai": {
           "npm": "@ai-sdk/openai-compatible",
           "name": "z.AI (GLM)",
-          "options": {"baseURL": "https://api.z.ai/api/paas/v4", "apiKey": "{env:Z_AI_API_KEY}"},
-          "models": {
-            "glm-5.1":      {"name": "GLM-5.1"},
-            "glm-4.7":      {"name": "GLM-4.7"},
-            "glm-z1-flash": {"name": "GLM-Z1-Flash (fast)"}
-          }
+          "options": {"baseURL": "https://api.z.ai/api/paas/v4", "apiKey": "{env:Z_AI_API_KEY}"}
         }
       }')
     fi
@@ -47,11 +43,7 @@
         "ollama-cloud": {
           "npm": "@ai-sdk/openai-compatible",
           "name": "Ollama Cloud",
-          "options": {"baseURL": "https://ollama.com/v1", "apiKey": "{env:OLLAMA_CLOUD_API_KEY}"},
-          "models": {
-            "qwen2.5-coder:32b": {"name": "Qwen2.5 Coder 32B"},
-            "qwen2.5-coder:7b":  {"name": "Qwen2.5 Coder 7B (fast)"}
-          }
+          "options": {"baseURL": "https://ollama.com/v1", "apiKey": "{env:OLLAMA_CLOUD_API_KEY}"}
         }
       }')
     fi
@@ -61,11 +53,7 @@
         "nvidia": {
           "npm": "@ai-sdk/openai-compatible",
           "name": "NVIDIA NIM",
-          "options": {"baseURL": "https://integrate.api.nvidia.com/v1", "apiKey": "{env:NVIDIA_API_KEY}"},
-          "models": {
-            "meta/llama-3.3-70b-instruct":             {"name": "Llama 3.3 70B"},
-            "nvidia/llama-3.1-nemotron-ultra-253b-v1": {"name": "Nemotron Ultra 253B"}
-          }
+          "options": {"baseURL": "https://integrate.api.nvidia.com/v1", "apiKey": "{env:NVIDIA_API_KEY}"}
         }
       }')
     fi
