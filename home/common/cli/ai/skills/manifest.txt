@@ -1,33 +1,23 @@
-# AI Skills Manifest
+# AI Skills Manifest — common (both machines, both agents)
 # Installed via: npx skills add <source> -g -a claude-code -a opencode -y
-# Last synced: 2026-05-14
 #
-# Format: <source> # comma-separated skill names from this source
+# Personal-only skills live in home/roles/personal/ai/skills/manifest.txt
 #
 # Harness built-ins (NOT installable — shipped with Claude Code harness):
 #   update-config, loop, schedule, simplify, fewer-permission-prompts,
 #   keybindings-help, statusline-setup, init, review, security-review, claude-api
 
-# --- Skills from GitHub packages ---
-anthropics/knowledge-work-plugins    # code-review
-anthropics/skills                    # frontend-design
-better-auth/skills                   # better-auth-best-practices
-JuliusBrussee/caveman               # caveman-commit, caveman-compress, caveman-help, caveman-review, compress
-Leonxlnx/taste-skill                # brandkit, design-taste-frontend, full-output-enforcement, gpt-taste, high-end-visual-design, image-to-code, imagegen-frontend-mobile, imagegen-frontend-web, industrial-brutalist-ui, minimalist-ui, redesign-existing-projects, stitch-design-taste
-mattpocock/skills -s grill-with-docs             # grill-with-docs (caveman from JuliusBrussee)
-mindrally/skills                    # sanity
-oakoss/agent-skills                  # tanstack-start
-obra/superpowers                    # brainstorming, requesting-code-review, systematic-debugging, test-driven-development, using-superpowers, writing-plans
-pbakaus/impeccable                  # impeccable
-prisma/skills                      # prisma-postgres
-resciencelab/opc-skills             # seo-geo
-secondsky/claude-skills             # tailwind-v4-shadcn
-shadcn/ui                           # shadcn
-squirrelscan/skills                 # audit-website
-tanstack/router                    # start-core
-vercel-labs/agent-skills            # web-design-guidelines
-vercel-labs/skills                  # find-skills
-vercel/turborepo                   # turborepo
-kadajett/agent-nestjs-skills -s nestjs-best-practices  # nestjs-best-practices
-wshobson/agents                    # api-design-principles, nodejs-backend-patterns, responsive-design
-safishamsi/graphify                # graphify — any input → knowledge graph + HTML + JSON + audit report
+anthropics/knowledge-work-plugins        # code-review
+anthropics/skills                        # frontend-design
+JuliusBrussee/caveman                   # caveman-commit, caveman-compress, caveman-help, caveman-review, compress
+mattpocock/skills -s grill-with-docs    # grill-with-docs
+obra/superpowers                         # brainstorming, requesting-code-review, systematic-debugging, test-driven-development, using-superpowers, writing-plans
+pbakaus/impeccable                       # impeccable
+secondsky/claude-skills                  # tailwind-v4-shadcn
+shadcn/ui                                # shadcn
+vercel-labs/agent-skills                 # web-design-guidelines
+vercel-labs/skills                       # find-skills
+kadajett/agent-nestjs-skills -s nestjs-best-practices
+wshobson/agents                          # api-design-principles, nodejs-backend-patterns, responsive-design
+OpenAEC-Foundation/Docker-Claude-Skill-Package
+SpillwaveSolutions/mastering-typescript-skill
