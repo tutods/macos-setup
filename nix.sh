@@ -312,7 +312,7 @@ check_ai_keys() {
   print_dim "Stored in ~/.config/fish/secrets.fish (never committed)"
   echo ""
   _prompt_key "Z_AI_API_KEY"         "z.AI (GLM coding plan)"
-  _prompt_key "OLLAMA_CLOUD_API_KEY" "Ollama Cloud"
+  _prompt_key "OLLAMA_API_KEY"       "Ollama Cloud"
   _prompt_key "OPENCODE_API_KEY"     "OpenCode Go"
   _prompt_key "NVIDIA_API_KEY"       "NVIDIA NIM"
   echo ""
