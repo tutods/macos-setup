@@ -6,6 +6,8 @@
   settings = {
     theme = "dark-daltonized";
 
+    telemetry.enabled = false;
+
     hooks.PreToolUse = [
       {
         matcher = "Bash";
@@ -43,7 +45,6 @@
       "caveman@caveman" = true;
       "superpowers@claude-plugins-official" = true;
       "frontend-design@claude-plugins-official" = true;
-      "context7@claude-plugins-official" = true;
       "code-review@claude-plugins-official" = true;
       "code-simplifier@claude-plugins-official" = true;
       "github@claude-plugins-official" = true;

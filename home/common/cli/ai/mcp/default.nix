@@ -18,23 +18,6 @@
 #    # or via doppler (personal machine):
 #    doppler secrets set GITHUB_TOKEN ghp_xxx
 #
-# ── Context7 API Key ──────────────────────────────────────────────────────────
-# context7 is a remote MCP (HTTP) — its API key can't be injected via env
-# at spawn time like github. The key must be a literal value in opencode.json.
-#
-# opencode.json is NOT in the dotfiles git repo (live file at ~/.config/opencode/).
-# The key should still NOT sit in plaintext there long-term.
-#
-# Recommended: store it in secrets.fish, then inject it once via:
-#   opencode-context7-setup   ← fish function deployed by this module
-#
-# That function reads CONTEXT7_API_KEY from your shell env and writes it into
-# opencode.json. Re-run after rotating the key.
-#
-# 1. Get/rotate key: https://context7.com/settings
-# 2. Store: echo 'set -gx CONTEXT7_API_KEY "ctx7sk-xxx"' >> ~/.config/fish/secrets.fish
-# 3. Inject: opencode-context7-setup
-#
 {
   config,
   pkgs,
@@ -52,7 +35,7 @@
 
   filesystemServer = {
     command = "npx";
-    args = ["-y" "@modelcontextprotocol/server-filesystem" home];
+    args = ["-y" "@modelcontextprotocol/server-filesystem" "${home}/.dotfiles" "${home}/Developer"];
   };
 
   # ── Claude Code CLI ──────────────────────────────────────────────────────────
@@ -65,7 +48,7 @@
 
   # ── opencode ─────────────────────────────────────────────────────────────────
   # File: ~/.config/opencode/opencode.json  (mcp key, type = "local" for stdio)
-  # Merged into existing config — preserves plugin, experimental, share, context7.
+  # Merged into existing config — preserves plugin, experimental, share.
   opencodeMcpServers = {
     filesystem =
       filesystemServer
@@ -86,6 +69,7 @@
     plugin = ["@warp-dot-dev/opencode-warp"];
     experimental.openTelemetry = false;
     share = "disabled";
+    autoupdate = "manual";
   };
 in {
   # Claude Code: ~/.claude/claude_desktop_config.json
@@ -146,32 +130,4 @@ in {
       echo "{\"mcp\": $nix_servers}" | ${pkgs.jq}/bin/jq '.' > "$target"
     fi
   '';
-
-  # Fish helper: inject CONTEXT7_API_KEY from env into opencode.json.
-  # Usage: set CONTEXT7_API_KEY in secrets.fish, then run `opencode-context7-setup`.
-  programs.fish.functions.opencode-context7-setup = {
-    description = "Inject CONTEXT7_API_KEY from env into opencode.json";
-    body = ''
-      set -l target "$HOME/.config/opencode/opencode.json"
-      set -l key $CONTEXT7_API_KEY
-
-      if test -z "$key"
-        echo "Error: CONTEXT7_API_KEY not set"
-        echo "Add to ~/.config/fish/secrets.fish: set -gx CONTEXT7_API_KEY ctx7sk-xxx"
-        return 1
-      end
-
-      if not test -f "$target"
-        echo "Error: $target not found — run darwin-rebuild first"
-        return 1
-      end
-
-      ${pkgs.jq}/bin/jq \
-        --arg key "$key" \
-        '.mcp.context7 = {type:"remote",url:"https://mcp.context7.com/mcp",enabled:true,headers:{CONTEXT7_API_KEY:$key}}' \
-        "$target" > "$target.tmp"; and mv "$target.tmp" "$target"
-
-      echo "context7 MCP key updated in $target"
-    '';
-  };
 }

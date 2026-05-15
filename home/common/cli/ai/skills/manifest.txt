@@ -4,9 +4,6 @@
 #
 # Format: <source> # comma-separated skill names from this source
 #
-# Standalone skills (NOT managed here — manually placed in ~/.claude/skills/):
-#   context7-mcp  — from context7@claude-plugins-official plugin (auto-managed via settings.json)
-#
 # Harness built-ins (NOT installable — shipped with Claude Code harness):
 #   update-config, loop, schedule, simplify, fewer-permission-prompts,
 #   keybindings-help, statusline-setup, init, review, security-review, claude-api
