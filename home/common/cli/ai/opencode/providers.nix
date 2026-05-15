@@ -34,6 +34,10 @@
             "options": {
               "baseURL": "https://api.z.ai/api/anthropic/v1",
               "apiKey": "{env:Z_AI_API_KEY}"
+            },
+            "models": {
+              "glm-5":   {"name": "GLM-5"},
+              "glm-4.7": {"name": "GLM-4.7"}
             }
           }
         }
