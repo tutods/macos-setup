@@ -8,7 +8,7 @@
     plugin = ["@warp-dot-dev/opencode-warp"];
     experimental.openTelemetry = false;
     share = "disabled";
-    autoupdate = "manual";
+    autoupdate = false;
     snapshot = false;
     logLevel = "WARN";
     disabled_providers = ["openai" "azure" "vertex" "bedrock"];
