@@ -31,12 +31,5 @@
         pipx install ttok || echo "  ⚠ pipx install ttok failed"
       fi
     fi
-
-    # ── AI skills ─────────────────────────────────────────────────────────
-    # fish function reads manifest.txt and runs `npx skills add` for each entry
-    if command -v fish > /dev/null 2>&1; then
-      echo "↣ AI skills sync"
-      fish -c "ai-skills-sync" || echo "  ⚠ ai-skills-sync failed (check manifest.txt)"
-    fi
   '';
 }

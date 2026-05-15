@@ -1,9 +1,25 @@
-{pkgs, ...}: let
-  manifest = ./manifest.txt;
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
+  commonManifest = builtins.readFile ./manifest.txt;
+  extra = config.home.ai.extraSkillsManifest;
+  combinedContent =
+    commonManifest
+    + (
+      if extra != ""
+      then "\n" + extra
+      else ""
+    );
+  combinedManifest = pkgs.writeText "ai-skills-manifest" combinedContent;
+  manifestHash = builtins.hashString "sha256" combinedContent;
 in {
   programs.fish.functions.ai-skills-sync = {
+    description = "Install AI skills from manifest into Claude Code and opencode";
     body = ''
-      set -l manifest "${manifest}"
+      set -l manifest "${combinedManifest}"
       set -l agents_flag "-a" "claude-code" "-a" "opencode"
       set -l installed 0
       set -l failed 0
@@ -23,16 +39,33 @@ in {
 
         echo "▸ npx skills add $clean_line -g $agents_flag -y"
         if npx skills add $clean_line -g $agents_flag -y 2>&1
-            set installed (math $installed + 1)
+          set installed (math $installed + 1)
         else
-            echo "  ⚠ Failed: $clean_line"
-            set failed (math $failed + 1)
+          echo "  ⚠ Failed: $clean_line"
+          set failed (math $failed + 1)
         end
       end < "$manifest"
 
       echo ""
       echo "Skills install complete: $installed succeeded, $failed failed"
     '';
-    description = "Install AI skills from manifest into Claude Code and opencode";
   };
+
+  home.activation.aiSkillsSync = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    stamp="$HOME/.config/ai/.skills-sync-hash"
+    manifest_hash="${manifestHash}"
+
+    mkdir -p "$HOME/.config/ai"
+
+    if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$manifest_hash" ]; then
+      echo "↣ AI skills sync (manifest changed)"
+      if command -v fish > /dev/null 2>&1; then
+        fish -c "ai-skills-sync" \
+          && echo "$manifest_hash" > "$stamp" \
+          || echo "  ⚠ ai-skills-sync failed"
+      fi
+    else
+      echo "↣ AI skills up to date"
+    fi
+  '';
 }
