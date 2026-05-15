@@ -4,15 +4,25 @@
   ...
 }: {
   # opencode: ~/.config/opencode/opencode.json  (provider block)
-  # Overrides the built-in zai provider's baseURL to the Coding Plan endpoint.
-  # API key is stored via /connect → ~/.local/share/opencode/auth.json.
+  # z.AI Coding Plan via Anthropic-compatible endpoint.
+  # API key stored via /connect → ~/.local/share/opencode/auth.json.
   home.activation.opencodeProviders = lib.hm.dag.entryAfter ["writeBoundary" "opencodeConfig"] ''
     target="$HOME/.config/opencode/opencode.json"
     [ -f "$target" ] || exit 0
 
-    ${pkgs.jq}/bin/jq '.provider.zai = {
-      "options": {
-        "baseURL": "https://api.z.ai/api/coding/paas/v4"
+    ${pkgs.jq}/bin/jq '. + {
+      "provider": {
+        "zai-anthropic": {
+          "npm": "@ai-sdk/anthropic",
+          "options": {
+            "baseURL": "https://api.z.ai/api/anthropic/v1"
+          },
+          "models": {
+            "glm-5":   {"name": "GLM-5"},
+            "glm-5.1": {"name": "GLM-5.1"},
+            "glm-4.7": {"name": "GLM-4.7"}
+          }
+        }
       }
     }' "$target" > "$target.tmp" && mv "$target.tmp" "$target"
   '';
