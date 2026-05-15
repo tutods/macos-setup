@@ -3,7 +3,7 @@
     ./claude
     ./init.nix
     ./instructions
-    ./mcp
+    ./opencode
     ./options.nix
     ./skills
   ];

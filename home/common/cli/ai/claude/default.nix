@@ -1,8 +1,17 @@
 {
+  config,
   pkgs,
   lib,
   ...
 }: let
+  servers = import ../mcp-servers.nix {homeDir = config.home.homeDirectory;};
+
+  mcpServers = {
+    filesystem = servers.filesystem;
+    github = servers.github;
+    playwright = servers.playwright;
+  };
+
   settings = {
     theme = "dark-daltonized";
 
@@ -48,7 +57,7 @@
       };
     };
 
-    # Baseline plugins — preserved from existing file on re-deploy (see activation script).
+    # Baseline plugins — preserved from live file on re-deploy (see activation).
     # Add new plugins here; they merge into the live file on next darwin-rebuild switch.
     enabledPlugins = {
       "caveman@caveman" = true;
@@ -78,6 +87,7 @@
 in {
   home.file.".claude/CLAUDE.md".text = "@RTK.md\n";
 
+  # ── settings.json ────────────────────────────────────────────────────────────
   home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     target="$HOME/.claude/settings.json"
     base='${builtins.toJSON settings}'
@@ -85,11 +95,8 @@ in {
     mkdir -p "$HOME/.claude"
 
     if [ -f "$target" ]; then
-      # Merge: preserve enabledPlugins from live file (managed by 'claude plugin add/remove').
-      # All other fields come from Nix (hooks, marketplaces, theme).
       existing_plugins=$(${pkgs.jq}/bin/jq -c '.enabledPlugins // {}' "$target")
       nix_plugins=$(echo "$base" | ${pkgs.jq}/bin/jq -c '.enabledPlugins')
-      # Union: start from Nix baseline, overlay live additions
       merged_plugins=$(${pkgs.jq}/bin/jq -cn \
         --argjson nix "$nix_plugins" \
         --argjson live "$existing_plugins" \
@@ -100,6 +107,44 @@ in {
         > "$target.tmp" && mv "$target.tmp" "$target"
     else
       echo "$base" > "$target"
+    fi
+  '';
+
+  # ── claude_desktop_config.json (MCP) ─────────────────────────────────────────
+  home.activation.claudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    target="$HOME/.claude/claude_desktop_config.json"
+    nix_servers='${builtins.toJSON mcpServers}'
+
+    mkdir -p "$HOME/.claude"
+
+    if [ -f "$target" ]; then
+      existing=$(${pkgs.jq}/bin/jq -c '.mcpServers // {}' "$target")
+      merged=$(${pkgs.jq}/bin/jq -cn \
+        --argjson nix "$nix_servers" \
+        --argjson live "$existing" \
+        '$nix + $live')
+      ${pkgs.jq}/bin/jq --argjson servers "$merged" \
+        '. + {mcpServers: $servers}' "$target" \
+        > "$target.tmp" && mv "$target.tmp" "$target"
+    else
+      echo "{\"mcpServers\": $nix_servers}" | ${pkgs.jq}/bin/jq '.' > "$target"
+    fi
+  '';
+
+  # ── role-specific MCP servers (extraMcpServers option) ───────────────────────
+  home.activation.claudeMcpExtra = lib.hm.dag.entryAfter ["writeBoundary" "claudeMcp"] ''
+    target="$HOME/.claude/claude_desktop_config.json"
+    extra='${builtins.toJSON config.home.ai.extraMcpServers}'
+
+    if [ "$extra" != "{}" ] && [ -f "$target" ]; then
+      existing=$(${pkgs.jq}/bin/jq -c '.mcpServers // {}' "$target")
+      merged=$(${pkgs.jq}/bin/jq -cn \
+        --argjson extra "$extra" \
+        --argjson live "$existing" \
+        '$extra + $live')
+      ${pkgs.jq}/bin/jq --argjson servers "$merged" \
+        '. + {mcpServers: $servers}' "$target" \
+        > "$target.tmp" && mv "$target.tmp" "$target"
     fi
   '';
 }
