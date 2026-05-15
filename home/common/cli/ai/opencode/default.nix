@@ -1,3 +1,3 @@
 {
-  imports = [./config.nix ./mcp.nix];
+  imports = [./config.nix ./mcp.nix ./providers.nix];
 }
