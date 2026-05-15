@@ -14,24 +14,29 @@
     # ── rtk proxy ─────────────────────────────────────────────────────────
     # rtk init is idempotent — safe to re-run on every switch
     if command -v rtk > /dev/null 2>&1; then
-      rtk init -g            2>/dev/null || true
-      rtk init -g --opencode 2>/dev/null || true
-      rtk init -g --codex    2>/dev/null || true
+      echo "↣ rtk init"
+      rtk init -g            || echo "  ⚠ rtk init failed"
+      rtk init -g --opencode || echo "  ⚠ rtk init --opencode failed"
+      rtk init -g --codex    || echo "  ⚠ rtk init --codex failed"
     fi
 
     # ── pipx packages ─────────────────────────────────────────────────────
     # Check pipx list before installing to avoid re-installing on every switch
     if command -v pipx > /dev/null 2>&1; then
-      pipx list 2>/dev/null | grep -q 'code-review-graph' \
-        || pipx install code-review-graph 2>/dev/null || true
-      pipx list 2>/dev/null | grep -qw 'ttok' \
-        || pipx install ttok 2>/dev/null || true
+      echo "↣ pipx packages"
+      if ! pipx list 2>/dev/null | grep -q 'code-review-graph'; then
+        pipx install code-review-graph || echo "  ⚠ pipx install code-review-graph failed"
+      fi
+      if ! pipx list 2>/dev/null | grep -qw 'ttok'; then
+        pipx install ttok || echo "  ⚠ pipx install ttok failed"
+      fi
     fi
 
     # ── AI skills ─────────────────────────────────────────────────────────
     # fish function reads manifest.txt and runs `npx skills add` for each entry
     if command -v fish > /dev/null 2>&1; then
-      fish -c "ai-skills-sync" 2>/dev/null || true
+      echo "↣ AI skills sync"
+      fish -c "ai-skills-sync" || echo "  ⚠ ai-skills-sync failed (check manifest.txt)"
     fi
   '';
 }

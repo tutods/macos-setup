@@ -1,7 +1,7 @@
 ## Work Context
 
 ### Environment
-- No Doppler — secrets via company tooling or `~/.config/fish/secrets.fish`
+- No Doppler CLI — secrets via company tooling or `~/.config/fish/secrets.fish`
 - Homebrew managed by `admin.daniel.a.sousa`; system user is `daniel.a.sousa`
 - Run `./nix.sh work` as the admin account; post-apply hooks execute as `daniel.a.sousa`
 

@@ -6,4 +6,7 @@
   # API & dev tools
   "bruno"
   "responsively"
+
+  # Containers
+  "orbstack"
 ]

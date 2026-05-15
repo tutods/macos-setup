@@ -63,7 +63,7 @@ Shared casks live in `modules/darwin/homebrew/casks/` (applied to every host). M
 
 ### Shell Configuration
 
-Fish shell is the primary shell, configured in `home/common/shell/fish/` with separate files for aliases (`alias.nix`), abbreviations (`abbrs.nix`), functions (`functions.nix`), completions (`completions.nix`), and extra tool integrations (`extra.nix`).
+Fish shell is the primary shell, configured in `home/common/shell/fish/` with separate files for aliases (`alias.nix`), abbreviations (`abbrs.nix`), functions (`functions.nix`), and extra tool integrations (`extra.nix`). Completions live in `~/.config/fish/completions/` (managed outside Nix for project-specific tools).
 
 ### AI Instructions Architecture
 

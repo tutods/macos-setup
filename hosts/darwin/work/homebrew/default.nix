@@ -5,6 +5,7 @@
     ];
     brews = [
       "acli"
+      "podman"
     ];
     casks = [
       "gcloud-cli"

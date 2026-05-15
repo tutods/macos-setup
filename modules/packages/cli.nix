@@ -4,7 +4,6 @@
     duf
     fd
     fnm
-    doppler
     httpie
     jq
     qpdf

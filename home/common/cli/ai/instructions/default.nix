@@ -21,7 +21,8 @@ in {
   # opencode — full instructions (context7 + shared + role extras)
   xdg.configFile."opencode/AGENTS.md".text = content;
 
-  # Claude Code — shared + role extras only (context7 already in ~/.claude/rules/context7.md)
+  # Claude Code — context7 prefix + shared + role extras
+  home.file.".claude/rules/context7.md".text = context7 + "\n";
   home.file.".claude/rules/workflow.md".text =
     shared
     + (

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Format all Nix files before commit
-nix --extra-experimental-features 'nix-command flakes' fmt . 2>/dev/null
+nix --extra-experimental-features 'nix-command flakes' fmt .
 
 # Fail if formatter changed anything (re-stage and recommit)
 if ! git diff --quiet; then
