@@ -37,8 +37,9 @@ in {
         set -l clean_line (string trim "$clean_line")
         if test -z "$clean_line"; continue; end
 
-        echo "▸ npx skills add $clean_line -g $agents_flag -y"
-        if npx skills add $clean_line -g $agents_flag -y 2>&1
+        set -l parts (string split " " -- $clean_line)
+        echo "▸ npx skills add $parts -g $agents_flag -y"
+        if npx skills add $parts -g $agents_flag -y 2>&1
           set installed (math $installed + 1)
         else
           echo "  ⚠ Failed: $clean_line"
@@ -60,9 +61,13 @@ in {
     if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$manifest_hash" ]; then
       echo "↣ AI skills sync (manifest changed)"
       if command -v fish > /dev/null 2>&1; then
+        # non-fatal: skills sync failure doesn't abort activation
         fish -c "ai-skills-sync" \
           && echo "$manifest_hash" > "$stamp" \
-          || echo "  ⚠ ai-skills-sync failed"
+          || echo "  ⚠ ai-skills-sync failed (non-fatal)"
+      else
+        echo "  ⚠ fish not found, skipping skills sync (non-fatal)"
+        echo "$manifest_hash" > "$stamp"
       fi
     else
       echo "↣ AI skills up to date"
