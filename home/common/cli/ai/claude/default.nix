@@ -8,6 +8,15 @@
 
     telemetry.enabled = false;
 
+    permissions.deny = [
+      "Read(./.env)"
+      "Read(./.env.*)"
+      "Read(./secrets/**)"
+      "Read(~/.config/fish/secrets.fish)"
+    ];
+
+    env.CLAUDE_CODE_SKIP_PROMPT_HISTORY = "1";
+
     hooks.PreToolUse = [
       {
         matcher = "Bash";
@@ -67,6 +76,8 @@
     };
   };
 in {
+  home.file.".claude/CLAUDE.md".text = "@RTK.md\n";
+
   home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     target="$HOME/.claude/settings.json"
     base='${builtins.toJSON settings}'
