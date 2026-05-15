@@ -1,4 +1,4 @@
-{
+{pkgs, ...}: {
   imports = [
     ./claude
     ./init.nix
@@ -6,5 +6,9 @@
     ./mcp
     ./options.nix
     ./skills
+  ];
+
+  home.packages = [
+    pkgs.repomix
   ];
 }

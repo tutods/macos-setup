@@ -237,6 +237,9 @@
   pb = "pnpm run build";
   pts = "pnpm run test";
 
+  # AI token tools
+  ccusage = "npx ccusage@latest";
+
   # Homebrew abbreviations
   bi = "brew install";
   bci = "brew install --cask";

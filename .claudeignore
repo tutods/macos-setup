@@ -1,0 +1,13 @@
+# Nix build outputs
+result
+result-*
+*.drv
+
+# Nix store references (large, never useful context)
+/nix/
+
+# Direnv
+.direnv/
+
+# Git internals
+.git/
