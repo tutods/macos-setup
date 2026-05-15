@@ -1,0 +1,12 @@
+# AI Skills Manifest — personal machine only (both agents)
+# Installed via extraSkillsManifest → ai-skills-sync on darwin-rebuild
+
+better-auth/skills                       # better-auth-best-practices
+Leonxlnx/taste-skill                    # brandkit, design-taste-frontend, full-output-enforcement, gpt-taste, high-end-visual-design, image-to-code, imagegen-frontend-mobile, imagegen-frontend-web, industrial-brutalist-ui, minimalist-ui, redesign-existing-projects, stitch-design-taste
+mindrally/skills                         # sanity
+oakoss/agent-skills                      # tanstack-start
+prisma/skills                            # prisma-postgres
+resciencelab/opc-skills                  # seo-geo
+squirrelscan/skills                      # audit-website
+tanstack/router                          # start-core
+vercel/turborepo                         # turborepo
