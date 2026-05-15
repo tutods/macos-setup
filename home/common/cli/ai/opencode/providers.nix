@@ -15,7 +15,8 @@
         "zai-anthropic": {
           "npm": "@ai-sdk/anthropic",
           "options": {
-            "baseURL": "https://api.z.ai/api/anthropic"
+            "baseURL": "https://api.z.ai/api/anthropic",
+            "apiKey": "{env:Z_AI_API_KEY}"
           },
           "models": {
             "glm-5":   {"name": "GLM-5"},
