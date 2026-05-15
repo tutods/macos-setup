@@ -38,12 +38,18 @@
     args = ["-y" "@modelcontextprotocol/server-filesystem" "${home}/.dotfiles" "${home}/Developer"];
   };
 
+  playwrightServer = {
+    command = "npx";
+    args = ["-y" "@playwright/mcp" "--isolated" "--headless"];
+  };
+
   # ── Claude Code CLI ──────────────────────────────────────────────────────────
   # File: ~/.claude/claude_desktop_config.json
   # Claude Code reads this on startup; does NOT write to it unless `claude mcp add`.
   claudeMcpServers = {
     filesystem = filesystemServer;
     github = githubServer;
+    playwright = playwrightServer;
   };
 
   # ── opencode ─────────────────────────────────────────────────────────────────
@@ -62,6 +68,12 @@
         type = "local";
         enabled = true;
       };
+    playwright =
+      playwrightServer
+      // {
+        type = "local";
+        enabled = true;
+      };
   };
 
   opencodeBaseConfig = {
@@ -70,6 +82,13 @@
     experimental.openTelemetry = false;
     share = "disabled";
     autoupdate = "manual";
+    snapshot = false;
+    logLevel = "WARN";
+    disabled_providers = ["openai" "azure" "vertex" "bedrock"];
+    permission.bash = {
+      "git *" = "allow";
+      "*" = "ask";
+    };
   };
 in {
   # Claude Code: ~/.claude/claude_desktop_config.json
@@ -128,6 +147,47 @@ in {
         > "$target.tmp" && mv "$target.tmp" "$target"
     else
       echo "{\"mcp\": $nix_servers}" | ${pkgs.jq}/bin/jq '.' > "$target"
+    fi
+  '';
+
+  # Role-specific MCP servers (e.g. personal: docker, postgres, shadcn)
+  home.activation.claudeMcpExtra = lib.hm.dag.entryAfter ["writeBoundary" "claudeMcp"] ''
+    target="$HOME/.claude/claude_desktop_config.json"
+    extra_servers='${builtins.toJSON config.home.ai.extraMcpServers}'
+
+    if [ "$extra_servers" != "{}" ] && [ -f "$target" ]; then
+      existing=$(${pkgs.jq}/bin/jq -c '.mcpServers // {}' "$target")
+      merged=$(${pkgs.jq}/bin/jq -cn \
+        --argjson extra "$extra_servers" \
+        --argjson live "$existing" \
+        '$extra + $live')
+      ${pkgs.jq}/bin/jq --argjson servers "$merged" \
+        '. + {mcpServers: $servers}' "$target" \
+        > "$target.tmp" && mv "$target.tmp" "$target"
+    fi
+  '';
+
+  home.activation.opencodeMcpExtra = lib.hm.dag.entryAfter ["writeBoundary" "opencodeMcp"] ''
+    target="$HOME/.config/opencode/opencode.json"
+    extra_servers='${builtins.toJSON (
+      lib.mapAttrs (_: v:
+        v
+        // {
+          type = "local";
+          enabled = true;
+        })
+      config.home.ai.extraMcpServers
+    )}'
+
+    if [ "$extra_servers" != "{}" ] && [ -f "$target" ]; then
+      existing=$(${pkgs.jq}/bin/jq -c '.mcp // {}' "$target")
+      merged=$(${pkgs.jq}/bin/jq -cn \
+        --argjson extra "$extra_servers" \
+        --argjson live "$existing" \
+        '$extra + $live')
+      ${pkgs.jq}/bin/jq --argjson mcp "$merged" \
+        '. + {mcp: $mcp}' "$target" \
+        > "$target.tmp" && mv "$target.tmp" "$target"
     fi
   '';
 }
