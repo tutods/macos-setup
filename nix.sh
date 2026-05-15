@@ -313,7 +313,6 @@ check_ai_keys() {
   echo ""
   _prompt_key "Z_AI_API_KEY"         "z.AI (GLM coding plan)"
   _prompt_key "OLLAMA_CLOUD_API_KEY" "Ollama Cloud"
-  _prompt_key "OPENAI_API_KEY"       "Codex (OpenAI)"
   _prompt_key "OPENCODE_API_KEY"     "OpenCode Go"
   _prompt_key "NVIDIA_API_KEY"       "NVIDIA NIM"
   echo ""

@@ -251,20 +251,6 @@ in {
       }')
     fi
 
-    if has_key "OPENAI_API_KEY"; then
-      provider=$(echo "$provider" | ${pkgs.jq}/bin/jq '. + {
-        "codex": {
-          "npm": "@ai-sdk/openai",
-          "name": "Codex",
-          "options": {"apiKey": "{env:OPENAI_API_KEY}"},
-          "models": {
-            "codex-mini-latest": {"name": "Codex Mini"},
-            "gpt-4.1-mini":      {"name": "GPT-4.1 Mini (fast)"}
-          }
-        }
-      }')
-    fi
-
     if has_key "NVIDIA_API_KEY"; then
       provider=$(echo "$provider" | ${pkgs.jq}/bin/jq '. + {
         "nvidia": {
