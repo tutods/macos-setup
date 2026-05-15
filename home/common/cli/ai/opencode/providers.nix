@@ -4,7 +4,7 @@
   ...
 }: {
   # opencode: ~/.config/opencode/opencode.json  (provider block)
-  # z.AI Coding Plan uses @ai-sdk/anthropic with a custom baseURL.
+  # z.AI Coding Plan via OpenAI-compatible endpoint.
   # Written only when Z_AI_API_KEY exists in env or secrets.fish.
   home.activation.opencodeProviders = lib.hm.dag.entryAfter ["writeBoundary" "opencodeConfig"] ''
     target="$HOME/.config/opencode/opencode.json"
@@ -29,15 +29,17 @@
     if has_key "Z_AI_API_KEY"; then
       ${pkgs.jq}/bin/jq '. + {
         "provider": {
-          "zai-anthropic": {
-            "npm": "@ai-sdk/anthropic",
+          "zai": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "z.AI Coding Plan",
             "options": {
-              "baseURL": "https://api.z.ai/api/anthropic/v1",
+              "baseURL": "https://api.z.ai/api/paas/v4",
               "apiKey": "{env:Z_AI_API_KEY}"
             },
             "models": {
-              "glm-5":   {"name": "GLM-5"},
-              "glm-4.7": {"name": "GLM-4.7"}
+              "glm-5":        {"name": "GLM-5"},
+              "glm-4.7":      {"name": "GLM-4.7"},
+              "glm-z1-flash": {"name": "GLM-Z1-Flash"}
             }
           }
         }
