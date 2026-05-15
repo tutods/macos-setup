@@ -6,7 +6,9 @@
     fnm
     httpie
     jq
+    yq
     qpdf
+    ast-grep
     ripgrep
     smartmontools
     speedtest-cli

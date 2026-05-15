@@ -9,6 +9,7 @@ Always prefer these tools over slower alternatives:
 | `fzf` | Manual selection | Fuzzy finder for interactive search, multi-select, and filtering |
 | `bat --style=plain` | `cat` | Syntax highlighting, Git integration |
 | `jq` | Manual JSON parsing | Native fast JSON processing |
+| `yq` | Manual YAML parsing | Native fast YAML processing |
 | `rtk` | Raw commands | Token proxy, reduces LLM token usage by 60-90% |
 | `eza` | `ls` | Icons, Git status, tree view |
 | `delta` | `diff` | Better diff rendering |
@@ -19,9 +20,16 @@ Always prefer these tools over slower alternatives:
 ## General Workflow
 
 - Use `rg` for searching file contents, `fd` for finding files by name
+- Use `ast-grep` (sg) for structural code search and precise matching
 - Use `fzf` for interactive selection, search, and filtering
 - Use `bat` for reading files when syntax highlighting helps
 - Use `rtk` for git operations and command execution when available
+- **Package Manager Enforcement**: 
+  - Always check for lock files in the current or parent directory to determine the package manager.
+  - If `pnpm-lock.yaml` exists $\rightarrow$ use `pnpm`.
+  - If `yarn.lock` exists $\rightarrow$ use `yarn`.
+  - If `package-lock.json` exists $\rightarrow$ use `npm`.
+  - Do not mix package managers in a project.
 - Prefer Nix-managed tools over ad-hoc installs
 - When editing files, prefer the Edit tool over Bash with sed/awk
 - Always run type checks (`pnpm typecheck` or `tsc --noEmit`) before declaring a task complete

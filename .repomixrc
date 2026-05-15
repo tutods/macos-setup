@@ -1,0 +1,18 @@
+{
+  "include": [
+    "**/*.{ts,tsx,js,jsx,nix,md,json,toml}"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.cache/**",
+    "**/dist/**",
+    "**/.nix-channel/**",
+    "**/results/**"
+  ],
+  "prioritize": [
+    "CLAUDE.md",
+    "flake.nix",
+    "home/common/cli/ai/instructions/shared-instructions.md"
+  ]
+}

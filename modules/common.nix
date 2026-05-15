@@ -19,7 +19,7 @@
   # Nix configuration
   nix = {
     settings = {
-      experimental-features = ["nix-command" "flakes" "optimise"];
+      experimental-features = ["nix-command" "flakes"];
       warn-dirty = true;
     };
 
