@@ -13,7 +13,7 @@ on:
 jobs:
   flake-checker:
     name: Flake Checker
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v22
@@ -22,7 +22,7 @@ jobs:
   build-configs:
     name: Build Darwin Configs
     needs: flake-checker
-    runs-on: macos-15
+    runs-on: macos-26
     strategy:
       matrix:
         config: [macbook, work]
