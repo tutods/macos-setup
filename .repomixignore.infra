@@ -1,0 +1,15 @@
+# Context set: infra
+# Include: modules/, .github/workflows/, any files in root related to infra (docker, etc)
+# Exclude: most of src, apps, docs, etc
+modules/
+.github/workflows/
+Dockerfile*
+docker-compose.yml*
+*.nix
+*.yaml
+*.yml
+*.sh
+*.py
+*.cs
+*.js
+*.ts

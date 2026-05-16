@@ -3,8 +3,6 @@
     defaults = {
       dock = {
         autohide = false;
-        # Only takes effect when autohide is enabled; prepared for future toggle
-        autohide-delay = 0.0;
         show-recents = false;
         magnification = true;
         minimize-to-application = true;
@@ -19,7 +17,7 @@
       };
 
       finder = {
-        FXPreferredViewStyle = "clmv";
+        FXPreferredViewStyle = "Nlsv";
         _FXSortFoldersFirst = true;
         FXRemoveOldTrashItems = true;
         NewWindowTarget = "Computer";
@@ -48,7 +46,9 @@
         AppleMetricUnits = 1;
         AppleTemperatureUnit = "Celsius";
         AppleWindowTabbingMode = "always";
+        ApplePressAndHoldEnabled = false;
         KeyRepeat = 2;
+        InitialKeyRepeat = 15;
         PMPrintingExpandedStateForPrint = true;
         PMPrintingExpandedStateForPrint2 = true;
         NSDocumentSaveNewDocumentsToCloud = false;
@@ -71,7 +71,7 @@
 
       screensaver = {
         askForPassword = true;
-        askForPasswordDelay = 30;
+        askForPasswordDelay = 0;
       };
 
       SoftwareUpdate = {
@@ -85,6 +85,7 @@
         };
         "com.apple.finder" = {
           FXPreferredSortOrder = "name";
+          FXArrangeMeBy = "name";
         };
         "com.apple.AdLib" = {
           allowApplePersonalizedAdvertising = false;

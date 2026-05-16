@@ -36,14 +36,16 @@ Always prefer these tools over slower alternatives:
 - Prefer targeted edits over rewriting entire files
 - Use type-safe patterns — avoid `any`, prefer branded types and Zod schemas for runtime validation
 
-## Git & Commits
-
-- Commit messages: imperative mood, present tense (`feat: add X`, `fix: broken Y`)
-- Prefer small, focused commits over large batches
-- Never commit secrets, `.env` files, or credentials
-- Branch names: `feat/`, `fix/`, `chore/` prefixes
-
-## Security & AI Safety
+ ## Git & Commits
+ 
+ - Commit messages: imperative mood, present tense (`feat: add X`, `fix: broken Y`)
+ - Prefer small, focused commits over large batches
+ - Never commit secrets, `.env` files, or credentials
+ - Branch names: `feat/`, `fix/`, `chore/` prefixes
+ 
+ - **Sanity Check**: Always run `nix fmt` and `nix flake check` before finalizing any AI-generated changes or declaring a task complete.
+ 
+ ## Security & AI Safety
 
 - **Secrets**: Never log output from `doppler` secrets or print plaintext credentials in AI-assisted logs.
 - **Verification**: Always verify AI-generated networking or security commands before executing with `sudo`.

@@ -12,6 +12,7 @@
     "every weekend",
     "before 6am every weekday"
   ],
+  "pruneUpToDateDependencies": true,
   "labels": ["🔄 dependencies", "🤖 automated"],
   "assignAutomerge": false,
   "lockFileMaintenance": {
@@ -22,6 +23,19 @@
     "enabled": true
   },
   "packageRules": [
+    {
+      "description": "🛠️ Group tooling and linting updates",
+      "matchPackageNames": [
+        "alejandra",
+        "shellcheck",
+        "lua-language-server",
+        "eslint",
+        "prettier"
+      ],
+      "groupName": "🛠️ tooling",
+      "semanticCommitType": "chore",
+      "labels": ["🛠️ tooling", "❄️ nix"]
+    },
     {
       "description": "✨ Automerge non-major Nix flake updates",
       "matchDatasources": ["nix-flake"],

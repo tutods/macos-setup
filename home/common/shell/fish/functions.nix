@@ -101,11 +101,20 @@
 
   node_clean = {
     body = ''
-      echo "Cleaning node_modules and dist folders in ~/Developer..."
-      fd -H -I -t d "node_modules|dist" ~/Developer -x rm -rf
-      echo "Done."
+      echo "Cleaning node_modules in ~/Developer..."
+      set targets (fd -H -I -t d "^node_modules$" ~/Developer)
+      if test (count $targets) -eq 0
+        echo "Nothing to clean."
+        return 0
+      end
+      printf "%s\n" $targets
+      read --local --prompt-str "Delete (count $targets) dirs? [y/N] " confirm
+      if string match -qi 'y' -- "$confirm"
+        fd -H -I -t d "^node_modules$" ~/Developer -x rm -rf
+        echo "Done."
+      end
     '';
-    description = "Recursively remove node_modules and dist in ~/Developer";
+    description = "Recursively remove node_modules in ~/Developer (with confirmation)";
   };
 
   nix_vacuum = {
@@ -123,12 +132,23 @@
 
   fzf_jump = {
     body = ''
-      set dest (fd . ~/Developer -max-depth 2 -type d | fzf --prompt="Jump to project > ")
+      set dest (fd -d 2 -t d . ~/Developer | fzf --prompt="Jump to project > ")
       if test -n "$dest"
         cd $dest
       end
     '';
     description = "Fuzzy jump to a project directory in ~/Developer";
+  };
+
+  doppler_safe = {
+    body = ''
+      if not git rev-parse --git-dir > /dev/null 2>&1
+        echo "⚠️  Not a git repository. Guarding against secret injection into random folders."
+        return 1
+      end
+      doppler run -- $argv
+    '';
+    description = "Inject secrets only if current folder is a git repo";
   };
 
   ytd = {

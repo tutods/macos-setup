@@ -30,7 +30,7 @@
         Hour = 3;
         Minute = 0;
       };
-      options = "--delete-older-than 7d";
+      options = "--delete-older-than 14d";
     };
 
     optimise.automatic = true;

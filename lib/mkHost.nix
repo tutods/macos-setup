@@ -50,17 +50,16 @@
         fi
       fi
 
-      hm_fish="/etc/profiles/per-user/${username}/bin/fish"
       sys_fish="/run/current-system/sw/bin/fish"
 
-      if [ -x "$hm_fish" ] && ! grep -qx "$hm_fish" /etc/shells 2>/dev/null; then
-        echo "Adding $hm_fish to /etc/shells"
-        echo "$hm_fish" >> /etc/shells
+      if [ -x "$fish_bin" ] && ! grep -qx "$fish_bin" /etc/shells 2>/dev/null; then
+        echo "Adding $fish_bin to /etc/shells"
+        echo "$fish_bin" >> /etc/shells
       fi
 
       target_shell="$sys_fish"
-      if [ -x "$hm_fish" ]; then
-        target_shell="$hm_fish"
+      if [ -x "$fish_bin" ]; then
+        target_shell="$fish_bin"
       fi
 
       current=$(dscl . -read /Users/${username} UserShell 2>/dev/null | awk '{print $2}')
