@@ -12,7 +12,6 @@
     "every weekend",
     "before 6am every weekday"
   ],
-  "pruneUpToDateDependencies": true,
   "labels": ["🔄 dependencies", "🤖 automated"],
   "assignAutomerge": false,
   "lockFileMaintenance": {
