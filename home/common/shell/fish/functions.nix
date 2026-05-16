@@ -78,6 +78,59 @@
     description = "Create directory and cd into it";
   };
 
+  review_commt = {
+    body = ''
+      if test (count $argv) -lt 1
+        echo "Usage: review-commt \"commit message\""
+        return 1
+      end
+      echo "--- UNSTAGED CHANGES ---"
+      git diff | delta
+      echo "--- STAGED CHANGES ---"
+      git diff --cached | delta
+      echo ""
+      read --local --prompt-str "Everything looks correct? Stage and commit as '$argv'? [y/N] " confirm
+      if string match -qi 'y' -- "$confirm"
+        git add -A
+        git commit -m "$argv"
+        git push
+      end
+    '';
+    description = "Visual review, then stage all changes, commit and push";
+  };
+
+  node_clean = {
+    body = ''
+      echo "Cleaning node_modules and dist folders in ~/Developer..."
+      fd -H -I -t d "node_modules|dist" ~/Developer -x rm -rf
+      echo "Done."
+    '';
+    description = "Recursively remove node_modules and dist in ~/Developer";
+  };
+
+  nix_vacuum = {
+    body = ''
+      echo "Running Nix garbage collection..."
+      nix-collect-garbage -d
+      echo "Optimising Nix store..."
+      nix-store --optimise
+      echo "Cleaning Homebrew..."
+      brew cleanup
+      echo "Vacuum complete."
+    '';
+    description = "Deep clean Nix and Homebrew environment";
+  };
+
+  fzf_jump = {
+    body = ''
+      set dest (fd . ~/Developer -max-depth 2 -type d | fzf --prompt="Jump to project > ")
+      if test -n "$dest"
+        cd $dest
+      end
+    '';
+    description = "Fuzzy jump to a project directory in ~/Developer";
+  };
+
   ytd = {
     body = ''
       yt-dlp -f bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best -o '%(upload_date)s - %(channel)s - %(id)s - %(title)s.%(ext)s' \
