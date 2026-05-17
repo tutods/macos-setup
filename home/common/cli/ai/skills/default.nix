@@ -29,6 +29,7 @@ in {
         return 1
       end
 
+      set -l entries
       while read -l line
         set -l line (string trim "$line")
         if test -z "$line"; or string match -q '#*' "$line"; continue; end
@@ -37,15 +38,19 @@ in {
         set -l clean_line (string trim "$clean_line")
         if test -z "$clean_line"; continue; end
 
-        set -l parts (string split " " -- $clean_line)
+        set -a entries "$clean_line"
+      end < "$manifest"
+
+      for entry in $entries
+        set -l parts (string split " " -- $entry)
         echo "▸ npx skills add $parts -g $agents_flag -y"
         if npx skills add $parts -g $agents_flag -y 2>&1 </dev/null
           set installed (math $installed + 1)
         else
-          echo "  ⚠ Failed: $clean_line"
+          echo "  ⚠ Failed: $entry"
           set failed (math $failed + 1)
         end
-      end < "$manifest"
+      end
 
       echo ""
       echo "Skills install complete: $installed succeeded, $failed failed"
