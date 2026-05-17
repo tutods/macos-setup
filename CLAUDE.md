@@ -95,6 +95,28 @@ The common module concatenates: context7 + shared + role extras (if set). Role m
    };
    ```
 
+### AI Skills
+
+Skills are installed from `home/common/cli/ai/skills/manifest.txt` + `home/roles/personal/ai/skills/manifest.txt` during `darwin-rebuild` activation. Install runs once per manifest change (guarded by `~/.config/ai/.skills-sync-hash`). Output logged to `~/.cache/ai-skills-install.log`.
+
+```bash
+# Force reinstall all skills (next ./nix.sh run will trigger install loop)
+rm ~/.config/ai/.skills-sync-hash && ./nix.sh macbook
+
+# Inspect last install run (errors, per-source status)
+cat ~/.cache/ai-skills-install.log
+
+# List currently installed skills
+npx skills ls -g
+
+# Add a new skill source: append a line to the relevant manifest
+# home/common/cli/ai/skills/manifest.txt       ← both machines
+# home/roles/personal/ai/skills/manifest.txt   ← personal only
+# Then run ./nix.sh macbook to apply
+```
+
+Key: `pkgs.git` + `pkgs.nodejs` are injected into PATH during activation — required because `npx skills add owner/repo` git-clones the source. Without `git`, GitHub-sourced packages silently fail.
+
 ## CI
 
 GitHub Actions (`flake-checker.yaml`) validates the flake on push and daily. Renovate auto-merges minor/patch updates for `nixpkgs`, `home-manager`, `nix-darwin`, and `nix-homebrew`.

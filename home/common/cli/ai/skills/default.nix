@@ -16,52 +16,10 @@
   combinedManifest = pkgs.writeText "ai-skills-manifest" combinedContent;
   manifestHash = builtins.hashString "sha256" combinedContent;
 in {
-  programs.fish.functions.ai-skills-sync = {
-    description = "Install AI skills from manifest into Claude Code and opencode";
-    body = ''
-      set -l manifest "${combinedManifest}"
-      set -l agents_flag "-a" "claude-code" "-a" "opencode"
-      set -l installed 0
-      set -l failed 0
-
-      if not test -f "$manifest"
-        echo "Skills manifest not found at $manifest"
-        return 1
-      end
-
-      set -l entries
-      while read -l line
-        set -l line (string trim "$line")
-        if test -z "$line"; or string match -q '#*' "$line"; continue; end
-
-        set -l clean_line (string replace -r '#.*' "" -- "$line")
-        set -l clean_line (string trim "$clean_line")
-        if test -z "$clean_line"; continue; end
-
-        set -a entries "$clean_line"
-      end < "$manifest"
-
-      for entry in $entries
-        set -l parts (string split " " -- $entry)
-        echo "▸ npx skills add $parts -g $agents_flag -y"
-        if npx skills add $parts -g $agents_flag -y 2>&1 </dev/null
-          set installed (math $installed + 1)
-        else
-          echo "  ⚠ Failed: $entry"
-          set failed (math $failed + 1)
-        end
-      end
-
-      echo ""
-      echo "Skills install complete: $installed succeeded, $failed failed"
-    '';
-  };
-
   home.activation.aiSkillsSync = lib.hm.dag.entryAfter ["writeBoundary"] ''
     stamp="$HOME/.config/ai/.skills-sync-hash"
-    manifest_hash="${manifestHash}"
-
-    mkdir -p "$HOME/.config/ai"
+    log="$HOME/.cache/ai-skills-install.log"
+    mkdir -p "$HOME/.config/ai" "$HOME/.cache"
 
     # Sync local skills manually
     mkdir -p "$HOME/.agents/skills/llm-council"
@@ -74,20 +32,36 @@ in {
     ln -sfn "$HOME/.agents/skills/llm-council" "$HOME/.claude/skills/llm-council"
     ln -sfn "$HOME/.agents/skills/content-writer" "$HOME/.claude/skills/content-writer"
 
-
-    if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$manifest_hash" ]; then
-      echo "↣ AI skills sync (manifest changed)"
-      if command -v fish > /dev/null 2>&1; then
-        # non-fatal: skills sync failure doesn't abort activation
-        fish -c "ai-skills-sync" \
-          && echo "$manifest_hash" > "$stamp" \
-          || echo "  ⚠ ai-skills-sync failed (non-fatal)"
-      else
-        echo "  ⚠ fish not found, skipping skills sync (non-fatal)"
-        echo "$manifest_hash" > "$stamp"
-      fi
-    else
+    if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "${manifestHash}" ]; then
       echo "↣ AI skills up to date"
+    else
+      export PATH="${pkgs.git}/bin:${pkgs.nodejs}/bin:$PATH"
+      # Trigger npx skills "Agent detected" non-interactive mode
+      export CLAUDECODE=1
+      export AI_AGENT=claude-code_agent
+
+      # Read manifest into array before iterating (avoids stdin contention with npx)
+      entries=()
+      while IFS= read -r raw; do
+        clean=$(printf '%s' "$raw" | sed 's/#.*//' | xargs)
+        [ -n "$clean" ] && entries+=("$clean")
+      done < "${combinedManifest}"
+
+      printf "↣ Syncing AI skills (%d sources)...\n" "''${#entries[@]}" | tee -a "$log"
+      ok=0; fail=0
+      for entry in "''${entries[@]}"; do
+        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -a github-copilot -y\n" "$entry" | tee -a "$log"
+        if npx skills add $entry -g -a claude-code -a opencode -a github-copilot -y </dev/null >>"$log" 2>&1; then
+          ok=$((ok+1))
+        else
+          printf "    warning: failed: %s\n" "$entry" | tee -a "$log"
+          fail=$((fail+1))
+        fi
+      done
+      printf "↣ Skills sync: %d ok, %d failed (log: %s)\n" "$ok" "$fail" "$log"
+
+      # Only stamp hash if fully successful (retry on next rebuild if any failed)
+      [ "$fail" -eq 0 ] && printf "%s" "${manifestHash}" > "$stamp"
     fi
   '';
 }
