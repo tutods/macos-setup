@@ -25,4 +25,11 @@
     command = "npx";
     args = ["-y" "@playwright/mcp" "--isolated" "--headless"];
   };
+
+  # Up-to-date library docs inline — replaces the ctx7 CLI round-trip.
+  # Requires CONTEXT7_API_KEY in env (secrets.fish) for higher quota.
+  context7 = {
+    command = "npx";
+    args = ["-y" "@upstash/context7-mcp@latest"];
+  };
 }

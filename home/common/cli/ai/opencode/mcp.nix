@@ -25,6 +25,12 @@
         type = "local";
         enabled = true;
       };
+    context7 =
+      servers.context7
+      // {
+        type = "local";
+        enabled = true;
+      };
   };
 in {
   # opencode: ~/.config/opencode/opencode.json  (mcp key — base servers)

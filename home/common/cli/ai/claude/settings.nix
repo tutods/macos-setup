@@ -29,14 +29,25 @@
       }
     ];
 
+    # Run biome check+fix after every file edit — only when biome config exists.
+    # Falls back to ./node_modules/.bin/biome if not in PATH (project-local install).
+    # Exits 0 silently when biome is unavailable or not configured.
+    hooks.PostToolUse = [
+      {
+        matcher = "Edit|Write|MultiEdit";
+        hooks = [
+          {
+            type = "command";
+            command = "if [ -f biome.json ] || [ -f biome.jsonc ]; then if command -v biome >/dev/null 2>&1; then biome check --write 2>&1; elif [ -x ./node_modules/.bin/biome ]; then ./node_modules/.bin/biome check --write 2>&1; fi; fi";
+          }
+        ];
+      }
+    ];
+
     extraKnownMarketplaces = {
       caveman.source = {
         source = "github";
         repo = "JuliusBrussee/caveman";
-      };
-      "claude-code-warp".source = {
-        source = "github";
-        repo = "warpdotdev/claude-code-warp";
       };
       "agricidaniel-seo".source = {
         source = "github";
@@ -48,7 +59,8 @@
       };
     };
 
-    # Add new plugins here; they merge with the live file on next darwin-rebuild switch.
+    # Nix is authoritative for plugins defined here (merge order: live + nix → nix wins).
+    # Set false to explicitly disable; omit to let user manage via UI.
     enabledPlugins = {
       "caveman@caveman" = true;
       "superpowers@claude-plugins-official" = true;
@@ -65,11 +77,11 @@
       "claude-code-setup@claude-plugins-official" = true;
       "pr-review-toolkit@claude-plugins-official" = true;
       "sourcegraph@claude-plugins-official" = true;
-      "terraform@claude-plugins-official" = true;
+      "terraform@claude-plugins-official" = false;
       "prisma@claude-plugins-official" = true;
       "sanity@claude-plugins-official" = true;
       "autofix-bot@claude-plugins-official" = true;
-      "warp@claude-code-warp" = true;
+      "warp@claude-code-warp" = false;
       "claude-seo@agricidaniel-seo" = true;
       "codex@openai-codex" = true;
     };
@@ -89,7 +101,7 @@ in {
       merged_plugins=$(${pkgs.jq}/bin/jq -cn \
         --argjson nix "$nix_plugins" \
         --argjson live "$existing_plugins" \
-        '$nix + $live')
+        '($live + $nix) | with_entries(select(.value != false))')
       echo "$base" \
         | ${pkgs.jq}/bin/jq --argjson plugins "$merged_plugins" \
             '. + {enabledPlugins: $plugins}' \
