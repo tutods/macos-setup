@@ -59,8 +59,10 @@
       };
     };
 
-    # Nix is authoritative for plugins defined here (merge order: live + nix → nix wins).
-    # Set false to explicitly disable; omit to let user manage via UI.
+    # Nix is authoritative for plugins listed here (merge: live + nix, nix wins).
+    # Plugins not listed here can still be managed via the UI.
+    # To permanently remove a plugin from existing installs add it to the
+    # purge list in the activation below instead of setting false here.
     enabledPlugins = {
       "caveman@caveman" = true;
       "superpowers@claude-plugins-official" = true;
@@ -77,11 +79,9 @@
       "claude-code-setup@claude-plugins-official" = true;
       "pr-review-toolkit@claude-plugins-official" = true;
       "sourcegraph@claude-plugins-official" = true;
-      "terraform@claude-plugins-official" = false;
       "prisma@claude-plugins-official" = true;
       "sanity@claude-plugins-official" = true;
       "autofix-bot@claude-plugins-official" = true;
-      "warp@claude-code-warp" = false;
       "claude-seo@agricidaniel-seo" = true;
       "codex@openai-codex" = true;
     };
@@ -101,7 +101,11 @@ in {
       merged_plugins=$(${pkgs.jq}/bin/jq -cn \
         --argjson nix "$nix_plugins" \
         --argjson live "$existing_plugins" \
-        '($live + $nix) | with_entries(select(.value != false))')
+        '$live + $nix')
+      # Purge plugins removed from this config (migration for existing installs).
+      # No-op on fresh installs where these keys never existed.
+      merged_plugins=$(echo "$merged_plugins" | ${pkgs.jq}/bin/jq -c \
+        'del(.["terraform@claude-plugins-official"], .["warp@claude-code-warp"])')
       echo "$base" \
         | ${pkgs.jq}/bin/jq --argjson plugins "$merged_plugins" \
             '. + {enabledPlugins: $plugins}' \

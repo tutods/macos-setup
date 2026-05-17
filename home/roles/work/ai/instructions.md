@@ -21,3 +21,18 @@
 - `openvpn` / `viscosity` — VPN required for internal services
 - `gcloud` — GCP operations
 - No personal doppler secrets on work machine — keep work and personal strictly separate
+
+### Jira MCP (`mcp-atlassian`)
+
+Managed via `home.ai.extraMcpServers.jira` in `home/roles/work/ai/default.nix`.
+Requires these vars in `~/.config/fish/secrets.fish`:
+
+```fish
+set -gx JIRA_URL       "https://<company>.atlassian.net"
+set -gx JIRA_EMAIL     "daniel.a.sousa@<company>.com"
+set -gx JIRA_API_TOKEN "<token>"
+```
+
+Generate token at: https://id.atlassian.com/manage-profile/security/api-tokens
+
+Apply: `./nix.sh work` — MCP is injected into both `claude_desktop_config.json` and `opencode.json` automatically.
