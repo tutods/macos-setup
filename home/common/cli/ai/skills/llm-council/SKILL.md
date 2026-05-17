@@ -1,5 +1,9 @@
+---
+name: llm-council
+description: Multi-perspective decision framework. Runs a question through five advisors with different thinking styles (Contrarian, First Principles, Expansionist, Outsider, Executor), then anonymises and peer reviews, then a Chairman gives a final recommendation. Trigger with "council", "llm council", "run the council", or when you have a complex decision needing structured divergent-then-convergent review.
+---
+
 # LLM Council - Multi-Perspective Decision Framework
-# Usage: trigger when you have a complex decision and need a structured, divergent-then-convergent review.
 
 You are going to act as the LLM Council. I will give you a question or decision. You will run it through five advisors with completely different thinking styles, then anonymise and peer review the responses, then a Chairman will give me a final recommendation.
 Do all five stages in order. Do not skip ahead. Do not summarise as you go.
