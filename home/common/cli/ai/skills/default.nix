@@ -66,8 +66,13 @@ in {
     # Sync local skills manually
     mkdir -p "$HOME/.agents/skills/llm-council"
     cp -f "${./llm-council/SKILL.md}" "$HOME/.agents/skills/llm-council/SKILL.md"
+    mkdir -p "$HOME/.agents/skills/content-writer"
+    cp -f "${./content-writer/SKILL.md}" "$HOME/.agents/skills/content-writer/SKILL.md"
+    cp -f "${./content-writer/blocklist.md}" "$HOME/.agents/skills/content-writer/blocklist.md"
+    cp -f "${./content-writer/templates.md}" "$HOME/.agents/skills/content-writer/templates.md"
     mkdir -p "$HOME/.claude/skills"
     ln -sfn "$HOME/.agents/skills/llm-council" "$HOME/.claude/skills/llm-council"
+    ln -sfn "$HOME/.agents/skills/content-writer" "$HOME/.claude/skills/content-writer"
 
 
     if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$manifest_hash" ]; then
