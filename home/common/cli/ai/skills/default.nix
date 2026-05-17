@@ -39,7 +39,7 @@ in {
 
         set -l parts (string split " " -- $clean_line)
         echo "▸ npx skills add $parts -g $agents_flag -y"
-        if npx skills add $parts -g $agents_flag -y 2>&1
+        if npx skills add $parts -g $agents_flag -y 2>&1 </dev/null
           set installed (math $installed + 1)
         else
           echo "  ⚠ Failed: $clean_line"
