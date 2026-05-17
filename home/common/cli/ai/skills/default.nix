@@ -68,8 +68,6 @@ in {
     cp -f "${./llm-council/SKILL.md}" "$HOME/.agents/skills/llm-council/SKILL.md"
     mkdir -p "$HOME/.claude/skills"
     ln -sfn "$HOME/.agents/skills/llm-council" "$HOME/.claude/skills/llm-council"
-    mkdir -p "$HOME/.config/opencode/skills"
-    ln -sfn "$HOME/.agents/skills/llm-council" "$HOME/.config/opencode/skills/llm-council"
 
 
     if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$manifest_hash" ]; then
