@@ -20,6 +20,5 @@
   "surfshark"
   "1password"
   "jordanbaird-ice"
-  "qbittorrent"
   "iina"
 ]
