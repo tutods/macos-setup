@@ -20,6 +20,6 @@
   "surfshark"
   "1password"
   "jordanbaird-ice"
-  "transmission"
+  "qbittorrent"
   "iina"
 ]
