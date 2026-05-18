@@ -70,12 +70,12 @@ Fish shell is the primary shell, configured in `home/common/shell/fish/` with se
 AI instructions are split into shared and role-specific:
 
 - `home/common/cli/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.config/opencode/AGENTS.md`)
-- `home/common/cli/ai/instructions/context7-prefix.md` — opencode-specific context7 docs prefix
+
 - `home/common/cli/ai/options.nix` — defines `home.ai.extraInstructions` option (default `""`)
 - `home/roles/personal/ai/instructions.md` — personal-specific additions (e.g., `doppler`)
 - `home/roles/work/` — no AI-specific instructions currently
 
-The common module concatenates: context7 + shared + role extras (if set). Role modules set `home.ai.extraInstructions` via their `ai/default.nix`.
+The common module concatenates: shared + role extras (if set). Role modules set `home.ai.extraInstructions` via their `ai/default.nix`.
 
 ### Adding a New Host
 

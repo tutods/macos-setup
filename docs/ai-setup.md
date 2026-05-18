@@ -78,7 +78,7 @@ Instructions are split by scope and deployed by `home/common/cli/ai/instructions
 
 | File | Deployed to | Purpose |
 |------|------------|---------|
-| `instructions/context7-prefix.md` | `~/.config/opencode/AGENTS.md` (prefix) | context7 CLI usage guide for opencode |
+
 | `instructions/shared-instructions.md` | `~/.config/opencode/AGENTS.md` + `~/.claude/rules/workflow.md` | Fast CLI prefs, git conventions, Nix dotfiles guide |
 | `home/roles/personal/ai/instructions.md` | appended to both (personal machine) | Doppler secrets management, AI privacy guard |
 | `home/roles/work/ai/instructions.md` | appended to both (work machine) | Work context (GCP, Jira, company tools) |
@@ -138,7 +138,6 @@ Base servers managed in `home/common/cli/ai/mcp-servers.nix`, deployed via separ
 | `filesystem` | Yes | Yes | Read/write files beyond CWD |
 | `github` | Yes | Yes | Access PRs, issues, repos |
 | `playwright` | Yes | Yes | Browser automation and testing |
-| `context7` | Yes | Yes | Current library docs (inline MCP, no API key needed) |
 | `jira` | Yes (work) | Yes (work) | Jira + Confluence via `mcp-atlassian` |
 
 ### GitHub MCP — token setup
@@ -153,14 +152,6 @@ The GitHub server reads `GITHUB_PERSONAL_ACCESS_TOKEN` from env. The wrapper map
    ```fish
    set -gx GITHUB_TOKEN "ghp_xxxxxxxxxxxxxxxxxxxx"
    ```
-
-### context7 MCP — setup
-
-context7 is deployed as a local MCP server (`@upstash/context7-mcp@latest`) on both Claude Code and opencode. No API key is required — the package handles auth internally.
-
-No manual setup needed. The server is active after `./nix.sh <config>`.
-
-To use in sessions: ask about any library and context7 resolves live docs inline.
 
 ### Jira MCP — work machine only
 

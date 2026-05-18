@@ -2,12 +2,12 @@
 # Installed via extraSkillsManifest → ai-skills-sync on darwin-rebuild
 
 better-auth/skills
-Leonxlnx/taste-skill
+Leonxlnx/taste-skill -s high-end-visual-design -s minimalist-ui -s redesign-existing-projects
 prisma/skills
 squirrelscan/skills
 vercel/turborepo
 anthropics/knowledge-work-plugins -s compliance-check -s legal-response
-mindrally/skills -s sanity -s tailwindcss -s prisma-development -s pnpm -s seo-best-practices
+mindrally/skills -s sanity -s tailwindcss -s pnpm -s seo-best-practices
 resciencelab/opc-skills -s banner-creator -s domain-hunter -s logo-creator -s seo-geo
 tanstack/router -s compositions/router-query -s lifecycle/migrate-from-nextjs -s lifecycle/migrate-from-react-router -s react-router -s react-start -s "react-start/server-components" -s router-core -s router-core/auth-and-guards -s router-core/code-splitting -s router-core/data-loading -s router-core/navigation -s router-core/not-found-and-errors -s router-core/path-params -s router-core/search-params -s router-core/ssr -s router-core/type-safety -s router-plugin -s start-core -s start-core/auth-server-primitives -s start-core/deployment -s start-core/execution-model -s start-core/middleware -s start-core/server-functions -s start-core/server-routes -s start-server-core -s virtual-file-routes
 wshobson/agents -s nextjs-app-router-patterns -s postgresql-table-design -s gdpr-data-handling

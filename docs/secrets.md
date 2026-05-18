@@ -63,10 +63,6 @@ set -gx JIRA_EMAIL       "daniel.a.sousa@<company>.com"
 set -gx JIRA_API_TOKEN   "<token>"
 ```
 
-## context7 MCP
-
-context7 is deployed as a local MCP server — no API key is required. The server is active on both Claude Code and opencode after `./nix.sh <config>`.
-
 ## Validation
 
 Home Manager warns on every deploy if required secret files are missing. The deploy still succeeds — warnings are informational only.

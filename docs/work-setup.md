@@ -114,5 +114,5 @@ All three must be present in `~/.config/fish/secrets.fish`:
 4. Run `./nix.sh work` again (or restart shell) so secrets load
 5. `gcloud auth login && gcloud auth application-default login`
 6. Connect VPN before accessing internal services
-7. Verify MCP: `claude mcp list` (should show filesystem, github, playwright, context7, jira)
+7. Verify MCP: `claude mcp list` (should show filesystem, github, playwright, jira)
 8. Verify skills: `npx skills ls -g`

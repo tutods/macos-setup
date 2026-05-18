@@ -11,7 +11,6 @@ JuliusBrussee/caveman
 obra/superpowers
 shadcn/ui
 pbakaus/impeccable
-vercel-labs/skills -s find-skills
 kadajett/agent-nestjs-skills -s nestjs-best-practices
 vercel-labs/agent-skills -s vercel-react-view-transitions -s web-design-guidelines
 anthropics/skills -s mcp-builder -s skill-creator -s webapp-testing -s frontend-design -s theme-factory
