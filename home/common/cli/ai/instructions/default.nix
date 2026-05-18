@@ -7,6 +7,7 @@
   sharedFiles = [
     ./shared-instructions.md
     ./privacy-guide.md
+    ./ts-conventions.md
   ];
 
   # Component-specific instructions

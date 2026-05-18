@@ -94,8 +94,8 @@ home/
 │           ├── abbrs.nix       # Expanding abbreviations (git, brew)
 │           └── functions.nix   # Multi-step helpers (goMain, commt, killport, etc.)
 └── roles/                # Context-specific overrides
-    ├── personal.nix     # Personal machine overrides (currently empty)
-    └── work.nix          # Work machine overrides (e.g. Bitbucket pipelines schema)
+    ├── personal/        # Personal machine overrides (ai/, skills/, instructions.md)
+    └── work/            # Work machine overrides (ai/, instructions.md)
 ```
 
 ### Aliases vs Abbreviations

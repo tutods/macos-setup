@@ -30,6 +30,14 @@
       if ! pipx list 2>/dev/null | grep -qw 'ttok'; then
         pipx install ttok || echo "  ⚠ pipx install ttok failed"
       fi
+      if ! pipx list 2>/dev/null | grep -q 'graphify'; then
+        pipx install graphify || echo "  ⚠ pipx install graphify failed"
+      fi
+    fi
+    # ── graphify init ─────────────────────────────────────────────────
+    if command -v graphify > /dev/null 2>&1; then
+      echo "↣ graphify install"
+      graphify install || echo "  ⚠ graphify install failed"
     fi
   '';
 }
