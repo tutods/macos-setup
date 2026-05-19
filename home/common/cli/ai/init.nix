@@ -6,7 +6,11 @@
 # Ordering: writeBoundary ensures home files are written first; mkdir at the
 # top of the script creates any config dirs that may still be missing.
 #
-{lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   home.activation.aiInit = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Ensure config dirs exist before tool init
     mkdir -p "$HOME/.claude" "$HOME/.config/opencode" "$HOME/.codex"
@@ -21,18 +25,18 @@
     fi
 
     # ── pipx packages ─────────────────────────────────────────────────────
-    # Check pipx list before installing to avoid re-installing on every switch
-    if command -v pipx > /dev/null 2>&1; then
-      echo "↣ pipx packages"
-      if ! pipx list 2>/dev/null | grep -q 'code-review-graph'; then
-        pipx install code-review-graph || echo "  ⚠ pipx install code-review-graph failed"
-      fi
-      if ! pipx list 2>/dev/null | grep -qw 'ttok'; then
-        pipx install ttok || echo "  ⚠ pipx install ttok failed"
-      fi
-      if ! pipx list 2>/dev/null | grep -q 'graphify'; then
-        pipx install graphify || echo "  ⚠ pipx install graphify failed"
-      fi
+    # Check pipx list before installing to avoid re-installing on every switch.
+    # Inject pkgs.pipx into PATH; activation runs before shell PATH is set up.
+    echo "↣ pipx packages"
+    export PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH"
+    if ! pipx list 2>/dev/null | grep -q 'code-review-graph'; then
+      pipx install code-review-graph || echo "  ⚠ pipx install code-review-graph failed"
+    fi
+    if ! pipx list 2>/dev/null | grep -qw 'ttok'; then
+      pipx install ttok || echo "  ⚠ pipx install ttok failed"
+    fi
+    if ! pipx list 2>/dev/null | grep -q 'graphify'; then
+      pipx install graphify || echo "  ⚠ pipx install graphify failed"
     fi
     # ── graphify init ─────────────────────────────────────────────────
     if command -v graphify > /dev/null 2>&1; then
