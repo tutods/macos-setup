@@ -102,7 +102,7 @@
   node_clean = {
     body = ''
       echo "Cleaning node_modules in ~/Developer..."
-      set targets (fd -H -I -t d "^node_modules$" ~/Developer)
+      set targets (fd -H -I -t d "^node_modules\$" ~/Developer)
       if test (count $targets) -eq 0
         echo "Nothing to clean."
         return 0
@@ -110,7 +110,7 @@
       printf "%s\n" $targets
       read --local --prompt-str "Delete (count $targets) dirs? [y/N] " confirm
       if string match -qi 'y' -- "$confirm"
-        fd -H -I -t d "^node_modules$" ~/Developer -x rm -rf
+        fd -H -I -t d "^node_modules\$" ~/Developer -x rm -rf
         echo "Done."
       end
     '';
