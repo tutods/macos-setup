@@ -18,6 +18,7 @@
     ./shell/fish
     # Terminal
     ./terminal/ghostty
+    ./terminal/warp
   ];
 
   home.activation.createDeveloperDir = lib.hm.dag.entryAfter ["writeBoundary"] ''
