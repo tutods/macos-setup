@@ -35,13 +35,13 @@
     if ! pipx list 2>/dev/null | grep -qw 'ttok'; then
       pipx install ttok || echo "  ⚠ pipx install ttok failed"
     fi
-    if ! pipx list 2>/dev/null | grep -q 'graphify'; then
-      pipx install graphify || echo "  ⚠ pipx install graphify failed"
+    if ! pipx list 2>/dev/null | grep -q 'graphifyy'; then
+      pipx install graphifyy || echo "  ⚠ pipx install graphifyy failed"
     fi
     # ── graphify init ─────────────────────────────────────────────────
-    if command -v graphify > /dev/null 2>&1; then
-      echo "↣ graphify install"
-      graphify install || echo "  ⚠ graphify install failed"
-    fi
+    echo "↣ graphify install (all agents)"
+    graphify install                       || echo "  ⚠ graphify install (claude) failed"
+    graphify install --platform opencode   || echo "  ⚠ graphify install (opencode) failed"
+    graphify install --platform codex      || echo "  ⚠ graphify install (codex) failed"
   '';
 }
