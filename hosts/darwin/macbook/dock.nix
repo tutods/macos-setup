@@ -18,6 +18,7 @@
         };
       }
       "/Applications/Zed.app"
+      "/Applications/Nix Apps/WebStorm.app"
       "/Users/tutods/Applications/Home Manager Apps/Visual Studio Code.app"
       "/Applications/Trae.app"
       "/Applications/Ghostty.app"
