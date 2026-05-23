@@ -4,11 +4,11 @@
 better-auth/skills
 Leonxlnx/taste-skill -s high-end-visual-design -s minimalist-ui -s redesign-existing-projects
 prisma/skills
-squirrelscan/skills
 vercel/turborepo
-anthropics/knowledge-work-plugins -s compliance-check -s legal-response
 mindrally/skills -s sanity -s seo-best-practices
-resciencelab/opc-skills -s banner-creator -s domain-hunter -s logo-creator
-tanstack/router -s compositions/router-query -s lifecycle/migrate-from-nextjs -s lifecycle/migrate-from-react-router -s react-router -s react-start -s "react-start/server-components" -s router-core -s router-core/auth-and-guards -s router-core/code-splitting -s router-core/data-loading -s router-core/navigation -s router-core/not-found-and-errors -s router-core/path-params -s router-core/search-params -s router-core/ssr -s router-core/type-safety -s router-plugin -s start-core -s start-core/auth-server-primitives -s start-core/deployment -s start-core/execution-model -s start-core/middleware -s start-core/server-functions -s start-core/server-routes -s start-server-core -s virtual-file-routes
-wshobson/agents -s nextjs-app-router-patterns -s postgresql-table-design -s gdpr-data-handling
-oakoss/agent-skills -s tanstack-cli -s tanstack-db -s tanstack-devtools -s tanstack-form -s tanstack-hotkeys -s tanstack-pacer -s tanstack-query -s tanstack-router -s tanstack-start -s tanstack-store -s tanstack-table -s tanstack-virtual -s meta-agent-creator -s meta-command-creator -s meta-hook-creator -s meta-plugin-creator -s meta-skill-creator -s skill-management -s motion -s react-email -s icon-design -s figma-developer -s drizzle-orm -s local-first -s postgres-tuning -s realtime-sync -s package-publishing -s seo-optimizer
+resciencelab/opc-skills -s banner-creator -s domain-hunter
+tanstack/router -s compositions/router-query -s react-router -s react-start -s "react-start/server-components" -s router-core -s router-core/auth-and-guards -s router-core/code-splitting -s router-core/data-loading -s router-core/navigation -s router-core/not-found-and-errors -s router-core/path-params -s router-core/search-params -s router-core/ssr -s router-core/type-safety -s router-plugin -s start-core -s start-core/auth-server-primitives -s start-core/deployment -s start-core/execution-model -s start-core/middleware -s start-core/server-functions -s start-core/server-routes -s start-server-core -s virtual-file-routes
+wshobson/agents -s postgresql-table-design -s gdpr-data-handling
+anthropics/skills -s theme-factory
+anthropics/knowledge-work-plugins -s brand-voice-enforcement -s content-creation -s ux-copy
+oakoss/agent-skills -s tanstack-cli -s tanstack-devtools -s tanstack-form -s tanstack-hotkeys -s tanstack-query -s tanstack-router -s tanstack-start -s tanstack-store -s tanstack-table -s tanstack-virtual -s meta-agent-creator -s meta-command-creator -s meta-hook-creator -s meta-plugin-creator -s meta-skill-creator -s skill-management -s motion -s react-email -s icon-design -s figma-developer -s drizzle-orm -s local-first -s postgres-tuning -s realtime-sync -s package-publishing -s seo-optimizer

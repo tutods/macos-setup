@@ -20,7 +20,8 @@ Always prefer these tools over slower alternatives:
 ## General Workflow
 
 - Use `rg` for searching file contents, `fd` for finding files by name
-- Use `ast-grep` (sg) for structural code search and precise matching
+- Use `rg --json` when piping search results — machine-parseable, skip manual parsing
+- Use `ast-grep` (`sg`) for structural code patterns and refactors — more precise than `rg` for code shapes
 - Use `fzf` for interactive selection, search, and filtering
 - Use `bat` for reading files when syntax highlighting helps
 - Use `rtk` for git operations and command execution when available
@@ -31,21 +32,90 @@ Always prefer these tools over slower alternatives:
   - If `package-lock.json` exists $\rightarrow$ use `npm`.
   - Do not mix package managers in a project.
 - Prefer Nix-managed tools over ad-hoc installs
-- When editing files, prefer the Edit tool over Bash with sed/awk
+- **NEVER use `nix-env -i`** — use `nix shell` for temporary tools to avoid polluting the global environment
+- **File editing — hard rules** (no exceptions):
+  - **NEVER** use `sed`, `awk`, or `perl` to edit files — always use the Edit tool
+  - **NEVER** use `echo >`, `printf >`, or `cat <<EOF >` to write files — always use the Write tool
+  - These tools are banned for file mutation even when "it seems simpler"
+- **No interactive commands** in automated flows — `vim`, `nano`, `git rebase -i`, `git add -p` will hang; use non-interactive alternatives or tools
+- **Token management**:
+  - Use `ttok` to estimate token count before sending large files (`ttok -m claude-sonnet-4-6 < file.ts`)
+  - Use `repomix` before handing off context to non-Claude AI (`repomix --output context.xml`)
 - Always run type checks (`pnpm typecheck` or `tsc --noEmit`) before declaring a task complete
-- Prefer targeted edits over rewriting entire files
+- **Minimal diff** — prefer targeted edits over file rewrites; changing 3 lines must not rewrite 300
 - Use type-safe patterns — avoid `any`, prefer branded types and Zod schemas for runtime validation
 
  ## Git & Commits
- 
- - Commit messages: imperative mood, present tense (`feat: add X`, `fix: broken Y`)
+
+ Follow [Conventional Commits](https://www.conventionalcommits.org/) strictly:
+
+ ```
+ <type>[optional scope]: <description>
+
+ [optional body]
+
+ [optional footer]
+ ```
+
+ **Commit types:**
+
+ | Type | When |
+ |------|------|
+ | `feat` | new feature |
+ | `fix` | bug fix |
+ | `docs` | documentation only |
+ | `refactor` | code change, no feature/fix |
+ | `perf` | performance improvement |
+ | `test` | adding/fixing tests |
+ | `chore` | maintenance, deps, tooling |
+ | `ci` | CI/CD changes |
+ | `build` | build system changes |
+ | `revert` | reverting a commit |
+ | `style` | formatting, whitespace (no logic change) |
+
+ **Rules:**
+ - Imperative mood, present tense: `feat: add X`, not `added X` or `adds X`
  - Prefer small, focused commits over large batches
  - Never commit secrets, `.env` files, or credentials
- - Branch names: `feat/`, `fix/`, `chore/` prefixes
+ - Breaking changes: add `!` after type (`feat!: drop support for X`) and `BREAKING CHANGE:` footer
+
+ **Branch names** — same type prefixes as commits:
+
+ ```
+ <type>/<short-kebab-description>
+ ```
+
+ Examples: `feat/user-auth`, `fix/token-expiry`, `docs/api-reference`, `refactor/auth-middleware`, `chore/bump-deps`
  
- - **Sanity Check**: Always run `nix fmt` and `nix flake check` before finalizing any AI-generated changes or declaring a task complete.
  
- ## Security & AI Safety
+ ## Verification & Completion
+
+- **Never declare done without running checks** — typecheck + lint + relevant tests; "should work" is not acceptable
+- **Error-first debugging** — read the full error output before retrying; no blind retries or guessing
+- **No unsolicited artifacts** — no auto-generated README, CHANGELOG, or docstrings unless explicitly asked
+
+## Code Hygiene
+
+- No commented-out code left behind
+- No `TODO` / `FIXME` comments unless explicitly asked to add them
+- No placeholder/stub implementations (fake data, hardcoded returns) without explicitly flagging them to the user
+
+## Destructive Operations
+
+**Always require explicit user confirmation before:**
+- `rm -rf` or bulk deletes
+- `git reset --hard`, `git clean -fd`, `git checkout -- .`
+- `git push --force` or `git push --force-with-lease`
+- Dropping/truncating database tables
+- Any action that cannot be undone
+
+## Shell Scripts
+
+All shell scripts must:
+- Start with `set -euo pipefail` — prevents silent failures from unset vars, failed commands, broken pipes
+- Quote all variables: `"$var"` not `$var`
+
+## Security & AI Safety
 
 - **Secrets**: Never log output from `doppler` secrets or print plaintext credentials in AI-assisted logs.
 - **Verification**: Always verify AI-generated networking or security commands before executing with `sudo`.
@@ -59,12 +129,3 @@ Always prefer these tools over slower alternatives:
 - `repomix` — pack repo context before switching tools or sharing with non-Claude AI
 - `ccusage` — token usage dashboard (`npx ccusage@latest` or `ccusage` abbreviation)
 
-## Nix Dotfiles (this repo)
-
-- Repo root: `~/.dotfiles` — all commands run from there
-- Deploy: `./nix.sh macbook` or `./nix.sh work`
-- Build only (no sudo): `./nix.sh macbook --build-only`
-- Module hierarchy: `modules/` (all hosts) → `hosts/darwin/<name>/` (per machine) → `home/common/` (all users) → `home/roles/<role>/` (personal/work)
-- Homebrew casks: shared in `modules/darwin/homebrew/casks/`, machine-specific in `hosts/darwin/<name>/homebrew/`
-- Adding packages: system packages in `modules/packages/`, user packages via `home/common/` or host-specific
-- Prefer `pkgsUnstable` only for tools that need latest (claude-code, codex, opencode); use stable for everything else

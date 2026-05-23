@@ -1,5 +1,8 @@
 let
-  instructions = builtins.readFile ./instructions.md;
+  instructions =
+    builtins.readFile ./instructions.md
+    + "\n\n"
+    + builtins.readFile ../../../common/cli/ai/context/stack-personal.md;
 
   # Helper to simplify MCP server definition
   mkMcp = {

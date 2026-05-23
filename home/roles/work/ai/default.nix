@@ -8,7 +8,10 @@ let
     args = args;
   };
 in {
-  home.ai.extraInstructions = builtins.readFile ./instructions.md;
+  home.ai.extraInstructions =
+    builtins.readFile ./instructions.md
+    + "\n\n"
+    + builtins.readFile ../../../common/cli/ai/context/stack-work.md;
 
   # Requires in ~/.config/fish/secrets.fish:
   #   set -gx JIRA_URL       "https://<company>.atlassian.net"

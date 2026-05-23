@@ -7,6 +7,10 @@
     ./shared-instructions.md
     ./privacy-guide.md
     ./ts-conventions.md
+    ./react-conventions.md
+    ./api-conventions.md
+    ./testing-conventions.md
+    ./dependency-hygiene.md
   ];
 
   toolExtras = {

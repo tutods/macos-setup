@@ -14,7 +14,12 @@
 ### Git
 - Work identity: `daniel.a.sousa` — commits go to company repos
 - Company repos are on Bitbucket/GitHub (check remote with `git remote -v`)
-- PRs go through Jira-linked branches: `feat/PROJ-123-description`
+- **Branch naming overrides global convention** — must include Jira ticket ID:
+  ```
+  <type>/PROJ-123-short-description
+  ```
+  Examples: `feat/PROJ-456-user-auth`, `fix/PROJ-789-token-expiry`, `refactor/PROJ-101-auth-middleware`
+- Commit messages still follow Conventional Commits — ticket ID belongs in branch name, not commit message
 
 ### Company tools
 - `acli` — Atlassian CLI (Jira, Confluence): `acli issue list`, `acli project list`
