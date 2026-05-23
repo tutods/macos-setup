@@ -1,6 +1,7 @@
 {pkgs, ...}: {
   imports = [
     ./claude
+    ./codex
     ./init.nix
     ./instructions
     ./opencode

@@ -9,4 +9,8 @@
 
   # Containers
   "orbstack"
+
+  # JetBrains (Homebrew instead of nixpkgs — avoids Nix wrapper issues)
+  "webstorm"
+  "datagrip"
 ]
