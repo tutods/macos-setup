@@ -19,15 +19,21 @@
   localSkills = ["llm-council" "content-writer" "ts-strict-audit" "conventional-commit"];
 in {
   # Deploy local skills to both the open agent-skills standard location and Claude Code.
-  # Each entry becomes a Nix store symlink — no activation cp/ln needed.
+  # Each entry becomes a Nix store symlink — force=true replaces existing directories.
   home.file = lib.listToAttrs (lib.concatMap (name: [
       {
         name = ".agents/skills/${name}";
-        value.source = ./${name};
+        value = {
+          source = ./${name};
+          force = true;
+        };
       }
       {
         name = ".claude/skills/${name}";
-        value.source = ./${name};
+        value = {
+          source = ./${name};
+          force = true;
+        };
       }
     ])
     localSkills);

@@ -35,6 +35,12 @@ home/identity/       → person-specific (GPG, email)
 | GUI apps (machine-specific) | `hosts/darwin/<name>/homebrew/` |
 | Per-user programs | `home/common/` or `home/roles/<role>/` |
 
+## Configurable paths
+
+- `home.ai.projectDir` — Primary development directory (default: `$HOME/Developer`)
+- Fish shell exports `$PROJECT_DIR` environment variable for functions
+- Override in role config: `home.ai.projectDir = "$HOME/Projects";`
+
 Prefer `pkgs` (stable) over `pkgsUnstable` unless the tool needs latest version (claude-code, opencode, codex use unstable).
 
 ## AI setup structure
