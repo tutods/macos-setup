@@ -4,8 +4,8 @@
     opencode
     codex
     ollama
-    pipx
+    (pipx.overridePythonAttrs {doCheck = false;})
     rtk
-    repomix # pack repo into AI-readable file (repomix --output /tmp/ctx.md)
+    repomix
   ];
 }
