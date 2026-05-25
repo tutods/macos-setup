@@ -1,3 +1,20 @@
+## RTK Token Proxy
+
+RTK is active via the opencode plugin (`~/.config/opencode/plugins/rtk.ts`). It auto-intercepts shell commands and compresses output before it reaches context — 60-90% token savings on git, ls, grep, test runners, etc.
+
+**You do not need to prefix commands with `rtk`** — the plugin rewrites them transparently.
+
+Use these meta commands directly when needed:
+
+```bash
+rtk gain              # token savings analytics for this session
+rtk gain --history    # savings history across commands
+rtk discover          # scan command history for missed RTK opportunities
+rtk proxy <cmd>       # bypass RTK and run command raw (debugging only)
+```
+
+---
+
 ## Model Selection
 
 Pick the least powerful model that fits the task.

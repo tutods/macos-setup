@@ -15,15 +15,6 @@
     # Ensure config dirs exist before tool init
     mkdir -p "$HOME/.claude" "$HOME/.config/opencode" "$HOME/.codex"
 
-    # ── rtk proxy ─────────────────────────────────────────────────────────
-    # rtk init is idempotent — safe to re-run on every switch
-    if command -v rtk > /dev/null 2>&1; then
-      echo "↣ rtk init"
-      rtk init -g            || echo "  ⚠ rtk init failed"
-      rtk init -g --opencode || echo "  ⚠ rtk init --opencode failed"
-      rtk init -g --codex    || echo "  ⚠ rtk init --codex failed"
-    fi
-
     # ── pipx packages ─────────────────────────────────────────────────────
     # Check pipx list before installing to avoid re-installing on every switch.
     # Inject pkgs.pipx into PATH; activation runs before shell PATH is set up.
@@ -39,9 +30,17 @@
       pipx install graphifyy || echo "  ⚠ pipx install graphifyy failed"
     fi
     # ── graphify init ─────────────────────────────────────────────────
-    echo "↣ graphify install (all agents)"
-    graphify install                       || echo "  ⚠ graphify install (claude) failed"
-    graphify install --platform opencode   || echo "  ⚠ graphify install (opencode) failed"
-    graphify install --platform codex      || echo "  ⚠ graphify install (codex) failed"
+    # Guard by version — only re-registers hooks when graphify updates
+    graphify_stamp="$HOME/.config/ai/.graphify-version"
+    graphify_ver=$(graphify --version 2>/dev/null || echo "")
+    if [ -n "$graphify_ver" ] && { [ ! -f "$graphify_stamp" ] || [ "$(cat "$graphify_stamp")" != "$graphify_ver" ]; }; then
+      echo "↣ graphify install (all agents) — $graphify_ver"
+      graphify install                       || echo "  ⚠ graphify install (claude) failed"
+      graphify install --platform opencode   || echo "  ⚠ graphify install (opencode) failed"
+      graphify install --platform codex      || echo "  ⚠ graphify install (codex) failed"
+      printf "%s" "$graphify_ver" > "$graphify_stamp"
+    else
+      echo "↣ graphify up to date ($graphify_ver)"
+    fi
   '';
 }

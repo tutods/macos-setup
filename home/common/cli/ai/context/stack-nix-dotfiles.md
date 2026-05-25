@@ -43,12 +43,14 @@ Prefer `pkgs` (stable) over `pkgsUnstable` unless the tool needs latest version 
 home/common/cli/ai/
 ├── claude/       → Claude Code settings + MCP
 ├── opencode/     → opencode config + MCP
+├── codex/        → Codex config + MCP
+├── rtk/          → RTK proxy files (claude-RTK.md, codex-RTK.md, opencode plugin)
 ├── instructions/ → runtime AI instructions (deployed to AI tools)
 ├── skills/       → local skills + manifest.txt
-├── context/      → stack reference files (@-mention in conversations)
+├── context/      → stack reference files (deployed to ~/.claude/context/ and opencode)
 ├── prompts/      → reusable prompt templates (@-mention in conversations)
-├── init.nix      → rtk init + pipx + skills sync
-└── mcp-servers.nix → shared MCP server definitions
+├── init.nix      → pipx installs + graphify hook registration (version-guarded)
+└── mcp-servers.nix → shared MCP server definitions (Nix-authoritative for all tools)
 ```
 
 ## Role split

@@ -24,7 +24,7 @@ Always prefer these tools over slower alternatives:
 - Use `ast-grep` (`sg`) for structural code patterns and refactors — more precise than `rg` for code shapes
 - Use `fzf` for interactive selection, search, and filtering
 - Use `bat` for reading files when syntax highlighting helps
-- Use `rtk` for git operations and command execution when available
+- Use `rtk` for git operations and command execution when available — run `rtk gain` to see token savings, `rtk discover` to find missed opportunities
 - **Package Manager Enforcement**: 
   - Always check for lock files in the current or parent directory to determine the package manager.
   - If `pnpm-lock.yaml` exists $\rightarrow$ use `pnpm`.

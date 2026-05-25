@@ -15,28 +15,27 @@
     );
   combinedManifest = pkgs.writeText "ai-skills-manifest" combinedContent;
   manifestHash = builtins.hashString "sha256" combinedContent;
+
+  localSkills = ["llm-council" "content-writer" "ts-strict-audit" "conventional-commit"];
 in {
+  # Deploy local skills to both the open agent-skills standard location and Claude Code.
+  # Each entry becomes a Nix store symlink — no activation cp/ln needed.
+  home.file = lib.listToAttrs (lib.concatMap (name: [
+      {
+        name = ".agents/skills/${name}";
+        value.source = ./${name};
+      }
+      {
+        name = ".claude/skills/${name}";
+        value.source = ./${name};
+      }
+    ])
+    localSkills);
+
   home.activation.aiSkillsSync = lib.hm.dag.entryAfter ["writeBoundary"] ''
     stamp="$HOME/.config/ai/.skills-sync-hash"
     log="$HOME/.cache/ai-skills-install.log"
     mkdir -p "$HOME/.config/ai" "$HOME/.cache"
-
-    # Sync local skills manually
-    mkdir -p "$HOME/.agents/skills/llm-council"
-    cp -f "${./llm-council/SKILL.md}" "$HOME/.agents/skills/llm-council/SKILL.md"
-    mkdir -p "$HOME/.agents/skills/content-writer"
-    cp -f "${./content-writer/SKILL.md}" "$HOME/.agents/skills/content-writer/SKILL.md"
-    cp -f "${./content-writer/blocklist.md}" "$HOME/.agents/skills/content-writer/blocklist.md"
-    cp -f "${./content-writer/templates.md}" "$HOME/.agents/skills/content-writer/templates.md"
-    mkdir -p "$HOME/.agents/skills/ts-strict-audit"
-    cp -f "${./ts-strict-audit/SKILL.md}" "$HOME/.agents/skills/ts-strict-audit/SKILL.md"
-    mkdir -p "$HOME/.agents/skills/conventional-commit"
-    cp -f "${./conventional-commit/SKILL.md}" "$HOME/.agents/skills/conventional-commit/SKILL.md"
-    mkdir -p "$HOME/.claude/skills"
-    ln -sfn "$HOME/.agents/skills/llm-council" "$HOME/.claude/skills/llm-council"
-    ln -sfn "$HOME/.agents/skills/content-writer" "$HOME/.claude/skills/content-writer"
-    ln -sfn "$HOME/.agents/skills/ts-strict-audit" "$HOME/.claude/skills/ts-strict-audit"
-    ln -sfn "$HOME/.agents/skills/conventional-commit" "$HOME/.claude/skills/conventional-commit"
 
     if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "${manifestHash}" ]; then
       echo "↣ AI skills up to date"
@@ -56,8 +55,8 @@ in {
       printf "↣ Syncing AI skills (%d sources)...\n" "''${#entries[@]}" | tee -a "$log"
       ok=0; fail=0
       for entry in "''${entries[@]}"; do
-        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -a github-copilot -y\n" "$entry" | tee -a "$log"
-        if npx skills add $entry -g -a claude-code -a opencode -a github-copilot -y </dev/null >>"$log" 2>&1; then
+        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -y\n" "$entry" | tee -a "$log"
+        if npx skills add $entry -g -a claude-code -a opencode -y </dev/null >>"$log" 2>&1; then
           ok=$((ok+1))
         else
           printf "    warning: failed: %s\n" "$entry" | tee -a "$log"
