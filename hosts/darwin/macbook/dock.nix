@@ -19,7 +19,7 @@
       }
       "/Applications/Zed.app"
       "/Applications/WebStorm.app"
-      "/Users/tutods/Applications/Home Manager Apps/Visual Studio Code.app"
+      "/Users/${config.system.primaryUser}/Applications/Home Manager Apps/Visual Studio Code.app"
       "/Applications/Trae.app"
       "/Applications/Ghostty.app"
       {
@@ -29,8 +29,8 @@
       }
     ];
     persistent-others = [
-      "/Users/tutods/Downloads"
-      "/Users/tutods/Developer"
+      "/Users/${config.system.primaryUser}/Downloads"
+      "/Users/${config.system.primaryUser}/Developer"
     ];
   };
 }

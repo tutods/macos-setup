@@ -16,7 +16,7 @@
         };
       }
       "/Applications/Zed.app"
-      "/Users/daniel.a.sousa/Applications/Home Manager Apps/Visual Studio Code.app"
+      "/Users/${config.system.primaryUser}/Applications/Home Manager Apps/Visual Studio Code.app"
       "/Applications/Ghostty.app"
       "/Applications/Warp.app"
       {
@@ -26,8 +26,8 @@
       }
     ];
     persistent-others = [
-      "/Users/daniel.a.sousa/Downloads"
-      "/Users/daniel.a.sousa/Developer"
+      "/Users/${config.system.primaryUser}/Downloads"
+      "/Users/${config.system.primaryUser}/Developer"
     ];
   };
 }
