@@ -101,8 +101,8 @@
 
   node_clean = {
     body = ''
-      echo "Cleaning node_modules in ~/Developer..."
-      set targets (fd -H -I -t d "^node_modules\$" ~/Developer)
+      echo "Cleaning node_modules in $PROJECT_DIR..."
+      set targets (fd -H -I -t d "^node_modules\$" $PROJECT_DIR)
       if test (count $targets) -eq 0
         echo "Nothing to clean."
         return 0
@@ -110,11 +110,11 @@
       printf "%s\n" $targets
       read --local --prompt-str "Delete (count $targets) dirs? [y/N] " confirm
       if string match -qi 'y' -- "$confirm"
-        fd -H -I -t d "^node_modules\$" ~/Developer -x rm -rf
+        fd -H -I -t d "^node_modules\$" $PROJECT_DIR -x rm -rf
         echo "Done."
       end
     '';
-    description = "Recursively remove node_modules in ~/Developer (with confirmation)";
+    description = "Recursively remove node_modules in $PROJECT_DIR (with confirmation)";
   };
 
   nix_vacuum = {
@@ -132,12 +132,12 @@
 
   fzf_jump = {
     body = ''
-      set dest (fd -d 2 -t d . ~/Developer | fzf --prompt="Jump to project > ")
+      set dest (fd -d 2 -t d . $PROJECT_DIR | fzf --prompt="Jump to project > ")
       if test -n "$dest"
         cd $dest
       end
     '';
-    description = "Fuzzy jump to a project directory in ~/Developer";
+    description = "Fuzzy jump to a project directory in $PROJECT_DIR";
   };
 
   doppler_safe = {

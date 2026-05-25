@@ -25,6 +25,23 @@
   "buffer_font_family": "JetBrains Mono",
   "buffer_font_size": 14.0,
   "buffer_line_height": "comfortable",
+  "soft_wrap": "editor_width",
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware"
+  },
+
+  // Git
+  "git": {
+    "inline_blame": {
+      "enabled": true
+    }
+  },
+
+  // Editor predictions
+  "edit_predictions": {
+    "provider": "copilot"
+  },
 
   // Workspace & Files
   "autosave": "on_focus_change",
@@ -97,6 +114,12 @@
   },
 
   // Extension/Agent
+  "agent": {
+    "enabled": false,
+    "dock": "right",
+    "button": true,
+    "sidebar_side": "right"
+  },
   "agent_servers": {
     "claude-acp": {
       "type": "registry"

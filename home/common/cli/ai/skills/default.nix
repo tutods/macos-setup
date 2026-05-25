@@ -32,7 +32,7 @@ in {
     ])
     localSkills);
 
-  home.activation.aiSkillsSync = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.aiSkillsSync = lib.hm.dag.entryAfter ["writeBoundary" "aiInit"] ''
     stamp="$HOME/.config/ai/.skills-sync-hash"
     log="$HOME/.cache/ai-skills-install.log"
     mkdir -p "$HOME/.config/ai" "$HOME/.cache"
@@ -55,8 +55,8 @@ in {
       printf "↣ Syncing AI skills (%d sources)...\n" "''${#entries[@]}" | tee -a "$log"
       ok=0; fail=0
       for entry in "''${entries[@]}"; do
-        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -y\n" "$entry" | tee -a "$log"
-        if npx skills add $entry -g -a claude-code -a opencode -y </dev/null >>"$log" 2>&1; then
+        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -a codex -y\n" "$entry" | tee -a "$log"
+        if npx skills add $entry -g -a claude-code -a opencode -a codex -y </dev/null >>"$log" 2>&1; then
           ok=$((ok+1))
         else
           printf "    warning: failed: %s\n" "$entry" | tee -a "$log"

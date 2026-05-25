@@ -6,14 +6,17 @@
 }: let
   servers = import ../mcp-servers.nix {homeDir = config.home.homeDirectory;};
 
-  codexServers = {
-    filesystem = servers.filesystem;
-    github = servers.github;
-    playwright = servers.playwright;
-  };
+  # Nix-authoritative: base servers + role-specific extras
+  codexServers =
+    {
+      filesystem = servers.filesystem;
+      github = servers.github;
+      playwright = servers.playwright;
+    }
+    // config.home.ai.extraMcpServers;
 in {
   # codex: ~/.codex/config.toml  ([mcp_servers.*] — Nix authoritative)
-  home.activation.codexMcp = lib.hm.dag.entryAfter ["writeBoundary" "codexConfig"] ''
+  home.activation.codexMcp = lib.hm.dag.entryAfter ["writeBoundary" "codexConfig" "aiInit"] ''
         target="$HOME/.codex/config.toml"
         [ -f "$target" ] || exit 0
 

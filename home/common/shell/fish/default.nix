@@ -13,6 +13,9 @@
     functions = import ./functions.nix;
 
     shellInit = ''
+      # Project directory (used in fish functions like fzf_jump, node_clean)
+      set -gx PROJECT_DIR "${config.home.ai.projectDir}"
+
       if test -f ~/.config/fish/secrets.fish
         source ~/.config/fish/secrets.fish
       end

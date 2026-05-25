@@ -4,7 +4,7 @@
   dvunused = "docker volume ls -q -f 'dangling=true'";
 
   # Navigation
-  work = "cd ~/Developer";
+  work = "cd $PROJECT_DIR";
   home = "cd ~";
   ".." = "cd ..";
   "..." = "cd ../..";

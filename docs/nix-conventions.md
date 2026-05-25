@@ -26,10 +26,10 @@ Rules and conventions for working in this Nix flake repo.
 
 ## Module Authoring
 
-- Prefer `lib.mkIf` over `if/else` at module top level
-- Use `lib.mkDefault` for values that host configs should be able to override
 - Keep `options.nix` and `default.nix` separate — options declarations in one file, logic in the other
 - Never hardcode usernames — use `config.home.username` or pass via `mkUser`
+- Use explicit imports over `lib.mkIf` for clarity (this codebase prefers direct imports)
+- Use `config.home.username` instead of hardcoding paths
 
 ## Deploy Commands
 
@@ -46,3 +46,9 @@ nix-collect-garbage -d    # garbage collect old generations
 - `nix-env -i` — always use `nix shell` for temporary tools
 - Hardcode absolute paths like `/home/user/` — use Home Manager variables
 - Put secrets or credentials in `.nix` files — use `doppler` or `sops-nix`
+
+## Path Conventions
+
+- `config.home.ai.projectDir` — Primary development directory (default: `$HOME/Developer`)
+- Fish functions use `$PROJECT_DIR` environment variable set by Nix
+- Use `config.home.homeDirectory` instead of `/Users/$username` where possible

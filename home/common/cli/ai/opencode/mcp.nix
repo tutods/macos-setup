@@ -22,7 +22,7 @@
     }
     // lib.mapAttrs (_: withOcAttrs) config.home.ai.extraMcpServers;
 in {
-  home.activation.opencodeMcp = lib.hm.dag.entryAfter ["writeBoundary" "opencodeConfig"] ''
+  home.activation.opencodeMcp = lib.hm.dag.entryAfter ["writeBoundary" "opencodeConfig" "aiInit"] ''
     target="$HOME/.config/opencode/opencode.json"
     nix_servers='${builtins.toJSON allServers}'
 

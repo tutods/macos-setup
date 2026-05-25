@@ -15,7 +15,7 @@
     }
     // config.home.ai.extraMcpServers;
 in {
-  home.activation.claudeMcp = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.claudeMcp = lib.hm.dag.entryAfter ["writeBoundary" "aiInit"] ''
     target="$HOME/.claude/claude_desktop_config.json"
     nix_servers='${builtins.toJSON allServers}'
 
