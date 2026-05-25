@@ -13,6 +13,7 @@
     "auto_reveal_entries": false
   },
   "git_panel": {
+    "dock": "left",
     "sort_by_path": true,
     "tree_view": true
   },
@@ -61,13 +62,36 @@
   },
   "languages": {
     "TypeScript": {
-      "formatter": "language_server"
+      "formatter": { "language_server": { "name": "biome" } },
+      "code_actions_on_format": {
+        "source.fixAll.biome": true,
+        "source.organizeImports.biome": true
+      }
     },
     "TSX": {
-      "formatter": "language_server"
+      "language_servers": ["emmet-language-server", "..."],
+      "formatter": { "language_server": { "name": "biome" } },
+      "code_actions_on_format": {
+        "source.fixAll.biome": true,
+        "source.organizeImports.biome": true
+      }
     },
     "JavaScript": {
-      "formatter": "language_server"
+      "language_servers": ["emmet-language-server", "..."],
+      "formatter": { "language_server": { "name": "biome" } },
+      "code_actions_on_format": {
+        "source.fixAll.biome": true,
+        "source.organizeImports.biome": true
+      }
+    },
+    "JSON": {
+      "formatter": { "language_server": { "name": "biome" } }
+    },
+    "JSONC": {
+      "formatter": { "language_server": { "name": "biome" } }
+    },
+    "CSS": {
+      "formatter": { "language_server": { "name": "biome" } }
     },
     "Nix": {
       "formatter": {
@@ -115,10 +139,9 @@
 
   // Extension/Agent
   "agent": {
-    "enabled": false,
+    "enabled": true,
     "dock": "right",
-    "button": true,
-    "sidebar_side": "right"
+    "button": true
   },
   "agent_servers": {
     "claude-acp": {
