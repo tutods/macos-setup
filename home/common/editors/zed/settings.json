@@ -43,10 +43,14 @@
   "ui_font_size": 15,
   "buffer_font_family": "JetBrains Mono",
   "buffer_font_size": 14.0,
+  "buffer_font_features": { "calt": true },
   "buffer_line_height": "comfortable",
   "tab_size": 2,
   "relative_line_numbers": "disabled",
   "soft_wrap": "editor_width",
+  "show_whitespaces": "selection",
+  "unnecessary_code_fade": 0.5,
+  "restore_on_startup": "last_session",
   "wrap_guides": [80, 120],
   "indent_guides": {
     "enabled": true,
@@ -102,9 +106,15 @@
 
   // ─── Git ─────────────────────────────────────────────────────────────────
   "git": {
+    "git_gutter": "tracked_files",
     "inline_blame": {
       "enabled": true
     }
+  },
+
+  // ─── Diagnostics ─────────────────────────────────────────────────────────
+  "diagnostics": {
+    "include_warnings": true
   },
 
   // ─── Workspace & Files ───────────────────────────────────────────────────
@@ -179,6 +189,9 @@
     "CSS": {
       "language_servers": ["emmet-language-server", "..."],
       "formatter": { "language_server": { "name": "biome" } }
+    },
+    "MDX": {
+      "language_servers": ["emmet-language-server", "..."]
     },
     "Nix": {
       "formatter": {
