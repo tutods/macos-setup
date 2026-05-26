@@ -245,6 +245,14 @@
         "require_config_file": false
       }
     },
+    "emmet-language-server": {
+      "initialization_options": {
+        "syntaxProfiles": {
+          "javascriptreact": "jsx",
+          "typescriptreact": "jsx"
+        }
+      }
+    },
     "tailwindcss-language-server": {
       "initialization_options": {
         "userLanguages": {
