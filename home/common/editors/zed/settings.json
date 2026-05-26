@@ -63,6 +63,7 @@
     "enabled": true,
     "coloring": "indent_aware"
   },
+  "use_smartcase_search": true,
   "use_autoclose": true,
   "use_auto_surround": true,
   "linked_edits": true,
@@ -115,7 +116,8 @@
   "git": {
     "git_gutter": "tracked_files",
     "inline_blame": {
-      "enabled": true
+      "enabled": true,
+      "delay_ms": 600
     }
   },
 
@@ -236,6 +238,11 @@
           "includeInlayFunctionLikeReturnTypeHints": true,
           "includeInlayEnumMemberValueHints": true
         }
+      }
+    },
+    "biome": {
+      "settings": {
+        "require_config_file": false
       }
     },
     "tailwindcss-language-server": {
