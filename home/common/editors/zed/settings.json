@@ -1,5 +1,8 @@
 {
-  // UI & View
+  // ─── Window ──────────────────────────────────────────────────────────────
+  "use_system_window_tabs": true,
+
+  // ─── Theme & Appearance ──────────────────────────────────────────────────
   "theme": {
     "mode": "dark",
     "light": "GitHub Light",
@@ -7,10 +10,15 @@
   },
   "icon_theme": "Warm Charmed Icons",
   "diff_view_style": "split",
+
+  // ─── Panels ──────────────────────────────────────────────────────────────
   "project_panel": {
     "dock": "left",
     "auto_fold_dirs": true,
     "auto_reveal_entries": false
+  },
+  "outline_panel": {
+    "dock": "left"
   },
   "git_panel": {
     "dock": "left",
@@ -18,33 +26,88 @@
     "tree_view": true
   },
 
-  // Editor
+  // ─── Tabs ────────────────────────────────────────────────────────────────
+  "preview_tabs": {
+    "enabled": true,
+    "enable_preview_from_file_finder": true,
+    "enable_preview_from_code_navigation": true
+  },
+  "tab_bar": {
+    "show": true,
+    "show_nav_history_buttons": false
+  },
+
+  // ─── Editor ──────────────────────────────────────────────────────────────
   "base_keymap": "VSCode",
-  "relative_line_numbers": "disabled",
   "ui_font_family": ".SystemUIFont",
   "ui_font_size": 15,
   "buffer_font_family": "JetBrains Mono",
   "buffer_font_size": 14.0,
   "buffer_line_height": "comfortable",
+  "tab_size": 2,
+  "relative_line_numbers": "disabled",
   "soft_wrap": "editor_width",
+  "wrap_guides": [80, 120],
   "indent_guides": {
     "enabled": true,
     "coloring": "indent_aware"
   },
+  "use_autoclose": true,
+  "use_auto_surround": true,
+  "linked_edits": true,
+  "seed_search_query_from_cursor": "selection",
+  "toolbar": {
+    "breadcrumbs": true,
+    "quick_actions": true
+  },
 
-  // Git
+  // ─── Gutter ──────────────────────────────────────────────────────────────
+  "gutter": {
+    "line_numbers": true,
+    "code_actions": true,
+    "runnables": true,
+    "breakpoints": true,
+    "folds": true
+  },
+
+  // ─── Scrollbar ───────────────────────────────────────────────────────────
+  "scrollbar": {
+    "show": "auto",
+    "cursors": true,
+    "git_diff": true,
+    "search_results": true,
+    "selected_symbol": true,
+    "diagnostics": "all"
+  },
+
+  // ─── Completions & Intelligence ──────────────────────────────────────────
+  "show_completions_on_input": true,
+  "show_completion_documentation": true,
+  "auto_signature_help": true,
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true
+  },
+
+  // ─── Edit Predictions (Copilot) ──────────────────────────────────────────
+  "edit_predictions": {
+    "provider": "copilot",
+    "allow_data_collection": "no",
+    "copilot": {
+      "enable_next_edit_suggestions": true
+    }
+  },
+
+  // ─── Git ─────────────────────────────────────────────────────────────────
   "git": {
     "inline_blame": {
       "enabled": true
     }
   },
 
-  // Editor predictions
-  "edit_predictions": {
-    "provider": "copilot"
-  },
-
-  // Workspace & Files
+  // ─── Workspace & Files ───────────────────────────────────────────────────
   "autosave": "on_focus_change",
   "format_on_save": "on",
   "file_scan_exclusions": [
@@ -53,13 +116,30 @@
     "**/.next",
     "**/dist",
     "**/out",
-    "**/build"
+    "**/build",
+    "**/.turbo",
+    "**/.vercel",
+    "**/.cache",
+    "**/.parcel-cache",
+    "**/coverage",
+    "**/.nyc_output",
+    "**/storybook-static"
   ],
-
-  // Languages & LSP
-  "inlay_hints": {
-    "enabled": true
+  "file_nesting": {
+    "enabled": true,
+    "patterns": {
+      "*.ts": ["$(capture).js", "$(capture).d.ts", "$(capture).test.ts", "$(capture).spec.ts"],
+      "*.tsx": ["$(capture).test.tsx", "$(capture).spec.tsx", "$(capture).stories.tsx", "$(capture).stories.ts"],
+      "package.json": ["package-lock.json", "pnpm-lock.yaml", "yarn.lock", ".npmrc", ".nvmrc", ".node-version"],
+      "tsconfig.json": ["tsconfig.*.json"],
+      ".env": [".env.*", ".env.local", ".env.*.local"],
+      "next.config.*": ["next-env.d.ts"],
+      "vite.config.*": ["vitest.config.*"],
+      "tailwind.config.*": ["postcss.config.*"]
+    }
   },
+
+  // ─── Languages ───────────────────────────────────────────────────────────
   "languages": {
     "TypeScript": {
       "formatter": { "language_server": { "name": "biome" } },
@@ -84,6 +164,12 @@
         "source.organizeImports.biome": true
       }
     },
+    "HTML": {
+      "language_servers": ["emmet-language-server", "..."]
+    },
+    "SCSS": {
+      "language_servers": ["emmet-language-server", "..."]
+    },
     "JSON": {
       "formatter": { "language_server": { "name": "biome" } }
     },
@@ -91,6 +177,7 @@
       "formatter": { "language_server": { "name": "biome" } }
     },
     "CSS": {
+      "language_servers": ["emmet-language-server", "..."],
       "formatter": { "language_server": { "name": "biome" } }
     },
     "Nix": {
@@ -101,7 +188,27 @@
       }
     }
   },
+
+  // ─── LSP ─────────────────────────────────────────────────────────────────
   "lsp": {
+    "typescript-language-server": {
+      "initialization_options": {
+        "preferences": {
+          "includeCompletionsForModuleExports": true,
+          "includeCompletionsWithSnippetText": true,
+          "includeAutomaticOptionalChainCompletions": true,
+          "importModuleSpecifierPreference": "shortest",
+          "includeInlayParameterNameHints": "all",
+          "includeInlayParameterNameHintsWhenArgumentMatchesName": true,
+          "includeInlayFunctionParameterTypeHints": true,
+          "includeInlayVariableTypeHints": true,
+          "includeInlayVariableTypeHintsWhenTypeMatchesName": false,
+          "includeInlayPropertyDeclarationTypeHints": true,
+          "includeInlayFunctionLikeReturnTypeHints": true,
+          "includeInlayEnumMemberValueHints": true
+        }
+      }
+    },
     "tailwindcss-language-server": {
       "initialization_options": {
         "userLanguages": {
@@ -124,7 +231,7 @@
     }
   },
 
-  // Terminal
+  // ─── Terminal ────────────────────────────────────────────────────────────
   "terminal": {
     "font_family": "JetBrainsMonoNL Nerd Font Mono",
     "font_size": 12.0,
@@ -137,13 +244,33 @@
     }
   },
 
-  // Extension/Agent
+  // ─── Agent & AI ──────────────────────────────────────────────────────────
+  "language_models": {
+    "ollama": {
+      "api_url": "https://ollama.com"
+    },
+    "opencode": {
+      "show_zen_models": false
+    }
+  },
   "agent": {
+    "default_model": {
+      "provider": "ollama",
+      "model": "deepseek-v4-pro",
+      "enable_thinking": true
+    },
     "enabled": true,
     "dock": "right",
-    "button": true
+    "button": true,
+    "sidebar_side": "right"
   },
   "agent_servers": {
+    "codex-acp": {
+      "type": "registry"
+    },
+    "glm-acp-agent": {
+      "type": "registry"
+    },
     "claude-acp": {
       "type": "registry"
     }
