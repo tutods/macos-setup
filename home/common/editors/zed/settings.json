@@ -1,6 +1,10 @@
 {
   // ─── Window ──────────────────────────────────────────────────────────────
   "use_system_window_tabs": true,
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
 
   // ─── Theme & Appearance ──────────────────────────────────────────────────
   "theme": {
@@ -51,6 +55,9 @@
   "show_whitespaces": "selection",
   "unnecessary_code_fade": 0.5,
   "restore_on_startup": "last_session",
+  "ensure_final_newline_on_save": true,
+  "remove_trailing_whitespace_on_save": true,
+  "extend_comment_on_newline": true,
   "wrap_guides": [80, 120],
   "indent_guides": {
     "enabled": true,
@@ -189,6 +196,15 @@
     "CSS": {
       "language_servers": ["emmet-language-server", "..."],
       "formatter": { "language_server": { "name": "biome" } }
+    },
+    "GraphQL": {
+      "formatter": { "language_server": { "name": "biome" } },
+      "code_actions_on_format": {
+        "source.fixAll.biome": true
+      }
+    },
+    "Prisma": {
+      "formatter": { "language_server": { "name": "prisma-language-server" } }
     },
     "MDX": {
       "language_servers": ["emmet-language-server", "..."]
