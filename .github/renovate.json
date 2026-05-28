@@ -18,6 +18,7 @@
   "dependencyDashboardAutoclose": true,
   "stopUpdatingLabel": "renovate:stop",
   "minimumReleaseAge": "3 days",
+  "assignees": ["renovate[bot]"],
   "osvVulnerabilityAlerts": true,
   "fetchChangeLogs": "pr",
   "rollbackPrs": true,
