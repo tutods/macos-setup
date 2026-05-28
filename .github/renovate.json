@@ -4,7 +4,8 @@
     "config:recommended",
     ":dependencyDashboard",
     ":semanticCommits",
-    ":renovatePrefix"
+    ":renovatePrefix",
+    "security:openssf-scorecard"
   ],
   "timezone": "Europe/Lisbon",
   "schedule": [
@@ -14,6 +15,14 @@
   ],
   "labels": ["🔄 dependencies", "🤖 automated"],
   "assignAutomerge": false,
+  "dependencyDashboardAutoclose": true,
+  "stopUpdatingLabel": "renovate:stop",
+  "minimumReleaseAge": "3 days",
+  "osvVulnerabilityAlerts": true,
+  "fetchChangeLogs": "pr",
+  "rollbackPrs": true,
+  "configMigration": true,
+  "separateMultipleMajor": true,
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 6am on Monday"]
