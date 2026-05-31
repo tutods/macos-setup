@@ -5,7 +5,7 @@
 }: let
   sharedMasApps = import ../../../modules/darwin/homebrew/mas.nix;
 in {
-  networking.localHostName = "daniel.a.sousa";
+  networking.localHostName = "daniel-a-sousa";
 
   imports = [
     ./dock.nix
