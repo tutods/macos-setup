@@ -26,6 +26,9 @@
       "fd *" = "allow";
       "rg *" = "allow";
       "grep *" = "allow";
+      "find *" = "allow";
+      "locate *" = "allow";
+      "whereis *" = "allow";
       # Data tools
       "jq *" = "allow";
       "yq *" = "allow";
@@ -39,9 +42,29 @@
       "uname*" = "allow";
       "hostname*" = "allow";
       "whoami*" = "allow";
+      "uptime*" = "allow";
+      "vm_stat*" = "allow";
       # CLI tools
       "fzf*" = "allow";
       "delta*" = "allow";
+      "skim*" = "allow";
+      "bat*" = "allow";
+      "cat*" = "allow";
+      "head*" = "allow";
+      "tail*" = "allow";
+      "wc*" = "allow";
+      "sort*" = "allow";
+      "uniq*" = "allow";
+      "awk*" = "allow";
+      "sed*" = "allow";
+      "cut*" = "allow";
+      "paste*" = "allow";
+      "tr*" = "allow";
+      "tee*" = "allow";
+      "base64*" = "allow";
+      "md5*" = "allow";
+      "shasum*" = "allow";
+      "xxd*" = "allow";
       "ttok*" = "allow";
       # RTK (token proxy)
       "rtk gain*" = "allow";
@@ -57,6 +80,27 @@
       # Safe npx
       "npx skills ls*" = "allow";
       "npx ccusage*" = "allow";
+      # GitHub CLI (safe operations only)
+      "gh issue list*" = "allow";
+      "gh issue view*" = "allow";
+      "gh issue create*" = "allow";
+      "gh pr list*" = "allow";
+      "gh pr view*" = "allow";
+      "gh pr checkout*" = "allow";
+      "gh pr diff*" = "allow";
+      "gh pr create*" = "allow";
+      "gh repo list*" = "allow";
+      "gh repo view*" = "allow";
+      "gh repo clone*" = "allow";
+      "gh release list*" = "allow";
+      "gh release view*" = "allow";
+      "gh release download*" = "allow";
+      "gh gist list*" = "allow";
+      "gh gist view*" = "allow";
+      "gh gist create*" = "allow";
+      "gh api*" = "allow";
+      "gh search*" = "allow";
+      "gh extension*" = "allow";
       # Package manager queries (read-only)
       "npm install*" = "allow";
       "npm i" = "allow";
