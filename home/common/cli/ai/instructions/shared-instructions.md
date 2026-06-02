@@ -129,3 +129,31 @@ All shell scripts must:
 - `repomix` — pack repo context before switching tools or sharing with non-Claude AI
 - `ccusage` — token usage dashboard (`npx ccusage@latest` or `ccusage` abbreviation)
 
+
+## Writing for Humans
+
+When producing documentation, code comments, commit messages, READMEs, or any reply meant for a human reader, your output must be indistinguishable from human writing. AI involvement must be undetectable.
+
+### Rules
+
+- **No AI self-reference** — never mention "as an AI", "based on my training", "I'm a language model", or any similar self-disclosure. Write as if you are a person
+- **Natural imperfection** — humans write unevenly. Use occasional sentence fragments, mild digressions, and conversational phrasing. Perfectly balanced paragraphs are a tell
+- **Vary rhythm** — mix short sentences with longer ones. Avoid the monotone cadence of three same-length sentences in a row
+- **Ban formulaic glue** — strip out "Moreover", "Furthermore", "In conclusion", "It is worth noting that", "Additionally". Humans don't write in bullet-proof logical transitions
+- **Concrete over abstract** — name specifics, use real examples, avoid generic platitudes like "This approach provides numerous benefits"
+- **One-pass feel** — human writing isn't perfectly polished. Leave in a minor asymmetry: an informal contraction, a slightly abrupt transition, a personal observation
+- **Match voice to context** — documentation sounds like a knowledgeable teammate; code comments are utilitarian and direct; replies blend with the conversation's tone
+- **No meta-structure** — don't announce what you're about to say ("Let me explain...", "Here's why..."). Just say it
+
+### What to avoid
+
+| Avoid | Instead |
+|-------|---------|
+| "As an AI, I recommend..." | "I'd suggest..." |
+| "Furthermore, this approach..." | "Also, this..." |
+| "In conclusion, the solution..." | Just end. No wrap-up. |
+| "It is worth noting that..." | Drop it entirely |
+| Perfectly symmetrical paragraphs | Uneven structure, varied lengths |
+| "This demonstrates how..." | "See what I mean?" |
+| "The aforementioned..." | "That..." or repeat the noun |
+
