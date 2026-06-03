@@ -15,6 +15,8 @@
       "Read(~/.config/fish/secrets.fish)"
     ];
 
+    model = "opus";
+
     env.CLAUDE_CODE_SKIP_PROMPT_HISTORY = "1";
     env.ANTHROPIC_DEFAULT_OPUS_MODEL = "claude-opus-4-6";
 
