@@ -162,7 +162,6 @@
   // ─── Languages ───────────────────────────────────────────────────────────
   "languages": {
     "TypeScript": {
-      "language_servers": ["emmet-language-server", "..."],
       "formatter": { "language_server": { "name": "biome" } },
       "code_actions_on_format": {
         "source.fixAll.biome": true,
@@ -170,7 +169,7 @@
       }
     },
     "TSX": {
-      "language_servers": ["emmet-language-server", "..."],
+      "language_servers": ["emmet-language-server", "!typescript-language-server", "..."],
       "formatter": { "language_server": { "name": "biome" } },
       "code_actions_on_format": {
         "source.fixAll.biome": true,
@@ -178,7 +177,7 @@
       }
     },
     "JavaScript": {
-      "language_servers": ["emmet-language-server", "..."],
+      "language_servers": ["emmet-language-server", "!typescript-language-server", "..."],
       "formatter": { "language_server": { "name": "biome" } },
       "code_actions_on_format": {
         "source.fixAll.biome": true,
@@ -186,7 +185,7 @@
       }
     },
     "JSX": {
-      "language_servers": ["emmet-language-server", "..."],
+      "language_servers": ["emmet-language-server", "!typescript-language-server", "..."],
       "formatter": { "language_server": { "name": "biome" } },
       "code_actions_on_format": {
         "source.fixAll.biome": true,
