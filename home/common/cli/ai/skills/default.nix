@@ -16,7 +16,7 @@
   combinedManifest = pkgs.writeText "ai-skills-manifest" combinedContent;
   manifestHash = builtins.hashString "sha256" combinedContent;
 
-  localSkills = ["llm-council" "content-writer" "ts-strict-audit" "conventional-commit"];
+  localSkills = ["llm-council" "content-writer" "ts-strict-audit" "conventional-commit" "open-pr"];
 in {
   # Deploy local skills to both the open agent-skills standard location and Claude Code.
   # Each entry becomes a Nix store symlink — force=true replaces existing directories.

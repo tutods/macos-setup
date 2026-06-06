@@ -45,47 +45,49 @@ Always prefer these tools over slower alternatives:
 - **Minimal diff** — prefer targeted edits over file rewrites; changing 3 lines must not rewrite 300
 - Use type-safe patterns — avoid `any`, prefer branded types and Zod schemas for runtime validation
 
- ## Git & Commits
+  ## Git & Commits
 
- Follow [Conventional Commits](https://www.conventionalcommits.org/) strictly:
+  When the user asks to commit anything, always use the **`/open-pr` skill**. This handles the full flow: gather staged changes, generate a conventional commit message, commit, push, and optionally open a PR. Never just run `git commit` directly — the skill asks for confirmation before committing.
 
- ```
- <type>[optional scope]: <description>
+  Follow [Conventional Commits](https://www.conventionalcommits.org/) strictly:
 
- [optional body]
+  ```
+  <type>[optional scope]: <description>
 
- [optional footer]
- ```
+  [optional body]
 
- **Commit types:**
+  [optional footer]
+  ```
 
- | Type | When |
- |------|------|
- | `feat` | new feature |
- | `fix` | bug fix |
- | `docs` | documentation only |
- | `refactor` | code change, no feature/fix |
- | `perf` | performance improvement |
- | `test` | adding/fixing tests |
- | `chore` | maintenance, deps, tooling |
- | `ci` | CI/CD changes |
- | `build` | build system changes |
- | `revert` | reverting a commit |
- | `style` | formatting, whitespace (no logic change) |
+  **Commit types:**
 
- **Rules:**
- - Imperative mood, present tense: `feat: add X`, not `added X` or `adds X`
- - Prefer small, focused commits over large batches
- - Never commit secrets, `.env` files, or credentials
- - Breaking changes: add `!` after type (`feat!: drop support for X`) and `BREAKING CHANGE:` footer
+  | Type | When |
+  |------|------|
+  | `feat` | new feature |
+  | `fix` | bug fix |
+  | `docs` | documentation only |
+  | `refactor` | code change, no feature/fix |
+  | `perf` | performance improvement |
+  | `test` | adding/fixing tests |
+  | `chore` | maintenance, deps, tooling |
+  | `ci` | CI/CD changes |
+  | `build` | build system changes |
+  | `revert` | reverting a commit |
+  | `style` | formatting, whitespace (no logic change) |
 
- **Branch names** — same type prefixes as commits:
+  **Rules:**
+  - Imperative mood, present tense: `feat: add X`, not `added X` or `adds X`
+  - Prefer small, focused commits over large batches
+  - Never commit secrets, `.env` files, or credentials
+  - Breaking changes: add `!` after type (`feat!: drop support for X`) and `BREAKING CHANGE:` footer
 
- ```
- <type>/<short-kebab-description>
- ```
+  **Branch names** — same type prefixes as commits:
 
- Examples: `feat/user-auth`, `fix/token-expiry`, `docs/api-reference`, `refactor/auth-middleware`, `chore/bump-deps`
+  ```
+  <type>/<short-kebab-description>
+  ```
+
+  Examples: `feat/user-auth`, `fix/token-expiry`, `docs/api-reference`, `refactor/auth-middleware`, `chore/bump-deps`
  
  
  ## Verification & Completion
