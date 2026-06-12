@@ -1,6 +1,5 @@
 [
-  "arc"
   "zen"
-  #"firefox@developer-edition"
+  "firefox@developer-edition"
   "google-chrome"
 ]

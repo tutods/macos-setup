@@ -132,7 +132,7 @@ These are declared in the repo but **upgraded to latest versions** each time you
 
 | Layer | What | Why mutable |
 |-------|------|-------------|
-| Homebrew casks | GUI apps (Arc, Zen, Slack, etc.) | `homebrew.onActivation.upgrade = true` upgrades all casks on every deploy |
+| Homebrew casks | GUI apps (Zen, Firefox Developer Edition, Slack, etc.) | `homebrew.onActivation.upgrade = true` upgrades all casks on every deploy |
 | Homebrew brews | CLI tools installed via brew (`mas`, `rtk`) | Same as above |
 | MAS apps | Mac App Store apps installed by `mas` | `mas install` runs in activation, version not pinned |
 | VSCode marketplace extensions | `extensionsFromVscodeMarketplace` entries | Pinned by `version` + `sha256` in the repo, but must be manually updated when upstream releases new versions |

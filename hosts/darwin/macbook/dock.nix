@@ -8,7 +8,7 @@
       }
       "/Applications/Zen.app"
       "/Applications/Safari.app"
-      "/Applications/Arc.app"
+      "/Applications/Firefox Developer Edition.app"
       "/Applications/Google Chrome.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Calendar.app"
