@@ -6,7 +6,7 @@
           small = false;
         };
       }
-      "/Applications/Zen.app"
+      "/Applications/Firefox Developer Edition.app"
       "/Applications/Slack.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Calendar.app"
