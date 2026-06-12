@@ -6,9 +6,9 @@
           small = false;
         };
       }
+      "/Applications/Firefox Developer Edition.app"
       "/Applications/Zen.app"
       "/Applications/Safari.app"
-      "/Applications/Firefox Developer Edition.app"
       "/Applications/Google Chrome.app"
       "/System/Applications/Mail.app"
       "/System/Applications/Calendar.app"
