@@ -16,6 +16,7 @@
         };
       }
       "/Applications/Zed.app"
+      "/Applications/WebStorm.app"
       "/Users/${config.system.primaryUser}/Applications/Home Manager Apps/Visual Studio Code.app"
       "/Applications/Ghostty.app"
       "/Applications/Warp.app"

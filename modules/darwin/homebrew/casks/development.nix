@@ -4,4 +4,7 @@
   "zed"
   "ghostty"
   "copilot-cli"
+
+  # JetBrains (Homebrew instead of nixpkgs — avoids Nix wrapper issues)
+  "webstorm"
 ]

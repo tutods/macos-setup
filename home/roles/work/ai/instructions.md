@@ -23,7 +23,7 @@
 
 ### Company tools
 - `acli` — Atlassian CLI (Jira, Confluence): `acli issue list`, `acli project list`
-- `openvpn` / `viscosity` — VPN required for internal services
+- `openvpn` — VPN required for internal services
 - `gcloud` — GCP operations
 - No personal doppler secrets on work machine — keep work and personal strictly separate
 

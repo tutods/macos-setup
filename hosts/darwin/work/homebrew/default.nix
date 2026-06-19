@@ -12,7 +12,6 @@
       "slack"
       "warp"
       "openvpn-connect"
-      "viscosity"
     ];
   };
 }

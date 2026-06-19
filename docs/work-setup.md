@@ -53,7 +53,7 @@ gcloud config list                        # show current config
 | Tool | Purpose |
 |------|---------|
 | `acli` | Atlassian CLI — `acli issue list`, `acli project list` |
-| `openvpn` / `viscosity` | VPN required for internal services |
+| `openvpn` | VPN required for internal services |
 | `gcloud` | GCP operations |
 
 VPN must be connected before accessing internal services.
