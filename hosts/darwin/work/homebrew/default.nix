@@ -8,6 +8,7 @@
       "podman"
     ];
     casks = [
+      "firefox"
       "gcloud-cli"
       "slack"
       "warp"
