@@ -4,6 +4,8 @@
   ...
 }: {
   imports = [
+    # General home options
+    ./options.nix
     # Editors
     ./editors/vscode
     ./editors/zed

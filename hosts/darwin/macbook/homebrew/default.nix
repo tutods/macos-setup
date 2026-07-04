@@ -1,11 +1,9 @@
-{...}: let
-  developmentCasks = import ./casks/development.nix;
-  browserCasks = import ./casks/browsers.nix;
-  communicationCasks = import ./casks/communication.nix;
-  utilsCasks = import ./casks/utils.nix;
-  fontCasks = import ./casks/fonts.nix;
-in {
-  homebrew = {
-    casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks ++ fontCasks;
-  };
+{...}: {
+  imports = [
+    ./casks/browsers.nix
+    ./casks/communication.nix
+    ./casks/development.nix
+    ./casks/fonts.nix
+    ./casks/utils.nix
+  ];
 }

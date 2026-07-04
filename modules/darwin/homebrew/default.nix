@@ -1,10 +1,11 @@
-{...}: let
-  developmentCasks = import ./casks/development.nix;
-  browserCasks = import ./casks/browsers.nix;
-  communicationCasks = import ./casks/communication.nix;
-  utilsCasks = import ./casks/utils.nix;
-  fontsCasks = import ./casks/fonts.nix;
-in {
+{...}: {
+  imports = [
+    ./casks/browsers.nix
+    ./casks/communication.nix
+    ./casks/development.nix
+    ./casks/utils.nix
+  ];
+
   homebrew = {
     enable = true;
 
@@ -17,7 +18,5 @@ in {
     brews = [
       "mas"
     ];
-
-    casks = developmentCasks ++ browserCasks ++ communicationCasks ++ utilsCasks ++ fontsCasks;
   };
 }

@@ -1,24 +1,26 @@
-[
-  # Disk tools
-  "applepi-baker"
-  "mounty"
+{...}: {
+  homebrew.casks = [
+    # Disk tools
+    "applepi-baker"
+    "mounty"
 
-  # Remote control
-  "teamviewer"
-  "anydesk"
+    # Remote control
+    "teamviewer"
+    "anydesk"
 
-  # Notes
-  "notion"
+    # Notes
+    "notion"
 
-  # Others
-  "tailscale-app"
-  "imageoptim"
-  "airbuddy"
-  "marta"
-  "keka"
-  "balenaetcher"
-  "surfshark"
-  "1password"
-  "jordanbaird-ice"
-  "iina"
-]
+    # Others
+    "tailscale-app"
+    "imageoptim"
+    "airbuddy"
+    "marta"
+    "keka"
+    "balenaetcher"
+    "surfshark"
+    "1password"
+    "jordanbaird-ice"
+    "iina"
+  ];
+}

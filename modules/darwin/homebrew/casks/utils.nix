@@ -1,22 +1,24 @@
-[
-  # Design
-  "figma"
+{...}: {
+  homebrew.casks = [
+    # Design
+    "figma"
 
-  # Tools
-  "stats"
-  "onyx"
-  "pearcleaner"
+    # Tools
+    "stats"
+    "onyx"
+    "pearcleaner"
 
-  # Screen sharing
-  "obs"
+    # Screen sharing
+    "obs"
 
-  # Window management
-  "rectangle-pro"
+    # Window management
+    "rectangle-pro"
 
-  # Others
-  "bitwarden"
-  "raycast"
-  "logi-options+"
-  "kap"
-  "numi"
-]
+    # Others
+    "bitwarden"
+    "raycast"
+    "logi-options+"
+    "kap"
+    "numi"
+  ];
+}

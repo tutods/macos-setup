@@ -1,11 +1,5 @@
 {lib, ...}: {
   options.home.ai = {
-    projectDir = lib.mkOption {
-      type = lib.types.str;
-      default = "$HOME/Developer";
-      description = "Primary project directory for development work (used in fish functions)";
-    };
-
     extraInstructions = lib.mkOption {
       type = lib.types.lines;
       default = "";

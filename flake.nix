@@ -47,6 +47,7 @@
 
     mkHost = import ./lib/mkHost.nix;
     mkUser = import ./lib/mkUser.nix;
+    mkDock = import ./lib/mkDock.nix;
 
     # Common modules applied to every host
     darwinCommonModules = [
@@ -65,7 +66,7 @@
             hostPath
           ];
         specialArgs = {
-          inherit pkgs pkgsUnstable nixpkgs nix-darwin home-manager nix-homebrew mkHost mkUser;
+          inherit pkgs pkgsUnstable nixpkgs nix-darwin home-manager nix-homebrew mkHost mkUser mkDock;
         };
       };
   in {

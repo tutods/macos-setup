@@ -3,7 +3,7 @@
 # and nix-homebrew flags are identical across all hosts.
 #
 # Usage in a host default.nix:
-#   { pkgs, mkHost, ... }:
+#   { mkHost, mkUser, ... }:
 #   {
 #     imports = [
 #       ./dock.nix
@@ -12,7 +12,8 @@
 #         username   = "tutods";
 #         hostname   = "tutods-macbook";
 #         brewUser   = "tutods";
-#         homeConfig = import ../../../home/tutods/default.nix;
+#         homeConfig = mkUser { username = "tutods"; role = "personal"; };
+#         masApps    = sharedMasApps // macbookMasApps;
 #       })
 #     ];
 #   }
@@ -27,7 +28,16 @@
   pkgsUnstable,
   lib,
   ...
-}: {
+}: let
+  fixFishShell = "${pkgs.bash}/bin/bash ${../scripts/darwin/fix-fish-shell.sh}";
+  installMasApps = "${pkgs.bash}/bin/bash ${../scripts/darwin/install-mas-apps.sh}";
+
+  masManifest = pkgs.writeText "mas-apps.tsv" (
+    lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (name: id: "${toString id}\t${name}") masApps
+    )
+  );
+in {
   networking.hostName = hostname;
   system.primaryUser = username;
   homebrew.user = brewUser;
@@ -40,55 +50,12 @@
   };
 
   system.activationScripts.extraActivation.text =
-    # Fix fish code signing and set as default shell
     ''
-      fish_bin="/etc/profiles/per-user/${username}/bin/fish"
-      if [ -x "$fish_bin" ]; then
-        if ! codesign -v "$fish_bin" 2>/dev/null; then
-          echo "Re-signing fish binary (invalid code signature detected)"
-          codesign --force --sign - "$fish_bin" 2>/dev/null || true
-        fi
-      fi
-
-      sys_fish="/run/current-system/sw/bin/fish"
-
-      if [ -x "$fish_bin" ] && ! grep -qx "$fish_bin" /etc/shells 2>/dev/null; then
-        echo "Adding $fish_bin to /etc/shells"
-        echo "$fish_bin" >> /etc/shells
-      fi
-
-      target_shell="$sys_fish"
-      if [ -x "$fish_bin" ]; then
-        target_shell="$fish_bin"
-      fi
-
-      current=$(dscl . -read /Users/${username} UserShell 2>/dev/null | awk '{print $2}')
-      if [ "$current" != "$target_shell" ]; then
-        echo "Setting default shell for ${username} from ${current:-default} to $target_shell"
-        dscl . -create /Users/${username} UserShell "$target_shell"
-      else
-        echo "Default shell for ${username} is already set to $target_shell"
-      fi
+      ${fixFishShell} "${username}"
     ''
-    # Install App Store apps via mas
-    + lib.optionalString (masApps != {}) (let
-      installLines = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: id: ''
-          if ! /opt/homebrew/bin/mas list 2>/dev/null | grep -q "^${toString id} "; then
-            echo "  ↣ Installing ${name}"
-            HOME="/Users/${username}" /opt/homebrew/bin/mas install ${toString id} \
-              && echo "  ✓ ${name}" \
-              || echo "  ✗ ${name} failed — install manually from App Store"
-          else
-            echo "  ✓ ${name} already installed"
-          fi
-        '')
-        masApps);
-    in ''
-      if [ -x /opt/homebrew/bin/mas ]; then
-        echo "↣ App Store apps"
-      ${installLines}
-      fi
-    '');
+    + lib.optionalString (masApps != {}) ''
+      ${installMasApps} "${username}" < "${masManifest}"
+    '';
 
   home-manager = {
     useGlobalPkgs = true;

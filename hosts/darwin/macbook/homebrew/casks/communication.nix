@@ -1,7 +1,9 @@
-[
-  # Messaging
-  "discord"
-  "telegram"
-  "whatsapp"
-  "tempbox"
-]
+{...}: {
+  homebrew.casks = [
+    # Messaging
+    "discord"
+    "telegram"
+    "whatsapp"
+    "tempbox"
+  ];
+}

@@ -1,3 +1,5 @@
-[
-  "google-chrome"
-]
+{...}: {
+  homebrew.casks = [
+    "google-chrome"
+  ];
+}

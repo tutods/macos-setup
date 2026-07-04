@@ -1,34 +1,21 @@
-{config, ...}: {
-  system.defaults.dock = {
-    persistent-apps = [
-      {
-        spacer = {
-          small = false;
-        };
-      }
-      "/Applications/Firefox.app"
-      "/Applications/Slack.app"
-      "/System/Applications/Mail.app"
-      "/System/Applications/Calendar.app"
-      {
-        spacer = {
-          small = false;
-        };
-      }
-      "/Applications/Zed.app"
-      "/Applications/WebStorm.app"
-      "/Users/${config.system.primaryUser}/Applications/Home Manager Apps/Visual Studio Code.app"
-      "/Applications/Ghostty.app"
-      "/Applications/Warp.app"
-      {
-        spacer = {
-          small = false;
-        };
-      }
-    ];
-    persistent-others = [
-      "/Users/${config.system.primaryUser}/Downloads"
-      "/Users/${config.system.primaryUser}/Developer"
-    ];
-  };
+{mkDock, ...}: {
+  imports = [
+    (mkDock {
+      groups = [
+        [
+          "/Applications/Firefox.app"
+          "/Applications/Slack.app"
+          "/System/Applications/Mail.app"
+          "/System/Applications/Calendar.app"
+        ]
+        [
+          "/Applications/Zed.app"
+          "/Applications/WebStorm.app"
+          "/Users/daniel.a.sousa/Applications/Home Manager Apps/Visual Studio Code.app"
+          "/Applications/Ghostty.app"
+          "/Applications/Warp.app"
+        ]
+      ];
+    })
+  ];
 }

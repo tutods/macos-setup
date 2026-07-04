@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   system = {
     defaults = {
       dock = {
@@ -100,34 +100,7 @@
     };
 
     activationScripts.postActivation.text = ''
-      ########################
-      # SSD-specific tweaks
-      ########################
-      # Disable hibernation (speeds up entering sleep mode)
-      sudo pmset -a hibernatemode 0
-      ########################
-      # Trackpad, mouse, keyboard, Bluetooth accessories, and input
-      ########################
-      # Increase sound quality for Bluetooth headphones/headsets
-      defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
-      # Follow the keyboard focus while zoomed in
-      defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
-      ########################
-      # Screen
-      ########################
-      # Disable shadow in screenshots
-      defaults write com.apple.screencapture disable-shadow -bool true
-      ########################
-      # Finder
-      ########################
-      # Set sorting and sorting direction
-      defaults write com.apple.finder sortColumn -string "name"
-      defaults write com.apple.finder sortDirection -string "ascending"
-      # Automatically open a new Finder window when a volume is mounted
-      defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true
-      defaults write com.apple.frameworks.diskimages auto-open-rw-root -bool true
-      # Enable AirDrop over Ethernet and on unsupported Macs running Lion
-      defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true
+      ${pkgs.bash}/bin/bash ${../../scripts/darwin/apply-macos-defaults.sh}
     '';
   };
 }

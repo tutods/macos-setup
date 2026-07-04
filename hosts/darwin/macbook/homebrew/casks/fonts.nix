@@ -1,5 +1,7 @@
-[
-  "font-satisfy"
-  "font-josefin-sans"
-  "font-fredoka"
-]
+{...}: {
+  homebrew.casks = [
+    "font-satisfy"
+    "font-josefin-sans"
+    "font-fredoka"
+  ];
+}

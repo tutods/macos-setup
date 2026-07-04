@@ -1,15 +1,18 @@
-[
-  # AI editors
-  "trae"
-  "warp"
+{...}: {
+  homebrew.casks = [
+    # AI editors
+    "trae"
+    "warp"
+    "supacode"
 
-  # API & dev tools
-  "bruno"
-  "responsively"
+    # API & dev tools
+    "bruno"
+    "responsively"
 
-  # Containers
-  "orbstack"
+    # Containers
+    "orbstack"
 
-  # JetBrains (Homebrew instead of nixpkgs — avoids Nix wrapper issues)
-  "datagrip"
-]
+    # JetBrains (Homebrew instead of nixpkgs — avoids Nix wrapper issues)
+    "datagrip"
+  ];
+}

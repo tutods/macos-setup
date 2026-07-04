@@ -1,5 +1,7 @@
-[
-  "firefox@developer-edition"
-  "zen"
-  "brave-browser"
-]
+{...}: {
+  homebrew.casks = [
+    "firefox@developer-edition"
+    "zen"
+    "brave-browser"
+  ];
+}
