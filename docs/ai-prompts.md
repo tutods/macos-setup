@@ -10,9 +10,9 @@ Reusable prompt templates and local AI skills. Load via `@` prefix in conversati
 | `explain-docs.md` | `@prompts/explain-docs` | Library/API explainer — mental model, minimal example, gotchas |
 | `pr-description.md` | `@prompts/pr-description` | PR description generator from `git diff` — Summary/Changes/Test Plan/Notes |
 
-## Local skills (`home/common/cli/ai/skills/`)
+## Local skills (`skills/local/`)
 
-Local skills are installed to `~/.agents/skills/` and symlinked to `~/.claude/skills/` on every deploy. No manifest entry needed — they deploy from the Nix store directly.
+Local skills live at the repo root (`skills/local/`) and are deployed to both `~/.agents/skills/` (open standard) and `~/.claude/skills/` (Claude Code discovery) via `home.file` on every deploy. No manifest entry needed — they deploy from the Nix store directly.
 
 | Skill | Trigger | Purpose |
 |-------|---------|---------|

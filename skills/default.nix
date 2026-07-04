@@ -24,14 +24,14 @@ in {
       {
         name = ".agents/skills/${name}";
         value = {
-          source = ./${name};
+          source = ./local/${name};
           force = true;
         };
       }
       {
         name = ".claude/skills/${name}";
         value = {
-          source = ./${name};
+          source = ./local/${name};
           force = true;
         };
       }
@@ -61,8 +61,8 @@ in {
       printf "↣ Syncing AI skills (%d sources)...\n" "''${#entries[@]}" | tee -a "$log"
       ok=0; fail=0
       for entry in "''${entries[@]}"; do
-        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -a codex -y\n" "$entry" | tee -a "$log"
-        if npx skills add $entry -g -a claude-code -a opencode -a codex -y </dev/null >>"$log" 2>&1; then
+        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -y\n" "$entry" | tee -a "$log"
+        if npx skills add $entry -g -a claude-code -a opencode -y </dev/null >>"$log" 2>&1; then
           ok=$((ok+1))
         else
           printf "    warning: failed: %s\n" "$entry" | tee -a "$log"

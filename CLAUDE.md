@@ -54,8 +54,7 @@ Applying uses `darwin-rebuild switch --flake ".#<config>"` (local binary if pres
 | `modules/` | Shared system-level config (applied to every host) |
 | `hosts/darwin/<name>/` | Per-machine config: system settings, dock, Homebrew casks |
 | `home/common/` | Shared Home Manager config (shell, CLI tools, editors) — every user gets this |
-| `home/roles/` | Context-specific Home Manager config (`personal/`, `work/`) — each role is a directory with `default.nix` and optional `ai/` submodule |
-| `home/identity/` | Person-specific overrides (GPG keys, email) — rarely used |
+| `home/roles/` | Context-specific Home Manager config (`personal/`, `work/`) — each role is a directory with `default.nix` and optional `ai/` submodule. In current usage role maps 1:1 to a single user (personal=`tutods`, work=`daniel.a.sousa`); the role/identity split earns its keep only if a future host reuses a role with a different user. |
 
 ### Homebrew Casks
 
@@ -85,19 +84,20 @@ The common module concatenates: shared + role extras (if set). Role modules set 
 
 ### Adding a New User
 
-1. Create `home/identity/<username>.nix` for person-specific overrides (if needed)
-2. Pass it to `mkHost` in the host's `default.nix`:
-   ```nix
-   homeConfig = mkUser {
-     username     = "<username>";
-     role         = "personal";  # or "work"
-     extraImports = [ ../../../home/identity/<username>.nix ];
-   };
-   ```
+Use `mkUser` (defined in `lib/mkUser.nix`) — it handles `home.username`, `home.homeDirectory`, and imports the role module. See `docs/adding-host-or-user.md` for the full flow.
+
+```nix
+homeConfig = mkUser {
+  username = "<username>";
+  role     = "personal";  # or "work"
+};
+```
+
+For person-specific overrides (GPG keys, email, etc.) pass `extraImports` pointing at any Nix file — there is no dedicated `home/identity/` directory; keep such files wherever makes sense for the host.
 
 ### AI Skills
 
-Skills are installed from `home/common/cli/ai/skills/manifest.txt` + `home/roles/personal/ai/skills/manifest.txt` during `darwin-rebuild` activation. Install runs once per manifest change (guarded by `~/.config/ai/.skills-sync-hash`). Output logged to `~/.cache/ai-skills-install.log`.
+Skills are installed from `skills/manifest.txt` + `home/roles/personal/ai/skills/manifest.txt` during `darwin-rebuild` activation. Install runs once per manifest change (guarded by `~/.config/ai/.skills-sync-hash`). Output logged to `~/.cache/ai-skills-install.log`.
 
 ```bash
 # Force reinstall all skills (next ./nix.sh run will trigger install loop)
@@ -110,10 +110,12 @@ cat ~/.cache/ai-skills-install.log
 npx skills ls -g
 
 # Add a new skill source: append a line to the relevant manifest
-# home/common/cli/ai/skills/manifest.txt       ← both machines
-# home/roles/personal/ai/skills/manifest.txt   ← personal only
+# skills/manifest.txt                              ← both machines
+# home/roles/personal/ai/skills/manifest.txt       ← personal only
 # Then run ./nix.sh macbook to apply
 ```
+
+Local in-repo skill sources live at `skills/local/` and deploy via `home.file` (dual target: `~/.agents/skills/` for the open standard, `~/.claude/skills/` for Claude Code discovery). They are NOT in the manifests.
 
 Key: `pkgs.git` + `pkgs.nodejs` are injected into PATH during activation — required because `npx skills add owner/repo` git-clones the source. Without `git`, GitHub-sourced packages silently fail.
 
