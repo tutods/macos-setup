@@ -136,7 +136,7 @@ These are declared in the repo but **upgraded to latest versions** each time you
 | Homebrew brews | CLI tools installed via brew (`mas`, `rtk`) | Same as above |
 | MAS apps | Mac App Store apps installed by `mas` | `mas install` runs in activation, version not pinned |
 | VSCode marketplace extensions | `extensionsFromVscodeMarketplace` entries | Pinned by `version` + `sha256` in the repo, but must be manually updated when upstream releases new versions |
-| nixpkgs-unstable packages | `pkgsUnstable` packages (claude-code, opencode, codex, ollama, pipx, fonts) | Pinned to `nixpkgs-unstable` flake input, which moves faster than stable |
+| nixpkgs-unstable packages | `pkgsUnstable` packages (claude-code, opencode, ollama, pipx, fonts) | Pinned to `nixpkgs-unstable` flake input, which moves faster than stable |
 
 ### What this means in practice
 

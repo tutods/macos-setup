@@ -12,7 +12,6 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 |------|---------|
 | `claude-code` | Primary AI coding assistant (CLI) |
 | `opencode` | Multi-provider terminal AI |
-| `codex` | Isolated one-shot scripting tasks |
 | `ollama` | Local/offline models (no network, no logs) |
 | `repomix` | Pack repo into AI-readable file |
 | `rtk` | Token proxy — reduces LLM token usage 60–90% |
@@ -21,8 +20,7 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 ### When to use which tool
 
 - `claude-code` — default for all coding tasks; full context, skills, MCP servers
-- `opencode` — multi-provider or when a different model is needed mid-session
-- `codex` — isolated throwaway scripts, one-shot shell tasks
+- `opencode` — multi-provider or when a different model is needed mid-session; codex accessed via opencode
 - `ollama` — offline/private work (no network, no logs) — see [ai-privacy.md](ai-privacy.md)
 - `repomix` — pack repo context before switching tools or sharing with non-Claude AI; see [repomix.md](repomix.md)
 
@@ -119,13 +117,12 @@ The biome hook is a no-op when biome is not configured in the project. Falls bac
 |---------------|------|
 | `caveman` | `JuliusBrussee/caveman` |
 | `agricidaniel-seo` | `AgriciDaniel/claude-seo` |
-| `openai-codex` | `openai/codex-plugin-cc` |
 
 ### Enabled plugins
 
 All plugins in `enabledPlugins` are set to `true`. Currently managed:
 
-`caveman`, `superpowers`, `frontend-design`, `code-review`, `code-simplifier`, `github`, `feature-dev`, `claude-md-management`, `typescript-lsp`, `security-guidance`, `commit-commands`, `figma`, `claude-code-setup`, `pr-review-toolkit`, `sourcegraph`, `prisma`, `sanity`, `autofix-bot`, `claude-seo` (agricidaniel-seo), `codex` (openai-codex)
+`caveman`, `superpowers`, `frontend-design`, `code-review`, `code-simplifier`, `github`, `feature-dev`, `claude-md-management`, `typescript-lsp`, `security-guidance`, `commit-commands`, `figma`, `claude-code-setup`, `pr-review-toolkit`, `sourcegraph`, `prisma`, `sanity`, `claude-seo` (agricidaniel-seo)
 
 ---
 
@@ -186,11 +183,13 @@ Static fields (`$schema`, `plugin`, `experimental`, `share`) are managed by Nix 
 
 ## Skills
 
-Managed by `home/common/cli/ai/skills/`.
+Managed by the repo-root `skills/` directory.
 
 Two manifests:
-- `manifest.txt` — common skills installed on both machines
+- `skills/manifest.txt` — common skills installed on both machines
 - `home/roles/personal/ai/skills/manifest.txt` — personal-only skills
+
+Local in-repo skill sources live at `skills/local/` and deploy via `home.file` (not the manifest).
 
 ### Sync skills
 
@@ -257,7 +256,6 @@ Managed in `home/common/cli/ai/init.nix`. Runs automatically on every `darwin-re
 |------|-----------|-------------|
 | `rtk init -g` | `rtk` in PATH | Configure rtk proxy for Claude Code + Copilot |
 | `rtk init -g --opencode` | `rtk` in PATH | Configure rtk proxy for opencode |
-| `rtk init -g --codex` | `rtk` in PATH | Configure rtk proxy for Codex |
 | `pipx install code-review-graph` | not in `pipx list` | Install code-review-graph CLI |
 | `pipx install ttok` | not in `pipx list` | Install ttok (LLM token counter) |
 | `ai-skills-sync` | manifest hash changed | Install/update skills from manifest |

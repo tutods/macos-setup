@@ -1,32 +1,27 @@
-let
-  instructions =
-    builtins.readFile ./instructions.md
-    + "\n\n"
-    + builtins.readFile ../../../common/cli/ai/context/stack-personal.md;
-
-  # Helper to simplify MCP server definition
-  mkMcp = {
-    cmd,
-    args,
-  }: {
-    command = cmd;
-    args = args;
-  };
+{
+  pkgs,
+  lib,
+  ...
+}: let
+  ai = import ../../../../lib/ai.nix {inherit pkgs;};
 in {
-  home.ai.extraInstructions = instructions;
+  home.ai.extraInstructions =
+    ai.appendIfNonEmpty
+    (builtins.readFile ./instructions.md)
+    (builtins.readFile ../../../common/cli/ai/context/stack-personal.md);
 
   home.ai.extraSkillsManifest = builtins.readFile ./skills/manifest.txt;
 
   home.ai.extraMcpServers = {
-    docker = mkMcp {
+    docker = ai.mkServer {
       cmd = "docker";
       args = ["mcp" "gateway" "run"];
     };
-    postgres = mkMcp {
+    postgres = ai.mkServer {
       cmd = "sh";
       args = ["-c" "doppler run -- npx -y @modelcontextprotocol/server-postgres"];
     };
-    shadcn = mkMcp {
+    shadcn = ai.mkServer {
       cmd = "npx";
       args = ["-y" "shadcn@latest" "mcp"];
     };

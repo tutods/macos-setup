@@ -12,7 +12,7 @@ Rules and conventions for working in this Nix flake repo.
 
 - Run `nix search nixpkgs <name>` to confirm a package exists in stable before adding it
 - Only use `pkgsUnstable` if the stable version is too old for the use case
-- Tools that justify `pkgsUnstable`: `claude-code`, `codex`, `opencode` — fast-moving, need latest
+- Tools that justify `pkgsUnstable`: `claude-code`, `opencode` — fast-moving, need latest
 
 ## Package Placement
 

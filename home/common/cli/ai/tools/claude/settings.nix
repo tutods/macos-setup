@@ -8,6 +8,14 @@
 
     telemetry.enabled = false;
 
+    # https://code.claude.com/docs/en/statusline
+    statusLine = {
+      type = "command";
+      command = "~/.claude/statusline.sh";
+      padding = 2;
+      refreshInterval = 30;
+    };
+
     permissions.deny = [
       "Read(./.env)"
       "Read(./.env.*)"
@@ -53,10 +61,6 @@
         source = "github";
         repo = "AgriciDaniel/claude-seo";
       };
-      "openai-codex".source = {
-        source = "github";
-        repo = "openai/codex-plugin-cc";
-      };
     };
 
     # Nix is authoritative for plugins listed here (merge: live + nix, nix wins).
@@ -81,9 +85,7 @@
       "sourcegraph@claude-plugins-official" = true;
       "prisma@claude-plugins-official" = true;
       "sanity@claude-plugins-official" = true;
-      "autofix-bot@claude-plugins-official" = true;
       "claude-seo@agricidaniel-seo" = true;
-      "codex@openai-codex" = true;
     };
   };
 in {
@@ -105,7 +107,7 @@ in {
       # Purge plugins removed from this config (migration for existing installs).
       # No-op on fresh installs where these keys never existed.
       merged_plugins=$(echo "$merged_plugins" | ${pkgs.jq}/bin/jq -c \
-        'del(.["terraform@claude-plugins-official"], .["warp@claude-code-warp"])')
+        'del(.["terraform@claude-plugins-official"], .["warp@claude-code-warp"], .["autofix-bot@claude-plugins-official"], .["codex@openai-codex"])')
       echo "$base" \
         | ${pkgs.jq}/bin/jq --argjson plugins "$merged_plugins" \
             '. + {enabledPlugins: $plugins}' \

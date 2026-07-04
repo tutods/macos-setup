@@ -1,14 +1,13 @@
 {pkgs, ...}: {
   imports = [
-    ./claude
-    ./codex
     ./context
     ./init.nix
     ./instructions
-    ./opencode
     ./options.nix
     ./rtk
-    ./skills
+    ./tools/claude
+    ./tools/opencode
+    ../../../../skills
   ];
 
   home.packages = [

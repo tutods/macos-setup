@@ -37,26 +37,31 @@ home/identity/       → person-specific (GPG, email)
 
 ## Configurable paths
 
-- `home.ai.projectDir` — Primary development directory (default: `$HOME/Developer`)
+- `home.devDir` — Primary development directory (default: `$HOME/Developer`)
 - Fish shell exports `$PROJECT_DIR` environment variable for functions
-- Override in role config: `home.ai.projectDir = "$HOME/Projects";`
+- Override in role config: `home.devDir = "$HOME/Projects";`
 
-Prefer `pkgs` (stable) over `pkgsUnstable` unless the tool needs latest version (claude-code, opencode, codex use unstable).
+Prefer `pkgs` (stable) over `pkgsUnstable` unless the tool needs latest version (claude-code and opencode use unstable).
 
 ## AI setup structure
 
 ```
 home/common/cli/ai/
-├── claude/       → Claude Code settings + MCP
-├── opencode/     → opencode config + MCP
-├── codex/        → Codex config + MCP
-├── rtk/          → RTK proxy files (claude-RTK.md, codex-RTK.md, opencode plugin)
-├── instructions/ → runtime AI instructions (deployed to AI tools)
-├── skills/       → local skills + manifest.txt
-├── context/      → stack reference files (deployed to ~/.claude/context/ and opencode)
-├── prompts/      → reusable prompt templates (@-mention in conversations)
-├── init.nix      → pipx installs + graphify hook registration (version-guarded)
+├── tools/
+│   ├── claude/    → Claude Code settings + MCP + instructions extras
+│   └── opencode/  → opencode config + MCP + instructions extras
+├── rtk/           → RTK proxy files (claude-RTK.md, opencode plugin)
+├── instructions/  → shared runtime AI instructions (deployed to AI tools)
+├── context/       → stack reference files (deployed to ~/.claude/context/ and opencode)
+├── prompts/       → reusable prompt templates (@-mention in conversations)
+├── init.nix       → pipx installs + graphify hook registration (version-guarded)
 └── mcp-servers.nix → shared MCP server definitions (Nix-authoritative for all tools)
+
+# Local skill sources live at repo root:
+skills/
+├── default.nix    → deployment logic (dual home.file to .agents + .claude)
+├── manifest.txt   → remote skills installed via `npx skills add`
+└── local/         → in-repo skill sources (llm-council, content-writer, ...)
 ```
 
 ## Role split

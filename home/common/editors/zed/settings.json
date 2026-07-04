@@ -321,9 +321,6 @@
     "sidebar_side": "right"
   },
   "agent_servers": {
-    "codex-acp": {
-      "type": "registry"
-    },
     "glm-acp-agent": {
       "type": "registry"
     },

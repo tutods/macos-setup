@@ -13,7 +13,7 @@
 }: {
   home.activation.aiInit = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Ensure config dirs exist before tool init
-    mkdir -p "$HOME/.claude" "$HOME/.config/opencode" "$HOME/.codex"
+    mkdir -p "$HOME/.claude" "$HOME/.config/opencode"
 
     # ── pipx packages ─────────────────────────────────────────────────────
     # Check pipx list before installing to avoid re-installing on every switch.
@@ -37,7 +37,6 @@
       echo "↣ graphify install (all agents) — $graphify_ver"
       graphify install                       || echo "  ⚠ graphify install (claude) failed"
       graphify install --platform opencode   || echo "  ⚠ graphify install (opencode) failed"
-      graphify install --platform codex      || echo "  ⚠ graphify install (codex) failed"
       printf "%s" "$graphify_ver" > "$graphify_stamp"
     else
       echo "↣ graphify up to date ($graphify_ver)"
