@@ -16,4 +16,7 @@ in {
       args = ["-y" "mcp-atlassian"];
     };
   };
+
+  # Work-only AI skills (Storybook is used in work projects)
+  home.ai.extraSkillsManifest = "oakoss/agent-skills -s storybook-stories";
 }

@@ -5,7 +5,6 @@
         [
           "/Applications/Firefox Developer Edition.app"
           "/Applications/Zen.app"
-          "/System/Applications/Safari.app"
           "/Applications/Google Chrome.app"
           "/System/Applications/Mail.app"
           "/System/Applications/Calendar.app"

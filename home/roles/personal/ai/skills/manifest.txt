@@ -2,17 +2,16 @@
 # Installed via extraSkillsManifest → ai-skills-sync on darwin-rebuild
 
 better-auth/skills
-Leonxlnx/taste-skill -s high-end-visual-design -s minimalist-ui -s redesign-existing-projects
-prisma/skills
+prisma/skills -s prisma-cli -s prisma-client-api -s prisma-database-setup
 vercel/turborepo
-mindrally/skills -s sanity -s seo-best-practices
+mindrally/skills -s sanity
 # NOTE: resciencelab/opc-skills -s banner-creator -s domain-hunter removed —
 # upstream bug writes skillPath to SKILL.md (a file) instead of the directory,
 # which makes claude /doctor fail with "path is a file". Re-add once fixed.
-tanstack/router -s compositions/router-query -s react-router -s react-start -s "react-start/server-components" -s router-core -s router-core/auth-and-guards -s router-core/code-splitting -s router-core/data-loading -s router-core/navigation -s router-core/not-found-and-errors -s router-core/path-params -s router-core/search-params -s router-core/ssr -s router-core/type-safety -s router-plugin -s start-core -s start-core/auth-server-primitives -s start-core/deployment -s start-core/execution-model -s start-core/middleware -s start-core/server-functions -s start-core/server-routes -s start-server-core -s virtual-file-routes
+tanstack/router -s compositions/router-query -s react-start -s "react-start/server-components" -s router-core -s router-core/auth-and-guards -s router-core/code-splitting -s router-core/data-loading -s router-core/navigation -s router-core/not-found-and-errors -s router-core/path-params -s router-core/search-params -s router-core/ssr -s router-core/type-safety -s router-plugin -s start-core -s start-core/auth-server-primitives -s start-core/deployment -s start-core/execution-model -s start-core/middleware -s start-core/server-functions -s start-core/server-routes -s start-server-core -s virtual-file-routes
 wshobson/agents -s postgresql-table-design -s gdpr-data-handling
-anthropics/skills -s theme-factory
+
 anthropics/knowledge-work-plugins -s brand-voice-enforcement -s content-creation -s ux-copy
-oakoss/agent-skills -s tanstack-cli -s tanstack-devtools -s tanstack-form -s tanstack-hotkeys -s tanstack-query -s tanstack-router -s tanstack-start -s tanstack-store -s tanstack-table -s tanstack-virtual -s meta-agent-creator -s meta-command-creator -s meta-hook-creator -s meta-plugin-creator -s meta-skill-creator -s skill-management -s motion -s react-email -s icon-design -s figma-developer -s drizzle-orm -s local-first -s postgres-tuning -s realtime-sync -s package-publishing -s seo-optimizer
+oakoss/agent-skills -s tanstack-form -s tanstack-query -s tanstack-router -s tanstack-start -s tanstack-table -s react-email -s icon-design -s figma-developer -s drizzle-orm -s package-publishing -s seo-optimizer
 nextlevelbuilder/ui-ux-pro-max-skill
 zarazhangrui/frontend-slides
