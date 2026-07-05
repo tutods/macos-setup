@@ -6,6 +6,8 @@
 }: {
   imports = [./extra.nix];
 
+  xdg.configFile."fish/completions/fnm.fish".source = ./fnm-completions.fish;
+
   programs.fish = {
     enable = true;
     shellAliases = import ./alias.nix;
@@ -35,7 +37,7 @@
 
       set fzf_preview_dir_cmd eza --all --color=always
 
-      fnm env --use-on-cd --shell fish --corepack-enabled | source
+      fnm env --use-on-cd --shell fish --corepack-enabled --resolve-engines | source
 
       fish_add_path --prepend $HOME/.local/bin
     '';
