@@ -28,18 +28,30 @@
         name = "pisces";
         src = pkgs.fishPlugins.pisces.src;
       }
+      {
+        name = "plugin-git";
+        src = pkgs.fishPlugins.plugin-git.src;
+      }
     ];
 
     interactiveShellInit = ''
-      set -g fish_complete_path $fish_complete_path ~/.config/fish/completions
-
       bind \ew backward-kill-line
 
       set fzf_preview_dir_cmd eza --all --color=always
 
       fnm env --use-on-cd --shell fish --corepack-enabled --resolve-engines | source
+    '';
 
-      fish_add_path --prepend $HOME/.local/bin
+    shellInit = ''
+      set -gx PROJECT_DIR "${config.home.devDir}"
+
+      if test -f ~/.config/fish/secrets.fish
+        source ~/.config/fish/secrets.fish
+      end
+
+      if not contains "$HOME/.local/bin" $fish_user_paths
+        set -U fish_user_paths $HOME/.local/bin $fish_user_paths
+      end
     '';
   };
 }

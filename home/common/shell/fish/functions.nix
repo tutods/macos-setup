@@ -110,7 +110,7 @@
       printf "%s\n" $targets
       read --local --prompt-str "Delete (count $targets) dirs? [y/N] " confirm
       if string match -qi 'y' -- "$confirm"
-        fd -H -I -t d "^node_modules\$" $PROJECT_DIR -x rm -rf
+        printf "%s\n" $targets | xargs rm -rf
         echo "Done."
       end
     '';
@@ -132,7 +132,7 @@
 
   fzf_jump = {
     body = ''
-      set dest (fd -d 2 -t d . $PROJECT_DIR | fzf --prompt="Jump to project > ")
+      set dest (fd -d 4 -t d . $PROJECT_DIR | fzf --prompt="Jump to project > ")
       if test -n "$dest"
         cd $dest
       end

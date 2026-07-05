@@ -221,14 +221,6 @@
   gwtrm = "git worktree remove";
   gwtulo = "git worktree unlock";
 
-  # npm abbreviations
-  ni = "npm install";
-  nid = "npm install --save-dev";
-  nr = "npm run";
-  nd = "npm run dev";
-  nb = "npm run build";
-  nts = "npm run test";
-
   # pnpm abbreviations
   pi = "pnpm install";
   pa = "pnpm add";
