@@ -15,11 +15,14 @@
     functions = import ./functions.nix;
 
     shellInit = ''
-      # Project directory (used in fish functions like fzf_jump, node_clean)
       set -gx PROJECT_DIR "${config.home.devDir}"
 
       if test -f ~/.config/fish/secrets.fish
         source ~/.config/fish/secrets.fish
+      end
+
+      if not contains "$HOME/.local/bin" $fish_user_paths
+        set -U fish_user_paths $HOME/.local/bin $fish_user_paths
       end
     '';
 
@@ -40,18 +43,6 @@
       set fzf_preview_dir_cmd eza --all --color=always
 
       fnm env --use-on-cd --shell fish --corepack-enabled --resolve-engines | source
-    '';
-
-    shellInit = ''
-      set -gx PROJECT_DIR "${config.home.devDir}"
-
-      if test -f ~/.config/fish/secrets.fish
-        source ~/.config/fish/secrets.fish
-      end
-
-      if not contains "$HOME/.local/bin" $fish_user_paths
-        set -U fish_user_paths $HOME/.local/bin $fish_user_paths
-      end
     '';
   };
 }
