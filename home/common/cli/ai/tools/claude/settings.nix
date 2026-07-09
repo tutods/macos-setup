@@ -96,6 +96,10 @@
   };
 in {
   home.file.".claude/CLAUDE.md".text = "@RTK.md\n";
+  home.file.".claude/hooks/block-ai-attribution.sh" = {
+    source = ./block-ai-attribution.sh;
+    force = true;
+  };
 
   home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     target="$HOME/.claude/settings.json"
