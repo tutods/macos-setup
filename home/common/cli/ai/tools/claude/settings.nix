@@ -7,6 +7,10 @@
     theme = "dark-daltonized";
 
     telemetry.enabled = false;
+    attribution = {
+      commit = "";
+      pr = "";
+    };
 
     # https://code.claude.com/docs/en/statusline
     statusLine = {
@@ -31,7 +35,9 @@
         hooks = [
           {
             type = "command";
-            command = "rtk hook claude";
+            command = "\"$HOME/.claude/hooks/block-ai-attribution.sh\"";
+            timeout = 10;
+            statusMessage = "Checking commit/PR for AI attribution";
           }
         ];
       }
