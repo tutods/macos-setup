@@ -306,7 +306,7 @@ If "Yes, review it" → continue.
 ### 7a — Generate the review
 
 1. Read the PR diff: `gh pr diff <pr-number>`
-2. Produce a thorough code review: bugs, logic errors, security concerns, missing tests, style issues, and improvement suggestions. Each finding should include the file, line (if applicable), a description of the issue, and a suggested fix.
+2. Produce findings: bugs, logic errors, security concerns, missing tests, style issues, improvement suggestions. For each finding capture: `id` (`F1`, `F2`, ...), `title`, `severity` (blocker / major / minor / nit), `file`, `line` (if applicable), `description`, `suggestion` (concrete fix or diff).
 
 ### 7b — Post to GitHub?
 
@@ -324,90 +324,174 @@ If "No, just show it" → display the review and stop. **Do not write to any fil
 
 If "Yes, post to GitHub" → continue.
 
-### 7c — Feedback on findings
-
-```
-Question: "Want to give feedback on the findings before posting?"
-Header: "Feedback"
-Options:
-  - label: "Yes, let me review each finding"
-    description: "Show each finding and let me react"
-  - label: "No, post as-is"
-    description: "Skip feedback, post the review directly"
-```
-
-If "Yes, let me review each finding" → show each finding one at a time and ask:
-
-```
-Question: "Agree with this finding?"
-Header: "Finding feedback"
-Options:
-  - label: "👍 Agree"
-    description: "This finding is correct — include it"
-  - label: "👎 Disagree"
-    description: "This finding is wrong — drop it"
-  - label: "👀 Not sure"
-    description: "Unsure — keep it but flag as uncertain"
-```
-
-Only findings marked 👍 or 👀 are included in the final review. 👎 findings are dropped.
-
-### 7d — Review format
+### 7c — Review format
 
 ```
 Question: "How should the review be posted?"
 Header: "Review format"
 Options:
   - label: "Inline review with overall comment"
-    description: "Line-specific comments + a summary status comment"
+    description: "Line-specific comments on the diff + a summary status comment"
   - label: "Single comment with all findings"
     description: "One review body containing everything"
   - label: "Multiple comments"
-    description: "Separate review comment per finding"
+    description: "Separate top-level review comment per finding"
 ```
 
-### 7e — Attribution
+### 7d — Attribution
 
 ```
 Question: "Add attribution to each comment?"
 Header: "Attribution"
 Options:
   - label: "Yes, add attribution"
-    description: "Prepend 'Reviewed by <AI model>' at the beginning of each comment"
+    description: "Prepend '> Reviewed by <AI model>' blockquote at the beginning of each comment"
   - label: "No attribution"
     description: "Skip — no model credit"
 ```
 
-If "Yes" → prepend `Reviewed by <current AI model>` at the **beginning** of each comment. Use the model name that is currently running the session.
+If "Yes" → prepend the blockquote at the **beginning** of every comment (overall, each inline, each top-level). Use the model name that is currently running the session.
+
+### 7e — Add your reactions to each comment
+
+After posting the review, ask the user to react to each comment. This adds a **GitHub reaction** (👍 / 👎 / 👀) on the corresponding comment using the Reactions API — it does **not** filter or remove findings.
+
+```
+Question: "Add your reaction to each posted comment?"
+Header: "Reactions"
+Options:
+  - label: "Yes, let me react"
+    description: "I'll add 👍 / 👎 / 👀 to each comment via the GitHub API"
+  - label: "No, skip"
+    description: "Post the review without reactions"
+```
+
+If "Yes, let me react" → for each posted comment (in order), ask:
+
+```
+Question: "Reaction for <comment-label>?"
+Header: "Comment reaction"
+Options:
+  - label: "👍 Agree"
+    description: "Add 👍 reaction"
+  - label: "👎 Disagree"
+    description: "Add 👎 reaction"
+  - label: "👀 Not sure"
+    description: "Add 👀 reaction"
+  - label: "Skip"
+    description: "Don't add a reaction to this comment"
+```
+
+Store the comment ID returned from posting. Add the reaction with:
+
+```bash
+gh api repos/{owner}/{repo}/issues/comments/<comment-id>/reactions \
+  --method POST \
+  --field 'content=+1'    # or "-1" or "eyes"
+```
+
+Reaction content values: `+1` (👍), `-1` (👎), `eyes` (👀).
 
 ### 7f — Post the review
 
-Based on the chosen format:
+**Comment format (markdown template):**
 
-**Inline review with overall comment:**
+```
+> Reviewed by <AI model>
 
-Use the GitHub Reviews API for line-specific comments with a summary:
+### Finding F<n>: <title>
+
+<short humanized description of the issue — see 7g for style rules>
+
+**File:** `<path>` · **Line:** <n> · **Severity:** <blocker|major|minor|nit>
+
+<details>
+<summary>Suggestion</summary>
+
+```diff
+- <old line>
++ <new line>
+```
+
+</details>
+```
+
+Notes on the template:
+- For **inline review** comments, omit the `File`/`Line` line (it's implicit from the diff position) and keep the body short.
+- For **single comment** (all findings), list each finding under its own `###` header inside one body.
+- For **multiple comments** (top-level), one comment per finding using the full template.
+
+**Posting commands:**
+
+**Inline review with overall comment** — overall as the review body, one inline comment per finding on the diff line:
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/<pr-number>/reviews \
   --method POST \
   --field event=COMMENT \
   --field 'body=<overall-comment>' \
-  --field 'comments=<json-array-of-inline-comments>'
+  --field 'comments=<json-array>'
 ```
 
-Each inline comment object: `{ "path": "<file>", "line": <line>, "body": "<comment>" }`.
+Each inline comment object: `{ "path": "<file>", "line": <n>, "body": "<comment>" }`.
 
 **Single comment with all findings:**
 
 ```bash
-gh pr review <pr-number> --comment --body "<review>"
+gh pr review <pr-number> --comment --body "<review-with-all-findings>"
 ```
 
-**Multiple comments:**
+**Multiple comments** — one top-level PR comment per finding, plus optional overall comment:
 
 ```bash
+gh pr comment <pr-number> --body "<overall-comment>"   # if attribution requested
 gh pr comment <pr-number> --body "<finding-1>"
 gh pr comment <pr-number> --body "<finding-2>"
-# ...one per finding
 ```
+
+Capture the comment ID from the response of each `gh pr comment` / `gh api` call. You'll need it for step 7e (reactions).
+
+### 7g — Writing style for findings (humanized, not AI)
+
+All review text must read like a teammate wrote it — not an AI. Apply these rules when writing each finding:
+
+- **Tone:** direct, specific, conversational. Talk like a colleague leaving a code review over coffee.
+- **No filler openers.** Never start a finding with "I'd suggest", "It would be better to", "Consider", "One thing to note", "Furthermore", "Additionally", "It is worth noting", or any hedge.
+- **Short sentences, varied rhythm.** Mix one-word lines ("Won't work.") with longer explanations. Break up symmetry.
+- **Name the problem first, then the fix.** Don't bury the issue in preamble.
+- **Concrete over abstract.** Quote the actual line, name the actual function, reference the actual file path. No generic platitudes.
+- **No meta-structure.** Don't say "Let me explain", "Here's why", "This demonstrates". Just say it.
+- **No AI self-reference.** Never write "as an AI", "based on my training", "I'm a language model".
+- **One-pass feel.** Mild asymmetry is fine — contractions, fragments, a personal aside. Don't over-polish.
+- **Severity language:** use plain words (`bug`, `breaks`, `leaks`, `racy`, `dead code`, `duplicated`) — not corporate severity labels in prose.
+- **Suggestion diffs:** keep them minimal and realistic. Only show the change, not the surrounding context.
+
+Good finding example:
+
+```markdown
+> Reviewed by Claude Sonnet 5
+
+### Finding F1: `fetchUser` drops the error on the floor
+
+If the network call rejects, this swallows it and returns `null` as if the user just doesn't exist. Caller has no way to tell "not found" from "server down" — auth will silently break.
+
+**File:** `src/lib/api.ts` · **Line:** 42 · **Severity:** major
+
+<details>
+<summary>Suggestion</summary>
+
+```diff
+- } catch {
+-   return null;
+- }
++ } catch (err) {
++   throw err;
++ }
+```
+
+</details>
+```
+
+Bad finding example (AI-tell, do not write this):
+
+> As an AI reviewing this code, I would suggest that the error handling could potentially be improved. Furthermore, it is worth noting that the function in question appears to drop errors. Consider refactoring this to provide better error propagation. This demonstrates how defensive coding practices can enhance the overall robustness of the application.
