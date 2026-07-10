@@ -81,31 +81,4 @@ in {
       [ "$fail" -eq 0 ] && printf "%s" "${manifestHash}" > "$stamp"
     fi
   '';
-
-  # npx skills only copies SKILL.md, missing supporting files for some repos.
-  # Fixup: clone the repo and copy the files that npx skills missed.
-  home.activation.aiSkillsFixup = lib.hm.dag.entryAfter ["aiSkillsSync"] ''
-    export PATH="${pkgs.git}/bin:${pkgs.nodejs}/bin:$PATH"
-    log="$HOME/.cache/ai-skills-install.log"
-
-    # frontend-slides: npx skills installs only SKILL.md, but the skill instructs
-    # the agent to read STYLE_PRESETS.md, animation-patterns.md, html-template.md,
-    # viewport-base.css, bold-template-pack/, and scripts/ — all present at repo root.
-    skillDir="$HOME/.agents/skills/frontend-slides"
-    if [ -d "$skillDir" ] && [ ! -f "$skillDir/STYLE_PRESETS.md" ]; then
-      printf "↣ Fixing frontend-slides: copying missing supporting files...\n" | tee -a "$log"
-      tmpDir=$(mktemp -d)
-      if git clone --depth 1 https://github.com/zarazhangrui/frontend-slides.git "$tmpDir/repo" >>"$log" 2>&1; then
-        for f in STYLE_PRESETS.md animation-patterns.md html-template.md viewport-base.css; do
-          cp "$tmpDir/repo/$f" "$skillDir/$f"
-        done
-        cp -r "$tmpDir/repo/bold-template-pack" "$skillDir/"
-        cp -r "$tmpDir/repo/scripts" "$skillDir/"
-        printf "  ✓ Copied supporting files for frontend-slides\n" | tee -a "$log"
-      else
-        printf "  warning: failed to clone frontend-slides repo for fixup\n" | tee -a "$log"
-      fi
-      rm -rf "$tmpDir"
-    fi
-  '';
 }

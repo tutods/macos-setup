@@ -13,4 +13,4 @@ wshobson/agents -s postgresql-table-design -s gdpr-data-handling
 anthropics/knowledge-work-plugins -s brand-voice-enforcement -s content-creation -s ux-copy
 oakoss/agent-skills -s tanstack-form -s tanstack-query -s tanstack-router -s tanstack-start -s tanstack-table -s react-email -s icon-design -s figma-developer -s drizzle-orm -s package-publishing -s seo-optimizer
 nextlevelbuilder/ui-ux-pro-max-skill
-zarazhangrui/frontend-slides
+https://github.com/zarazhangrui/frontend-slides/tree/main/plugins/frontend-slides/skills/frontend-slides
