@@ -20,23 +20,29 @@
 in {
   # Deploy local skills to both the open agent-skills standard location and Claude Code.
   # Each entry becomes a Nix store symlink — force=true replaces existing directories.
-  home.file = lib.listToAttrs (lib.concatMap (name: [
-      {
-        name = ".agents/skills/${name}";
-        value = {
-          source = ./local/${name};
-          force = true;
-        };
-      }
-      {
-        name = ".claude/skills/${name}";
-        value = {
-          source = ./local/${name};
-          force = true;
-        };
-      }
-    ])
-    localSkills);
+  home.file =
+    lib.listToAttrs (lib.concatMap (name: [
+        {
+          name = ".agents/skills/${name}";
+          value = {
+            source = ./local/${name};
+            force = true;
+          };
+        }
+        {
+          name = ".claude/skills/${name}";
+          value = {
+            source = ./local/${name};
+            force = true;
+          };
+        }
+      ])
+      localSkills)
+    // {
+      # CONNECTORS.md — referenced by skills from anthropics/knowledge-work-plugins
+      # via ../../CONNECTORS.md (resolves from ~/.agents/skills/<name>/ to ~/.agents/)
+      ".agents/CONNECTORS.md".source = ./CONNECTORS.md;
+    };
 
   home.activation.aiSkillsSync = lib.hm.dag.entryAfter ["writeBoundary" "aiInit"] ''
     stamp="$HOME/.config/ai/.skills-sync-hash"
@@ -73,6 +79,33 @@ in {
 
       # Only stamp hash if fully successful (retry on next rebuild if any failed)
       [ "$fail" -eq 0 ] && printf "%s" "${manifestHash}" > "$stamp"
+    fi
+  '';
+
+  # npx skills only copies SKILL.md, missing supporting files for some repos.
+  # Fixup: clone the repo and copy the files that npx skills missed.
+  home.activation.aiSkillsFixup = lib.hm.dag.entryAfter ["aiSkillsSync"] ''
+    export PATH="${pkgs.git}/bin:${pkgs.nodejs}/bin:$PATH"
+    log="$HOME/.cache/ai-skills-install.log"
+
+    # frontend-slides: npx skills installs only SKILL.md, but the skill instructs
+    # the agent to read STYLE_PRESETS.md, animation-patterns.md, html-template.md,
+    # viewport-base.css, bold-template-pack/, and scripts/ — all present at repo root.
+    skillDir="$HOME/.agents/skills/frontend-slides"
+    if [ -d "$skillDir" ] && [ ! -f "$skillDir/STYLE_PRESETS.md" ]; then
+      printf "↣ Fixing frontend-slides: copying missing supporting files...\n" | tee -a "$log"
+      tmpDir=$(mktemp -d)
+      if git clone --depth 1 https://github.com/zarazhangrui/frontend-slides.git "$tmpDir/repo" >>"$log" 2>&1; then
+        for f in STYLE_PRESETS.md animation-patterns.md html-template.md viewport-base.css; do
+          cp "$tmpDir/repo/$f" "$skillDir/$f"
+        done
+        cp -r "$tmpDir/repo/bold-template-pack" "$skillDir/"
+        cp -r "$tmpDir/repo/scripts" "$skillDir/"
+        printf "  ✓ Copied supporting files for frontend-slides\n" | tee -a "$log"
+      else
+        printf "  warning: failed to clone frontend-slides repo for fixup\n" | tee -a "$log"
+      fi
+      rm -rf "$tmpDir"
     fi
   '';
 }

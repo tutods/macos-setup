@@ -282,3 +282,132 @@ After the PR is created, output the URL:
 
 <url>
 ```
+
+---
+
+## Step 7 — Review the Pull Request
+
+After the PR is created, ask:
+
+```
+Question: "Review the pull request?"
+Header: "Review PR"
+Options:
+  - label: "Yes, review it"
+    description: "Generate a code review of the PR diff"
+  - label: "No, done"
+    description: "Stop here — PR is open, no review needed"
+```
+
+If "No, done" → stop.
+
+If "Yes, review it" → continue.
+
+### 7a — Generate the review
+
+1. Read the PR diff: `gh pr diff <pr-number>`
+2. Produce a thorough code review: bugs, logic errors, security concerns, missing tests, style issues, and improvement suggestions. Each finding should include the file, line (if applicable), a description of the issue, and a suggested fix.
+
+### 7b — Post to GitHub?
+
+```
+Question: "Post review to GitHub?"
+Header: "Post review"
+Options:
+  - label: "No, just show it"
+    description: "Display the review inline — do NOT save to any file"
+  - label: "Yes, post to GitHub"
+    description: "Submit the review via gh pr review"
+```
+
+If "No, just show it" → display the review and stop. **Do not write to any file.**
+
+If "Yes, post to GitHub" → continue.
+
+### 7c — Feedback on findings
+
+```
+Question: "Want to give feedback on the findings before posting?"
+Header: "Feedback"
+Options:
+  - label: "Yes, let me review each finding"
+    description: "Show each finding and let me react"
+  - label: "No, post as-is"
+    description: "Skip feedback, post the review directly"
+```
+
+If "Yes, let me review each finding" → show each finding one at a time and ask:
+
+```
+Question: "Agree with this finding?"
+Header: "Finding feedback"
+Options:
+  - label: "👍 Agree"
+    description: "This finding is correct — include it"
+  - label: "👎 Disagree"
+    description: "This finding is wrong — drop it"
+  - label: "👀 Not sure"
+    description: "Unsure — keep it but flag as uncertain"
+```
+
+Only findings marked 👍 or 👀 are included in the final review. 👎 findings are dropped.
+
+### 7d — Review format
+
+```
+Question: "How should the review be posted?"
+Header: "Review format"
+Options:
+  - label: "Inline review with overall comment"
+    description: "Line-specific comments + a summary status comment"
+  - label: "Single comment with all findings"
+    description: "One review body containing everything"
+  - label: "Multiple comments"
+    description: "Separate review comment per finding"
+```
+
+### 7e — Attribution
+
+```
+Question: "Add attribution to each comment?"
+Header: "Attribution"
+Options:
+  - label: "Yes, add attribution"
+    description: "Prepend 'Reviewed by <AI model>' at the beginning of each comment"
+  - label: "No attribution"
+    description: "Skip — no model credit"
+```
+
+If "Yes" → prepend `Reviewed by <current AI model>` at the **beginning** of each comment. Use the model name that is currently running the session.
+
+### 7f — Post the review
+
+Based on the chosen format:
+
+**Inline review with overall comment:**
+
+Use the GitHub Reviews API for line-specific comments with a summary:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/<pr-number>/reviews \
+  --method POST \
+  --field event=COMMENT \
+  --field 'body=<overall-comment>' \
+  --field 'comments=<json-array-of-inline-comments>'
+```
+
+Each inline comment object: `{ "path": "<file>", "line": <line>, "body": "<comment>" }`.
+
+**Single comment with all findings:**
+
+```bash
+gh pr review <pr-number> --comment --body "<review>"
+```
+
+**Multiple comments:**
+
+```bash
+gh pr comment <pr-number> --body "<finding-1>"
+gh pr comment <pr-number> --body "<finding-2>"
+# ...one per finding
+```

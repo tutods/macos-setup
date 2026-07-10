@@ -16,8 +16,8 @@ vercel-labs/agent-skills -s web-design-guidelines
 anthropics/skills -s mcp-builder -s skill-creator
 mattpocock/skills -s grill-with-docs -s prototype -s handoff -s grill-me
 anthropics/knowledge-work-plugins -s system-design -s write-spec -s accessibility-review
-wshobson/agents -s architecture-patterns -s deployment-pipeline-design -s design-system-patterns -s error-handling-patterns -s auth-implementation-patterns -s database-migration -s dependency-upgrade -s nx-workspace-patterns
+wshobson/agents -s architecture-patterns -s deployment-pipeline-design -s design-system-patterns -s error-handling-patterns -s auth-implementation-patterns -s database-migration -s dependency-upgrade -s nx-workspace-patterns -s multi-reviewer-patterns -s parallel-debugging -s parallel-feature-development -s team-composition-patterns -s team-communication-protocols
 secondsky/claude-skills -s react-hook-form-zod -s database-schema-design -s rest-api-design -s sql-query-optimization -s sql-best-practices -s access-control-rbac -s csrf-protection -s health-check-endpoints -s xss-prevention -s systematic-debugging -s verification-before-completion -s image-optimization -s github-cli
-biomejs/biome -s biome-developer
+biomejs/biome -s biome-developer -s testing-codegen
 mindrally/skills -s pnpm
 oakoss/agent-skills -s prompt-engineering -s secure-ai -s css-animation-patterns -s design-system -s find-skills -s react-patterns -s react-performance -s responsive-images -s tailwind -s accessibility -s openapi -s pino-logging -s zod-validation -s vitest-testing -s vite -s github-actions -s git-workflow -s docker -s application-security -s technical-docs -s typescript-patterns
