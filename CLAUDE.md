@@ -119,6 +119,13 @@ Local in-repo skill sources live at `skills/local/` and deploy via `home.file` (
 
 Key: `pkgs.git` + `pkgs.nodejs` are injected into PATH during activation — required because `npx skills add owner/repo` git-clones the source. Without `git`, GitHub-sourced packages silently fail.
 
+## Repo Rules
+
+- **Repo scripts are zero-dependency bash.** `nix.sh` and anything run at bootstrap must work with bash built-ins only — no `gum`, no external TUI tools (a script that installs dependencies can't depend on them). A gum-based TUI was tried and reverted.
+- **Git remotes stay SSH.** Never switch them to HTTPS during reviews or "fixes".
+- **Configs the app itself writes (e.g. Zed `settings.json`) are seeded as a one-time copy, not a store symlink** — a read-only symlink breaks the app's own save.
+- One-off gotchas live in `docs/ai-lessons.md` — check it before debugging setup issues that feel familiar.
+
 ## CI
 
 GitHub Actions (`flake-checker.yaml`) validates the flake on push and daily. Renovate auto-merges minor/patch updates for `nixpkgs`, `home-manager`, `nix-darwin`, and `nix-homebrew`.
