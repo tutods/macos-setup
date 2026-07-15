@@ -2,7 +2,6 @@
   homebrew.casks = [
     # AI editors
     "trae"
-    "warp"
     "supacode"
 
     # API & dev tools

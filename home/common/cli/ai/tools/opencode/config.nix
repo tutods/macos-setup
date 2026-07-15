@@ -5,7 +5,6 @@
 }: let
   base = {
     "\$schema" = "https://opencode.ai/config.json";
-    plugin = ["@warp-dot-dev/opencode-warp"];
     experimental.openTelemetry = false;
     share = "disabled";
     autoupdate = false;

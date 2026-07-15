@@ -11,7 +11,6 @@
       "firefox"
       "gcloud-cli"
       "slack"
-      "warp"
       "openvpn-connect"
     ];
   };
