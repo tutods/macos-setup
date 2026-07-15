@@ -27,8 +27,6 @@
       "Read(~/.config/fish/secrets.fish)"
     ];
 
-    env.CLAUDE_CODE_SKIP_PROMPT_HISTORY = "1";
-
     hooks.PreToolUse = [
       {
         matcher = "Bash";
