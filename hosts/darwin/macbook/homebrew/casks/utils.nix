@@ -14,7 +14,6 @@
     # Others
     "tailscale-app"
     "imageoptim"
-    "airbuddy"
     "marta"
     "keka"
     "balenaetcher"
