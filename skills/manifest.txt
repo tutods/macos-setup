@@ -21,3 +21,4 @@ secondsky/claude-skills -s react-hook-form-zod -s database-schema-design -s rest
 biomejs/biome -s biome-developer -s testing-codegen
 mindrally/skills -s pnpm
 oakoss/agent-skills -s prompt-engineering -s secure-ai -s css-animation-patterns -s design-system -s find-skills -s react-patterns -s react-performance -s responsive-images -s tailwind -s accessibility -s openapi -s pino-logging -s zod-validation -s vitest-testing -s vite -s github-actions -s git-workflow -s docker -s application-security -s technical-docs -s typescript-patterns
+yizhiyanhua-ai/fireworks-tech-graph/skills/fireworks-tech-graph
