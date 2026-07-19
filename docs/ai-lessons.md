@@ -18,6 +18,10 @@ Specific incidents worth remembering but too narrow for standing rules. Each ent
 - **Escape `$` in regexes passed to `fd`/`rg` from fish** — fish expands `$` as a variable and the command breaks (`d6ac2bb`).
 - **Git remotes stay SSH** — don't "fix" them to HTTPS during audits; SSH is the intended auth path.
 
+## Node / package managers
+
+- **pnpm ≥10.x stopped reading the `pnpm` field in `package.json`** — settings like `onlyBuiltDependencies` moved to `pnpm-workspace.yaml`; the old field only produces a WARN and silently does nothing (hit in jps, 2026-07-17). Move the keys, don't ignore the warning.
+
 ## Frontend
 
 - **`@unpic/react` handles preload/LQIP via its own props (`background`, priority)** — hand-rolled lazy-loading/preload tricks around it broke the hero image twice (a-optica `68a7ca8` revert, `8e2ec74` fix). Configure the component, don't work around it.

@@ -1,18 +1,24 @@
 ## API Conventions
 
-### Response Envelope
+### Response Contract
 
-All API responses use this shape:
+No envelope. The HTTP status code is the sole success/error discriminator — the body is either the data itself or the error itself, never wrapped:
 
 ```typescript
-// Success
-{ data: T, error: null }
+// Success, single resource
+T
 
-// Error
-{ data: null, error: { code: string; message: string; details?: unknown } }
+// Success, list
+{ items: T[], total: number }
+
+// Success, no content (204)
+// (empty body)
+
+// Error (any non-2xx)
+{ code: string; message: string; details?: unknown }
 ```
 
-Never return raw data without the envelope. Never throw unhandled errors — always map to the error shape.
+Error codes are machine-readable strings (`CUSTOMER_NOT_FOUND`, `VALIDATION_ERROR`), not numbers. Never wrap responses in `{ data, error }` — that envelope was tried and deliberately dropped (JPS ADR-0015). Never throw unhandled errors — always map to the error shape.
 
 ### HTTP Status Codes
 
@@ -60,10 +66,16 @@ Rules:
 
 ### Pagination
 
-Prefer cursor-based pagination for large datasets:
+Offset pagination for typical admin/list endpoints — request `?page=1&pageSize=50`, respond:
 
 ```typescript
-{ data: T[], nextCursor: string | null, hasMore: boolean }
+{ items: T[], total: number }
 ```
 
-Offset pagination only for small, non-real-time datasets where cursor is overkill.
+The client derives `page`/`totalPages` from its own request params plus `total` — don't echo them back.
+
+Cursor-based pagination only for large or real-time datasets:
+
+```typescript
+{ items: T[], nextCursor: string | null, hasMore: boolean }
+```
