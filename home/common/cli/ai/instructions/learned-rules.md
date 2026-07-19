@@ -47,3 +47,18 @@ Standing rules mined from past corrections. Each one exists because the same mis
   Wrong: `for (const item of items) { results.push(fn(item)) }`. Right: `const results = items.map(fn)`.
 - **Avoid type casting.** No `as` to silence the compiler — narrow, use a type guard, or fix the type at the source (`as const` and test files excepted).
   Wrong: `const user = data as User`. Right: `const user = userSchema.parse(data)` or a narrowing check.
+- **Every new Node package is ESM + TypeScript.** `"type": "module"` in every `package.json`; no CJS, no plain JS files (stated explicitly in tutods sessions).
+  Wrong: new package without `"type": "module"`. Right: ESM + TS from the first commit.
+- **Every package gets a path alias to its source root immediately; no deep relative imports.** Current convention is `@/*` → `src/` (tutods migrated from `~/*` — check the project's tsconfig, don't assume).
+  Wrong: `import x from "../../lib/utils"`. Right: `import x from "@/lib/utils"` with the alias wired in tsconfig + bundler.
+- **Never name Tailwind v4 `@theme` tokens with core t-shirt keys** (`--container-sm/md/lg/xs/xl/…`). They silently shadow the core size scale app-wide (broke Sheet/Dialog widths in tutods). Use semantic names (`--container-prose`).
+  Wrong: `@theme { --container-lg: 1040px }`. Right: `@theme { --container-page: 1040px }` → `max-w-page`.
+- **Sanity projects: shape data in GROQ, not TS.** Defaults via `coalesce()` in the projection; Portable Text → string via `pt::text()` in the query. No post-query `??` wrapper helpers (corrected repeatedly in a-optica).
+  Wrong: `getSafePageData(result)` applying `??`. Right: `"title": coalesce(hero.title, "")` in the query.
+- **No single-letter callback parameters.** Name array/render-prop params after the thing (`item`, `index`, `event`/`evt`, `error`) — `i`, `e`, `err`, `res` are banned.
+  Wrong: `items.map((i) => …)`. Right: `items.map((item) => …)`.
+
+### Git & repo hygiene
+
+- **In a repo with the user's uncommitted work, commit with an explicit pathspec.** Plain `git commit` sweeps whatever the user had staged into your commit (happened twice with a staged deletion in a-optica).
+  Wrong: `git add my-file && git commit -m …`. Right: `git commit -m … -- my-file` (or verify `git diff --cached --stat` first).

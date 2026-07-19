@@ -22,6 +22,10 @@ Specific incidents worth remembering but too narrow for standing rules. Each ent
 
 - **pnpm ≥10.x stopped reading the `pnpm` field in `package.json`** — settings like `onlyBuiltDependencies` moved to `pnpm-workspace.yaml`; the old field only produces a WARN and silently does nothing (hit in jps, 2026-07-17). Move the keys, don't ignore the warning.
 
+## Projects
+
+- **`~/Developer/AI/a-optica` is a dead path** (empty except `.idea`) — the live project is `~/Developer/freelances/a-optica`. Its session-memory rules were ported into that repo's `.universal-ai-config/instructions/` on 2026-07-19; don't mine the dead memory again.
+
 ## Frontend
 
 - **`@unpic/react` handles preload/LQIP via its own props (`background`, priority)** — hand-rolled lazy-loading/preload tricks around it broke the hero image twice (a-optica `68a7ca8` revert, `8e2ec74` fix). Configure the component, don't work around it.
