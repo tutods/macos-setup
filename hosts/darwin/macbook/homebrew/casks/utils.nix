@@ -21,5 +21,6 @@
     "1password"
     "jordanbaird-ice"
     "iina"
+    "claude"
   ];
 }
