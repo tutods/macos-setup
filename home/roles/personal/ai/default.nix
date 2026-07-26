@@ -29,7 +29,7 @@ in {
         force = true;
       };
     }
-  ]) ["elementor-crocoblock"]);
+  ]) ["elementor-crocoblock" "optimize-images"]);
 
   home.ai.extraMcpServers = {
     docker = ai.mkServer {

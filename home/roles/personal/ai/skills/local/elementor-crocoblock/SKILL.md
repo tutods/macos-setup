@@ -29,29 +29,43 @@ MCP tools (`add-container`, `get-page-structure`, `get-widget-schema`, `update-e
 
 ## Layout system (the core recipe)
 
-Every section follows the same two-layer container pattern:
+**Default: one container per section, not two.** Set `content_width: "boxed"` directly on the
+section's own container, alongside its background (color/image/gradient). Elementor's `boxed`
+content-width caps and centers that container's *content* via internal calculated padding — it
+does not shrink the container's own box, so a background painted on that same container still
+spans edge to edge. There is no need for a separate nested "inner boxed wrapper" purely to achieve
+centering — that was an earlier version of this recipe, corrected after diffing a user's own
+manually-edited pages against the original two-container builds: their finished sections carry
+`content_width: "boxed"` (or omit the key — same effective default) directly on the one section
+container, with the real content as direct children, no wrapper in between.
 
-- **Outer container** — full width, carries the background (color/image/gradient spans edge to
-  edge). Horizontal padding: **16px on desktop, tablet, and mobile — same value everywhere.**
-  Vertical padding: **80px** top/bottom (section rhythm), section-specific if the design calls for
-  more/less. Never hand-pick per-section left/right pixel padding to fake centering — that's what
-  the inner layer does.
+  **Only split into a separate outer(full) + inner(boxed) pair when the section genuinely has two
+  or more sibling sub-groups that need *different* content widths** — e.g. one full-bleed image
+  block sitting beside a capped text block in the same section (the full-width exception, below).
+  If every child in the section wants the same centered treatment, one container with
+  `content_width: "boxed"` is correct and sufficient.
 
-  Why 16px on desktop too, not just tablet/mobile: a `boxed` inner content wrapper caps at the
-  kit's `container_width` (1140px on this build) and centers via margin. That centering only kicks
-  in once the viewport is wider than the boxed width plus its own gutter. On viewports between the
-  tablet breakpoint and roughly 1140+2×gutter (~1025–1139px — small laptops), a boxed inner with
-  zero outer padding touches the screen edge. A uniform 16px outer gutter closes that band and
-  costs nothing on wide screens (absorbed into the centering margin above ~1172px).
+  If a section already has **multiple sibling children directly under one container**, each with
+  its own distinct alignment/gap (e.g. an eyebrow+heading group next to a 3-card row, both
+  independently `content_width: "boxed"`), that's already the right shape — don't wrap them in yet
+  another container, and don't try to merge them into each other either.
 
-- **Inner content wrapper** (nested inside the outer, holds the actual content) —
-  `content_width: "boxed"` (Elementor's native mechanism, anchored to the kit's `container_width`).
-  This is the default; use it without asking.
+- Horizontal padding on the section container: **16px on desktop, tablet, and mobile — same value
+  everywhere.** Vertical padding: **80px** top/bottom (section rhythm), section-specific if the
+  design calls for more/less. Never hand-pick per-section left/right pixel padding to fake
+  centering — that's what `content_width: "boxed"` already does natively.
 
-  **Full-width exception**: only when the design calls for a deliberate full-bleed split (image
-  fills half the section edge-to-edge, etc.) — use `content_width: "full"` on that inner wrapper,
-  and only after explicit approval for that specific section. Don't infer it from an unfinished or
-  unvalidated reference section elsewhere on the site.
+  Why 16px on desktop too, not just tablet/mobile: `boxed` caps content at the kit's
+  `container_width` (1140px on this build) and centers via margin. That centering only kicks in
+  once the viewport is wider than the boxed width plus its own gutter. On viewports between the
+  tablet breakpoint and roughly 1140+2×gutter (~1025–1139px — small laptops), boxed content with
+  zero outer padding touches the screen edge. A uniform 16px gutter closes that band and costs
+  nothing on wide screens (absorbed into the centering margin above ~1172px).
+
+- **Full-width exception**: use `content_width: "full"` only for a section (or the specific
+  sub-block within it) that deliberately needs a full-bleed split — image fills half the section
+  edge-to-edge, etc. — and only after explicit approval for that specific section. Don't infer it
+  from an unfinished or unvalidated reference section elsewhere on the site.
 
 - **Gap scale**: 24px between tightly related elements (heading + subtitle, icon + label), 56px
   between major sub-blocks within a section. Pick from this scale rather than inventing a new gap
@@ -62,20 +76,26 @@ Every section follows the same two-layer container pattern:
   `grid_columns_grid_tablet` explicitly); wider grids (3–5 cols) usually collapse to 1 on mobile,
   sometimes 2 on tablet — match the design.
 
-- **Avoid unnecessary containers.** Flatten wrapper containers that add no layout value (no
-  padding, no background, no distinct responsive behavior) — deep nesting (4–5 levels for a simple
-  two-column block) makes the tree harder to maintain and often the source of the boxed/full-width
-  gotcha below.
+- **Avoid unnecessary containers, generally.** Beyond the single-vs-split-container call above,
+  flatten any wrapper that adds no layout value (no padding, no background, no distinct responsive
+  behavior, no gap that matters) — deep nesting (4–5 levels for a simple two-column block) makes
+  the tree harder to maintain. A `gap` setting on a container with exactly one child is inert —
+  a clear sign that wrapper can be flattened away (reparent its child up, delete the wrapper).
 
 ### Hero recipe
 
 Verified identical across every finished hero on this build:
 
-- `flex_direction: column`, `justify_content: center`, `align_items: center`, gap 24px.
+- One container (per the layout system above — no separate boxed inner wrapper): `content_width:
+  "boxed"`, `flex_direction: column`, `justify_content: center`, `align_items: center`, gap 24px.
 - `min_height`: **85vh desktop / 70vh tablet / 80vh mobile**.
-- Padding: 0 (the hero's own min-height handles vertical space); horizontal gutter still 16px on
-  all breakpoints per the outer-container rule above (0 on desktop only if explicitly following an
-  older/different design system — confirm before deviating).
+- Padding: 0 vertical (the hero's own min-height handles vertical space); horizontal gutter still
+  16px on all breakpoints per the section-padding rule above (0 on desktop only if explicitly
+  following an older/different design system — confirm before deviating). If the design anchors
+  content to the bottom (`justify_content: "flex-end"`) rather than centering it, some vertical
+  padding-bottom is normal and section-specific — align_items still just needs to match the
+  content's own alignment (e.g. `flex-start` for left-aligned copy), since `boxed` centers the
+  1140px region regardless of the container's own align_items.
 - Background: image, `background_size: cover`, `background_position: center center`.
 - Overlay: `background_overlay_background: gradient`, two-stop gradient
   `rgba(49,36,23,0.8) → rgba(15,28,42,0.8)` at **180deg**, opacity 1. (Colors are this project's
@@ -116,9 +136,12 @@ Verified identical across every finished hero on this build:
   postmeta inserted manually before build tools work correctly — otherwise `add-container` and
   similar silently write a plain-text fallback into `post_content` instead of real Elementor data.
   Check `is_elementor` / this meta before trusting a builder tool call on an unfamiliar post.
-- **Any nested (non-top-level) container left at the auto-defaulted `content_width: "boxed"`**
-  snaps to the kit's literal width (e.g. 1140px) regardless of its flex context — always set
-  nested containers explicitly to `"full"` unless boxed is actually intended there.
+- **A container with `content_width` left unset defaults to the kit's boxed width** (e.g. 1140px)
+  regardless of its flex context — surprising on a nested container that's meant to just fill its
+  parent (a grid cell, a sub-panel of a split section). Set `content_width` explicitly on every
+  container: `"boxed"` on the section's own container (see layout system above), `"full"` on
+  nested containers that should just fill their parent (grid cells, split-section sub-panels) —
+  don't leave it unset and get surprised by the auto-boxed default.
 - **Responsive width cascade**: fixed-width elements (split images, thin dividers) need **explicit**
   `width_tablet` / `width_mobile` overrides — a desktop-only `width` on a `_flex_size: custom`
   element doesn't reliably cascade down, causing tablet overflow or a divider rendering as a full
