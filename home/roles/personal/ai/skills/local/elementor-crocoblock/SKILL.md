@@ -142,6 +142,11 @@ Verified identical across every finished hero on this build:
   container: `"boxed"` on the section's own container (see layout system above), `"full"` on
   nested containers that should just fill their parent (grid cells, split-section sub-panels) —
   don't leave it unset and get surprised by the auto-boxed default.
+- **Internal containers (grids, flexbox) carry a small default padding** even when none is set
+  explicitly — a nested grid/flex container meant to just hold widgets edge-to-edge (a stats row, an
+  icon+label card, a grid cell) picks up unwanted inset unless `padding` is explicitly zeroed. Set
+  `padding: {unit:"px", top:0, right:0, bottom:0, left:0, isLinked:true}` on every internal
+  container that has no deliberate custom padding of its own — don't rely on the default being zero.
 - **Responsive width cascade**: fixed-width elements (split images, thin dividers) need **explicit**
   `width_tablet` / `width_mobile` overrides — a desktop-only `width` on a `_flex_size: custom`
   element doesn't reliably cascade down, causing tablet overflow or a divider rendering as a full
