@@ -19,7 +19,6 @@
     "balenaetcher"
     "surfshark"
     "1password"
-    "jordanbaird-ice"
     "iina"
     "claude"
   ];

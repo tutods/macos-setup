@@ -11,6 +11,9 @@
     # Window management
     "rectangle-pro"
 
+    # Menu bar
+    "jordanbaird-ice"
+
     # Others
     "bitwarden"
     "raycast"
