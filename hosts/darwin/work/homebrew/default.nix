@@ -12,7 +12,6 @@
       "firefox"
       "gcloud-cli"
       "slack"
-      "openvpn-connect"
       "podman-desktop"
     ];
   };

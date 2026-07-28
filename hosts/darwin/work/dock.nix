@@ -13,7 +13,6 @@
           "/Applications/WebStorm.app"
           "/Users/daniel.a.sousa/Applications/Home Manager Apps/Visual Studio Code.app"
           "/Applications/Ghostty.app"
-          "/Applications/Warp.app"
         ]
       ];
     })

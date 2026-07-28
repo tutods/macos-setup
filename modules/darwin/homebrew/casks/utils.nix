@@ -8,9 +8,6 @@
     "onyx"
     "pearcleaner"
 
-    # Screen sharing
-    "obs"
-
     # Window management
     "rectangle-pro"
 
