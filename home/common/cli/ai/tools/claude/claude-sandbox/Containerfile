@@ -1,0 +1,62 @@
+FROM docker.io/library/ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Core CLI tools + GitHub CLI (gh apt repo)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        ripgrep \
+        fd-find \
+        jq \
+        less \
+        gpg \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+        && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+           | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+        && apt-get update \
+        && apt-get install -y --no-install-recommends gh \
+    && ln -s /usr/bin/fdfind /usr/local/bin/fd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Node.js 22 LTS (Claude Code runtime)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python + pipx (for graphify — pipx package is "graphifyy", see docs/ai-lessons.md)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-venv \
+        pipx \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g @anthropic-ai/claude-code
+
+RUN useradd --create-home --shell /bin/bash --uid 1000 claude
+
+USER claude
+WORKDIR /workspace
+
+# pipx binaries live here; persist on PATH for build + runtime.
+ENV PATH="/home/claude/.local/bin:${PATH}"
+
+# Install Claude Code skills from the manifest.
+# Synced from /skills/manifest.txt by Home Manager — edit there, not here.
+COPY --chown=claude:claude skills-manifest.txt /tmp/skills-manifest.txt
+RUN while IFS= read -r line; do \
+        case "$line" in ''|\#*) continue;; esac; \
+        echo "=> skills add: $line"; \
+        npx -y skills add $line -g -a claude-code -y || echo "   skipped: $line"; \
+    done < /tmp/skills-manifest.txt \
+    && rm /tmp/skills-manifest.txt
+
+# graphify: knowledge-graph skill + hooks. Package name is graphifyy (double-y).
+# Claude-only install — opencode isn't in this container.
+RUN pipx install graphifyy && graphify install
+
+ENTRYPOINT ["claude"]

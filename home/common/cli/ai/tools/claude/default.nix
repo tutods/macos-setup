@@ -1,3 +1,3 @@
 {
-  imports = [./settings.nix ./mcp.nix ./statusline.nix];
+  imports = [./settings.nix ./mcp.nix ./statusline.nix ./claude-sandbox];
 }
