@@ -21,6 +21,7 @@ in {
         role = "work";
       };
       masApps = sharedMasApps;
+      trustedTaps = ["atlassian/acli"];
     })
   ];
 }

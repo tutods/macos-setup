@@ -23,6 +23,7 @@
   brewUser,
   homeConfig,
   masApps ? {},
+  trustedTaps ? [],
 }: {
   pkgs,
   pkgsUnstable,
@@ -37,6 +38,13 @@
       lib.mapAttrsToList (name: id: "${toString id}\t${name}") masApps
     )
   );
+
+  # Homebrew 6.0.13+ refuses non-official tap formulae unless trusted.
+  # Seeded into brewUser's ~/.homebrew/trust.json before the activation bundle runs.
+  trustManifest = pkgs.writeText "homebrew-trust.json" (
+    builtins.toJSON {trustedtaps = trustedTaps;}
+  );
+  trustFile = "/Users/${brewUser}/.homebrew/trust.json";
 in {
   networking.hostName = hostname;
   system.primaryUser = username;
@@ -52,6 +60,13 @@ in {
   system.activationScripts.extraActivation.text =
     ''
       ${fixFishShell} "${username}"
+    ''
+    # Seed-once: never clobber taps the user added manually via `brew trust`.
+    + lib.optionalString (trustedTaps != []) ''
+      if [ ! -f "${trustFile}" ]; then
+        install -d -m 0755 -o "${brewUser}" -g staff "/Users/${brewUser}/.homebrew"
+        install -m 0644 -o "${brewUser}" -g staff "${trustManifest}" "${trustFile}"
+      fi
     ''
     + lib.optionalString (masApps != {}) ''
       ${installMasApps} "${username}" < "${masManifest}"
