@@ -17,6 +17,11 @@ in {
     };
   };
 
-  # Work-only AI skills (Storybook is used in work projects)
-  home.ai.extraSkillsManifest = "oakoss/agent-skills -s storybook-stories";
+  # Work-only AI skills (Storybook is used in work projects; Jira for ticket management)
+  home.ai.extraSkillsManifest = ''
+    oakoss/agent-skills -s storybook-stories
+    morphet81/cheat-sheets -s create-jira-ticket -s update-jira-ticket
+    alirezarezvani/claude-skills -s jira-expert
+    arjunmahishi/dotfiles -s acli-jira
+  '';
 }
