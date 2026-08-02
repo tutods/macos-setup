@@ -12,7 +12,7 @@ wshobson/agents -s postgresql-table-design -s gdpr-data-handling
 
 anthropics/knowledge-work-plugins -s brand-voice-enforcement -s content-creation -s ux-copy
 coreyhaines31/marketingskills
-kostja94/marketing-skills -s legal-page-generator
+kostja94/marketing-skills
 addyosmani/web-quality-skills
 charlie947/social-media-skills
 remotion-dev/skills

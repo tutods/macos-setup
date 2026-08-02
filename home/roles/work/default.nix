@@ -1,6 +1,5 @@
 {
   imports = [
     ./ai
-    ./shell.nix
   ];
 }

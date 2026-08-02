@@ -5,6 +5,13 @@
 }: let
   ai = import ../../../../lib/ai.nix {inherit pkgs;};
 in {
+  # Temporary — Kimi Code CLI, remove when done trying it out.
+  home.packages = [
+    (pkgs.writeShellScriptBin "kimi" ''
+      exec ${pkgs.nodejs}/bin/npx -y @moonshot-ai/kimi-code@latest "$@"
+    '')
+  ];
+
   home.ai.extraInstructions =
     ai.appendIfNonEmpty
     (builtins.readFile ./instructions.md)
