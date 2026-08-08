@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code statusline — 2 lines.
 # Line 1: model · dir · git branch + dirty counts
-# Line 2: context bar + % · cost · duration · lines · 5h% · 7d%
+# Line 2: context bar + % · cost · lines · 5h% + reset · 7d% + reset
 #
 # JSON session data arrives on stdin:
 # https://code.claude.com/docs/en/statusline
@@ -12,12 +12,13 @@ input=$(cat)
 MODEL=$(echo "$input" | jq -r '.model.display_name // "Claude"')
 DIR=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
 COST=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
-DURATION_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
 LINES_ADD=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 LINES_REM=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 FIVE_H=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 WEEK=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+FIVE_H_RESET=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+WEEK_RESET=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
 CYAN='\033[36m'
 GREEN='\033[32m'
@@ -58,16 +59,6 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
 fi
 
 COST_FMT=$(printf '$%.2f' "$COST")
-DURATION_SEC=$((DURATION_MS / 1000))
-if [ "$DURATION_SEC" -ge 3600 ]; then
-  HOURS=$((DURATION_SEC / 3600))
-  MINS=$(((DURATION_SEC % 3600) / 60))
-  DURATION_FMT="${HOURS}h${MINS}m"
-else
-  MINS=$((DURATION_SEC / 60))
-  SECS=$((DURATION_SEC % 60))
-  DURATION_FMT="${MINS}m${SECS}s"
-fi
 
 rate_color() {
   if [ "$1" -ge 90 ]; then printf '%b' "$RED"
@@ -75,18 +66,40 @@ rate_color() {
   else printf '%b' "$GREEN"; fi
 }
 
+fmt_reset() {
+  [ -z "${1:-}" ] && return 0
+  local now diff days hours mins
+  now=$(date +%s)
+  diff=$(( $1 - now ))
+  [ "$diff" -le 0 ] && { printf 'now'; return; }
+  days=$(( diff / 86400 ))
+  hours=$(( (diff % 86400) / 3600 ))
+  mins=$(( (diff % 3600) / 60 ))
+  if [ "$days" -gt 0 ]; then
+    printf '%dd%dh' "$days" "$hours"
+  elif [ "$hours" -gt 0 ]; then
+    printf '%dh%dm' "$hours" "$mins"
+  else
+    printf '%dm' "$mins"
+  fi
+}
+
 RATE=""
 if [ -n "$FIVE_H" ]; then
   FIVE_H_INT=$(printf '%.0f' "$FIVE_H")
+  FIVE_H_FMT=$(fmt_reset "$FIVE_H_RESET")
   RATE="$(rate_color "$FIVE_H_INT")5h ${FIVE_H_INT}%${RESET}"
+  [ -n "$FIVE_H_FMT" ] && RATE="${RATE} ${DIM}in ${FIVE_H_FMT}${RESET}"
 fi
 if [ -n "$WEEK" ]; then
   WEEK_INT=$(printf '%.0f' "$WEEK")
+  WEEK_FMT=$(fmt_reset "$WEEK_RESET")
   if [ -n "$RATE" ]; then
     RATE="${RATE} ${DIM}·${RESET} $(rate_color "$WEEK_INT")7d ${WEEK_INT}%${RESET}"
   else
     RATE="$(rate_color "$WEEK_INT")7d ${WEEK_INT}%${RESET}"
   fi
+  [ -n "$WEEK_FMT" ] && RATE="${RATE} ${DIM}in ${WEEK_FMT}${RESET}"
 fi
 
 DIR_NAME="${DIR##*/}"
@@ -115,7 +128,6 @@ printf '%b\n' "${CYAN}${MODEL}${RESET} ${DIM}in${RESET} 📁 ${DIR_NAME}${GIT}${
 
 LINE2="${BAR_COLOR}${BAR}${RESET} ${PCT}%"
 LINE2="${LINE2} ${SEP} ${YELLOW}${COST_FMT}${RESET}"
-LINE2="${LINE2} ${SEP} ⏱ ${DURATION_FMT}"
 LINE2="${LINE2} ${SEP} ${GREEN}+${LINES_ADD}${RESET} ${RED}-${LINES_REM}${RESET}"
 [ -n "$RATE" ] && LINE2="${LINE2} ${SEP} ${RATE}"
 printf '%b\n' "$LINE2"
