@@ -42,7 +42,7 @@
 
       set fzf_preview_dir_cmd eza --all --color=always
 
-      fnm env --use-on-cd --shell fish --corepack-enabled --resolve-engines | source
+      fnm env --shell fish --corepack-enabled --resolve-engines | source
     '';
   };
 }
