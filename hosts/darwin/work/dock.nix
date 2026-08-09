@@ -4,6 +4,7 @@
       groups = [
         [
           "/Applications/Firefox.app"
+          "/Applications/Safari.app"
           "/Applications/Slack.app"
           "/System/Applications/Mail.app"
           "/System/Applications/Calendar.app"
