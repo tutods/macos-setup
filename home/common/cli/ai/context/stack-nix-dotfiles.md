@@ -55,7 +55,7 @@ home/common/cli/ai/
 ├── instructions/  → shared runtime AI instructions (→ ~/.claude/rules/workflow.md)
 ├── context/       → stack reference files (→ ~/.claude/context/)
 ├── prompts/       → reusable prompt templates (@-mention in conversations)
-├── init.nix       → pipx installs + graphify hook registration (version-guarded)
+├── init.nix       → pipx installs (guarded), one-time tool migrations
 ├── options.nix    → home.ai.* options (instructions, MCP, marketplaces, plugins)
 └── mcp-servers.nix → shared MCP server definitions (Nix-authoritative)
 

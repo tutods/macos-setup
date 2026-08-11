@@ -10,7 +10,8 @@ Specific incidents worth remembering but too narrow for standing rules. Each ent
 - **Plugins are coarser than skills** — a marketplace's plugin usually ships several skills, and the plugin name rarely matches the skill name. Read the repo's `marketplace.json` and match the plugin whose `source` dir holds the `skills/<name>/` you want; guessing produces a config that silently installs nothing useful.
 - **Custom skills are copied, not symlinked** — `home.file` points into the read-only Nix store and Claude Code writes inside skill directories. `lib/ai.nix:mkLocalSkills` does a `cp -R` + `chmod -R u+w`, ordered after `linkGeneration` so Home Manager's teardown of the old generation doesn't delete the fresh copy.
 - **`resciencelab/opc-skills` has an upstream bug** — it writes `skillPath` pointing at `SKILL.md` instead of the directory, which makes `claude /doctor` fail. Don't re-add until fixed.
-- **graphify's pipx package is `graphifyy`** (double y) — the obvious name installs the wrong thing (`df2e9c4`).
+- **graphify's pipx package is `graphifyy`** (double y) — the obvious name installs the wrong thing (`df2e9c4`). Removed since; kept here because the name trips up anyone re-adding it.
+- **A tool that installs *itself* into the agent must be uninstalled before it's dropped from Nix.** `graphify install` wrote a `PreToolUse` hook into `~/.claude/settings.json` and a skill tree into `~/.claude/skills/graphify/`; deleting the Nix block alone would have left a hook firing on every Bash/Read/Glob call against a missing binary. Run the tool's own `uninstall` first — `init.nix` has the guarded migration.
 
 ## Nix / dotfiles
 

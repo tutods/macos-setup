@@ -227,7 +227,7 @@ Managed in `home/common/cli/ai/init.nix`. Runs automatically on every `darwin-re
 | `rtk init -g` | `rtk` in PATH | Configure rtk proxy for Claude Code + Copilot |
 | `pipx install code-review-graph` | not in `pipx list` | Install code-review-graph CLI |
 | `pipx install ttok` | not in `pipx list` | Install ttok (LLM token counter) |
-| `graphify install` | version changed | Register graphify hooks |
+| graphify removal | `graphify` still on PATH | One-time: `graphify uninstall` (drops its PreToolUse hook + `~/.claude/skills/graphify/`), then `pipx uninstall graphifyy` |
 | `localSkills*` | every switch | Copy custom skills into `~/.claude/skills/` |
 
 ---
