@@ -6,9 +6,4 @@
     ./casks/fonts.nix
     ./casks/utils.nix
   ];
-
-  homebrew.brews = [
-    "podman"
-    "docker-compose"
-  ];
 }

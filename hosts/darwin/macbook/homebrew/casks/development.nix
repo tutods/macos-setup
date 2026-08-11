@@ -9,7 +9,7 @@
     "responsively"
 
     # Containers
-    "podman-desktop"
+    "orbstack"
 
     # JetBrains (Homebrew instead of nixpkgs — avoids Nix wrapper issues)
     "datagrip"

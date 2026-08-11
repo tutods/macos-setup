@@ -39,10 +39,6 @@ in {
   ]) ["elementor-crocoblock" "optimize-images"]);
 
   home.ai.extraMcpServers = {
-    docker = ai.mkServer {
-      cmd = "docker";
-      args = ["mcp" "gateway" "run"];
-    };
     postgres = ai.mkServer {
       cmd = "sh";
       args = ["-c" "doppler run -- npx -y @modelcontextprotocol/server-postgres"];
