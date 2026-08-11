@@ -1,6 +1,6 @@
 # ── Shared MCP server definitions ─────────────────────────────────────────────
 #
-# Pure data — no activations. Imported by claude/default.nix and opencode/mcp.nix.
+# Pure data — no activations. Imported by tools/claude/mcp.nix.
 #
 # ── GitHub Token ──────────────────────────────────────────────────────────────
 # github server reads GITHUB_PERSONAL_ACCESS_TOKEN from env.

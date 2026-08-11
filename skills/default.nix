@@ -1,84 +1,61 @@
+# ── Custom skills — shared across every role ──────────────────────────────────
+#
+# In-repo skill sources only. Everything else comes from a Claude Code plugin
+# marketplace (home/common/cli/ai/tools/claude/plugins.nix).
+#
+# Installed as real directories under ~/.claude/skills, not store symlinks —
+# see lib/ai.nix:mkLocalSkills for why. Role-specific custom skills live in
+# home/roles/<role>/ai/skills/local/ and are installed the same way.
+#
 {
   config,
   pkgs,
   lib,
   ...
 }: let
-  commonManifest = builtins.readFile ./manifest.txt;
-  extra = config.home.ai.extraSkillsManifest;
-  combinedContent =
-    commonManifest
-    + (
-      if extra != ""
-      then "\n" + extra
-      else ""
-    );
-  combinedManifest = pkgs.writeText "ai-skills-manifest" combinedContent;
-  manifestHash = builtins.hashString "sha256" combinedContent;
-
-  localSkills = ["llm-council" "content-writer" "ts-strict-audit" "conventional-commit" "open-pr" "deep-review" "ui-iterate"];
+  ai = import ../lib/ai.nix {inherit pkgs;};
 in {
-  # Deploy local skills to both the open agent-skills standard location and Claude Code.
-  # Each entry becomes a Nix store symlink — force=true replaces existing directories.
-  home.file =
-    lib.listToAttrs (lib.concatMap (name: [
-        {
-          name = ".agents/skills/${name}";
-          value = {
-            source = ./local/${name};
-            force = true;
-          };
-        }
-        {
-          name = ".claude/skills/${name}";
-          value = {
-            source = ./local/${name};
-            force = true;
-          };
-        }
-      ])
-      localSkills)
-    // {
-      # CONNECTORS.md — referenced by skills from anthropics/knowledge-work-plugins
-      # via ../../CONNECTORS.md (resolves from ~/.agents/skills/<name>/ to ~/.agents/)
-      ".agents/CONNECTORS.md".source = ./CONNECTORS.md;
-    };
+  imports = [
+    (ai.mkLocalSkills {
+      inherit lib;
+      label = "common";
+      dir = ./local;
+      names = [
+        "llm-council"
+        "content-writer"
+        "ts-strict-audit"
+        "conventional-commit"
+        "open-pr"
+        "deep-review"
+        "ui-iterate"
+      ];
+    })
+  ];
 
-  home.activation.aiSkillsSync = lib.hm.dag.entryAfter ["writeBoundary" "aiInit"] ''
-    stamp="$HOME/.config/ai/.skills-sync-hash"
-    log="$HOME/.cache/ai-skills-install.log"
-    mkdir -p "$HOME/.config/ai" "$HOME/.cache"
+  # ~/.claude/skills used to hold whatever `npx skills add` had dropped there.
+  # Now only custom skills belong in it — external ones ship inside their
+  # plugin. Anything else is a leftover shadowing a plugin's copy, so report it
+  # rather than delete it: the directory may be a hand-written skill.
+  home.activation.customSkillsAudit = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
+    dest="$HOME/.claude/skills"
+    managed=" ${lib.concatStringsSep " " config.home.ai.customSkills} "
+    stray=""
 
-    if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "${manifestHash}" ]; then
-      echo "↣ AI skills up to date"
-    else
-      export PATH="${pkgs.git}/bin:${pkgs.nodejs}/bin:$PATH"
-      # Trigger npx skills "Agent detected" non-interactive mode
-      export CLAUDECODE=1
-      export AI_AGENT=claude-code_agent
+    for path in "$dest"/*; do
+      [ -e "$path" ] || continue
+      name=$(basename "$path")
+      case "$managed" in
+        *" $name "*) ;;
+        *) stray="$stray $name" ;;
+      esac
+    done
 
-      # Read manifest into array before iterating (avoids stdin contention with npx)
-      entries=()
-      while IFS= read -r raw; do
-        clean=$(printf '%s' "$raw" | sed 's/#.*//' | xargs)
-        [ -n "$clean" ] && entries+=("$clean")
-      done < "${combinedManifest}"
-
-      printf "↣ Syncing AI skills (%d sources)...\n" "''${#entries[@]}" | tee -a "$log"
-      ok=0; fail=0
-      for entry in "''${entries[@]}"; do
-        printf "  ▸ npx skills add %s -g -a claude-code -a opencode -y\n" "$entry" | tee -a "$log"
-        if npx skills add $entry -g -a claude-code -a opencode -y </dev/null >>"$log" 2>&1; then
-          ok=$((ok+1))
-        else
-          printf "    warning: failed: %s\n" "$entry" | tee -a "$log"
-          fail=$((fail+1))
-        fi
-      done
-      printf "↣ Skills sync: %d ok, %d failed (log: %s)\n" "$ok" "$fail" "$log"
-
-      # Only stamp hash if fully successful (retry on next rebuild if any failed)
-      [ "$fail" -eq 0 ] && printf "%s" "${manifestHash}" > "$stamp"
+    if [ -n "$stray" ]; then
+      printf "\n  ⚠  Unmanaged skills in ~/.claude/skills:\n"
+      for name in $stray; do printf "       %s\n" "$name"; done
+      printf "  These predate the move to plugins (or were added by hand).\n"
+      printf "  Remove the ones you don't want with:\n"
+      printf "    rm -rf%s\n\n" "$(for name in $stray; do printf " ~/.claude/skills/%s" "$name"; done)"
     fi
   '';
 }

@@ -13,7 +13,7 @@
 }: {
   home.activation.aiInit = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Ensure config dirs exist before tool init
-    mkdir -p "$HOME/.claude" "$HOME/.config/opencode" "$HOME/.config/ai"
+    mkdir -p "$HOME/.claude" "$HOME/.config/ai"
 
     # ── pipx packages ─────────────────────────────────────────────────────
     # Check pipx list before installing to avoid re-installing on every switch.
@@ -34,9 +34,8 @@
     graphify_stamp="$HOME/.config/ai/.graphify-version"
     graphify_ver=$(graphify --version 2>/dev/null || echo "")
     if [ -n "$graphify_ver" ] && { [ ! -f "$graphify_stamp" ] || [ "$(cat "$graphify_stamp")" != "$graphify_ver" ]; }; then
-      echo "↣ graphify install (all agents) — $graphify_ver"
-      graphify install                       || echo "  ⚠ graphify install (claude) failed"
-      graphify install --platform opencode   || echo "  ⚠ graphify install (opencode) failed"
+      echo "↣ graphify install — $graphify_ver"
+      graphify install || echo "  ⚠ graphify install (claude) failed"
       printf "%s" "$graphify_ver" > "$graphify_stamp"
     else
       echo "↣ graphify up to date ($graphify_ver)"

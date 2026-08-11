@@ -6,7 +6,6 @@
     ./options.nix
     ./rtk
     ./tools/claude
-    ./tools/opencode
     ../../../../skills
   ];
 

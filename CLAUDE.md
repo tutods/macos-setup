@@ -68,7 +68,7 @@ Fish shell is the primary shell, configured in `home/common/shell/fish/` with se
 
 AI instructions are split into shared and role-specific:
 
-- `home/common/cli/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.config/opencode/AGENTS.md`)
+- `home/common/cli/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.claude/rules/workflow.md`)
 
 - `home/common/cli/ai/options.nix` — defines `home.ai.extraInstructions` option (default `""`)
 - `home/roles/personal/ai/instructions.md` — personal-specific additions (e.g., `doppler`)
@@ -97,27 +97,35 @@ For person-specific overrides (GPG keys, email, etc.) pass `extraImports` pointi
 
 ### AI Skills
 
-Skills are installed from `skills/manifest.txt` + `home/roles/personal/ai/skills/manifest.txt` during `darwin-rebuild` activation. Install runs once per manifest change (guarded by `~/.config/ai/.skills-sync-hash`). Output logged to `~/.cache/ai-skills-install.log`.
+Two sources, and only two.
 
-```bash
-# Force reinstall all skills (next ./nix.sh run will trigger install loop)
-rm ~/.config/ai/.skills-sync-hash && ./nix.sh macbook
+**External skills — Claude Code plugin marketplaces.** Declared in Nix, written into `~/.claude/settings.json` as `extraKnownMarketplaces` + `enabledPlugins`; Claude Code installs them itself on next launch. There is no sync script and nothing to run by hand.
 
-# Inspect last install run (errors, per-source status)
-cat ~/.cache/ai-skills-install.log
+| Where | Scope |
+|-------|-------|
+| `home/common/cli/ai/tools/claude/plugins.nix` | both machines |
+| `home/roles/personal/ai/default.nix` | personal only |
+| `home/roles/work/ai/default.nix` | work only |
 
-# List currently installed skills
-npx skills ls -g
+Roles contribute through two options (`home/common/cli/ai/options.nix`), which merge across modules:
 
-# Add a new skill source: append a line to the relevant manifest
-# skills/manifest.txt                              ← both machines
-# home/roles/personal/ai/skills/manifest.txt       ← personal only
-# Then run ./nix.sh macbook to apply
+```nix
+home.ai.marketplaces = { <key> = "<owner>/<repo>"; };   # key is chosen here, not read from the repo
+home.ai.plugins      = [ "<plugin>@<key>" ];
 ```
 
-Local in-repo skill sources live at `skills/local/` and deploy via `home.file` (dual target: `~/.agents/skills/` for the open standard, `~/.claude/skills/` for Claude Code discovery). They are NOT in the manifests.
+Plugins are coarser than skills. To add one, find the plugin that ships the skill you want in the source repo's `.claude-plugin/marketplace.json` — a plugin's `source` dir contains the `skills/<name>/` you're after — then add the marketplace and the plugin. `claude-plugins-official` is built into Claude Code and needs no marketplace entry.
 
-Key: `pkgs.git` + `pkgs.nodejs` are injected into PATH during activation — required because `npx skills add owner/repo` git-clones the source. Without `git`, GitHub-sourced packages silently fail.
+A repo without `.claude-plugin/marketplace.json` **cannot** be installed this way. `docs/dropped-skill-sources.md` records the sources dropped for that reason when this repo migrated off `npx skills`, so they can be re-checked later.
+
+**Custom skills — in-repo sources.** `skills/local/` (both roles), `home/roles/<role>/ai/skills/local/` (role-only). Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under `~/.claude/skills/` — copied, not symlinked into the Nix store, because Claude Code writes inside a skill directory. `~/.agents/` is not used.
+
+```bash
+# Add a custom skill: create skills/local/<name>/SKILL.md, add <name> to the
+# `names` list in skills/default.nix, then ./nix.sh macbook
+```
+
+Every deploy also lists directories in `~/.claude/skills/` that this repo doesn't own — leftovers from the old `npx skills` era, which now shadow the copies shipped inside plugins. It prints the `rm -rf` line and never deletes on its own, since a stray directory could be a hand-written skill.
 
 ## Repo Rules
 

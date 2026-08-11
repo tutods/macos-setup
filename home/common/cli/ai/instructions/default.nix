@@ -18,19 +18,13 @@
     ./dependency-hygiene.md
   ];
 
-  toolExtras = {
-    claude = builtins.readFile ../tools/claude/instructions.md;
-    opencode = builtins.readFile ../tools/opencode/instructions.md;
-  };
+  claudeExtras = builtins.readFile ../tools/claude/instructions.md;
 
   sharedContent = lib.concatStringsSep "\n\n" (map builtins.readFile sharedFiles);
   extra = config.home.ai.extraInstructions or "";
-
-  # Per-tool content: shared + tool-specific extras + role extras.
-  toolContent = tool:
-    ai.appendIfNonEmpty (sharedContent + "\n\n" + toolExtras.${tool}) extra
-    + "\n";
 in {
-  xdg.configFile."opencode/AGENTS.md".text = toolContent "opencode";
-  home.file.".claude/rules/workflow.md".text = toolContent "claude";
+  # shared + claude-specific extras + role extras.
+  home.file.".claude/rules/workflow.md".text =
+    ai.appendIfNonEmpty (sharedContent + "\n\n" + claudeExtras) extra
+    + "\n";
 }

@@ -11,7 +11,7 @@ You should explicitly switch to a local model (e.g., `ollama/qwen2.5-coder:32b`)
 - **Local System Deep-Dives**: When the AI needs to analyze large portions of the local filesystem that you are uncomfortable uploading to a cloud provider.
 
 ## Implementation
-1. **Model Switch**: Use `Ctrl+M` in opencode to switch the provider to `ollama`.
+1. **Model Switch**: Run the task against a local `ollama` model instead of a cloud provider.
 2. **Verification**: Ensure the model is running locally (`ollama list`).
 3. **Workflow**: 
    - Use cloud models for architecture and boilerplate.

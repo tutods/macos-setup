@@ -5,6 +5,17 @@
 }: let
   ai = import ../../../../lib/ai.nix {inherit pkgs;};
 in {
+  # Work-only custom skills — real dirs in ~/.claude/skills.
+  # (Custom skills shared across roles live in ~/.dotfiles/skills/default.nix.)
+  imports = [
+    (ai.mkLocalSkills {
+      inherit lib;
+      label = "work";
+      dir = ./skills/local;
+      names = ["acli"];
+    })
+  ];
+
   home.ai.extraInstructions =
     ai.appendIfNonEmpty
     (builtins.readFile ./instructions.md)
@@ -21,29 +32,12 @@ in {
     };
   };
 
-  # Work-only AI skills (Storybook is used in work projects; Jira for ticket management)
-  home.ai.extraSkillsManifest = ''
-    oakoss/agent-skills -s storybook-stories
-    morphet81/cheat-sheets -s create-jira-ticket -s update-jira-ticket
-    alirezarezvani/claude-skills -s jira-expert
-  '';
+  # Work-only plugin marketplaces (Jira ticket management).
+  home.ai.marketplaces = {
+    claude-code-skills = "alirezarezvani/claude-skills";
+  };
 
-  # Work-only local skills — deployed to both agents, this role only.
-  # (Common local skills, shared across roles, live in ~/.dotfiles/skills/default.nix instead.)
-  home.file = lib.listToAttrs (lib.concatMap (name: [
-    {
-      name = ".agents/skills/${name}";
-      value = {
-        source = ./skills/local/${name};
-        force = true;
-      };
-    }
-    {
-      name = ".claude/skills/${name}";
-      value = {
-        source = ./skills/local/${name};
-        force = true;
-      };
-    }
-  ]) ["acli"]);
+  home.ai.plugins = [
+    "pm-skills@claude-code-skills" # jira-expert
+  ];
 }

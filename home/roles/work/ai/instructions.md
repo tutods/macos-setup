@@ -39,4 +39,4 @@ set -gx JIRA_API_TOKEN "<token>"
 
 Generate token at: https://id.atlassian.com/manage-profile/security/api-tokens
 
-Apply: `./nix.sh work` — MCP is injected into both `claude_desktop_config.json` and `opencode.json` automatically.
+Apply: `./nix.sh work` — MCP is injected into `claude_desktop_config.json` automatically.

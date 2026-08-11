@@ -2,13 +2,14 @@
 
 Specific incidents worth remembering but too narrow for standing rules. Each entry: what happened → what to do instead. Sources are commits in this repo unless noted.
 
-## Claude Code / opencode setup
+## Claude Code setup
 
 - **Don't set Opus as the default model in settings** — it silently drains credits on every session (`f8e94dd`). Pick the model per task instead.
-- **`ai-skills-sync` can fail on first run / on the work machine** — it needs the admin user context that `./nix.sh` runs under, not a plain shell. If it fails, rerun after a rebuild rather than debugging the sync itself.
 - **Skills must not reference files outside their own directory** — 6 installed skills had dangling references and broke (`006f405`). When writing a skill, everything it mentions ships inside it.
-- **`resciencelab/opc-skills` has an upstream bug** — it writes `skillPath` pointing at `SKILL.md` instead of the directory, which makes `claude /doctor` fail (noted in `home/roles/personal/ai/skills/manifest.txt`). Don't re-add until fixed.
-- **`tanstack/router` as a skill source is broken** — dropped in `2b6c6e1`; use the `tanstack-router` skill from `oakoss/agent-skills` instead.
+- **A skill repo is not automatically a plugin marketplace** — only repos with `.claude-plugin/marketplace.json` can be installed as plugins. 12 of 30 sources had none when this repo moved off `npx skills` and had to be dropped; see `docs/dropped-skill-sources.md`.
+- **Plugins are coarser than skills** — a marketplace's plugin usually ships several skills, and the plugin name rarely matches the skill name. Read the repo's `marketplace.json` and match the plugin whose `source` dir holds the `skills/<name>/` you want; guessing produces a config that silently installs nothing useful.
+- **Custom skills are copied, not symlinked** — `home.file` points into the read-only Nix store and Claude Code writes inside skill directories. `lib/ai.nix:mkLocalSkills` does a `cp -R` + `chmod -R u+w`, ordered after `linkGeneration` so Home Manager's teardown of the old generation doesn't delete the fresh copy.
+- **`resciencelab/opc-skills` has an upstream bug** — it writes `skillPath` pointing at `SKILL.md` instead of the directory, which makes `claude /doctor` fail. Don't re-add until fixed.
 - **graphify's pipx package is `graphifyy`** (double y) — the obvious name installs the wrong thing (`df2e9c4`).
 
 ## Nix / dotfiles

@@ -61,7 +61,7 @@ VPN must be connected before accessing internal services.
 
 ## Jira MCP
 
-Managed via `home.ai.extraMcpServers.jira` in `home/roles/work/ai/default.nix`. Uses the `mcp-atlassian` npm package and is injected into both Claude Code and opencode automatically on `./nix.sh work`.
+Managed via `home.ai.extraMcpServers.jira` in `home/roles/work/ai/default.nix`. Uses the `mcp-atlassian` npm package and is injected into Claude Code automatically on `./nix.sh work`.
 
 ### Setup
 
@@ -114,4 +114,4 @@ All three must be present in `~/.config/fish/secrets.fish`:
 5. `gcloud auth login && gcloud auth application-default login`
 6. Connect VPN before accessing internal services
 7. Verify MCP: `claude mcp list` (should show filesystem, github, playwright, jira)
-8. Verify skills: `npx skills ls -g`
+8. Verify custom skills: `ls ~/.claude/skills` — external skills arrive as plugins (`claude` → `/plugin`)

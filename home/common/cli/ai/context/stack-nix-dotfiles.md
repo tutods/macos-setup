@@ -41,28 +41,33 @@ home/identity/       → person-specific (GPG, email)
 - Fish shell exports `$PROJECT_DIR` environment variable for functions
 - Override in role config: `home.devDir = "$HOME/Projects";`
 
-Prefer `pkgs` (stable) over `pkgsUnstable` unless the tool needs latest version (claude-code and opencode use unstable).
+Prefer `pkgs` (stable) over `pkgsUnstable` unless the tool needs latest version (claude-code uses unstable).
 
 ## AI setup structure
+
+Claude Code is the only agent. There is no second CLI to keep in sync.
 
 ```
 home/common/cli/ai/
 ├── tools/
-│   ├── claude/    → Claude Code settings + MCP + instructions extras
-│   └── opencode/  → opencode config + MCP + instructions extras
-├── rtk/           → RTK proxy files (claude-RTK.md, opencode plugin)
-├── instructions/  → shared runtime AI instructions (deployed to AI tools)
-├── context/       → stack reference files (deployed to ~/.claude/context/ and opencode)
+│   └── claude/    → settings + plugin marketplaces + MCP + instructions extras
+├── rtk/           → RTK proxy file (claude-RTK.md)
+├── instructions/  → shared runtime AI instructions (→ ~/.claude/rules/workflow.md)
+├── context/       → stack reference files (→ ~/.claude/context/)
 ├── prompts/       → reusable prompt templates (@-mention in conversations)
 ├── init.nix       → pipx installs + graphify hook registration (version-guarded)
-└── mcp-servers.nix → shared MCP server definitions (Nix-authoritative for all tools)
+├── options.nix    → home.ai.* options (instructions, MCP, marketplaces, plugins)
+└── mcp-servers.nix → shared MCP server definitions (Nix-authoritative)
 
-# Local skill sources live at repo root:
+# Custom skill sources live at repo root:
 skills/
-├── default.nix    → deployment logic (dual home.file to .agents + .claude)
-├── manifest.txt   → remote skills installed via `npx skills add`
+├── default.nix    → copies local/ into ~/.claude/skills (real dirs, not symlinks)
 └── local/         → in-repo skill sources (llm-council, content-writer, ...)
 ```
+
+External skills are Claude Code plugins, declared in
+`tools/claude/plugins.nix` (shared) and each role's `ai/default.nix`, and
+written into `~/.claude/settings.json`. Nothing installs skills out of band.
 
 ## Role split
 
@@ -74,4 +79,5 @@ skills/
 - Secrets never in this repo — `~/.config/fish/secrets.fish` and `~/.config/git/private` are machine-local
 - Homebrew is upgraded automatically on every deploy (`homebrew.onActivation.upgrade = true`)
 - `pkgsUnstable` packages are not pinned — they track the unstable channel
-- Skills sync is hash-guarded — force resync with `rm ~/.config/ai/.skills-sync-hash`
+- External skills are plugins — add the marketplace + plugin in Nix, never via the Claude Code UI
+- Custom skills are copied into `~/.claude/skills/`, so edits there are overwritten on the next deploy — change the repo source

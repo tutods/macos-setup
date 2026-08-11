@@ -15,7 +15,7 @@ Switch to a local model (e.g., `ollama/qwen2.5-coder:32b`) when the task involve
 
 ## How to switch
 
-1. In opencode: `Ctrl+M` to switch provider to `ollama`
+1. Run the task against a local `ollama` model instead of a cloud provider
 2. Verify model is running: `ollama list`
 3. Workflow: use cloud models for architecture and boilerplate, local models for the "final pass" on sensitive data
 

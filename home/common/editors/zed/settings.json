@@ -304,9 +304,6 @@
   "language_models": {
     "ollama": {
       "api_url": "https://ollama.com"
-    },
-    "opencode": {
-      "show_zen_models": false
     }
   },
   "agent": {

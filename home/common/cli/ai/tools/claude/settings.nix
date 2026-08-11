@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   ...
@@ -56,41 +57,24 @@
       }
     ];
 
-    extraKnownMarketplaces = {
-      caveman.source = {
-        source = "github";
-        repo = "JuliusBrussee/caveman";
-      };
-      "agricidaniel-seo".source = {
-        source = "github";
-        repo = "AgriciDaniel/claude-seo";
-      };
-    };
+    # Marketplaces and plugins are declared in ./plugins.nix (shared) and in
+    # each role's ai/default.nix. Skills come from here — nothing installs them
+    # out of band.
+    extraKnownMarketplaces =
+      lib.mapAttrs (_: repo: {
+        source = {
+          source = "github";
+          inherit repo;
+        };
+      })
+      config.home.ai.marketplaces;
 
     # Nix is authoritative for plugins listed here (merge: live + nix, nix wins).
     # Plugins not listed here can still be managed via the UI.
     # To permanently remove a plugin from existing installs add it to the
-    # purge list in the activation below instead of setting false here.
-    enabledPlugins = {
-      "caveman@caveman" = true;
-      "superpowers@claude-plugins-official" = true;
-      "frontend-design@claude-plugins-official" = true;
-      "code-review@claude-plugins-official" = true;
-      "code-simplifier@claude-plugins-official" = true;
-      "github@claude-plugins-official" = true;
-      "feature-dev@claude-plugins-official" = true;
-      "claude-md-management@claude-plugins-official" = true;
-      "typescript-lsp@claude-plugins-official" = true;
-      "security-guidance@claude-plugins-official" = true;
-      "commit-commands@claude-plugins-official" = true;
-      "figma@claude-plugins-official" = true;
-      "claude-code-setup@claude-plugins-official" = true;
-      "pr-review-toolkit@claude-plugins-official" = true;
-      "sourcegraph@claude-plugins-official" = true;
-      "prisma@claude-plugins-official" = true;
-      "sanity@claude-plugins-official" = true;
-      "claude-seo@agricidaniel-seo" = true;
-    };
+    # purge list in the activation below instead of dropping it from the list.
+    enabledPlugins =
+      lib.listToAttrs (map (p: lib.nameValuePair p true) config.home.ai.plugins);
   };
 in {
   home.file.".claude/CLAUDE.md".text = "@RTK.md\n";

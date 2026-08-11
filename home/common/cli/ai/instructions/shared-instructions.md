@@ -124,8 +124,7 @@ All shell scripts must:
 
 ## AI Tool Selection
 
-- `claude-code` — default for all coding tasks; full context, skills, MCP servers
-- `opencode` — multi-provider or when you need a different model mid-session; codex accessed via opencode
+- `claude-code` — the coding agent; full context, skills, plugins, MCP servers
 - `ollama` — offline/private work (no network, no logs)
 - `repomix` — pack repo context before switching tools or sharing with non-Claude AI
 - `ccusage` — token usage dashboard (`npx ccusage@latest` or `ccusage` abbreviation)
