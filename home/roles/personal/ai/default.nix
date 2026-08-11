@@ -46,8 +46,8 @@ in {
     "marketing-skills@marketingskills"
     "web-quality-skills@addy-web-quality-skills"
     "social-media-skills@social-media-skills"
+    # core-skills@hyperframes omitted — strict subset of hyperframes@hyperframes
     "hyperframes@hyperframes"
-    "core-skills@hyperframes"
     "watch@claude-video"
     "ui-ux-pro-max@ui-ux-pro-max-skill"
     "frontend-slides@frontend-slides"
