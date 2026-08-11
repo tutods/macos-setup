@@ -21,5 +21,6 @@
     "1password"
     "iina"
     "claude"
+    "refine"
   ];
 }
