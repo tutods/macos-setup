@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   ai = import ../../../../lib/ai.nix {inherit pkgs;};
 in {
   home.ai.extraInstructions =
@@ -22,6 +26,24 @@ in {
     oakoss/agent-skills -s storybook-stories
     morphet81/cheat-sheets -s create-jira-ticket -s update-jira-ticket
     alirezarezvani/claude-skills -s jira-expert
-    arjunmahishi/dotfiles -s acli-jira
   '';
+
+  # Work-only local skills — deployed to both agents, this role only.
+  # (Common local skills, shared across roles, live in ~/.dotfiles/skills/default.nix instead.)
+  home.file = lib.listToAttrs (lib.concatMap (name: [
+    {
+      name = ".agents/skills/${name}";
+      value = {
+        source = ./skills/local/${name};
+        force = true;
+      };
+    }
+    {
+      name = ".claude/skills/${name}";
+      value = {
+        source = ./skills/local/${name};
+        force = true;
+      };
+    }
+  ]) ["acli"]);
 }
