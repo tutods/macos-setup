@@ -20,6 +20,7 @@
     "surfshark"
     "1password"
     "iina"
+    "elmedia-player"
     "claude"
     "refine"
   ];
