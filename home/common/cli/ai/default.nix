@@ -1,6 +1,5 @@
 {
   imports = [
-    ./context
     ./init.nix
     ./instructions
     ./options.nix

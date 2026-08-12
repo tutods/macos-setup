@@ -12,14 +12,13 @@ in {
       inherit lib;
       label = "work";
       dir = ./skills/local;
-      names = ["acli"];
+      names = ["acli" "work-stack"];
     })
   ];
 
-  home.ai.extraInstructions =
-    ai.appendIfNonEmpty
-    (builtins.readFile ./instructions.md)
-    (builtins.readFile ../../../common/cli/ai/context/stack-work.md);
+  # Stack reference is the `work-stack` skill above, not an always-on
+  # instruction — it is irrelevant during Nix or content work.
+  home.ai.extraInstructions = builtins.readFile ./instructions.md;
 
   # Requires in ~/.config/fish/secrets.fish:
   #   set -gx JIRA_URL       "https://<company>.atlassian.net"

@@ -201,15 +201,22 @@ To add one: create `skills/local/<name>/SKILL.md`, add `<name>` to the `names` l
 
 `~/.claude/skills/` used to hold everything the old manifests installed. Those directories are still on disk after the migration and now shadow copies that ship inside plugins. Every deploy lists any directory it doesn't own and prints the `rm -rf` line to clear them — it never deletes on its own, since a stray directory could be a hand-written skill.
 
-### Stack context files
+### Stack reference is a skill
 
-Deployed to `~/.claude/context/` from `home/common/cli/ai/context/`. @-mention one at the start of a conversation to prime the model on a stack:
+There used to be a `home/common/cli/ai/context/` directory deployed to
+`~/.claude/context/` for `@`-mentioning. It was delivered twice: the personal
+and work files were *also* concatenated into `extraInstructions`, so they loaded
+in every session — including Nix and content work — while the docs told you to
+`@`-mention them on demand.
 
-| File | Use |
-|------|-----|
-| `@context/stack-personal` | Personal: TanStack Start, Next.js, Tailwind, shadcn/ui, Postgres, Drizzle/Prisma |
-| `@context/stack-work` | Work: React/Next.js, MariaDB, NestJS, GCP |
-| `@context/stack-nix-dotfiles` | This repo: module hierarchy, commands, conventions |
+All three are skills now, so they trigger on the work instead of on you
+remembering:
+
+| Skill | Scope | Covers |
+|-------|-------|--------|
+| `personal-stack` | personal | TanStack Start, Next.js, Tailwind, shadcn/ui, Postgres, Drizzle/Prisma, Better Auth, Sanity, Doppler |
+| `work-stack` | work | React + TanStack, MariaDB, NestJS, GCP, Jira branch naming |
+| `nix-setup` | both | This repo: commands, module hierarchy, package placement, rule scoping |
 
 ### Stack conventions are skills, not instructions
 

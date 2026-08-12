@@ -28,6 +28,9 @@ in {
         "open-pr"
         "deep-review"
         "ui-iterate"
+        # This repo's own conventions. Was an @-mention file in ~/.claude/context/,
+        # which only helped when remembered — as a skill it triggers on the work.
+        "nix-setup"
 
         # Stack conventions — skills, not always-on instructions, so they load
         # only when the work is actually TypeScript/React/API/testing/deps.

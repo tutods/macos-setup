@@ -66,6 +66,13 @@
       pr = "";
     };
 
+    # Auto memory off. Claude Code would otherwise read and write its own
+    # memory directory, which is a second source of rules alongside the ones
+    # this repo generates — and the only one not under version control.
+    # Instructions live in ~/.claude/rules/, conventions live in skills.
+    # https://code.claude.com/docs/en/memory
+    autoMemoryEnabled = false;
+
     # https://code.claude.com/docs/en/statusline
     statusLine = {
       type = "command";

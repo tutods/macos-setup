@@ -12,7 +12,7 @@ in {
       inherit lib;
       label = "personal";
       dir = ./skills/local;
-      names = ["elementor-crocoblock" "optimize-images"];
+      names = ["elementor-crocoblock" "optimize-images" "personal-stack"];
     })
   ];
 
@@ -23,10 +23,9 @@ in {
     '')
   ];
 
-  home.ai.extraInstructions =
-    ai.appendIfNonEmpty
-    (builtins.readFile ./instructions.md)
-    (builtins.readFile ../../../common/cli/ai/context/stack-personal.md);
+  # Stack reference is the `personal-stack` skill above, not an always-on
+  # instruction — it is irrelevant during Nix or content work.
+  home.ai.extraInstructions = builtins.readFile ./instructions.md;
 
   # Personal-only plugin marketplaces. See
   # home/common/cli/ai/tools/claude/plugins.nix for the shared set.
