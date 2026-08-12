@@ -59,6 +59,7 @@
 
   settings = {
     theme = "dark-daltonized";
+    model = "opusplan";
 
     telemetry.enabled = false;
     attribution = {
