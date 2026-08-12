@@ -30,6 +30,17 @@
     fi
   '';
 
+  # Obsidian vault, doubling as Claude Code's durable notes store — read via
+  # the obsidian-vault skill (home/common/ai/skills/local). Created once, never
+  # touched again by activation, so notes survive every deploy.
+  home.activation.createObsidianVault = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if [ ! -d "${config.home.homeDirectory}/Obsidian" ]; then
+      echo "↣ Create Obsidian vault"
+      mkdir -p "${config.home.homeDirectory}/Obsidian"
+      install -m 0644 ${./obsidian-index.md} "${config.home.homeDirectory}/Obsidian/Index.md"
+    fi
+  '';
+
   home.activation.checkSecrets = lib.hm.dag.entryAfter ["writeBoundary"] ''
     YELLOW='\033[1;33m'
     NC='\033[0m'

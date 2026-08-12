@@ -35,6 +35,19 @@ Always prefer these tools over slower alternatives:
 - Prefer small, focused commits over large batches.
 - Never commit secrets, `.env` files, or credentials.
 
+## Lessons Learned
+
+When a mistake gets corrected — a bug I introduced, a wrong assumption, a fix
+that needed a second pass — log it to the Obsidian vault (`obsidian-vault`
+skill) without being asked. Do this once the correction is confirmed working,
+not mid-debugging.
+
+- One note per lesson, Wrong/Right pattern: what broke it, what fixes it.
+- File under the project/stack it happened in, linked from `Lessons Index.md`.
+- Skip anything already covered by an existing note or skill — update that
+  note instead of creating a near-duplicate.
+- Skip one-off typos or anything not likely to recur.
+
 ## Verification & Completion
 
 - **No unsolicited artifacts** — no auto-generated README, CHANGELOG, or docstrings unless explicitly asked

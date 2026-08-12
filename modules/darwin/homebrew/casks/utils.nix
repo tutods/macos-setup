@@ -20,5 +20,6 @@
     "logi-options+"
     "kap"
     "numi"
+    "obsidian"
   ];
 }

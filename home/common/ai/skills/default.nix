@@ -26,6 +26,7 @@
         "open-pr"
         "deep-review"
         "ui-iterate"
+        "obsidian-vault"
         # This repo's own conventions. Was an @-mention file in ~/.claude/context/,
         # which only helped when remembered — as a skill it triggers on the work.
         "nix-setup"
