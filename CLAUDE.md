@@ -136,6 +136,27 @@ A repo without `.claude-plugin/marketplace.json` **cannot** be installed this wa
 
 Every deploy also lists directories in `~/.claude/skills/` that this repo doesn't own — leftovers from the old `npx skills` era, which now shadow the copies shipped inside plugins. It prints the `rm -rf` line and never deletes on its own, since a stray directory could be a hand-written skill.
 
+### AI Agents
+
+Custom subagents — Markdown files with `name`/`description`/`tools`/`model`
+frontmatter, invoked via the Agent tool. In-repo only; there's no plugin
+channel for these the way there is for skills.
+
+```bash
+home/common/ai/agents/local/<name>.md   # both roles
+```
+
+Installed by `lib/ai.nix:mkLocalAgents` as `home.file` symlinks into
+`~/.claude/agents/<name>.md` — unlike skills, an agent file is read-only input
+Claude Code never writes inside, so a store symlink is safe, and Home Manager
+removes it for free when the name leaves the `names` list in
+`home/common/ai/agents/default.nix`.
+
+```bash
+# Add a custom agent: create home/common/ai/agents/local/<name>.md, add <name> to the
+# `names` list in home/common/ai/agents/default.nix, then ./nix.sh macbook
+```
+
 ## Repo Rules
 
 - **Repo scripts are zero-dependency bash.** `nix.sh` and anything run at bootstrap must work with bash built-ins only — no `gum`, no external TUI tools (a script that installs dependencies can't depend on them). A gum-based TUI was tried and reverted.

@@ -74,6 +74,31 @@ in {
     '';
   };
 
+  # Install in-repo subagent definitions into ~/.claude/agents/<name>.md.
+  #
+  # Unlike mkLocalSkills this uses home.file: an agent file is read-only input —
+  # Claude Code never writes inside one — so a store symlink is safe, and Home
+  # Manager then removes the file for free when a name leaves the list.
+  #
+  # Also records the names in `home.ai.customAgents`, mirroring customSkills.
+  #
+  #   lib   — the module-args `lib`
+  #   label — log label; unique per call site
+  #   dir   — directory holding <name>.md files
+  #   names — agent names (file basenames, and the frontmatter `name`)
+  mkLocalAgents = {
+    lib,
+    label,
+    dir,
+    names,
+  }: {
+    home.ai.customAgents = names;
+
+    home.file = lib.listToAttrs (map
+      (name: lib.nameValuePair ".claude/agents/${name}.md" {source = "${dir}/${name}.md";})
+      names);
+  };
+
   # Generate a bash snippet that merges a single key into a JSON config file
   # via jq, creating the file with `{"<key>": <value>}` if it does not exist.
   #

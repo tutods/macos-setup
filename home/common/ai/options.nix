@@ -56,6 +56,16 @@
       '';
     };
 
+    customAgents = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      internal = true;
+      description = ''
+        Names of in-repo subagents installed to ~/.claude/agents. Populated by
+        `lib/ai.nix:mkLocalAgents`, not set by hand.
+      '';
+    };
+
     plugins = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];

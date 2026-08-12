@@ -14,6 +14,7 @@
     ./init.nix
     ./instructions
     ./skills
+    ./agents
     ./settings.nix
     ./plugins.nix
     ./mcp.nix

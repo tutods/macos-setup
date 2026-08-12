@@ -84,6 +84,9 @@ home/common/ai/
 ├── skills/
 │   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)
 │   └── local/       → in-repo skill sources
+├── agents/
+│   ├── default.nix  → symlinks local/ into ~/.claude/agents (home.file)
+│   └── local/       → in-repo subagent sources
 └── rtk/             → RTK proxy reference (→ ~/.claude/RTK.md, via @RTK.md)
 ```
 
@@ -106,6 +109,7 @@ home/roles/<role>/ai/
 | True in every session | `home/common/ai/instructions/` |
 | True for a stack | `home/common/ai/skills/local/` |
 | True for one role | `home/roles/<role>/ai/skills/local/` |
+| A repeatable multi-step workflow | `home/common/ai/agents/local/` |
 | True for one repo | that repo's own `CLAUDE.md` |
 
 Never name a specific project inside a machine-wide instruction or skill — write

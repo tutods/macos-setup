@@ -198,6 +198,16 @@ Each deploy replaces the directory, so edits made directly in `~/.claude/skills/
 
 To add one: create `home/common/ai/skills/local/<name>/SKILL.md`, add `<name>` to the `names` list in `skills/default.nix`, run `./nix.sh <config>`.
 
+### Custom agents — in-repo sources
+
+| Path | Scope |
+|------|-------|
+| `home/common/ai/agents/local/` | both roles — `dev-lifecycle` |
+
+In-repo only, same as custom skills — there is no plugin channel for agents. Installed by `lib/ai.nix:mkLocalAgents` as `home.file` symlinks into `~/.claude/agents/<name>.md`, not copied — an agent file is read-only input Claude Code never writes inside, so a store symlink is safe (and Home Manager removes it for free once a name leaves the `names` list, unlike skills).
+
+To add one: create `home/common/ai/agents/local/<name>.md`, add `<name>` to the `names` list in `agents/default.nix`, run `./nix.sh <config>`.
+
 #### Leftovers from `npx skills`
 
 `~/.claude/skills/` used to hold everything the old manifests installed. Those directories are still on disk after the migration and now shadow copies that ship inside plugins. Every deploy lists any directory it doesn't own and prints the `rm -rf` line to clear them — it never deletes on its own, since a stray directory could be a hand-written skill.
