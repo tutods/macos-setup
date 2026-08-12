@@ -6,6 +6,7 @@ Rules and conventions for working in this Nix flake repo.
 
 - Run `nix fmt` before committing any `.nix` file — hard requirement, not a suggestion
 - Run `nix flake check` after any change to `flake.nix` or module files — catches errors before deploy
+- Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces` — plugins fail silently, so nothing else will tell you a name is wrong
 - Never skip these even for "trivial" edits
 
 ## Adding Packages

@@ -10,18 +10,20 @@
 #
 # Custom, in-repo skills do NOT come from here — see skills/default.nix.
 #
-# Adding a source: plugins are coarser than skills. Find the plugin that ships
-# the skill you want in the repo's .claude-plugin/marketplace.json (a plugin's
-# `source` dir contains the `skills/<name>/` you're after), then add the
-# marketplace and the plugin. Repos without a .claude-plugin/marketplace.json
-# cannot be installed this way — see docs/dropped-skill-sources.md.
+# ── Adding a source ───────────────────────────────────────────────────────────
+# Plugins are coarser than skills: enabling one registers *every* skill it
+# ships, and a plugin's bundled .mcp.json registers its MCP servers too. Check
+# both before adding, and prefer single-skill plugins:
+#
+#   scripts/verify-plugins.sh          # every declared plugin resolves + skill counts
+#
+# Find the plugin whose `source` dir holds the `skills/<name>/` you want in the
+# repo's .claude-plugin/marketplace.json. Repos without that file cannot be
+# installed this way — see docs/dropped-skill-sources.md.
 #
 {...}: {
   home.ai.marketplaces = {
     caveman = "JuliusBrussee/caveman";
-    # Key kept as-is (repo declares "agricidaniel-claude-seo") — renaming would
-    # orphan the already-installed plugin.
-    agricidaniel-seo = "AgriciDaniel/claude-seo";
     impeccable = "pbakaus/impeccable";
     anthropic-agent-skills = "anthropics/skills";
     mattpocock = "mattpocock/skills";
@@ -29,6 +31,8 @@
     knowledge-work-plugins = "anthropics/knowledge-work-plugins";
     claude-code-workflows = "wshobson/agents";
     claude-skills = "secondsky/claude-skills";
+    # Single-skill plugins only — see the two entries in home.ai.plugins.
+    claude-code-skills = "alirezarezvani/claude-skills";
   };
 
   home.ai.plugins = [
@@ -36,43 +40,31 @@
     "superpowers@claude-plugins-official"
     "frontend-design@claude-plugins-official"
     "code-review@claude-plugins-official"
-    "code-simplifier@claude-plugins-official"
     "github@claude-plugins-official"
     "feature-dev@claude-plugins-official"
-    "claude-md-management@claude-plugins-official"
     "typescript-lsp@claude-plugins-official"
     "security-guidance@claude-plugins-official"
-    "commit-commands@claude-plugins-official"
     "figma@claude-plugins-official"
-    "claude-code-setup@claude-plugins-official"
-    "pr-review-toolkit@claude-plugins-official"
-    # sourcegraph, prisma and sanity dropped — a plugin's bundled .mcp.json is
-    # registered when the plugin is enabled, which is why their servers showed
-    # up in `claude mcp list` next to the ones declared in mcp-servers.nix.
-    # prisma shipped no skills at all; sanity's 5 skills went with its MCP.
+    "claude-code-setup@claude-plugins-official" # Claude Code config, incl. agent authoring
+
+    # ── authoring skills and agents ─────────────────────────────────────────
+    "example-skills@anthropic-agent-skills" # skill-creator, mcp-builder (+10 others)
+    "write-a-skill@claude-code-skills" # 1 skill
 
     # ── single-plugin marketplaces ──────────────────────────────────────────
     "caveman@caveman"
-    "claude-seo@agricidaniel-seo"
     "impeccable@impeccable"
     "mattpocock-skills@mattpocock"
     "humanizer@humanizer"
 
-    # ── anthropics/skills ───────────────────────────────────────────────────
-    "example-skills@anthropic-agent-skills" # mcp-builder, skill-creator
+    # ── wshobson/agents ─────────────────────────────────────────────────────
+    "javascript-typescript@claude-code-workflows" # nodejs-backend, modern-js, ts-advanced-types, js-testing
+    "developer-essentials@claude-code-workflows" # error-handling / auth-implementation / nx / turborepo
+    "backend-development@claude-code-workflows" # api-design, architecture, cqrs, microservices — NestJS-adjacent
+    "cicd-automation@claude-code-workflows" # deployment-pipeline, github-actions, secrets-management
 
     # ── anthropics/knowledge-work-plugins ───────────────────────────────────
-    "engineering@knowledge-work-plugins" # system-design
-    "product-management@knowledge-work-plugins" # write-spec
-    "design@knowledge-work-plugins" # accessibility-review, ux-copy
-
-    # ── wshobson/agents ─────────────────────────────────────────────────────
-    "backend-development@claude-code-workflows" # architecture-patterns
-    "cicd-automation@claude-code-workflows" # deployment-pipeline-design
-    "ui-design@claude-code-workflows" # design-system-patterns
-    "javascript-typescript@claude-code-workflows" # nodejs-backend, modern-js, ts-advanced-types, js-testing
-    "developer-essentials@claude-code-workflows" # error-handling / auth-implementation / nx-workspace patterns
-    "agent-teams@claude-code-workflows" # multi-reviewer, parallel-debugging, parallel-feature-development, team-composition, team-communication
+    "design@knowledge-work-plugins" # accessibility-review, ux-copy, design-critique
 
     # ── secondsky/claude-skills (one plugin per skill) ──────────────────────
     "react-hook-form-zod@claude-skills"

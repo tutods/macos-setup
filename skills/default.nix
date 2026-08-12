@@ -28,9 +28,10 @@ in {
         "open-pr"
         "deep-review"
         "ui-iterate"
-        # Vendored from kadajett/agent-nestjs-skills (MIT) — no plugin
-        # marketplace ships a NestJS skill, so it cannot arrive as a plugin.
-        "nestjs-best-practices"
+        # Vendored (MIT) — neither source is a plugin marketplace, so these
+        # cannot arrive as plugins. Provenance is in each SKILL.md frontmatter.
+        "nestjs-best-practices" # kadajett/agent-nestjs-skills
+        "find-skills" # oakoss/agent-skills
       ];
     })
   ];

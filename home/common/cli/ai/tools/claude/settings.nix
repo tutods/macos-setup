@@ -4,6 +4,48 @@
   lib,
   ...
 }: let
+  # Plugins deliberately removed from home.ai.plugins, deleted from the live
+  # settings.json on every deploy.
+  #
+  # This list is load-bearing, not cosmetic: enabledPlugins merges live + nix,
+  # so dropping an entry from home.ai.plugins alone leaves it enabled on any
+  # machine that already installed it.
+  #
+  # Entries can be retired once every machine has deployed past them — the date
+  # records when the entry was added, so it is clear what is safe to drop.
+  purgedPlugins = [
+    # ── pre-2026-08 ────────────────────────────────────────────────────────
+    "terraform@claude-plugins-official"
+    "warp@claude-code-warp"
+    "autofix-bot@claude-plugins-official"
+    "codex@openai-codex"
+
+    # ── 2026-08 cleanup ────────────────────────────────────────────────────
+    # MCP wrappers whose bundled .mcp.json registered servers we did not want
+    "sourcegraph@claude-plugins-official"
+    "prisma@claude-plugins-official"
+    "sanity@claude-plugins-official"
+    # superseded, unused, or redundant with a custom skill
+    "framework-migration@claude-code-workflows"
+    "core-skills@hyperframes" # strict subset of hyperframes@hyperframes
+    "pm-skills@claude-code-skills" # acli custom skill + jira MCP cover this
+    "code-simplifier@claude-plugins-official" # harness ships /simplify
+    "commit-commands@claude-plugins-official" # conventional-commit custom skill
+    "pr-review-toolkit@claude-plugins-official" # code-review + deep-review
+    "claude-md-management@claude-plugins-official"
+    # generic advice the model does not need spelled out
+    "engineering@knowledge-work-plugins"
+    "product-management@knowledge-work-plugins"
+    "ui-design@claude-code-workflows" # half of it is mobile-native design
+    "agent-teams@claude-code-workflows" # harness orchestrates natively
+    # large bundles for occasional work — re-add if they earn their keep
+    "marketing-skills@marketingskills" # 49 skills
+    "hyperframes@hyperframes" # 25 skills, Remotion-specific
+    "brand-voice@knowledge-work-plugins" # content-writer + humanizer cover it
+  ];
+
+  purgeExpr = "del(${lib.concatMapStringsSep ", " (p: ''.["${p}"]'') purgedPlugins})";
+
   settings = {
     theme = "dark-daltonized";
 
@@ -98,8 +140,7 @@ in {
         '$live + $nix')
       # Purge plugins removed from this config (migration for existing installs).
       # No-op on fresh installs where these keys never existed.
-      merged_plugins=$(echo "$merged_plugins" | ${pkgs.jq}/bin/jq -c \
-        'del(.["terraform@claude-plugins-official"], .["warp@claude-code-warp"], .["autofix-bot@claude-plugins-official"], .["codex@openai-codex"], .["sourcegraph@claude-plugins-official"], .["prisma@claude-plugins-official"], .["framework-migration@claude-code-workflows"], .["core-skills@hyperframes"], .["sanity@claude-plugins-official"], .["pm-skills@claude-code-skills"])')
+      merged_plugins=$(echo "$merged_plugins" | ${pkgs.jq}/bin/jq -c '${purgeExpr}')
       echo "$base" \
         | ${pkgs.jq}/bin/jq --argjson plugins "$merged_plugins" \
             '. + {enabledPlugins: $plugins}' \

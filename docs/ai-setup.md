@@ -197,9 +197,18 @@ A repo with no `.claude-plugin/marketplace.json` cannot be installed this way. S
 
 | Path | Scope |
 |------|-------|
-| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate` |
+| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices`, `find-skills` |
 | `home/roles/personal/ai/skills/local/` | personal — `elementor-crocoblock`, `optimize-images` |
 | `home/roles/work/ai/skills/local/` | work — `acli` |
+
+Two are vendored rather than written here, because their upstreams are plain skill repos with no plugin marketplace. Both are MIT and record `vendored-from` in their SKILL.md frontmatter:
+
+| Skill | Upstream |
+|-------|----------|
+| `nestjs-best-practices` | `kadajett/agent-nestjs-skills` |
+| `find-skills` | `oakoss/agent-skills` |
+
+Note that `find-skills` can *install* what it finds, straight into `~/.claude/skills/`. Don't let it — anything it drops there is outside Nix and gets flagged by the deploy's leftover audit. Use it to discover, then declare the plugin in Nix.
 
 Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under `~/.claude/skills/` — a plain `cp -R`, not a `home.file` symlink into the Nix store, because Claude Code writes inside a skill directory. `~/.agents/` is not used.
 
@@ -224,7 +233,6 @@ Managed in `home/common/cli/ai/init.nix`. Runs automatically on every `darwin-re
 
 | Step | Condition | What it does |
 |------|-----------|-------------|
-| `rtk init -g` | `rtk` in PATH | Configure rtk proxy for Claude Code + Copilot |
 | `pipx install code-review-graph` | not in `pipx list` | Install code-review-graph CLI |
 | `pipx install ttok` | not in `pipx list` | Install ttok (LLM token counter) |
 | graphify removal | `graphify` still on PATH | One-time: `graphify uninstall` (drops its PreToolUse hook + `~/.claude/skills/graphify/`), then `pipx uninstall graphifyy` |

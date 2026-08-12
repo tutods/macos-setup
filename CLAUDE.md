@@ -116,6 +116,15 @@ home.ai.plugins      = [ "<plugin>@<key>" ];
 
 Plugins are coarser than skills. To add one, find the plugin that ships the skill you want in the source repo's `.claude-plugin/marketplace.json` — a plugin's `source` dir contains the `skills/<name>/` you're after — then add the marketplace and the plugin. `claude-plugins-official` is built into Claude Code and needs no marketplace entry.
 
+**Plugins fail silently** — a typo'd name is written to `settings.json`, Claude Code installs nothing, and nothing is logged. Always check:
+
+```bash
+./scripts/verify-plugins.sh          # every plugin resolves, + the skill count each drags in
+./scripts/verify-plugins.sh --quiet  # what CI runs
+```
+
+Removing a plugin from `home.ai.plugins` is **not** enough — `enabledPlugins` merges live + Nix, so it stays enabled on machines that already installed it. Add it to `purgedPlugins` in `tools/claude/settings.nix` too.
+
 A repo without `.claude-plugin/marketplace.json` **cannot** be installed this way. `docs/dropped-skill-sources.md` records the sources dropped for that reason when this repo migrated off `npx skills`, so they can be re-checked later.
 
 **Custom skills — in-repo sources.** `skills/local/` (both roles), `home/roles/<role>/ai/skills/local/` (role-only). Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under `~/.claude/skills/` — copied, not symlinked into the Nix store, because Claude Code writes inside a skill directory. `~/.agents/` is not used.

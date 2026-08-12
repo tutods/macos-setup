@@ -32,33 +32,30 @@ in {
   # home/common/cli/ai/tools/claude/plugins.nix for the shared set.
   home.ai.marketplaces = {
     better-auth-agent-skills = "better-auth/skills";
-    marketingskills = "coreyhaines31/marketingskills";
     addy-web-quality-skills = "addyosmani/web-quality-skills";
     social-media-skills = "charlie947/social-media-skills";
-    hyperframes = "heygen-com/hyperframes";
     claude-video = "bradautomates/claude-video";
     ui-ux-pro-max-skill = "nextlevelbuilder/ui-ux-pro-max-skill";
     frontend-slides = "zarazhangrui/frontend-slides";
+    # Moved off the shared set — 31 SEO skills have no place on the work laptop.
+    agricidaniel-seo = "AgriciDaniel/claude-seo";
   };
 
   home.ai.plugins = [
-    "auth-skills@better-auth-agent-skills"
-    "marketing-skills@marketingskills"
-    "web-quality-skills@addy-web-quality-skills"
-    "social-media-skills@social-media-skills"
-    # core-skills@hyperframes omitted — strict subset of hyperframes@hyperframes
-    "hyperframes@hyperframes"
-    "watch@claude-video"
-    "ui-ux-pro-max@ui-ux-pro-max-skill"
-    "frontend-slides@frontend-slides"
+    "claude-seo@agricidaniel-seo" # 31 skills — the single SEO source
+    "social-media-skills@social-media-skills" # 17 — Instagram/post work
+    "ui-ux-pro-max@ui-ux-pro-max-skill" # 7
+    "web-quality-skills@addy-web-quality-skills" # 6 — Core Web Vitals, perf, a11y
+    "auth-skills@better-auth-agent-skills" # 2
+    "watch@claude-video" # 1
+    "frontend-slides@frontend-slides" # 1
 
     # wshobson/agents — marketplace declared in the shared plugins.nix
     "database-design@claude-code-workflows" # postgresql
     "hr-legal-compliance@claude-code-workflows" # gdpr-data-handling
 
     # anthropics/knowledge-work-plugins — ditto
-    "brand-voice@knowledge-work-plugins" # brand-voice-enforcement
-    "marketing@knowledge-work-plugins" # content-creation
+    "marketing@knowledge-work-plugins" # 8 — the one marketing source
   ];
 
   # postgres dropped — @modelcontextprotocol/server-postgres was archived
