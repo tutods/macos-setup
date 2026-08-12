@@ -46,9 +46,10 @@
     "figma@claude-plugins-official"
     "claude-code-setup@claude-plugins-official"
     "pr-review-toolkit@claude-plugins-official"
-    "sourcegraph@claude-plugins-official"
-    "prisma@claude-plugins-official"
     "sanity@claude-plugins-official"
+    # sourcegraph + prisma dropped — both are MCP wrappers, and prisma ships no
+    # skills at all. Their servers were showing up in `claude mcp list` because a
+    # plugin's bundled .mcp.json is registered when the plugin is enabled.
 
     # ── single-plugin marketplaces ──────────────────────────────────────────
     "caveman@caveman"
@@ -70,7 +71,6 @@
     "cicd-automation@claude-code-workflows" # deployment-pipeline-design
     "ui-design@claude-code-workflows" # design-system-patterns
     "developer-essentials@claude-code-workflows" # error-handling / auth-implementation / nx-workspace patterns
-    "framework-migration@claude-code-workflows" # database-migration, dependency-upgrade
     "agent-teams@claude-code-workflows" # multi-reviewer, parallel-debugging, parallel-feature-development, team-composition, team-communication
 
     # ── secondsky/claude-skills (one plugin per skill) ──────────────────────
