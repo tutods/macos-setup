@@ -220,6 +220,16 @@ To add one: create `skills/local/<name>/SKILL.md`, add `<name>` to the `names` l
 
 `~/.claude/skills/` used to hold everything the old manifests installed. Those directories are still on disk after the migration and now shadow copies that ship inside plugins. Every deploy lists any directory it doesn't own and prints the `rm -rf` line to clear them — it never deletes on its own, since a stray directory could be a hand-written skill.
 
+### Stack context files
+
+Deployed to `~/.claude/context/` from `home/common/cli/ai/context/`. @-mention one at the start of a conversation to prime the model on a stack:
+
+| File | Use |
+|------|-----|
+| `@context/stack-personal` | Personal: TanStack Start, Next.js, Tailwind, shadcn/ui, Postgres, Drizzle/Prisma |
+| `@context/stack-work` | Work: React/Next.js, MariaDB, NestJS, GCP |
+| `@context/stack-nix-dotfiles` | This repo: module hierarchy, commands, conventions |
+
 ### Harness built-ins (not installable)
 
 Always available, never declared anywhere:

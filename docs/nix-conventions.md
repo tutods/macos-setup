@@ -50,6 +50,6 @@ nix-collect-garbage -d    # garbage collect old generations
 
 ## Path Conventions
 
-- `config.home.ai.projectDir` — Primary development directory (default: `$HOME/Developer`)
+- `config.home.devDir` — Primary development directory (default: `$HOME/Developer`), declared in `home/common/options.nix`
 - Fish functions use `$PROJECT_DIR` environment variable set by Nix
 - Use `config.home.homeDirectory` instead of `/Users/$username` where possible
