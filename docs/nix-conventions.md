@@ -6,13 +6,14 @@ Rules and conventions for working in this Nix flake repo.
 
 - Run `nix fmt` before committing any `.nix` file — hard requirement, not a suggestion
 - Run `nix flake check` after any change to `flake.nix` or module files — catches errors before deploy
+- Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces` — plugins fail silently, so nothing else will tell you a name is wrong
 - Never skip these even for "trivial" edits
 
 ## Adding Packages
 
 - Run `nix search nixpkgs <name>` to confirm a package exists in stable before adding it
 - Only use `pkgsUnstable` if the stable version is too old for the use case
-- Tools that justify `pkgsUnstable`: `claude-code`, `opencode` — fast-moving, need latest
+- Tools that justify `pkgsUnstable`: `claude-code` — fast-moving, needs latest
 
 ## Package Placement
 
@@ -49,6 +50,6 @@ nix-collect-garbage -d    # garbage collect old generations
 
 ## Path Conventions
 
-- `config.home.ai.projectDir` — Primary development directory (default: `$HOME/Developer`)
+- `config.home.devDir` — Primary development directory (default: `$HOME/Developer`), declared in `home/common/options.nix`
 - Fish functions use `$PROJECT_DIR` environment variable set by Nix
 - Use `config.home.homeDirectory` instead of `/Users/$username` where possible

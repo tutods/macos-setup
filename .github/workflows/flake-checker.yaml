@@ -5,12 +5,26 @@ on:
   push:
     branches:
       - main
+  # Without this every PR merged unverified unless someone remembered to
+  # dispatch the workflow by hand.
+  pull_request:
   schedule:
     # l33t o'clock
     - cron: '37 13 * * *'
   workflow_dispatch:
 
 jobs:
+  # Plugins fail silently: a typo'd name is written to settings.json, Claude
+  # Code installs nothing, and no error is ever surfaced. Cheap to check, so it
+  # runs first and on ubuntu.
+  verify-plugins:
+    name: Verify Plugins
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify declared plugins resolve
+        run: ./scripts/verify-plugins.sh --quiet
+
   flake-checker:
     name: Flake Checker
     runs-on: macos-26

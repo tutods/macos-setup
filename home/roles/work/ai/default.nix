@@ -5,10 +5,20 @@
 }: let
   ai = import ../../../../lib/ai.nix {inherit pkgs;};
 in {
-  home.ai.extraInstructions =
-    ai.appendIfNonEmpty
-    (builtins.readFile ./instructions.md)
-    (builtins.readFile ../../../common/cli/ai/context/stack-work.md);
+  # Work-only custom skills — real dirs in ~/.claude/skills.
+  # (Custom skills shared across roles live in ~/.dotfiles/skills/default.nix.)
+  imports = [
+    (ai.mkLocalSkills {
+      inherit lib;
+      label = "work";
+      dir = ./skills/local;
+      names = ["acli" "work-stack"];
+    })
+  ];
+
+  # Stack reference is the `work-stack` skill above, not an always-on
+  # instruction — it is irrelevant during Nix or content work.
+  home.ai.extraInstructions = builtins.readFile ./instructions.md;
 
   # Requires in ~/.config/fish/secrets.fish:
   #   set -gx JIRA_URL       "https://<company>.atlassian.net"
@@ -21,29 +31,8 @@ in {
     };
   };
 
-  # Work-only AI skills (Storybook is used in work projects; Jira for ticket management)
-  home.ai.extraSkillsManifest = ''
-    oakoss/agent-skills -s storybook-stories
-    morphet81/cheat-sheets -s create-jira-ticket -s update-jira-ticket
-    alirezarezvani/claude-skills -s jira-expert
-  '';
-
-  # Work-only local skills — deployed to both agents, this role only.
-  # (Common local skills, shared across roles, live in ~/.dotfiles/skills/default.nix instead.)
-  home.file = lib.listToAttrs (lib.concatMap (name: [
-    {
-      name = ".agents/skills/${name}";
-      value = {
-        source = ./skills/local/${name};
-        force = true;
-      };
-    }
-    {
-      name = ".claude/skills/${name}";
-      value = {
-        source = ./skills/local/${name};
-        force = true;
-      };
-    }
-  ]) ["acli"]);
+  # No work-only plugins. Jira is covered by the `acli` custom skill above
+  # (real Atlassian CLI, with JQL/ADF/field-convention references) plus the
+  # jira MCP server — pm-skills@claude-code-skills was dropped as a weaker
+  # third path to the same thing.
 }

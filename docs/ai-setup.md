@@ -10,56 +10,24 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 
 | Tool | Purpose |
 |------|---------|
-| `claude-code` | Primary AI coding assistant (CLI) |
-| `opencode` | Multi-provider terminal AI |
-| `ollama` | Local/offline models (no network, no logs) |
-| `repomix` | Pack repo into AI-readable file |
-| `rtk` | Token proxy — reduces LLM token usage 60–90% |
+| `claude-code` | The AI coding assistant (CLI) |
+| `rtk` | Token proxy — compresses command output. Manual: prefix commands with `rtk` |
 | `pipx` | Installs `code-review-graph`, `ttok` post-deploy |
 
 ### When to use which tool
 
-- `claude-code` — default for all coding tasks; full context, skills, MCP servers
-- `opencode` — multi-provider or when a different model is needed mid-session; codex accessed via opencode
-- `ollama` — offline/private work (no network, no logs) — see [ai-privacy.md](ai-privacy.md)
-- `repomix` — pack repo context before switching tools or sharing with non-Claude AI; see [repomix.md](repomix.md)
+- `claude-code` — every coding task; full context, skills, plugins, MCP servers
+- `rtk` — prefix read-heavy commands (`rtk git status`) so their output lands compressed
 
-### opencode model selection
-
-Switch model mid-session with `Ctrl+M` in opencode without losing context.
-
-#### Anthropic (default)
+### Model selection
 
 | Tier | Model | Use when |
 |------|-------|----------|
 | fast | `claude-haiku-4-5-20251001` | mechanical changes, isolated functions, 1–2 files |
-| default | `claude-sonnet-4-6` | standard multi-file work, integration tasks |
-| best | `claude-opus-4-6` | architecture, design reviews, complex reasoning |
+| default | `claude-sonnet-5` | standard multi-file work, integration tasks |
+| best | `claude-opus-5` | architecture, design reviews, complex reasoning |
 
-#### z.AI / GLM (coding plan)
-
-| Tier | Model | Use when |
-|------|-------|----------|
-| fast | `zhipu/glm-z1-flash` | quick edits, simple lookups, cheap iterations |
-| default | `zhipu/glm-4.7` | multi-file TypeScript/frontend work |
-| best | `zhipu/glm-5.1` | deep reasoning, architecture, replaces Opus |
-
-#### Ollama (local/private)
-
-| Tier | Model | Use when |
-|------|-------|----------|
-| fast | `ollama/qwen2.5-coder:7b` | offline quick edits, no network |
-| default | `ollama/qwen2.5-coder:32b` | offline multi-file coding |
-
-See [ai-privacy.md](ai-privacy.md) for when to prefer local models.
-
-### repomix
-
-Config at `.dotfiles/repomix.config.json`. From the dotfiles root:
-
-```bash
-repomix   # → /tmp/dotfiles-context.md
-```
+Model IDs move. This table and `tools/claude/instructions.md` are the two places that name them.
 
 ### ttok
 
@@ -76,10 +44,11 @@ Instructions are split by scope and deployed by `home/common/cli/ai/instructions
 
 | File | Deployed to | Purpose |
 |------|------------|---------|
-
-| `instructions/shared-instructions.md` | `~/.config/opencode/AGENTS.md` + `~/.claude/rules/workflow.md` | Fast CLI prefs, git conventions, Nix dotfiles guide |
-| `home/roles/personal/ai/instructions.md` | appended to both (personal machine) | Doppler secrets management, AI privacy guard |
-| `home/roles/work/ai/instructions.md` | appended to both (work machine) | Work context (GCP, Jira, company tools) |
+| `instructions/shared-instructions.md` | `~/.claude/rules/workflow.md` | Fast CLI prefs, file-editing rules, destructive-op gates, human-voice writing |
+| `instructions/model-quality.md` | same | Evidence-before-claims, scope guard, plan execution, skill discipline |
+| `instructions/learned-rules.md` | same | Standing rules mined from past corrections |
+| `home/roles/personal/ai/instructions.md` | appended (personal machine) | Doppler secrets management |
+| `home/roles/work/ai/instructions.md` | appended (work machine) | Work context (GCP, Jira, company tools) |
 
 Role-specific instructions are set via `home.ai.extraInstructions` (defined in `options.nix`).
 
@@ -89,7 +58,7 @@ See [work-setup.md](work-setup.md) for the full work environment setup.
 
 ## Claude Code Settings
 
-Managed by `home/common/cli/ai/claude/settings.nix` via `home.activation.claudeSettings`.
+Managed by `home/common/cli/ai/tools/claude/settings.nix` via `home.activation.claudeSettings`.
 
 Written to `~/.claude/settings.json` on every `darwin-rebuild switch`.
 
@@ -97,45 +66,36 @@ Written to `~/.claude/settings.json` on every `darwin-rebuild switch`.
 
 - **Live file wins for unmanaged plugins** — plugins added via `claude plugin add` in the UI are preserved.
 - **Nix wins for declared keys** — keys in `enabledPlugins` attrset override the live file.
-- **Explicit purge** — removed plugins are deleted from the live file via `jq del()` on every deploy, so old machines migrate cleanly. New machines never see the deleted keys.
+- **Explicit purge** — plugins listed in `purgedPlugins` are deleted from the live file on every deploy, so machines that already installed them migrate cleanly. New machines never see the keys.
 
-To add a plugin permanently: add it to `enabledPlugins` in `claude/settings.nix`.
-To remove a plugin permanently: remove it from `enabledPlugins` and add it to the `del()` call in the activation script.
+`settings.nix` does not hold the plugin list itself — it renders `extraKnownMarketplaces` and `enabledPlugins` from `home.ai.marketplaces` / `home.ai.plugins`. See [Skills](#skills) for where those are declared and how to add one.
+
+To remove a plugin permanently: drop it from the relevant `home.ai.plugins` list **and** add it to `purgedPlugins` in `settings.nix`. The list removal alone is not enough — `enabledPlugins` merges live + Nix, so it stays enabled where it is already installed.
 
 ### Hooks
 
 | Hook | Trigger | Action |
 |------|---------|--------|
-| `PreToolUse` | Any `Bash` call | `rtk hook claude` — token proxy interception |
+| `PreToolUse` | Any `Bash` call | `~/.claude/hooks/block-ai-attribution.sh` — rejects AI attribution in commits/PRs |
 | `PostToolUse` | `Edit`, `Write`, `MultiEdit` | Run `biome check --write` if `biome.json`/`biome.jsonc` exists in CWD |
 
 The biome hook is a no-op when biome is not configured in the project. Falls back to `./node_modules/.bin/biome` if not in PATH.
-
-### Custom marketplaces
-
-| Marketplace ID | Repo |
-|---------------|------|
-| `caveman` | `JuliusBrussee/caveman` |
-| `agricidaniel-seo` | `AgriciDaniel/claude-seo` |
-
-### Enabled plugins
-
-All plugins in `enabledPlugins` are set to `true`. Currently managed:
-
-`caveman`, `superpowers`, `frontend-design`, `code-review`, `code-simplifier`, `github`, `feature-dev`, `claude-md-management`, `typescript-lsp`, `security-guidance`, `commit-commands`, `figma`, `claude-code-setup`, `pr-review-toolkit`, `sourcegraph`, `prisma`, `sanity`, `claude-seo` (agricidaniel-seo)
 
 ---
 
 ## MCP Servers
 
-Base servers managed in `home/common/cli/ai/mcp-servers.nix`, deployed via separate activations for Claude Code and opencode.
+Base servers managed in `home/common/cli/ai/mcp-servers.nix`, deployed by `tools/claude/mcp.nix`.
 
-| Server | Claude Code | opencode | Purpose |
-|--------|:-----------:|:--------:|---------|
-| `filesystem` | Yes | Yes | Read/write files beyond CWD |
-| `github` | Yes | Yes | Access PRs, issues, repos |
-| `playwright` | Yes | Yes | Browser automation and testing |
-| `jira` | Yes (work) | Yes (work) | Jira + Confluence via `mcp-atlassian` |
+| Server | Scope | Purpose |
+|--------|-------|---------|
+| `github` | both | GitHub's official server, toolsets pinned to context/repos/issues/pull_requests/actions |
+| `playwright` | both | Browser automation and testing |
+| `shadcn` | personal | shadcn/ui component registry |
+| `code-review-graph` | both | Tree-sitter code graph — query structure instead of re-reading files |
+| `jira` | work | Jira + Confluence via `mcp-atlassian` |
+
+Enabling a plugin also registers any MCP servers in its bundled `.mcp.json`, so `claude mcp list` can show servers not declared here. Remove those by dropping the plugin, not by editing `mcp-servers.nix`.
 
 ### GitHub MCP — token setup
 
@@ -171,79 +131,123 @@ See [work-setup.md](work-setup.md) for the full Jira setup flow.
 | File | Tool | Managed by |
 |------|------|-----------|
 | `~/.claude/claude_desktop_config.json` | Claude Code CLI | Nix activation (merge) |
-| `~/.config/opencode/opencode.json` (`mcp` key) | opencode | Nix activation (merge) |
 
-Both use a merge strategy: Nix adds/updates managed servers; manually added servers are preserved.
-
-### opencode base config
-
-Static fields (`$schema`, `plugin`, `experimental`, `share`) are managed by Nix via `home.activation.opencodeConfig`. Runs before MCP merge. Nix wins for these fields; the `mcp` key is updated by the MCP activation.
+Merge strategy: Nix adds/updates managed servers; manually added servers are preserved.
 
 ---
 
 ## Skills
 
-Managed by the repo-root `skills/` directory.
+Skills come from exactly two places. Nothing installs them out of band — there is no sync script, no manifest, and no `npx skills`.
 
-Two manifests:
-- `skills/manifest.txt` — common skills installed on both machines
-- `home/roles/personal/ai/skills/manifest.txt` — personal-only skills
+### External skills — Claude Code plugin marketplaces
 
-Local in-repo skill sources live at `skills/local/` and deploy via `home.file` (not the manifest).
+Declared in Nix, written into `~/.claude/settings.json` as `extraKnownMarketplaces` + `enabledPlugins`. Claude Code installs them itself on next launch.
 
-### Sync skills
+| Declared in | Scope |
+|-------------|-------|
+| `home/common/cli/ai/tools/claude/plugins.nix` | both machines |
+| `home/roles/personal/ai/default.nix` | personal only |
+| `home/roles/work/ai/default.nix` | work only |
 
-Skills install automatically on every `darwin-rebuild switch`, guarded by a content hash at `~/.config/ai/.skills-sync-hash`. Only re-runs when the manifest changes.
+Both levels use the same two options, which merge across modules:
 
-```bash
-# Force full reinstall on next deploy
-rm ~/.config/ai/.skills-sync-hash && ./nix.sh macbook
-
-# Inspect last install log
-cat ~/.cache/ai-skills-install.log
-
-# List installed skills
-npx skills ls -g
+```nix
+home.ai.marketplaces = { <key> = "<owner>/<repo>"; };   # key chosen here, not read from the repo
+home.ai.plugins      = [ "<plugin>@<key>" ];
 ```
 
-### Skill categories (common — both machines)
+The marketplace key is the identifier used on the right of `@`. Keep it stable — renaming it orphans every plugin already installed under the old name.
 
-| Category | Sources |
-|----------|---------|
-| Workflow / superpowers | `obra/superpowers`, `pbakaus/impeccable`, `mattpocock/skills` |
-| Nix | `0xbigboss/claude-code -s nix-best-practices` |
-| TypeScript / JS | `SpillwaveSolutions/mastering-typescript-skill`, `wshobson/agents` (ts/js patterns), `secondsky/claude-skills` (ts/api/security) |
-| React / Frontend | `vercel-labs/agent-skills`, `anthropics/skills`, `shadcn/ui`, `oakoss/agent-skills` (react patterns) |
-| Backend / API | `kadajett/agent-nestjs-skills`, `wshobson/agents` (node/api/db), `oakoss/agent-skills` (backend/api) |
-| Tailwind / CSS | `giuseppe-trisciuoglio/developer-kit -s tailwind-css-patterns`, `heygen-com/hyperframes -s tailwind`, `wshobson/agents -s tailwind-design-system` |
-| Biome | `biomejs/biome -s biome-developer` |
-| Docker | `OpenAEC-Foundation/Docker-Claude-Skill-Package` (compose, cicd, production, storage, optimization) |
-| Security | `wshobson/agents` (sast, secrets, stride, auth patterns), `oakoss/agent-skills` (security) |
-| Testing | `wshobson/agents` (js-testing, e2e, bats), `oakoss/agent-skills` (testing) |
-| DevOps / CI | `wshobson/agents` (github-actions, monorepo, git-workflows), `oakoss/agent-skills` (github-actions, git-workflow) |
-| Knowledge work | `anthropics/knowledge-work-plugins` (debug, architecture, system-design, deploy-checklist, and many more) |
-| Prompt engineering | `wshobson/agents -s prompt-engineering-patterns` |
-| Vercel / deploy | `vercel-labs/skills` |
-| Caveman mode | `JuliusBrussee/caveman` |
+#### Adding a source
 
-### Skill categories (personal machine only)
+Plugins are coarser-grained than skills: one plugin usually ships several. To wire up a skill you want:
 
-| Category | Sources |
-|----------|---------|
-| Next.js | `secondsky/claude-skills -s nextjs`, `wshobson/agents -s nextjs-app-router-patterns` |
-| Postgres / DB | `wshobson/agents -s postgresql-table-design` |
-| TanStack | `oakoss/agent-skills` (TanStack Query, Router, Form, Virtual, Table, Start) |
-| ORM / DB | `oakoss/agent-skills` (drizzle-orm, hono, pglite, realtime-sync, postgres-tuning) |
-| Local-first | `oakoss/agent-skills -s local-first` |
-| Design / UI | `oakoss/agent-skills` (shadcn-ui, icon-design, figma-developer, react-email) |
-| Motion / animation | `oakoss/agent-skills` (motion) |
-| SEO | `oakoss/agent-skills -s seo-optimizer` |
-| Publishing | `oakoss/agent-skills -s package-publishing` |
-| GDPR | `wshobson/agents -s gdpr-data-handling` |
+```bash
+# 1. Confirm the repo is a marketplace
+git clone --filter=blob:none --no-checkout --depth 1 https://github.com/<owner>/<repo> /tmp/probe
+git -C /tmp/probe cat-file -e HEAD:.claude-plugin/marketplace.json || echo "not a marketplace — cannot install as a plugin"
+
+# 2. Find the plugin whose `source` dir contains skills/<skill-you-want>/
+git -C /tmp/probe show HEAD:.claude-plugin/marketplace.json | jq -r '.plugins[] | "\(.name)\t\(.source)"'
+git -C /tmp/probe ls-tree -r --name-only HEAD | grep '<skill-you-want>/SKILL.md'
+```
+
+Then add the marketplace + plugin and run `./nix.sh <config>`.
+
+A repo with no `.claude-plugin/marketplace.json` cannot be installed this way. See [dropped-skill-sources.md](dropped-skill-sources.md) for the sources dropped for that reason when this repo migrated off `npx skills`, and for how to re-check them.
+
+`claude-plugins-official` ships with Claude Code — its plugins are listed, but it needs no marketplace entry.
+
+### Custom skills — in-repo sources
+
+| Path | Scope |
+|------|-------|
+| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices`, plus the stack conventions below |
+| `home/roles/personal/ai/skills/local/` | personal — `elementor-crocoblock`, `optimize-images` |
+| `home/roles/work/ai/skills/local/` | work — `acli` |
+
+One is vendored rather than written here: `nestjs-best-practices`, from `kadajett/agent-nestjs-skills` (MIT, `vendored-from` in its SKILL.md frontmatter). Its upstream is a plain skill repo with no plugin marketplace, so it cannot arrive as a plugin, and NestJS is a primary backend framework here with no other coverage.
+
+Vendoring is the exception, not a second channel. Everything that *can* be a plugin must be one — see [dropped-skill-sources.md](dropped-skill-sources.md).
+
+Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under `~/.claude/skills/` — a plain `cp -R`, not a `home.file` symlink into the Nix store, because Claude Code writes inside a skill directory. `~/.agents/` is not used.
+
+Each deploy replaces the directory, so edits made directly in `~/.claude/skills/` are lost — change the repo source instead.
+
+To add one: create `skills/local/<name>/SKILL.md`, add `<name>` to the `names` list in `skills/default.nix`, run `./nix.sh <config>`.
+
+#### Leftovers from `npx skills`
+
+`~/.claude/skills/` used to hold everything the old manifests installed. Those directories are still on disk after the migration and now shadow copies that ship inside plugins. Every deploy lists any directory it doesn't own and prints the `rm -rf` line to clear them — it never deletes on its own, since a stray directory could be a hand-written skill.
+
+### Stack reference is a skill
+
+There used to be a `home/common/cli/ai/context/` directory deployed to
+`~/.claude/context/` for `@`-mentioning. It was delivered twice: the personal
+and work files were *also* concatenated into `extraInstructions`, so they loaded
+in every session — including Nix and content work — while the docs told you to
+`@`-mention them on demand.
+
+All three are skills now, so they trigger on the work instead of on you
+remembering:
+
+| Skill | Scope | Covers |
+|-------|-------|--------|
+| `personal-stack` | personal | TanStack Start, Next.js, Tailwind, shadcn/ui, Postgres, Drizzle/Prisma, Better Auth, Sanity, Doppler |
+| `work-stack` | work | React + TanStack, MariaDB, NestJS, GCP, Jira branch naming |
+| `nix-setup` | both | This repo: commands, module hierarchy, package placement, rule scoping |
+
+### Stack conventions are skills, not instructions
+
+`ts-conventions`, `react-conventions`, `api-conventions`, `testing-conventions`
+and `dependency-hygiene` live in `skills/local/` rather than in the always-on
+instruction set. They were ~2,500 tokens loading in every session, including
+Nix work and content writing. As skills they load only when the work matches.
+
+Only put a file in `instructions/` if it must apply to **every** session
+regardless of subject — that is now just `shared-instructions`, `model-quality`
+and `learned-rules`.
+
+The same rule was then applied *inside* those three files. Anything that only
+matters for one stack was moved out to the skill that owns it:
+
+| Moved out | Landed in |
+|-----------|-----------|
+| Conventional-commit type table, branch naming | `conventional-commit` skill |
+| Package-manager enforcement, `any`/Zod rules | `ts-conventions` |
+| Array methods, single-letter params, ESM + path alias, `@tutods/*` configs | `ts-conventions` |
+| Tailwind v4 `@theme` (incl. the t-shirt-key shadowing trap) | `react-conventions` |
+| Sanity GROQ shaping | `api-conventions` |
+
+Also dropped: the "AI Tool Selection" section (obsolete once the stack became
+Claude-only), and rules `shared-instructions` restated from `model-quality` —
+"minimal diff", "never declare done without checks", error-first debugging.
+The always-on payload went 27.8 KB → 12.1 KB.
 
 ### Harness built-ins (not installable)
 
-Always available, cannot be added to the manifest:
+Always available, never declared anywhere:
 `update-config`, `loop`, `schedule`, `simplify`, `fewer-permission-prompts`, `keybindings-help`, `statusline-setup`, `init`, `review`, `security-review`, `claude-api`
 
 ---
@@ -254,11 +258,10 @@ Managed in `home/common/cli/ai/init.nix`. Runs automatically on every `darwin-re
 
 | Step | Condition | What it does |
 |------|-----------|-------------|
-| `rtk init -g` | `rtk` in PATH | Configure rtk proxy for Claude Code + Copilot |
-| `rtk init -g --opencode` | `rtk` in PATH | Configure rtk proxy for opencode |
 | `pipx install code-review-graph` | not in `pipx list` | Install code-review-graph CLI |
 | `pipx install ttok` | not in `pipx list` | Install ttok (LLM token counter) |
-| `ai-skills-sync` | manifest hash changed | Install/update skills from manifest |
+| graphify removal | `graphify` still on PATH | One-time: `graphify uninstall` (drops its PreToolUse hook + `~/.claude/skills/graphify/`), then `pipx uninstall graphifyy` |
+| `localSkills*` | every switch | Copy custom skills into `~/.claude/skills/` |
 
 ---
 
@@ -277,8 +280,8 @@ After running `./nix.sh <config>` on a new machine:
    set -gx JIRA_EMAIL     "daniel.a.sousa@<company>.com"
    set -gx JIRA_API_TOKEN "<token>"
    ```
-4. Verify Claude Code plugins loaded: `claude` → check plugin list
+4. Verify Claude Code plugins loaded: `claude` → `/plugin` (marketplaces install on first launch)
 5. Verify MCP servers: `claude mcp list`
-6. Check skills installed: `npx skills ls -g`
+6. Check custom skills landed: `ls ~/.claude/skills`
 
 See [work-setup.md](work-setup.md) for the complete work machine setup.

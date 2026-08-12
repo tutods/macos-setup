@@ -301,20 +301,9 @@
   },
 
   // ─── Agent & AI ──────────────────────────────────────────────────────────
-  "language_models": {
-    "ollama": {
-      "api_url": "https://ollama.com"
-    },
-    "opencode": {
-      "show_zen_models": false
-    }
-  },
+  // No default_model: Claude Code drives agent work, reached here via the
+  // claude-acp agent server below.
   "agent": {
-    "default_model": {
-      "provider": "ollama",
-      "model": "deepseek-v4-pro",
-      "enable_thinking": true
-    },
     "enabled": true,
     "dock": "right",
     "button": true,

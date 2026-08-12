@@ -8,7 +8,7 @@
 
     extraMcpServers = lib.mkOption {
       default = {};
-      description = "Role-specific MCP servers merged into both claude_desktop_config.json and opencode.json";
+      description = "Role-specific MCP servers merged into claude_desktop_config.json";
       type = lib.types.attrsOf (lib.types.submodule {
         options = {
           command = lib.mkOption {
@@ -29,10 +29,41 @@
       });
     };
 
-    extraSkillsManifest = lib.mkOption {
-      type = lib.types.lines;
-      default = "";
-      description = "Extra skill install lines appended to the common manifest, installed to both agents";
+    marketplaces = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {};
+      example = {caveman = "JuliusBrussee/caveman";};
+      description = ''
+        Claude Code plugin marketplaces, as `<key> = "<owner>/<repo>"`.
+
+        The key is the marketplace identifier used in `home.ai.plugins`
+        (`<plugin>@<key>`) — it is chosen here, not read from the repo's
+        marketplace.json. Keep it stable: renaming a key orphans every plugin
+        already installed under the old name.
+
+        `claude-plugins-official` is built into Claude Code — do not list it.
+      '';
+    };
+
+    customSkills = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      internal = true;
+      description = ''
+        Names of in-repo skills copied into ~/.claude/skills. Populated by
+        `lib/ai.nix:mkLocalSkills`, not set by hand — skills/default.nix reads
+        it to report directories in ~/.claude/skills that this repo doesn't own.
+      '';
+    };
+
+    plugins = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      example = ["caveman@caveman"];
+      description = ''
+        Plugins to enable, as `<plugin>@<marketplace>`. Every non-custom skill
+        arrives this way; custom in-repo skills are deployed by skills/default.nix.
+      '';
     };
   };
 }
