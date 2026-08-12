@@ -20,12 +20,19 @@ process. Two triggers:
 
 ## Layout
 
-- Flat at vault root — no folders. Organization is links and index notes.
-- **Index notes** aggregate a topic (e.g. `Dotfiles Index.md`, `Work Index.md`)
-  — a plain list of `[[wikilinks]]`.
+- Type folders at vault root: `Lessons/`, `Decisions/`, `Process/`,
+  `Conventions/`, `Notes/` (catch-all for anything that doesn't fit the rest).
+  Create a new folder only for a genuinely new recurring type — don't fragment
+  further than that.
+- **Index notes** live at vault root, outside the type folders — they're
+  navigation, not content. `Index.md` is the entry point, linking topic
+  indexes like `Lessons Index.md` and `Projects Knowledge Index.md`, each a
+  plain list of `[[wikilinks]]`.
 - **Title Case** for every note filename.
 - Each note is a self-contained unit — one topic/decision/fact per note, not a
   running log.
+- `[[wikilinks]]` resolve by filename regardless of folder — no path needed
+  in a link, so moving a note between folders never breaks a link.
 
 ## Linking
 
@@ -55,17 +62,20 @@ rg -l "\[\[Note Title\]\]" "$HOME/Obsidian"
 ### Find index notes
 
 ```bash
-fd -e md "Index" "$HOME/Obsidian"
+fd -e md -d 1 "Index" "$HOME/Obsidian"
 ```
 
 ### Create a note
 
-1. Title Case filename, `.md` extension, written straight into `$HOME/Obsidian/`.
+1. Title Case filename, `.md` extension, written into the matching type
+   folder (`Lessons/`, `Decisions/`, `Process/`, `Conventions/`, or `Notes/`
+   if nothing fits). `mkdir -p` the folder first if it doesn't exist yet — the
+   vault only ships with `Index.md`, type folders appear on first use.
 2. Content is one unit of learning — what, why, and nothing that belongs in a
    more specific note instead.
 3. Add `[[wikilinks]]` to related notes under `## Related`.
 4. If a relevant index note exists, add this note's `[[wikilink]]` to it. If
-   the topic is new and will grow, create an index note for it.
+   the topic is new and will grow, create an index note for it at vault root.
 
 ### Update a note
 
@@ -75,8 +85,8 @@ note is explicitly a running log.
 ### Log a lesson
 
 Triggered by a corrected mistake, not by request. Before writing, check
-`Lessons Index.md` and grep for the topic — update an existing note instead of
-duplicating it.
+`Lessons Index.md` and grep `Lessons/` for the topic — update an existing note
+instead of duplicating it. New lessons go in `Lessons/`.
 
 ```markdown
 # <Short Title>
