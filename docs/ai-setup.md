@@ -11,16 +11,13 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 | Tool | Purpose |
 |------|---------|
 | `claude-code` | The AI coding assistant (CLI) |
-| `ollama` | Local/offline models (no network, no logs) |
-| `repomix` | Pack repo into AI-readable file |
-| `rtk` | Token proxy — reduces LLM token usage 60–90% |
+| `rtk` | Token proxy — compresses command output. Manual: prefix commands with `rtk` |
 | `pipx` | Installs `code-review-graph`, `ttok` post-deploy |
 
 ### When to use which tool
 
 - `claude-code` — every coding task; full context, skills, plugins, MCP servers
-- `ollama` — offline/private work (no network, no logs) — see [ai-privacy.md](ai-privacy.md)
-- `repomix` — pack repo context before sharing with a non-Claude AI; see [repomix.md](repomix.md)
+- `rtk` — prefix read-heavy commands (`rtk git status`) so their output lands compressed
 
 ### Model selection
 
@@ -29,23 +26,6 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 | fast | `claude-haiku-4-5-20251001` | mechanical changes, isolated functions, 1–2 files |
 | default | `claude-sonnet-4-6` | standard multi-file work, integration tasks |
 | best | `claude-opus-4-6` | architecture, design reviews, complex reasoning |
-
-#### Ollama (local/private)
-
-| Tier | Model | Use when |
-|------|-------|----------|
-| fast | `ollama/qwen2.5-coder:7b` | offline quick edits, no network |
-| default | `ollama/qwen2.5-coder:32b` | offline multi-file coding |
-
-See [ai-privacy.md](ai-privacy.md) for when to prefer local models.
-
-### repomix
-
-Config at `.dotfiles/repomix.config.json`. From the dotfiles root:
-
-```bash
-repomix   # → /tmp/dotfiles-context.md
-```
 
 ### ttok
 
@@ -62,9 +42,8 @@ Instructions are split by scope and deployed by `home/common/cli/ai/instructions
 
 | File | Deployed to | Purpose |
 |------|------------|---------|
-
 | `instructions/shared-instructions.md` | `~/.claude/rules/workflow.md` | Fast CLI prefs, git conventions, Nix dotfiles guide |
-| `home/roles/personal/ai/instructions.md` | appended (personal machine) | Doppler secrets management, AI privacy guard |
+| `home/roles/personal/ai/instructions.md` | appended (personal machine) | Doppler secrets management |
 | `home/roles/work/ai/instructions.md` | appended (work machine) | Work context (GCP, Jira, company tools) |
 
 Role-specific instructions are set via `home.ai.extraInstructions` (defined in `options.nix`).
@@ -83,11 +62,11 @@ Written to `~/.claude/settings.json` on every `darwin-rebuild switch`.
 
 - **Live file wins for unmanaged plugins** — plugins added via `claude plugin add` in the UI are preserved.
 - **Nix wins for declared keys** — keys in `enabledPlugins` attrset override the live file.
-- **Explicit purge** — removed plugins are deleted from the live file via `jq del()` on every deploy, so old machines migrate cleanly. New machines never see the deleted keys.
+- **Explicit purge** — plugins listed in `purgedPlugins` are deleted from the live file on every deploy, so machines that already installed them migrate cleanly. New machines never see the keys.
 
 `settings.nix` does not hold the plugin list itself — it renders `extraKnownMarketplaces` and `enabledPlugins` from `home.ai.marketplaces` / `home.ai.plugins`. See [Skills](#skills) for where those are declared and how to add one.
 
-To remove a plugin permanently: drop it from the relevant `home.ai.plugins` list and add it to the `del()` call in the activation script, so machines that already installed it are cleaned up.
+To remove a plugin permanently: drop it from the relevant `home.ai.plugins` list **and** add it to `purgedPlugins` in `settings.nix`. The list removal alone is not enough — `enabledPlugins` merges live + Nix, so it stays enabled where it is already installed.
 
 ### Hooks
 
@@ -106,10 +85,12 @@ Base servers managed in `home/common/cli/ai/mcp-servers.nix`, deployed by `tools
 
 | Server | Scope | Purpose |
 |--------|-------|---------|
-| `filesystem` | both | Read/write files beyond CWD |
-| `github` | both | Access PRs, issues, repos |
+| `github` | both | GitHub's official server, toolsets pinned to context/repos/issues/pull_requests/actions |
 | `playwright` | both | Browser automation and testing |
+| `shadcn` | personal | shadcn/ui component registry |
 | `jira` | work | Jira + Confluence via `mcp-atlassian` |
+
+Enabling a plugin also registers any MCP servers in its bundled `.mcp.json`, so `claude mcp list` can show servers not declared here. Remove those by dropping the plugin, not by editing `mcp-servers.nix`.
 
 ### GitHub MCP — token setup
 

@@ -40,7 +40,7 @@ Always prefer these tools over slower alternatives:
 - **No interactive commands** in automated flows — `vim`, `nano`, `git rebase -i`, `git add -p` will hang; use non-interactive alternatives or tools
 - **Token management**:
   - Use `ttok` to estimate token count before sending large files (`ttok -m claude-sonnet-4-6 < file.ts`)
-  - Use `repomix` before handing off context to non-Claude AI (`repomix --output context.xml`)
+  - Prefix read-heavy commands with `rtk` to compress their output (`rtk git status`) — there is no hook doing this for you
 - Always run type checks (`pnpm typecheck` or `tsc --noEmit`) before declaring a task complete
 - **Minimal diff** — prefer targeted edits over file rewrites; changing 3 lines must not rewrite 300
 - Use type-safe patterns — avoid `any`, prefer branded types and Zod schemas for runtime validation
@@ -125,8 +125,6 @@ All shell scripts must:
 ## AI Tool Selection
 
 - `claude-code` — the coding agent; full context, skills, plugins, MCP servers
-- `ollama` — offline/private work (no network, no logs)
-- `repomix` — pack repo context before switching tools or sharing with non-Claude AI
 - `ccusage` — token usage dashboard (`npx ccusage@latest` or `ccusage` abbreviation)
 
 

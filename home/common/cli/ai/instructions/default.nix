@@ -10,7 +10,6 @@
     ./shared-instructions.md
     ./model-quality.md
     ./learned-rules.md
-    ./privacy-guide.md
     ./ts-conventions.md
     ./react-conventions.md
     ./api-conventions.md

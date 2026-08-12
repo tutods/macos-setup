@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{
   imports = [
     ./context
     ./init.nix
@@ -7,9 +7,5 @@
     ./rtk
     ./tools/claude
     ../../../../skills
-  ];
-
-  home.packages = [
-    pkgs.repomix
   ];
 }

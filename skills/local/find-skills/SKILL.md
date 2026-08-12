@@ -14,6 +14,26 @@ metadata:
 
 # Find Skills
 
+> **LOCAL RULE — this machine only (added on vendoring, not upstream).**
+>
+> Use this skill to **discover only. Never install.** Every non-custom skill on
+> this machine comes from a Claude Code plugin marketplace, declared in Nix.
+>
+> The `pnpm dlx skills add` commands below write into `~/.claude/skills/`,
+> outside Nix. Anything landing there is unmanaged: it gets flagged by the
+> deploy's leftover audit, is invisible to `scripts/verify-plugins.sh`, and
+> silently shadows the plugin-shipped copy of the same skill.
+>
+> When you find something worth having:
+> 1. Check the source repo for `.claude-plugin/marketplace.json`.
+> 2. If present, add the marketplace + plugin to `home.ai.marketplaces` /
+>    `home.ai.plugins`, then `./nix.sh <config>`.
+> 3. If absent, it cannot be a plugin — either vendor it into `skills/local/`
+>    with its licence and provenance, or skip it. Record the decision in
+>    `docs/dropped-skill-sources.md`.
+>
+> Ignore the multi-agent rows below; Claude Code is the only agent here.
+
 ## Overview
 
 Searches the open agent skills ecosystem and installs matching skills via the Skills CLI (`pnpm dlx skills`). Includes an enrichment script that fetches descriptions from skills.sh for each result, giving users context beyond raw skill names.

@@ -12,8 +12,8 @@ Standing rules mined from past corrections. Each one exists because the same mis
   Wrong: edits sitting in `.worktrees/` while reporting success. Right: verified changes in the project the user has open.
 - **Never swap build tooling or framework infrastructure as a side effect.** Bundler, server runtime, or framework changes need their own explicit approval and a rollback plan.
   Wrong: migrating Vite→RSBuild while doing a performance task. Right: "this would need a build-tool change — separate decision, want a proposal?"
-- **Do the work yourself — never pull another model or paid API for something you can do.** Translation, content, analysis: the assistant does it directly.
-  Wrong: `ollama pull` a model to translate strings. Right: translate the chunk yourself, glossary in hand.
+- **Do the work yourself — never reach for another model or a paid API for something you can do.** Translation, content, analysis: the assistant does it directly.
+  Wrong: pulling down a local model to translate strings. Right: translate the chunk yourself, glossary in hand.
 - **Shared tooling config lives in the `@tutods/*` packages** (`biome-config`, `typescript-config`, `renovate-config` in the `lib` repo). Improve the package, then check whether sibling repos (jps, farmacia-nova, tutods) need the same change — and say so.
   Wrong: fixing renovate rules in one repo's local config. Right: fix `@tutods/renovate-config`, then offer to apply it to the siblings.
 - **Worktrees are temporary.** Non-trivial feature work happens in one; quick fixes (lint, one-liners) go directly in the working tree; and every worktree is removed as soon as the work lands.
