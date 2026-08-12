@@ -73,6 +73,5 @@
     "health-check-endpoints@claude-skills"
     "xss-prevention@claude-skills"
     "systematic-debugging@claude-skills"
-    "image-optimization@claude-skills"
   ];
 }

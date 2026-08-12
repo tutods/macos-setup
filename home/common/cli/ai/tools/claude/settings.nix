@@ -42,6 +42,10 @@
     "marketing-skills@marketingskills" # 49 skills
     "hyperframes@hyperframes" # 25 skills, Remotion-specific
     "brand-voice@knowledge-work-plugins" # content-writer + humanizer cover it
+    # duplicate of the personal optimize-images custom skill, which is more
+    # specific (1500px longest side, WebP, metadata stripped) and backed by the
+    # imagemagick/jpegoptim/optipng already in modules/packages/media.nix
+    "image-optimization@claude-skills"
   ];
 
   purgeExpr = "del(${lib.concatMapStringsSep ", " (p: ''.["${p}"]'') purgedPlugins})";
