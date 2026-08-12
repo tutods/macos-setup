@@ -18,13 +18,18 @@
   # GitHub's official server, from nixpkgs — a real binary, no npx/Docker.
   # Replaces @modelcontextprotocol/server-github, which upstream archived.
   #
+  # Toolsets are pinned rather than left on the default set
+  # (context, repos, issues, pull_requests, users, copilot):
+  #   + actions          — CI run/job status, which the default set omits
+  #   - users, copilot   — unused here, and copilot alone is a large surface
+  #
   # ${ } inside the arg string below is shell expansion at server spawn;
   # ${pkgs...} is Nix interpolation at build time.
   github = {
     command = "sh";
     args = [
       "-c"
-      "GITHUB_PERSONAL_ACCESS_TOKEN=\"\${GITHUB_TOKEN:-}\" ${pkgs.github-mcp-server}/bin/github-mcp-server stdio"
+      ''GITHUB_PERSONAL_ACCESS_TOKEN="''${GITHUB_TOKEN:-}" ${pkgs.github-mcp-server}/bin/github-mcp-server stdio --toolsets context,repos,issues,pull_requests,actions''
     ];
   };
 
