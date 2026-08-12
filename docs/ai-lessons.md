@@ -30,5 +30,4 @@ Specific incidents worth remembering but too narrow for standing rules. Each ent
 ## Projects
 
 Per-project lessons are **not** kept here — they live in that project's own
-`CLAUDE.md`, so they travel with the repo. See `docs/project-rules/` for the
-ones staged but not yet installed.
+`CLAUDE.md`, so they travel with the repo and apply from any machine.

@@ -74,11 +74,11 @@ home/common/ai/
 ├── init.nix         → guarded pipx installs, one-time tool migrations
 ├── mcp-servers.nix  → shared MCP server definitions (Nix-authoritative)
 ├── instructions/    → always-on instructions (→ ~/.claude/rules/workflow.md)
-├── rtk/             → RTK proxy reference (→ ~/.claude/RTK.md)
 ├── skills/
 │   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)
 │   └── local/       → in-repo skill sources
 └── claude/          → settings, plugin marketplaces, MCP wiring, statusline
+    └── rtk/         → RTK proxy reference (→ ~/.claude/RTK.md, via @RTK.md)
 ```
 
 Each role mirrors that shape:
@@ -99,8 +99,8 @@ home/roles/<role>/ai/
 | True for one role | `home/roles/<role>/ai/skills/local/` |
 | True for one repo | that repo's own `CLAUDE.md` |
 
-Never name a specific project inside a machine-wide instruction or skill.
-`docs/project-rules/` stages per-project files that aren't installed yet.
+Never name a specific project inside a machine-wide instruction or skill — write
+it in that project's own `CLAUDE.md` instead, so it travels with the repo.
 
 ## Skills and plugins
 

@@ -142,7 +142,7 @@ Every deploy also lists directories in `~/.claude/skills/` that this repo doesn'
 - **Git remotes stay SSH.** Never switch them to HTTPS during reviews or "fixes".
 - **Configs the app itself writes (e.g. Zed `settings.json`) are seeded as a one-time copy, not a store symlink** — a read-only symlink breaks the app's own save.
 - One-off gotchas live in `docs/ai-lessons.md` — check it before debugging setup issues that feel familiar.
-- **Rules are scoped to where they're true.** Always-true → `instructions/`; true for a stack → `home/common/ai/skills/local/`; true for one repo → that repo's own `CLAUDE.md` (staged in `docs/project-rules/` until installed). Never name a specific project inside a machine-wide instruction or skill.
+- **Rules are scoped to where they're true.** Always-true → `instructions/`; true for a stack → `home/common/ai/skills/local/`; true for one repo → that repo's own `CLAUDE.md`. Never name a specific project inside a machine-wide instruction or skill.
 
 ## CI
 
