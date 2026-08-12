@@ -44,8 +44,8 @@ Instructions are split by scope and deployed by `home/common/cli/ai/instructions
 
 | File | Deployed to | Purpose |
 |------|------------|---------|
-| `instructions/shared-instructions.md` | `~/.claude/rules/workflow.md` | Fast CLI prefs, git conventions, Nix dotfiles guide |
-| `instructions/model-quality.md` | same | Evidence-before-claims, scope guard, plan execution |
+| `instructions/shared-instructions.md` | `~/.claude/rules/workflow.md` | Fast CLI prefs, file-editing rules, destructive-op gates, human-voice writing |
+| `instructions/model-quality.md` | same | Evidence-before-claims, scope guard, plan execution, skill discipline |
 | `instructions/learned-rules.md` | same | Standing rules mined from past corrections |
 | `home/roles/personal/ai/instructions.md` | appended (personal machine) | Doppler secrets management |
 | `home/roles/work/ai/instructions.md` | appended (work machine) | Work context (GCP, Jira, company tools) |
@@ -221,6 +221,22 @@ Nix work and content writing. As skills they load only when the work matches.
 Only put a file in `instructions/` if it must apply to **every** session
 regardless of subject — that is now just `shared-instructions`, `model-quality`
 and `learned-rules`.
+
+The same rule was then applied *inside* those three files. Anything that only
+matters for one stack was moved out to the skill that owns it:
+
+| Moved out | Landed in |
+|-----------|-----------|
+| Conventional-commit type table, branch naming | `conventional-commit` skill |
+| Package-manager enforcement, `any`/Zod rules | `ts-conventions` |
+| Array methods, single-letter params, ESM + path alias, `@tutods/*` configs | `ts-conventions` |
+| Tailwind v4 `@theme` (incl. the t-shirt-key shadowing trap) | `react-conventions` |
+| Sanity GROQ shaping | `api-conventions` |
+
+Also dropped: the "AI Tool Selection" section (obsolete once the stack became
+Claude-only), and rules `shared-instructions` restated from `model-quality` —
+"minimal diff", "never declare done without checks", error-first debugging.
+The always-on payload went 27.8 KB → 12.1 KB.
 
 ### Harness built-ins (not installable)
 

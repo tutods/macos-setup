@@ -1,6 +1,6 @@
 ---
 name: api-conventions
-description: HTTP API conventions for this machine's projects — no response envelope (status code is the discriminator), error shapes, pagination, and validation at the edge. Use when designing, implementing, or reviewing an HTTP API, REST endpoint, or route handler.
+description: HTTP API conventions for this machine's projects — no response envelope (status code is the discriminator), error shapes, pagination, validation at the edge, and GROQ query shaping for Sanity. Use when designing, implementing, or reviewing an HTTP API, REST endpoint, route handler, or CMS query.
 ---
 
 ## API Conventions
@@ -68,6 +68,17 @@ Rules:
 - Validate request bodies, query params, and path params with Zod at the route handler
 - Reject early — validate before any business logic runs
 - Return `400` with the Zod error details formatted as `{ code: "VALIDATION_ERROR", message: "...", details: zodError.issues }`
+
+### CMS Queries (Sanity / GROQ)
+
+Shape data in the query, not in TypeScript afterwards:
+
+- Defaults via `coalesce()` in the projection
+- Portable Text → string via `pt::text()` in the query
+- No post-query `??` wrapper helpers (corrected repeatedly in a-optica)
+
+Wrong: `getSafePageData(result)` applying `??` to every field.
+Right: `"title": coalesce(hero.title, "")` in the projection.
 
 ### Pagination
 

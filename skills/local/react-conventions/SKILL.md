@@ -57,6 +57,16 @@ Rules:
 - No arbitrary Tailwind values (`w-[347px]`) without a comment explaining the specific constraint
 - shadcn/ui primitives as base — extend via `className`, do not fork component internals
 
+**Tailwind is v4.** CSS-first config via `@theme` in the CSS entry — never introduce v3 patterns like a `tailwind.config.js` theme extension in new code.
+
+```css
+@theme { --color-brand: oklch(0.6 0.2 250); }
+```
+
+**Never name `@theme` tokens with core t-shirt keys** (`--container-xs/sm/md/lg/xl/…`). They silently shadow Tailwind's core size scale app-wide — this broke Sheet and Dialog widths in tutods. Use semantic names instead.
+
+Wrong: `@theme { --container-lg: 1040px }` → Right: `@theme { --container-page: 1040px }`, used as `max-w-page`.
+
 ### No Snapshot Tests
 
 Snapshot tests are banned — they break on cosmetic changes and create false confidence. Write behavioral tests instead.

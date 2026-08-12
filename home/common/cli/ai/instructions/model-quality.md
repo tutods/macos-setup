@@ -35,5 +35,6 @@ When the user reports something broke:
 
 ### Skill discipline
 
-- Before starting a task, check the skills table for a match; load at most 3 relevant skills.
-- Repeated flows have dedicated skills — use them instead of ad-hoc work: commits/PRs → `open-pr`, full project reviews → `deep-review`, visual refinement → `ui-iterate`, type-safety sweep → `ts-strict-audit`, PT-PT content → `content-writer`.
+- Before starting a task, check the available skills for a match; load at most 3.
+- Repeated flows have dedicated skills — use them instead of ad-hoc work: commits/PRs → `open-pr`, commit message alone → `conventional-commit`, full project reviews → `deep-review`, visual refinement → `ui-iterate`, type-safety sweep → `ts-strict-audit`, PT-PT content → `content-writer`.
+- House conventions are skills, not always-on rules — load the matching one before writing code: `ts-conventions`, `react-conventions`, `api-conventions`, `testing-conventions`, `dependency-hygiene`, `nestjs-best-practices`.

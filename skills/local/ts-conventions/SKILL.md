@@ -1,6 +1,6 @@
 ---
 name: ts-conventions
-description: TypeScript conventions for this machine's projects — strict mode settings, banned patterns (no `as` casting, no `any`), branded types, and Zod at boundaries. Use when writing, reviewing, or refactoring TypeScript, choosing types, or setting up a tsconfig.
+description: TypeScript conventions for this machine's projects — strict mode settings, banned patterns (no `as` casting, no `any`), branded types, Zod at boundaries, naming, ESM package setup, and path aliases. Use when writing, reviewing, or refactoring TypeScript, choosing types, setting up a tsconfig, or scaffolding a new package.
 ---
 
 ## TypeScript Conventions
@@ -43,6 +43,25 @@ function assertNever(x: never): never {
 - `catch (e: unknown)` — never `catch (e: any)` or bare `catch`
 - No empty catch blocks — at minimum log the error
 
+### Style
+
+- **Prefer array methods over `for...of`** — `map`/`filter`/`forEach` read better. Loops only where early exit or sequential `await` genuinely requires one.
+  Wrong: `for (const item of items) { results.push(fn(item)) }` → Right: `const results = items.map(fn)`
+- **No single-letter callback parameters.** Name them after the thing: `item`, `index`, `event`/`evt`, `error`. `i`, `e`, `err`, `res` are banned.
+  Wrong: `items.map((i) => …)` → Right: `items.map((item) => …)`
+- **Function declarations, not top-level arrow functions.** Arrows are for callbacks only (`useMemo`, `useCallback`, array methods, inline handlers).
+  Wrong: `export const parseUser = () => {}` → Right: `export function parseUser() {}`
+
+### New packages
+
+- **Every new Node package is ESM + TypeScript** — `"type": "module"` in `package.json` from the first commit. No CJS, no plain `.js` files.
+- **Wire a path alias to the source root immediately** — no deep relative imports. Current convention is `@/*` → `src/` (tutods migrated from `~/*`, so check the project's tsconfig rather than assuming).
+  Wrong: `import x from "../../lib/utils"` → Right: `import x from "@/lib/utils"`, alias set in both tsconfig and the bundler.
+
 ### Package manager
 
 Prefer `pnpm`. Check for a lock file before running any install command — use whatever the project already uses (`pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `package-lock.json` → npm). Never mix package managers in one project.
+
+### Shared configs
+
+Tooling config lives in the `@tutods/*` packages (`biome-config`, `typescript-config`, `renovate-config` in the `lib` repo). Fix the package, not one repo's local copy — then check whether the siblings (jps, farmacia-nova, tutods) need the same change, and say so.

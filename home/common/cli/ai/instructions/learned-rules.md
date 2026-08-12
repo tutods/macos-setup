@@ -14,8 +14,6 @@ Standing rules mined from past corrections. Each one exists because the same mis
   Wrong: migrating Vite→RSBuild while doing a performance task. Right: "this would need a build-tool change — separate decision, want a proposal?"
 - **Do the work yourself — never reach for another model or a paid API for something you can do.** Translation, content, analysis: the assistant does it directly.
   Wrong: pulling down a local model to translate strings. Right: translate the chunk yourself, glossary in hand.
-- **Shared tooling config lives in the `@tutods/*` packages** (`biome-config`, `typescript-config`, `renovate-config` in the `lib` repo). Improve the package, then check whether sibling repos (jps, farmacia-nova, tutods) need the same change — and say so.
-  Wrong: fixing renovate rules in one repo's local config. Right: fix `@tutods/renovate-config`, then offer to apply it to the siblings.
 - **Worktrees are temporary.** Non-trivial feature work happens in one; quick fixes (lint, one-liners) go directly in the working tree; and every worktree is removed as soon as the work lands.
   Wrong: three stale worktrees left behind after PRs merged. Right: land the PR, `git worktree remove`, done.
 
@@ -35,28 +33,12 @@ Standing rules mined from past corrections. Each one exists because the same mis
 - **A PR isn't delivered with conflicts on it.** After opening or updating a PR (or after the base branch moves), check mergeability and resolve conflicts immediately.
   Wrong: reporting "PR opened" while GitHub shows conflicts. Right: rebase/merge, push, confirm mergeable.
 
-### Code & docs style (cross-project)
+### Docs style
 
-- **Tailwind is v4.** Use CSS-first config (`@theme`); never introduce v3 patterns like `tailwind.config.js` theme extension in new code.
-  Wrong: adding `tailwind.config.js` colors. Right: `@theme { --color-brand: … }` in the CSS entry.
-- **Function declarations, not top-level arrow functions.** Arrows are for callbacks only (`useMemo`, `useCallback`, array methods, handlers passed inline).
-  Wrong: `export const HeroBanner = () => {}`. Right: `export function HeroBanner() {}`.
 - **No counts or ranges in docs that go stale.** Describe the set, not its size.
   Wrong: "ADRs 0001–0014". Right: "architecture decision records, numbered".
-- **Prefer array methods over `for...of`.** `map`/`forEach`/`filter` read better; loops only where early exit or awaiting in sequence genuinely requires one.
-  Wrong: `for (const item of items) { results.push(fn(item)) }`. Right: `const results = items.map(fn)`.
-- **Avoid type casting.** No `as` to silence the compiler — narrow, use a type guard, or fix the type at the source (`as const` and test files excepted).
-  Wrong: `const user = data as User`. Right: `const user = userSchema.parse(data)` or a narrowing check.
-- **Every new Node package is ESM + TypeScript.** `"type": "module"` in every `package.json`; no CJS, no plain JS files (stated explicitly in tutods sessions).
-  Wrong: new package without `"type": "module"`. Right: ESM + TS from the first commit.
-- **Every package gets a path alias to its source root immediately; no deep relative imports.** Current convention is `@/*` → `src/` (tutods migrated from `~/*` — check the project's tsconfig, don't assume).
-  Wrong: `import x from "../../lib/utils"`. Right: `import x from "@/lib/utils"` with the alias wired in tsconfig + bundler.
-- **Never name Tailwind v4 `@theme` tokens with core t-shirt keys** (`--container-sm/md/lg/xs/xl/…`). They silently shadow the core size scale app-wide (broke Sheet/Dialog widths in tutods). Use semantic names (`--container-prose`).
-  Wrong: `@theme { --container-lg: 1040px }`. Right: `@theme { --container-page: 1040px }` → `max-w-page`.
-- **Sanity projects: shape data in GROQ, not TS.** Defaults via `coalesce()` in the projection; Portable Text → string via `pt::text()` in the query. No post-query `??` wrapper helpers (corrected repeatedly in a-optica).
-  Wrong: `getSafePageData(result)` applying `??`. Right: `"title": coalesce(hero.title, "")` in the query.
-- **No single-letter callback parameters.** Name array/render-prop params after the thing (`item`, `index`, `event`/`evt`, `error`) — `i`, `e`, `err`, `res` are banned.
-  Wrong: `items.map((i) => …)`. Right: `items.map((item) => …)`.
+
+Stack-specific style rules (TypeScript, React/Tailwind, Sanity/GROQ) are **not** here — they live in the `ts-conventions`, `react-conventions` and `api-conventions` skills so they cost nothing in a Nix or content session. Load the matching skill before writing code.
 
 ### Git & repo hygiene
 

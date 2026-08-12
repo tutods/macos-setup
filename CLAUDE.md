@@ -68,7 +68,7 @@ Fish shell is the primary shell, configured in `home/common/shell/fish/` with se
 
 AI instructions are split into shared and role-specific:
 
-- `home/common/cli/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.claude/rules/workflow.md`)
+- `home/common/cli/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.claude/rules/workflow.md`). Always-on only: anything stack-specific belongs in a skill under `skills/local/`, not here.
 
 - `home/common/cli/ai/options.nix` — defines `home.ai.extraInstructions` option (default `""`)
 - `home/roles/personal/ai/instructions.md` — personal-specific additions (e.g., `doppler`)
