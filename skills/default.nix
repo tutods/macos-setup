@@ -28,10 +28,11 @@ in {
         "open-pr"
         "deep-review"
         "ui-iterate"
-        # Vendored (MIT) — neither source is a plugin marketplace, so these
-        # cannot arrive as plugins. Provenance is in each SKILL.md frontmatter.
-        "nestjs-best-practices" # kadajett/agent-nestjs-skills
-        "find-skills" # oakoss/agent-skills
+        # Vendored (MIT) — kadajett/agent-nestjs-skills is not a plugin
+        # marketplace, so this cannot arrive as a plugin. NestJS is a primary
+        # backend framework here and nothing else covers it. Provenance is in
+        # the SKILL.md frontmatter.
+        "nestjs-best-practices"
       ];
     })
   ];

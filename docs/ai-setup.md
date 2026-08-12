@@ -178,18 +178,13 @@ A repo with no `.claude-plugin/marketplace.json` cannot be installed this way. S
 
 | Path | Scope |
 |------|-------|
-| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices`, `find-skills` |
+| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices` |
 | `home/roles/personal/ai/skills/local/` | personal — `elementor-crocoblock`, `optimize-images` |
 | `home/roles/work/ai/skills/local/` | work — `acli` |
 
-Two are vendored rather than written here, because their upstreams are plain skill repos with no plugin marketplace. Both are MIT and record `vendored-from` in their SKILL.md frontmatter:
+One is vendored rather than written here: `nestjs-best-practices`, from `kadajett/agent-nestjs-skills` (MIT, `vendored-from` in its SKILL.md frontmatter). Its upstream is a plain skill repo with no plugin marketplace, so it cannot arrive as a plugin, and NestJS is a primary backend framework here with no other coverage.
 
-| Skill | Upstream |
-|-------|----------|
-| `nestjs-best-practices` | `kadajett/agent-nestjs-skills` |
-| `find-skills` | `oakoss/agent-skills` |
-
-Note that `find-skills` can *install* what it finds, straight into `~/.claude/skills/`. Don't let it — anything it drops there is outside Nix and gets flagged by the deploy's leftover audit. Use it to discover, then declare the plugin in Nix.
+Vendoring is the exception, not a second channel. Everything that *can* be a plugin must be one — see [dropped-skill-sources.md](dropped-skill-sources.md).
 
 Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under `~/.claude/skills/` — a plain `cp -R`, not a `home.file` symlink into the Nix store, because Claude Code writes inside a skill directory. `~/.agents/` is not used.
 

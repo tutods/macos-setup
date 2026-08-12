@@ -53,6 +53,16 @@ effect on a machine.
 | `oakoss/agent-skills` | storybook-stories |
 | `morphet81/cheat-sheets` | create-jira-ticket, update-jira-ticket — partly covered by `pm-skills@claude-code-skills` (jira-expert) |
 
+## Vendored, then dropped
+
+- **`find-skills`** (`oakoss/agent-skills`) — vendored into `skills/local/` briefly,
+  then removed. It discovers skills from skills.sh but *installs* them with
+  `pnpm dlx skills add`, straight into `~/.claude/skills/` outside Nix, which is
+  exactly the channel this repo closed: such installs are invisible to
+  `scripts/verify-plugins.sh`, get flagged by the deploy's leftover audit, and
+  silently shadow plugin-shipped copies of the same skill. Re-add only if it
+  gains a discovery-only mode, or if `oakoss/agent-skills` becomes a marketplace.
+
 ## Already absent before the migration
 
 - `resciencelab/opc-skills` (banner-creator, domain-hunter) — removed earlier over
