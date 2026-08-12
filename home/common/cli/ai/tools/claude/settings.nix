@@ -99,7 +99,7 @@ in {
       # Purge plugins removed from this config (migration for existing installs).
       # No-op on fresh installs where these keys never existed.
       merged_plugins=$(echo "$merged_plugins" | ${pkgs.jq}/bin/jq -c \
-        'del(.["terraform@claude-plugins-official"], .["warp@claude-code-warp"], .["autofix-bot@claude-plugins-official"], .["codex@openai-codex"], .["sourcegraph@claude-plugins-official"], .["prisma@claude-plugins-official"], .["framework-migration@claude-code-workflows"], .["core-skills@hyperframes"])')
+        'del(.["terraform@claude-plugins-official"], .["warp@claude-code-warp"], .["autofix-bot@claude-plugins-official"], .["codex@openai-codex"], .["sourcegraph@claude-plugins-official"], .["prisma@claude-plugins-official"], .["framework-migration@claude-code-workflows"], .["core-skills@hyperframes"], .["sanity@claude-plugins-official"], .["pm-skills@claude-code-skills"])')
       echo "$base" \
         | ${pkgs.jq}/bin/jq --argjson plugins "$merged_plugins" \
             '. + {enabledPlugins: $plugins}' \

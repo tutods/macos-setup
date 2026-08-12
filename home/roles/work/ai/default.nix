@@ -32,12 +32,8 @@ in {
     };
   };
 
-  # Work-only plugin marketplaces (Jira ticket management).
-  home.ai.marketplaces = {
-    claude-code-skills = "alirezarezvani/claude-skills";
-  };
-
-  home.ai.plugins = [
-    "pm-skills@claude-code-skills" # jira-expert
-  ];
+  # No work-only plugins. Jira is covered by the `acli` custom skill above
+  # (real Atlassian CLI, with JQL/ADF/field-convention references) plus the
+  # jira MCP server — pm-skills@claude-code-skills was dropped as a weaker
+  # third path to the same thing.
 }
