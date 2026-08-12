@@ -1,3 +1,8 @@
+---
+name: testing-conventions
+description: Testing conventions for this machine's projects — Vitest/Playwright stack, what to test and what not to, naming, and fixture patterns. Use when writing or reviewing tests, setting up a test runner, or deciding test coverage for a change.
+---
+
 ## Testing Conventions
 
 ### Stack

@@ -1,3 +1,8 @@
+---
+name: react-conventions
+description: React conventions for this machine's projects — component folder structure, function declarations over arrow components, hook rules, and composition patterns. Use when writing, reviewing, or restructuring React components, hooks, or a component library.
+---
+
 ## React Conventions
 
 ### Component File Structure

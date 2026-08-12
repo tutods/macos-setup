@@ -6,15 +6,18 @@
 }: let
   ai = import ../../../../../lib/ai.nix {inherit pkgs;};
 
+  # Always-on instructions only — these are concatenated into
+  # ~/.claude/rules/workflow.md and load in *every* session.
+  #
+  # Stack-specific conventions (TypeScript, React, API, testing, dependency
+  # hygiene) deliberately live in skills/local/ instead: they are irrelevant
+  # when the session is about Nix or content, and as skills they load on demand
+  # rather than costing ~2.5k tokens up front. Add here only if it must apply
+  # to every session regardless of what is being worked on.
   sharedFiles = [
     ./shared-instructions.md
     ./model-quality.md
     ./learned-rules.md
-    ./ts-conventions.md
-    ./react-conventions.md
-    ./api-conventions.md
-    ./testing-conventions.md
-    ./dependency-hygiene.md
   ];
 
   claudeExtras = builtins.readFile ../tools/claude/instructions.md;

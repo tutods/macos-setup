@@ -1,3 +1,8 @@
+---
+name: dependency-hygiene
+description: Rules for adding, upgrading, or removing an npm dependency — check native/existing solutions first, evaluate maintenance and size, prefer the workspace's shared config packages. Use when about to install a package, review a lockfile change, or audit dependencies.
+---
+
 ## Dependency Hygiene
 
 ### Before Adding Any Dependency

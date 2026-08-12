@@ -14,7 +14,10 @@
 # Store in secrets (never commit):
 #   echo 'set -gx GITHUB_TOKEN "ghp_xxx"' >> ~/.config/fish/secrets.fish
 #
-{pkgs}: {
+{
+  pkgs,
+  homeDir,
+}: {
   # GitHub's official server, from nixpkgs — a real binary, no npx/Docker.
   # Replaces @modelcontextprotocol/server-github, which upstream archived.
   #
@@ -36,5 +39,24 @@
   playwright = {
     command = "npx";
     args = ["-y" "@playwright/mcp" "--isolated" "--headless"];
+  };
+
+  # Tree-sitter code graph, so review/impact questions query structure instead
+  # of re-reading files. Complements rtk: rtk compresses command output, this
+  # avoids reading in the first place.
+  #
+  # Deliberately NOT installed via `code-review-graph install`. That command
+  # auto-detects every agent on the machine and writes config for Cursor,
+  # Gemini, Codex, Windsurf, Zed and the rest — and its Claude Code half writes
+  # hooks into ~/.claude/settings.json, which this repo overwrites on every
+  # deploy. Declaring the server here gives the same MCP tools and touches
+  # nothing else. (`install --platform claude-code` would narrow the blast
+  # radius but still fights settings.json.)
+  #
+  # Per-repo setup is still manual and required: `code-review-graph build`
+  # inside a project before its graph answers anything.
+  code-review-graph = {
+    command = "${homeDir}/.local/bin/code-review-graph";
+    args = ["serve"];
   };
 }

@@ -1,3 +1,8 @@
+---
+name: api-conventions
+description: HTTP API conventions for this machine's projects — no response envelope (status code is the discriminator), error shapes, pagination, and validation at the edge. Use when designing, implementing, or reviewing an HTTP API, REST endpoint, or route handler.
+---
+
 ## API Conventions
 
 ### Response Contract

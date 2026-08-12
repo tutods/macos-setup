@@ -28,6 +28,14 @@ in {
         "open-pr"
         "deep-review"
         "ui-iterate"
+
+        # Stack conventions — skills, not always-on instructions, so they load
+        # only when the work is actually TypeScript/React/API/testing/deps.
+        "ts-conventions"
+        "react-conventions"
+        "api-conventions"
+        "testing-conventions"
+        "dependency-hygiene"
         # Vendored (MIT) — kadajett/agent-nestjs-skills is not a plugin
         # marketplace, so this cannot arrive as a plugin. NestJS is a primary
         # backend framework here and nothing else covers it. Provenance is in

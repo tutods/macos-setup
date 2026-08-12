@@ -24,8 +24,10 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 | Tier | Model | Use when |
 |------|-------|----------|
 | fast | `claude-haiku-4-5-20251001` | mechanical changes, isolated functions, 1–2 files |
-| default | `claude-sonnet-4-6` | standard multi-file work, integration tasks |
-| best | `claude-opus-4-6` | architecture, design reviews, complex reasoning |
+| default | `claude-sonnet-5` | standard multi-file work, integration tasks |
+| best | `claude-opus-5` | architecture, design reviews, complex reasoning |
+
+Model IDs move. This table and `tools/claude/instructions.md` are the two places that name them.
 
 ### ttok
 
@@ -43,6 +45,8 @@ Instructions are split by scope and deployed by `home/common/cli/ai/instructions
 | File | Deployed to | Purpose |
 |------|------------|---------|
 | `instructions/shared-instructions.md` | `~/.claude/rules/workflow.md` | Fast CLI prefs, git conventions, Nix dotfiles guide |
+| `instructions/model-quality.md` | same | Evidence-before-claims, scope guard, plan execution |
+| `instructions/learned-rules.md` | same | Standing rules mined from past corrections |
 | `home/roles/personal/ai/instructions.md` | appended (personal machine) | Doppler secrets management |
 | `home/roles/work/ai/instructions.md` | appended (work machine) | Work context (GCP, Jira, company tools) |
 
@@ -88,6 +92,7 @@ Base servers managed in `home/common/cli/ai/mcp-servers.nix`, deployed by `tools
 | `github` | both | GitHub's official server, toolsets pinned to context/repos/issues/pull_requests/actions |
 | `playwright` | both | Browser automation and testing |
 | `shadcn` | personal | shadcn/ui component registry |
+| `code-review-graph` | both | Tree-sitter code graph — query structure instead of re-reading files |
 | `jira` | work | Jira + Confluence via `mcp-atlassian` |
 
 Enabling a plugin also registers any MCP servers in its bundled `.mcp.json`, so `claude mcp list` can show servers not declared here. Remove those by dropping the plugin, not by editing `mcp-servers.nix`.
@@ -178,7 +183,7 @@ A repo with no `.claude-plugin/marketplace.json` cannot be installed this way. S
 
 | Path | Scope |
 |------|-------|
-| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices` |
+| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices`, plus the stack conventions below |
 | `home/roles/personal/ai/skills/local/` | personal — `elementor-crocoblock`, `optimize-images` |
 | `home/roles/work/ai/skills/local/` | work — `acli` |
 
@@ -205,6 +210,17 @@ Deployed to `~/.claude/context/` from `home/common/cli/ai/context/`. @-mention o
 | `@context/stack-personal` | Personal: TanStack Start, Next.js, Tailwind, shadcn/ui, Postgres, Drizzle/Prisma |
 | `@context/stack-work` | Work: React/Next.js, MariaDB, NestJS, GCP |
 | `@context/stack-nix-dotfiles` | This repo: module hierarchy, commands, conventions |
+
+### Stack conventions are skills, not instructions
+
+`ts-conventions`, `react-conventions`, `api-conventions`, `testing-conventions`
+and `dependency-hygiene` live in `skills/local/` rather than in the always-on
+instruction set. They were ~2,500 tokens loading in every session, including
+Nix work and content writing. As skills they load only when the work matches.
+
+Only put a file in `instructions/` if it must apply to **every** session
+regardless of subject — that is now just `shared-instructions`, `model-quality`
+and `learned-rules`.
 
 ### Harness built-ins (not installable)
 

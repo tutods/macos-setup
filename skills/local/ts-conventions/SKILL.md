@@ -1,3 +1,8 @@
+---
+name: ts-conventions
+description: TypeScript conventions for this machine's projects — strict mode settings, banned patterns (no `as` casting, no `any`), branded types, and Zod at boundaries. Use when writing, reviewing, or refactoring TypeScript, choosing types, or setting up a tsconfig.
+---
+
 ## TypeScript Conventions
 
 These conventions apply to all TypeScript projects on this machine.
