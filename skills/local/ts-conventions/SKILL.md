@@ -55,7 +55,7 @@ function assertNever(x: never): never {
 ### New packages
 
 - **Every new Node package is ESM + TypeScript** — `"type": "module"` in `package.json` from the first commit. No CJS, no plain `.js` files.
-- **Wire a path alias to the source root immediately** — no deep relative imports. Current convention is `@/*` → `src/` (tutods migrated from `~/*`, so check the project's tsconfig rather than assuming).
+- **Wire a path alias to the source root immediately** — no deep relative imports. Default convention is `@/*` → `src/`, but read the project's tsconfig rather than assuming; older repos may still use `~/*`.
   Wrong: `import x from "../../lib/utils"` → Right: `import x from "@/lib/utils"`, alias set in both tsconfig and the bundler.
 
 ### Package manager
@@ -64,4 +64,4 @@ Prefer `pnpm`. Check for a lock file before running any install command — use 
 
 ### Shared configs
 
-Tooling config lives in the `@tutods/*` packages (`biome-config`, `typescript-config`, `renovate-config` in the `lib` repo). Fix the package, not one repo's local copy — then check whether the siblings (jps, farmacia-nova, tutods) need the same change, and say so.
+Where a project consumes shared Biome/TypeScript/Renovate config from a package, fix the package rather than that repo's local copy — then check whether sibling repos need the same change, and say so. The consuming repo's own `CLAUDE.md` names which package.

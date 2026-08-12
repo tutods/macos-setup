@@ -42,5 +42,5 @@ Stack-specific style rules (TypeScript, React/Tailwind, Sanity/GROQ) are **not**
 
 ### Git & repo hygiene
 
-- **In a repo with the user's uncommitted work, commit with an explicit pathspec.** Plain `git commit` sweeps whatever the user had staged into your commit (happened twice with a staged deletion in a-optica).
+- **In a repo with the user's uncommitted work, commit with an explicit pathspec.** Plain `git commit` sweeps whatever the user had staged into your commit (this has happened more than once).
   Wrong: `git add my-file && git commit -m …`. Right: `git commit -m … -- my-file` (or verify `git diff --cached --stat` first).

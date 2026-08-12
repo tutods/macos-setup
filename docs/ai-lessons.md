@@ -25,13 +25,10 @@ Specific incidents worth remembering but too narrow for standing rules. Each ent
 
 ## Node / package managers
 
-- **pnpm ≥10.x stopped reading the `pnpm` field in `package.json`** — settings like `onlyBuiltDependencies` moved to `pnpm-workspace.yaml`; the old field only produces a WARN and silently does nothing (hit in jps, 2026-07-17). Move the keys, don't ignore the warning.
+- **pnpm ≥10.x stopped reading the `pnpm` field in `package.json`** — settings like `onlyBuiltDependencies` moved to `pnpm-workspace.yaml`; the old field only produces a WARN and silently does nothing (2026-07-17). Move the keys, don't ignore the warning.
 
 ## Projects
 
-- **`~/Developer/AI/a-optica` is a dead path** (empty except `.idea`) — the live project is `~/Developer/freelances/a-optica`. Its session-memory rules were ported into that repo's `.universal-ai-config/instructions/` on 2026-07-19; don't mine the dead memory again.
-
-## Frontend
-
-- **`@unpic/react` handles preload/LQIP via its own props (`background`, priority)** — hand-rolled lazy-loading/preload tricks around it broke the hero image twice (a-optica `68a7ca8` revert, `8e2ec74` fix). Configure the component, don't work around it.
-- **Check current API names before using a library remembered from training data** — `inputValidator` was deprecated in favor of `validator` (a-optica `5bff831`). The ctx7 rule exists for this reason.
+Per-project lessons are **not** kept here — they live in that project's own
+`CLAUDE.md`, so they travel with the repo. See `docs/project-rules/` for the
+ones staged but not yet installed.

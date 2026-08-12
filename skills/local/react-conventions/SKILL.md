@@ -63,7 +63,7 @@ Rules:
 @theme { --color-brand: oklch(0.6 0.2 250); }
 ```
 
-**Never name `@theme` tokens with core t-shirt keys** (`--container-xs/sm/md/lg/xl/…`). They silently shadow Tailwind's core size scale app-wide — this broke Sheet and Dialog widths in tutods. Use semantic names instead.
+**Never name `@theme` tokens with core t-shirt keys** (`--container-xs/sm/md/lg/xl/…`). They silently shadow Tailwind's core size scale app-wide, which breaks shadcn primitives like Sheet and Dialog. Use semantic names instead.
 
 Wrong: `@theme { --container-lg: 1040px }` → Right: `@theme { --container-page: 1040px }`, used as `max-w-page`.
 

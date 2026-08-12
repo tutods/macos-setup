@@ -23,7 +23,7 @@ T
 { code: string; message: string; details?: unknown }
 ```
 
-Error codes are machine-readable strings (`CUSTOMER_NOT_FOUND`, `VALIDATION_ERROR`), not numbers. Never wrap responses in `{ data, error }` — that envelope was tried and deliberately dropped (JPS ADR-0015). Never throw unhandled errors — always map to the error shape.
+Error codes are machine-readable strings (`CUSTOMER_NOT_FOUND`, `VALIDATION_ERROR`), not numbers. Never wrap responses in `{ data, error }` — that envelope was tried and deliberately dropped. Never throw unhandled errors — always map to the error shape.
 
 ### HTTP Status Codes
 
@@ -75,7 +75,7 @@ Shape data in the query, not in TypeScript afterwards:
 
 - Defaults via `coalesce()` in the projection
 - Portable Text → string via `pt::text()` in the query
-- No post-query `??` wrapper helpers (corrected repeatedly in a-optica)
+- No post-query `??` wrapper helpers
 
 Wrong: `getSafePageData(result)` applying `??` to every field.
 Right: `"title": coalesce(hero.title, "")` in the projection.
