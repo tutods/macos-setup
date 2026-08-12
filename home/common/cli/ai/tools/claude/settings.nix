@@ -46,6 +46,13 @@
     # specific (1500px longest side, WebP, metadata stripped) and backed by the
     # imagemagick/jpegoptim/optipng already in modules/packages/media.nix
     "image-optimization@claude-skills"
+    # generic REST advice that contradicts api-conventions — most of it
+    # recommends the { data, error } envelope this house style bans
+    "rest-api-design@claude-skills"
+    # ts-advanced-types / js-testing duplicate ts-conventions and
+    # testing-conventions; nodejs-backend and modern-js are covered by
+    # nestjs-best-practices + backend-development@claude-code-workflows
+    "javascript-typescript@claude-code-workflows"
   ];
 
   purgeExpr = "del(${lib.concatMapStringsSep ", " (p: ''.["${p}"]'') purgedPlugins})";

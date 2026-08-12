@@ -58,7 +58,6 @@
     "humanizer@humanizer"
 
     # ── wshobson/agents ─────────────────────────────────────────────────────
-    "javascript-typescript@claude-code-workflows" # nodejs-backend, modern-js, ts-advanced-types, js-testing
     "developer-essentials@claude-code-workflows" # error-handling / auth-implementation / nx / turborepo
     "backend-development@claude-code-workflows" # api-design, architecture, cqrs, microservices — NestJS-adjacent
     "cicd-automation@claude-code-workflows" # deployment-pipeline, github-actions, secrets-management
@@ -68,7 +67,6 @@
 
     # ── secondsky/claude-skills (one plugin per skill) ──────────────────────
     "react-hook-form-zod@claude-skills"
-    "rest-api-design@claude-skills"
     "csrf-protection@claude-skills"
     "health-check-endpoints@claude-skills"
     "xss-prevention@claude-skills"
