@@ -27,7 +27,7 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 | default | `claude-sonnet-5` | standard multi-file work, integration tasks |
 | best | `claude-opus-5` | architecture, design reviews, complex reasoning |
 
-Model IDs move. This table and `tools/claude/instructions.md` are the two places that name them.
+Model IDs move. This table and `claude/instructions.md` are the two places that name them.
 
 ### ttok
 
@@ -40,7 +40,7 @@ git diff | ttok                  # count tokens in a diff
 
 ## AI Instructions
 
-Instructions are split by scope and deployed by `home/common/cli/ai/instructions/default.nix`.
+Instructions are split by scope and deployed by `home/common/ai/instructions/default.nix`.
 
 | File | Deployed to | Purpose |
 |------|------------|---------|
@@ -58,7 +58,7 @@ See [work-setup.md](work-setup.md) for the full work environment setup.
 
 ## Claude Code Settings
 
-Managed by `home/common/cli/ai/tools/claude/settings.nix` via `home.activation.claudeSettings`.
+Managed by `home/common/ai/claude/settings.nix` via `home.activation.claudeSettings`.
 
 Written to `~/.claude/settings.json` on every `darwin-rebuild switch`.
 
@@ -85,7 +85,7 @@ The biome hook is a no-op when biome is not configured in the project. Falls bac
 
 ## MCP Servers
 
-Base servers managed in `home/common/cli/ai/mcp-servers.nix`, deployed by `tools/claude/mcp.nix`.
+Base servers managed in `home/common/ai/mcp-servers.nix`, deployed by `claude/mcp.nix`.
 
 | Server | Scope | Purpose |
 |--------|-------|---------|
@@ -146,7 +146,7 @@ Declared in Nix, written into `~/.claude/settings.json` as `extraKnownMarketplac
 
 | Declared in | Scope |
 |-------------|-------|
-| `home/common/cli/ai/tools/claude/plugins.nix` | both machines |
+| `home/common/ai/claude/plugins.nix` | both machines |
 | `home/roles/personal/ai/default.nix` | personal only |
 | `home/roles/work/ai/default.nix` | work only |
 
@@ -183,7 +183,7 @@ A repo with no `.claude-plugin/marketplace.json` cannot be installed this way. S
 
 | Path | Scope |
 |------|-------|
-| `skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices`, plus the stack conventions below |
+| `home/common/ai/skills/local/` | both roles — `llm-council`, `content-writer`, `ts-strict-audit`, `conventional-commit`, `open-pr`, `deep-review`, `ui-iterate`, `nestjs-best-practices`, plus the stack conventions below |
 | `home/roles/personal/ai/skills/local/` | personal — `elementor-crocoblock`, `optimize-images` |
 | `home/roles/work/ai/skills/local/` | work — `acli` |
 
@@ -195,7 +195,7 @@ Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under 
 
 Each deploy replaces the directory, so edits made directly in `~/.claude/skills/` are lost — change the repo source instead.
 
-To add one: create `skills/local/<name>/SKILL.md`, add `<name>` to the `names` list in `skills/default.nix`, run `./nix.sh <config>`.
+To add one: create `home/common/ai/skills/local/<name>/SKILL.md`, add `<name>` to the `names` list in `skills/default.nix`, run `./nix.sh <config>`.
 
 #### Leftovers from `npx skills`
 
@@ -203,7 +203,7 @@ To add one: create `skills/local/<name>/SKILL.md`, add `<name>` to the `names` l
 
 ### Stack reference is a skill
 
-There used to be a `home/common/cli/ai/context/` directory deployed to
+There used to be a `home/common/ai/context/` directory deployed to
 `~/.claude/context/` for `@`-mentioning. It was delivered twice: the personal
 and work files were *also* concatenated into `extraInstructions`, so they loaded
 in every session — including Nix and content work — while the docs told you to
@@ -221,7 +221,7 @@ remembering:
 ### Stack conventions are skills, not instructions
 
 `ts-conventions`, `react-conventions`, `api-conventions`, `testing-conventions`
-and `dependency-hygiene` live in `skills/local/` rather than in the always-on
+and `dependency-hygiene` live in `home/common/ai/skills/local/` rather than in the always-on
 instruction set. They were ~2,500 tokens loading in every session, including
 Nix work and content writing. As skills they load only when the work matches.
 
@@ -254,7 +254,7 @@ Always available, never declared anywhere:
 
 ## Initialization (Home Manager Activations)
 
-Managed in `home/common/cli/ai/init.nix`. Runs automatically on every `darwin-rebuild switch`. Each step is guarded — only acts when needed.
+Managed in `home/common/ai/init.nix`. Runs automatically on every `darwin-rebuild switch`. Each step is guarded — only acts when needed.
 
 | Step | Condition | What it does |
 |------|-----------|-------------|

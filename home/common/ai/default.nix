@@ -4,7 +4,7 @@
     ./instructions
     ./options.nix
     ./rtk
-    ./tools/claude
-    ../../../../skills
+    ./claude
+    ./skills
   ];
 }

@@ -4,8 +4,8 @@
   lib,
   ...
 }: let
-  ai = import ../../../../../../lib/ai.nix {inherit pkgs;};
-  servers = import ../../mcp-servers.nix {
+  ai = import ../../../../lib/ai.nix {inherit pkgs;};
+  servers = import ../mcp-servers.nix {
     inherit pkgs;
     homeDir = config.home.homeDirectory;
   };

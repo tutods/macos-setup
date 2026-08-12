@@ -6,7 +6,7 @@
   ai = import ../../../../lib/ai.nix {inherit pkgs;};
 in {
   # Personal-only custom skills — real dirs in ~/.claude/skills.
-  # (Custom skills shared across roles live in ~/.dotfiles/skills/default.nix.)
+  # (Custom skills shared across roles live in home/common/ai/skills/default.nix.)
   imports = [
     (ai.mkLocalSkills {
       inherit lib;
@@ -28,7 +28,7 @@ in {
   home.ai.extraInstructions = builtins.readFile ./instructions.md;
 
   # Personal-only plugin marketplaces. See
-  # home/common/cli/ai/tools/claude/plugins.nix for the shared set.
+  # home/common/ai/claude/plugins.nix for the shared set.
   home.ai.marketplaces = {
     better-auth-agent-skills = "better-auth/skills";
     addy-web-quality-skills = "addyosmani/web-quality-skills";

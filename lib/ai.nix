@@ -1,11 +1,12 @@
-# Shared helpers for the AI wiring tree under home/common/cli/ai.
+# Shared helpers for the AI wiring tree under home/common/ai.
 #
 # Why this exists: the per-tool trees each grew their own copy of the same
 # patterns — a tiny `mkMcp`-style helper, a jq-based "merge key into JSON file"
 # activation script, and an append-if-non-empty concatenator. Concentrating
 # those here means a new tool is one call site, not new copies.
 #
-# Import as: `let ai = import ../../lib/ai.nix { inherit pkgs; }; in ...`
+# Import as: `let ai = import <path-to>/lib/ai.nix { inherit pkgs; }; in ...`
+# (four levels up from home/common/ai/* and home/roles/<role>/ai/)
 {pkgs}: let
   jqBin = "${pkgs.jq}/bin/jq";
 in {
@@ -73,7 +74,7 @@ in {
   # Generate a bash snippet that merges a single key into a JSON config file
   # via jq, creating the file with `{"<key>": <value>}` if it does not exist.
   #
-  # Used by tools/claude/mcp.nix (key="mcpServers").
+  # Used by claude/mcp.nix (key="mcpServers").
   mergeJsonKey = {
     file,
     key,

@@ -6,7 +6,7 @@
   ai = import ../../../../lib/ai.nix {inherit pkgs;};
 in {
   # Work-only custom skills — real dirs in ~/.claude/skills.
-  # (Custom skills shared across roles live in ~/.dotfiles/skills/default.nix.)
+  # (Custom skills shared across roles live in home/common/ai/skills/default.nix.)
   imports = [
     (ai.mkLocalSkills {
       inherit lib;

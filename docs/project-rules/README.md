@@ -2,8 +2,8 @@
 
 Rules that only apply to **one** project. They do not belong on this machine.
 
-A rule earns a place in `home/common/cli/ai/instructions/` only if it holds in
-every session. A rule earns a place in `skills/local/` if it holds for a whole
+A rule earns a place in `home/common/ai/instructions/` only if it holds in
+every session. A rule earns a place in `home/common/ai/skills/local/` if it holds for a whole
 stack. Everything below is narrower than that — it is true of exactly one
 repository, and it should travel with that repository so it also applies when
 someone else (or another machine) works on it.

@@ -68,9 +68,9 @@ Fish shell is the primary shell, configured in `home/common/shell/fish/` with se
 
 AI instructions are split into shared and role-specific:
 
-- `home/common/cli/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.claude/rules/workflow.md`). Always-on only: anything stack-specific belongs in a skill under `skills/local/`, not here.
+- `home/common/ai/instructions/shared-instructions.md` — universal CLI tools + workflow (deployed to all roles via `~/.claude/rules/workflow.md`). Always-on only: anything stack-specific belongs in a skill under `home/common/ai/skills/local/`, not here.
 
-- `home/common/cli/ai/options.nix` — defines `home.ai.extraInstructions` option (default `""`)
+- `home/common/ai/options.nix` — defines `home.ai.extraInstructions` option (default `""`)
 - `home/roles/personal/ai/instructions.md` — personal-specific additions (e.g., `doppler`)
 - `home/roles/work/` — no AI-specific instructions currently
 
@@ -103,11 +103,11 @@ Two sources, and only two.
 
 | Where | Scope |
 |-------|-------|
-| `home/common/cli/ai/tools/claude/plugins.nix` | both machines |
+| `home/common/ai/claude/plugins.nix` | both machines |
 | `home/roles/personal/ai/default.nix` | personal only |
 | `home/roles/work/ai/default.nix` | work only |
 
-Roles contribute through two options (`home/common/cli/ai/options.nix`), which merge across modules:
+Roles contribute through two options (`home/common/ai/options.nix`), which merge across modules:
 
 ```nix
 home.ai.marketplaces = { <key> = "<owner>/<repo>"; };   # key is chosen here, not read from the repo
@@ -123,15 +123,15 @@ Plugins are coarser than skills. To add one, find the plugin that ships the skil
 ./scripts/verify-plugins.sh --quiet  # what CI runs
 ```
 
-Removing a plugin from `home.ai.plugins` is **not** enough — `enabledPlugins` merges live + Nix, so it stays enabled on machines that already installed it. Add it to `purgedPlugins` in `tools/claude/settings.nix` too.
+Removing a plugin from `home.ai.plugins` is **not** enough — `enabledPlugins` merges live + Nix, so it stays enabled on machines that already installed it. Add it to `purgedPlugins` in `claude/settings.nix` too.
 
 A repo without `.claude-plugin/marketplace.json` **cannot** be installed this way. `docs/dropped-skill-sources.md` records the sources dropped for that reason when this repo migrated off `npx skills`, so they can be re-checked later.
 
-**Custom skills — in-repo sources.** `skills/local/` (both roles), `home/roles/<role>/ai/skills/local/` (role-only). Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under `~/.claude/skills/` — copied, not symlinked into the Nix store, because Claude Code writes inside a skill directory. `~/.agents/` is not used.
+**Custom skills — in-repo sources.** `home/common/ai/skills/local/` (both roles), `home/roles/<role>/ai/skills/local/` (role-only). Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under `~/.claude/skills/` — copied, not symlinked into the Nix store, because Claude Code writes inside a skill directory. `~/.agents/` is not used.
 
 ```bash
-# Add a custom skill: create skills/local/<name>/SKILL.md, add <name> to the
-# `names` list in skills/default.nix, then ./nix.sh macbook
+# Add a custom skill: create home/common/ai/skills/local/<name>/SKILL.md, add <name> to the
+# `names` list in home/common/ai/skills/default.nix, then ./nix.sh macbook
 ```
 
 Every deploy also lists directories in `~/.claude/skills/` that this repo doesn't own — leftovers from the old `npx skills` era, which now shadow the copies shipped inside plugins. It prints the `rm -rf` line and never deletes on its own, since a stray directory could be a hand-written skill.
@@ -142,7 +142,7 @@ Every deploy also lists directories in `~/.claude/skills/` that this repo doesn'
 - **Git remotes stay SSH.** Never switch them to HTTPS during reviews or "fixes".
 - **Configs the app itself writes (e.g. Zed `settings.json`) are seeded as a one-time copy, not a store symlink** — a read-only symlink breaks the app's own save.
 - One-off gotchas live in `docs/ai-lessons.md` — check it before debugging setup issues that feel familiar.
-- **Rules are scoped to where they're true.** Always-true → `instructions/`; true for a stack → `skills/local/`; true for one repo → that repo's own `CLAUDE.md` (staged in `docs/project-rules/` until installed). Never name a specific project inside a machine-wide instruction or skill.
+- **Rules are scoped to where they're true.** Always-true → `instructions/`; true for a stack → `home/common/ai/skills/local/`; true for one repo → that repo's own `CLAUDE.md` (staged in `docs/project-rules/` until installed). Never name a specific project inside a machine-wide instruction or skill.
 
 ## CI
 

@@ -26,7 +26,7 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 SOURCES=(
-  home/common/cli/ai/tools/claude/plugins.nix
+  home/common/ai/claude/plugins.nix
   home/roles/personal/ai/default.nix
   home/roles/work/ai/default.nix
 )

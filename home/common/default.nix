@@ -9,8 +9,9 @@
     # Editors
     ./editors/vscode
     ./editors/zed
+    # AI (Claude Code): instructions, skills, plugins, MCP
+    ./ai
     # CLI tools
-    ./cli/ai
     ./cli/bat.nix
     ./cli/gh.nix
     ./cli/git.nix

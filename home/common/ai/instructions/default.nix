@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  ai = import ../../../../../lib/ai.nix {inherit pkgs;};
+  ai = import ../../../../lib/ai.nix {inherit pkgs;};
 
   # Always-on instructions only — these are concatenated into
   # ~/.claude/rules/workflow.md and load in *every* session.
@@ -20,7 +20,7 @@
     ./learned-rules.md
   ];
 
-  claudeExtras = builtins.readFile ../tools/claude/instructions.md;
+  claudeExtras = builtins.readFile ../claude/instructions.md;
 
   sharedContent = lib.concatStringsSep "\n\n" (map builtins.readFile sharedFiles);
   extra = config.home.ai.extraInstructions or "";
