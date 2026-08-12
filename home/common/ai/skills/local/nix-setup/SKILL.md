@@ -67,19 +67,28 @@ Claude Code is the only agent. There is no second CLI to keep in sync.
 
 Everything AI lives under `home/common/ai/`. Nothing AI-related sits outside it.
 
+There is no `claude/` subdirectory: every file here writes into `~/.claude/`,
+so it would not separate Claude things from non-Claude things.
+
 ```
 home/common/ai/
 ├── default.nix      → imports the tree
 ├── options.nix      → home.ai.* options
 ├── init.nix         → guarded pipx installs, one-time tool migrations
-├── mcp-servers.nix  → shared MCP server definitions (Nix-authoritative)
+├── settings.nix     → ~/.claude/settings.json (+ hooks, purgedPlugins)
+├── plugins.nix      → marketplaces + plugins, shared across hosts
+├── mcp.nix          → writes the MCP server list
+├── mcp-servers.nix  → the server definitions themselves (pure data)
+├── statusline.nix   → statusline script + config
 ├── instructions/    → always-on instructions (→ ~/.claude/rules/workflow.md)
 ├── skills/
 │   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)
 │   └── local/       → in-repo skill sources
-└── claude/          → settings, plugin marketplaces, MCP wiring, statusline
-    └── rtk/         → RTK proxy reference (→ ~/.claude/RTK.md, via @RTK.md)
+└── rtk/             → RTK proxy reference (→ ~/.claude/RTK.md, via @RTK.md)
 ```
+
+`lib/ai.nix` is passed in as the `aiLib` module argument (wired in
+`lib/mkHost.nix` via `extraSpecialArgs`) — never import it by relative path.
 
 Each role mirrors that shape:
 
@@ -110,7 +119,7 @@ them on next launch. Never add one through the Claude Code UI.
 
 Removing a plugin from `home.ai.plugins` is not enough: `enabledPlugins` merges
 live and Nix state, so it must also go in `purgedPlugins` in
-`claude/settings.nix`.
+`settings.nix`.
 
 Custom skills are **copied** into `~/.claude/skills/`, so edits made there are
 overwritten on the next deploy — change the repo source instead.

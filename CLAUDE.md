@@ -103,7 +103,7 @@ Two sources, and only two.
 
 | Where | Scope |
 |-------|-------|
-| `home/common/ai/claude/plugins.nix` | both machines |
+| `home/common/ai/plugins.nix` | both machines |
 | `home/roles/personal/ai/default.nix` | personal only |
 | `home/roles/work/ai/default.nix` | work only |
 
@@ -123,7 +123,7 @@ Plugins are coarser than skills. To add one, find the plugin that ships the skil
 ./scripts/verify-plugins.sh --quiet  # what CI runs
 ```
 
-Removing a plugin from `home.ai.plugins` is **not** enough — `enabledPlugins` merges live + Nix, so it stays enabled on machines that already installed it. Add it to `purgedPlugins` in `claude/settings.nix` too.
+Removing a plugin from `home.ai.plugins` is **not** enough — `enabledPlugins` merges live + Nix, so it stays enabled on machines that already installed it. Add it to `purgedPlugins` in `settings.nix` too.
 
 A repo without `.claude-plugin/marketplace.json` **cannot** be installed this way. `docs/dropped-skill-sources.md` records the sources dropped for that reason when this repo migrated off `npx skills`, so they can be re-checked later.
 

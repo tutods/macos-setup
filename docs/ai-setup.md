@@ -27,7 +27,7 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 | default | `claude-sonnet-5` | standard multi-file work, integration tasks |
 | best | `claude-opus-5` | architecture, design reviews, complex reasoning |
 
-Model IDs move. This table and `claude/instructions.md` are the two places that name them.
+Model IDs move. This table and `instructions/model-selection.md` are the two places that name them.
 
 ### ttok
 
@@ -58,7 +58,7 @@ See [work-setup.md](work-setup.md) for the full work environment setup.
 
 ## Claude Code Settings
 
-Managed by `home/common/ai/claude/settings.nix` via `home.activation.claudeSettings`.
+Managed by `home/common/ai/settings.nix` via `home.activation.claudeSettings`.
 
 Written to `~/.claude/settings.json` on every `darwin-rebuild switch`.
 
@@ -85,7 +85,7 @@ The biome hook is a no-op when biome is not configured in the project. Falls bac
 
 ## MCP Servers
 
-Base servers managed in `home/common/ai/mcp-servers.nix`, deployed by `claude/mcp.nix`.
+Base servers managed in `home/common/ai/mcp-servers.nix`, deployed by `mcp.nix`.
 
 | Server | Scope | Purpose |
 |--------|-------|---------|
@@ -146,7 +146,7 @@ Declared in Nix, written into `~/.claude/settings.json` as `extraKnownMarketplac
 
 | Declared in | Scope |
 |-------------|-------|
-| `home/common/ai/claude/plugins.nix` | both machines |
+| `home/common/ai/plugins.nix` | both machines |
 | `home/roles/personal/ai/default.nix` | personal only |
 | `home/roles/work/ai/default.nix` | work only |
 

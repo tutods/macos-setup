@@ -68,7 +68,7 @@ Everything Claude Code reads is generated from this repo, so both machines stay 
 | Custom skills | `home/common/ai/skills/local/` | `~/.claude/skills/` (real dirs, copied) |
 | External skills | plugin marketplaces, declared in Nix | installed by Claude Code on next launch |
 | MCP servers | `home/common/ai/mcp-servers.nix` | `~/.claude/claude_desktop_config.json` |
-| Settings, hooks, statusline | `home/common/ai/claude/settings.nix` | `~/.claude/settings.json` |
+| Settings, hooks, statusline | `home/common/ai/settings.nix` | `~/.claude/settings.json` |
 
 Rules are scoped to where they are actually true: always-true rules are instructions, stack-specific ones are skills that load on demand, and repo-specific ones live in that repo's own `CLAUDE.md`.
 
@@ -146,7 +146,7 @@ Run `nix fmt` before committing — a pre-commit hook enforces it.
 │   └── work/                   default · dock · packages · homebrew
 ├── home/
 │   ├── common/                 Every user
-│   │   ├── ai/                 instructions · skills · claude (settings, plugins, mcp, rtk)
+│   │   ├── ai/                 instructions · skills · settings · plugins · mcp · rtk
 │   │   ├── cli/                bat · gh · git · htop
 │   │   ├── editors/            vscode · zed
 │   │   ├── shell/              fish · oh-my-posh
@@ -172,7 +172,7 @@ Run `nix fmt` before committing — a pre-commit hook enforces it.
 | System package, one machine | `hosts/darwin/<name>/packages.nix` |
 | User program | `home/common/` |
 | Claude skill | `home/common/ai/skills/local/` + the `names` list |
-| Claude plugin | `home/common/ai/claude/plugins.nix` or a role's `ai/default.nix` |
+| Claude plugin | `home/common/ai/plugins.nix` or a role's `ai/default.nix` |
 
 Check a package exists in stable first: `nix search nixpkgs <name>`.
 

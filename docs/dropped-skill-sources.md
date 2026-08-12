@@ -16,7 +16,7 @@ git -C /tmp/probe cat-file -e HEAD:.claude-plugin/marketplace.json && echo "now 
 
 If a repo has since added one, look up which plugin ships the skill you want
 (a plugin's `source` dir contains the `skills/<name>/` you're after) and add it
-to `home/common/ai/claude/plugins.nix` or the role's `ai/default.nix`.
+to `home/common/ai/plugins.nix` or the role's `ai/default.nix`.
 
 Note that the dropped skills are still sitting in `~/.claude/skills/` from the
 old `npx skills` installs until you clear them — the deploy lists them and
