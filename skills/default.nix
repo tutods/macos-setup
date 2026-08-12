@@ -28,6 +28,9 @@ in {
         "open-pr"
         "deep-review"
         "ui-iterate"
+        # Vendored from kadajett/agent-nestjs-skills (MIT) — no plugin
+        # marketplace ships a NestJS skill, so it cannot arrive as a plugin.
+        "nestjs-best-practices"
       ];
     })
   ];

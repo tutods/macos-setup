@@ -70,6 +70,7 @@
     "backend-development@claude-code-workflows" # architecture-patterns
     "cicd-automation@claude-code-workflows" # deployment-pipeline-design
     "ui-design@claude-code-workflows" # design-system-patterns
+    "javascript-typescript@claude-code-workflows" # nodejs-backend, modern-js, ts-advanced-types, js-testing
     "developer-essentials@claude-code-workflows" # error-handling / auth-implementation / nx-workspace patterns
     "agent-teams@claude-code-workflows" # multi-reviewer, parallel-debugging, parallel-feature-development, team-composition, team-communication
 

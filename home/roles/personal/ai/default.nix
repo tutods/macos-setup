@@ -61,11 +61,10 @@ in {
     "marketing@knowledge-work-plugins" # content-creation
   ];
 
+  # postgres dropped — @modelcontextprotocol/server-postgres was archived
+  # upstream, and it only ever did read-only queries + schema inspection.
+  # `doppler run -- psql` covers that without a stale server in the loop.
   home.ai.extraMcpServers = {
-    postgres = ai.mkServer {
-      cmd = "sh";
-      args = ["-c" "doppler run -- npx -y @modelcontextprotocol/server-postgres"];
-    };
     shadcn = ai.mkServer {
       cmd = "npx";
       args = ["-y" "shadcn@latest" "mcp"];
