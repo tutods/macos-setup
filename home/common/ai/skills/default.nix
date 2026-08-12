@@ -1,22 +1,20 @@
 # ── Custom skills — shared across every role ──────────────────────────────────
 #
 # In-repo skill sources only. Everything else comes from a Claude Code plugin
-# marketplace (home/common/cli/ai/tools/claude/plugins.nix).
+# marketplace (home/common/ai/plugins.nix).
 #
 # Installed as real directories under ~/.claude/skills, not store symlinks —
 # see lib/ai.nix:mkLocalSkills for why. Role-specific custom skills live in
 # home/roles/<role>/ai/skills/local/ and are installed the same way.
 #
 {
+  aiLib,
   config,
-  pkgs,
   lib,
   ...
-}: let
-  ai = import ../lib/ai.nix {inherit pkgs;};
-in {
+}: {
   imports = [
-    (ai.mkLocalSkills {
+    (aiLib.mkLocalSkills {
       inherit lib;
       label = "common";
       dir = ./local;

@@ -1,11 +1,11 @@
 {
+  aiLib,
   config,
   pkgs,
   lib,
   ...
 }: let
-  ai = import ../../../../../../lib/ai.nix {inherit pkgs;};
-  servers = import ../../mcp-servers.nix {
+  servers = import ./mcp-servers.nix {
     inherit pkgs;
     homeDir = config.home.homeDirectory;
   };
@@ -24,7 +24,7 @@
     // config.home.ai.extraMcpServers;
 in {
   home.activation.claudeMcp = lib.hm.dag.entryAfter ["writeBoundary" "aiInit"] (
-    ai.mergeJsonKey {
+    aiLib.mergeJsonKey {
       file = "$HOME/.claude/claude_desktop_config.json";
       key = "mcpServers";
       value = allServers;

@@ -75,8 +75,12 @@ in {
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
+    # aiLib is passed in rather than imported per module: it used to be
+    # `import ../../../../lib/ai.nix` in five files, which silently encoded the
+    # depth of each one and had to be recounted on every directory move.
     extraSpecialArgs = {
       inherit pkgs pkgsUnstable;
+      aiLib = import ./ai.nix {inherit pkgs;};
     };
     backupFileExtension = "backup";
     users.${username} = homeConfig;

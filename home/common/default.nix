@@ -9,15 +9,16 @@
     # Editors
     ./editors/vscode
     ./editors/zed
+    # AI (Claude Code): instructions, skills, plugins, MCP
+    ./ai
     # CLI tools
-    ./cli/ai
     ./cli/bat.nix
     ./cli/gh.nix
     ./cli/git.nix
     ./cli/htop.nix
-    ./cli/oh-my-posh
     # Shell
     ./shell/fish
+    ./shell/oh-my-posh
     # Terminal
     ./terminal/ghostty
   ];

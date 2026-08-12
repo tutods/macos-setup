@@ -1,11 +1,9 @@
 {
+  aiLib,
   config,
-  pkgs,
   lib,
   ...
 }: let
-  ai = import ../../../../../lib/ai.nix {inherit pkgs;};
-
   # Always-on instructions only — these are concatenated into
   # ~/.claude/rules/workflow.md and load in *every* session.
   #
@@ -18,15 +16,14 @@
     ./shared-instructions.md
     ./model-quality.md
     ./learned-rules.md
+    ./model-selection.md
   ];
-
-  claudeExtras = builtins.readFile ../tools/claude/instructions.md;
 
   sharedContent = lib.concatStringsSep "\n\n" (map builtins.readFile sharedFiles);
   extra = config.home.ai.extraInstructions or "";
 in {
-  # shared + claude-specific extras + role extras.
+  # shared instructions + role extras.
   home.file.".claude/rules/workflow.md".text =
-    ai.appendIfNonEmpty (sharedContent + "\n\n" + claudeExtras) extra
+    aiLib.appendIfNonEmpty sharedContent extra
     + "\n";
 }

@@ -65,32 +65,51 @@ Run `nix search nixpkgs <name>` before adding a package. Prefer `pkgs` (stable);
 
 Claude Code is the only agent. There is no second CLI to keep in sync.
 
-```
-home/common/cli/ai/
-├── tools/claude/  → settings, plugin marketplaces, MCP, Claude-only instructions
-├── rtk/           → RTK proxy reference (→ ~/.claude/RTK.md)
-├── instructions/  → always-on instructions (→ ~/.claude/rules/workflow.md)
-├── init.nix       → guarded pipx installs, one-time tool migrations
-├── options.nix    → home.ai.* options
-└── mcp-servers.nix → shared MCP server definitions (Nix-authoritative)
+Everything AI lives under `home/common/ai/`. Nothing AI-related sits outside it.
 
-skills/
-├── default.nix    → copies local/ into ~/.claude/skills (real dirs, not symlinks)
-└── local/         → in-repo skill sources
+There is no `claude/` subdirectory: every file here writes into `~/.claude/`,
+so it would not separate Claude things from non-Claude things.
+
+```
+home/common/ai/
+├── default.nix      → imports the tree
+├── options.nix      → home.ai.* options
+├── init.nix         → guarded pipx installs, one-time tool migrations
+├── settings.nix     → ~/.claude/settings.json (+ hooks, purgedPlugins)
+├── plugins.nix      → marketplaces + plugins, shared across hosts
+├── mcp.nix          → writes the MCP server list
+├── mcp-servers.nix  → the server definitions themselves (pure data)
+├── statusline.nix   → statusline script + config
+├── instructions/    → always-on instructions (→ ~/.claude/rules/workflow.md)
+├── skills/
+│   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)
+│   └── local/       → in-repo skill sources
+└── rtk/             → RTK proxy reference (→ ~/.claude/RTK.md, via @RTK.md)
 ```
 
-Role-specific skills live in `home/roles/<role>/ai/skills/local/`.
+`lib/ai.nix` is passed in as the `aiLib` module argument (wired in
+`lib/mkHost.nix` via `extraSpecialArgs`) — never import it by relative path.
+
+Each role mirrors that shape:
+
+```
+home/roles/<role>/ai/
+├── default.nix      → role plugins, MCP servers, extraInstructions
+├── instructions.md  → role-only always-on text
+└── skills/local/    → role-only skill sources
+```
 
 ## Rule scoping — where a given rule goes
 
 | Scope | Home |
 |-------|------|
-| True in every session | `instructions/` |
-| True for a stack | `skills/local/` |
+| True in every session | `home/common/ai/instructions/` |
+| True for a stack | `home/common/ai/skills/local/` |
+| True for one role | `home/roles/<role>/ai/skills/local/` |
 | True for one repo | that repo's own `CLAUDE.md` |
 
-Never name a specific project inside a machine-wide instruction or skill.
-`docs/project-rules/` stages per-project files that aren't installed yet.
+Never name a specific project inside a machine-wide instruction or skill — write
+it in that project's own `CLAUDE.md` instead, so it travels with the repo.
 
 ## Skills and plugins
 
@@ -100,7 +119,7 @@ them on next launch. Never add one through the Claude Code UI.
 
 Removing a plugin from `home.ai.plugins` is not enough: `enabledPlugins` merges
 live and Nix state, so it must also go in `purgedPlugins` in
-`tools/claude/settings.nix`.
+`settings.nix`.
 
 Custom skills are **copied** into `~/.claude/skills/`, so edits made there are
 overwritten on the next deploy — change the repo source instead.

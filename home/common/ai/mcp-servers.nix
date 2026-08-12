@@ -1,11 +1,11 @@
 # ── Shared MCP server definitions ─────────────────────────────────────────────
 #
-# Pure data — no activations. Imported by tools/claude/mcp.nix.
+# Pure data — no activations. Imported by ./mcp.nix.
 #
 # Note that enabling a Claude Code plugin also registers any MCP servers in its
 # bundled `.mcp.json`, so `claude mcp list` can show servers that are not
 # declared here. Those are removed by dropping the plugin, not by editing this
-# file — see tools/claude/plugins.nix.
+# file — see ./plugins.nix.
 #
 # ── GitHub Token ──────────────────────────────────────────────────────────────
 # github server reads GITHUB_PERSONAL_ACCESS_TOKEN from env.
