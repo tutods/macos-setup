@@ -123,7 +123,7 @@ Plugins are coarser than skills. To add one, find the plugin that ships the skil
 ./scripts/verify-plugins.sh --quiet  # what CI runs
 ```
 
-Removing a plugin from `home.ai.plugins` is **not** enough — `enabledPlugins` merges live + Nix, so it stays enabled on machines that already installed it. Add it to `purgedPlugins` in `settings.nix` too.
+`enabledPlugins` is written fully from `home.ai.plugins` on every deploy — dropping a plugin from the list is enough, the next `./nix.sh` disables it. Never add a plugin through the Claude Code UI; it will not survive the next deploy.
 
 A repo without `.claude-plugin/marketplace.json` **cannot** be installed this way. `docs/dropped-skill-sources.md` records the sources dropped for that reason when this repo migrated off `npx skills`, so they can be re-checked later.
 

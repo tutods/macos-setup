@@ -1,62 +1,8 @@
 {
   config,
-  pkgs,
   lib,
   ...
 }: let
-  # Plugins deliberately removed from home.ai.plugins, deleted from the live
-  # settings.json on every deploy.
-  #
-  # This list is load-bearing, not cosmetic: enabledPlugins merges live + nix,
-  # so dropping an entry from home.ai.plugins alone leaves it enabled on any
-  # machine that already installed it.
-  #
-  # Entries can be retired once every machine has deployed past them — the date
-  # records when the entry was added, so it is clear what is safe to drop.
-  purgedPlugins = [
-    # ── pre-2026-08 ────────────────────────────────────────────────────────
-    "terraform@claude-plugins-official"
-    "warp@claude-code-warp"
-    "autofix-bot@claude-plugins-official"
-    "codex@openai-codex"
-
-    # ── 2026-08 cleanup ────────────────────────────────────────────────────
-    # MCP wrappers whose bundled .mcp.json registered servers we did not want
-    "sourcegraph@claude-plugins-official"
-    "prisma@claude-plugins-official"
-    "sanity@claude-plugins-official"
-    # superseded, unused, or redundant with a custom skill
-    "framework-migration@claude-code-workflows"
-    "core-skills@hyperframes" # strict subset of hyperframes@hyperframes
-    "pm-skills@claude-code-skills" # acli custom skill + jira MCP cover this
-    "code-simplifier@claude-plugins-official" # harness ships /simplify
-    "commit-commands@claude-plugins-official" # conventional-commit custom skill
-    "pr-review-toolkit@claude-plugins-official" # code-review + deep-review
-    "claude-md-management@claude-plugins-official"
-    # generic advice the model does not need spelled out
-    "engineering@knowledge-work-plugins"
-    "product-management@knowledge-work-plugins"
-    "ui-design@claude-code-workflows" # half of it is mobile-native design
-    "agent-teams@claude-code-workflows" # harness orchestrates natively
-    # large bundles for occasional work — re-add if they earn their keep
-    "marketing-skills@marketingskills" # 49 skills
-    "hyperframes@hyperframes" # 25 skills, Remotion-specific
-    "brand-voice@knowledge-work-plugins" # content-writer + humanizer cover it
-    # duplicate of the personal optimize-images custom skill, which is more
-    # specific (1500px longest side, WebP, metadata stripped) and backed by the
-    # imagemagick/jpegoptim/optipng already in modules/packages/media.nix
-    "image-optimization@claude-skills"
-    # generic REST advice that contradicts api-conventions — most of it
-    # recommends the { data, error } envelope this house style bans
-    "rest-api-design@claude-skills"
-    # ts-advanced-types / js-testing duplicate ts-conventions and
-    # testing-conventions; nodejs-backend and modern-js are covered by
-    # nestjs-best-practices + backend-development@claude-code-workflows
-    "javascript-typescript@claude-code-workflows"
-  ];
-
-  purgeExpr = "del(${lib.concatMapStringsSep ", " (p: ''.["${p}"]'') purgedPlugins})";
-
   settings = {
     theme = "dark-daltonized";
     model = "opusplan";
@@ -130,10 +76,10 @@
       })
       config.home.ai.marketplaces;
 
-    # Nix is authoritative for plugins listed here (merge: live + nix, nix wins).
-    # Plugins not listed here can still be managed via the UI.
-    # To permanently remove a plugin from existing installs add it to the
-    # purge list in the activation below instead of dropping it from the list.
+    # Nix is fully authoritative for enabledPlugins — the whole file is
+    # rewritten on every deploy, so a plugin dropped from home.ai.plugins is
+    # simply gone on the next `./nix.sh`. Never add plugins via the UI; they
+    # do not survive the next deploy.
     enabledPlugins =
       lib.listToAttrs (map (p: lib.nameValuePair p true) config.home.ai.plugins);
   };
@@ -149,23 +95,6 @@ in {
     base='${builtins.toJSON settings}'
 
     mkdir -p "$HOME/.claude"
-
-    if [ -f "$target" ]; then
-      existing_plugins=$(${pkgs.jq}/bin/jq -c '.enabledPlugins // {}' "$target")
-      nix_plugins=$(echo "$base" | ${pkgs.jq}/bin/jq -c '.enabledPlugins')
-      merged_plugins=$(${pkgs.jq}/bin/jq -cn \
-        --argjson nix "$nix_plugins" \
-        --argjson live "$existing_plugins" \
-        '$live + $nix')
-      # Purge plugins removed from this config (migration for existing installs).
-      # No-op on fresh installs where these keys never existed.
-      merged_plugins=$(echo "$merged_plugins" | ${pkgs.jq}/bin/jq -c '${purgeExpr}')
-      echo "$base" \
-        | ${pkgs.jq}/bin/jq --argjson plugins "$merged_plugins" \
-            '. + {enabledPlugins: $plugins}' \
-        > "$target.tmp" && mv "$target.tmp" "$target"
-    else
-      echo "$base" > "$target"
-    fi
+    printf '%s\n' "$base" > "$target.tmp" && mv "$target.tmp" "$target"
   '';
 }

@@ -75,7 +75,7 @@ home/common/ai/
 ├── default.nix      → imports the tree
 ├── options.nix      → home.ai.* options
 ├── init.nix         → guarded pipx installs, one-time tool migrations
-├── settings.nix     → ~/.claude/settings.json (+ hooks, purgedPlugins)
+├── settings.nix     → ~/.claude/settings.json (+ hooks)
 ├── plugins.nix      → marketplaces + plugins, shared across hosts
 ├── mcp.nix          → writes the MCP server list
 ├── mcp-servers.nix  → the server definitions themselves (pure data)
@@ -117,9 +117,10 @@ External skills are **Claude Code plugins** — declare the marketplace and plug
 in Nix; they are written into `~/.claude/settings.json` and Claude Code installs
 them on next launch. Never add one through the Claude Code UI.
 
-Removing a plugin from `home.ai.plugins` is not enough: `enabledPlugins` merges
-live and Nix state, so it must also go in `purgedPlugins` in
-`settings.nix`.
+`enabledPlugins` is rewritten from `home.ai.plugins` on every deploy, so
+removing a plugin from the list is enough — the next deploy disables it. This
+is why plugins must never be added through the Claude Code UI (line above):
+they don't survive the next `./nix.sh`.
 
 Custom skills are **copied** into `~/.claude/skills/`, so edits made there are
 overwritten on the next deploy — change the repo source instead.

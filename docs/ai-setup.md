@@ -62,15 +62,16 @@ Managed by `home/common/ai/settings.nix` via `home.activation.claudeSettings`.
 
 Written to `~/.claude/settings.json` on every `darwin-rebuild switch`.
 
-### Plugin merge strategy
+### Plugin state is fully declarative
 
-- **Live file wins for unmanaged plugins** — plugins added via `claude plugin add` in the UI are preserved.
-- **Nix wins for declared keys** — keys in `enabledPlugins` attrset override the live file.
-- **Explicit purge** — plugins listed in `purgedPlugins` are deleted from the live file on every deploy, so machines that already installed them migrate cleanly. New machines never see the keys.
+`~/.claude/settings.json` is rewritten from scratch on every deploy — Nix owns
+the whole file, including `enabledPlugins`. There is no merge with the live
+file: dropping a plugin from `home.ai.plugins` is enough on its own, the next
+`./nix.sh` disables it.
 
 `settings.nix` does not hold the plugin list itself — it renders `extraKnownMarketplaces` and `enabledPlugins` from `home.ai.marketplaces` / `home.ai.plugins`. See [Skills](#skills) for where those are declared and how to add one.
 
-To remove a plugin permanently: drop it from the relevant `home.ai.plugins` list **and** add it to `purgedPlugins` in `settings.nix`. The list removal alone is not enough — `enabledPlugins` merges live + Nix, so it stays enabled where it is already installed.
+Never add a plugin through the Claude Code UI — it does not survive the next deploy.
 
 ### Hooks
 
