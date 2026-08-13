@@ -1,7 +1,7 @@
 {...}: {
   homebrew = {
     taps = [
-      "atlassian/homebrew-acli"
+      "atlassian/acli"
     ];
     brews = [
       "acli"

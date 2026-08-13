@@ -10,7 +10,9 @@ metadata:
 
 # NestJS Best Practices
 
-Comprehensive best practices guide for NestJS applications. Contains 40 rules across 10 categories, prioritized by impact to guide automated refactoring and code generation.
+Comprehensive best practices guide for NestJS applications, prioritized by impact to guide automated refactoring and code generation.
+
+> **Precedence:** where a rule here conflicts with the house convention skills, the house skills win — specifically: Zod at boundaries (`ts-conventions`/`api-conventions`) over class-validator, no response envelope (`api-conventions`) over DTO response wrapping, and Vitest/MSW (`testing-conventions`) over Jest/TestingModule-only patterns.
 
 ## When to Apply
 

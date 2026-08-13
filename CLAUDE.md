@@ -58,7 +58,7 @@ Applying uses `darwin-rebuild switch --flake ".#<config>"` (local binary if pres
 
 ### Homebrew Casks
 
-Shared casks live in `modules/darwin/homebrew/casks/` (applied to every host). Machine-specific additions go in `hosts/darwin/<name>/homebrew/`. Both levels use the same category names: `development.nix`, `browsers.nix`, `communication.nix`, `utils.nix`. Macbook also has `fonts.nix`. The `work` host has a single inline list since it only adds `slack`.
+Shared casks live in `modules/darwin/homebrew/casks/` (applied to every host). Machine-specific additions go in `hosts/darwin/<name>/homebrew/`. Both levels use the same category names: `development.nix`, `browsers.nix`, `communication.nix`, `utils.nix`. Macbook also has `fonts.nix`. The `work` host has a single inline list (`firefox`, `gcloud-cli`, `slack`, plus the `atlassian/acli` tap and `acli` brew).
 
 ### Shell Configuration
 
@@ -72,7 +72,7 @@ AI instructions are split into shared and role-specific:
 
 - `home/common/ai/options.nix` — defines `home.ai.extraInstructions` option (default `""`)
 - `home/roles/personal/ai/instructions.md` — personal-specific additions (e.g., `doppler`)
-- `home/roles/work/` — no AI-specific instructions currently
+- `home/roles/work/ai/instructions.md` — work-specific additions (git/Jira branch naming, company tools); the work role also ships the `acli`, `work-stack`, and `obsidian-vault` custom skills
 
 The common module concatenates: shared + role extras (if set). Role modules set `home.ai.extraInstructions` via their `ai/default.nix`.
 
@@ -95,6 +95,8 @@ homeConfig = mkUser {
 
 For person-specific overrides (GPG keys, email, etc.) pass `extraImports` pointing at any Nix file — there is no dedicated `home/identity/` directory; keep such files wherever makes sense for the host.
 
+For a secondary account that should only share the shell experience (fish, aliases, prompt, CLI tools — no editors or AI), pass `profile = "shell"` and add the account to the host's `extraShellUsers` so fish becomes its default shell. See the work host's admin user for the pattern.
+
 ### AI Skills
 
 Two sources, and only two.
@@ -115,6 +117,8 @@ home.ai.plugins      = [ "<plugin>@<key>" ];
 ```
 
 Plugins are coarser than skills. To add one, find the plugin that ships the skill you want in the source repo's `.claude-plugin/marketplace.json` — a plugin's `source` dir contains the `skills/<name>/` you're after — then add the marketplace and the plugin. `claude-plugins-official` is built into Claude Code and needs no marketplace entry.
+
+**Machine-wide plugins are generic only** — workflow, writing, debugging, authoring (caveman, humanizer, mattpocock, the official productivity set). Stack- and domain-specific plugins (framework packs, SEO, design tooling) are enabled per project in that repo's own `.claude/settings.json`, never here.
 
 **Plugins fail silently** — a typo'd name is written to `settings.json`, Claude Code installs nothing, and nothing is logged. Always check:
 
@@ -155,6 +159,23 @@ removes it for free when the name leaves the `names` list in
 ```bash
 # Add a custom agent: create home/common/ai/agents/local/<name>.md, add <name> to the
 # `names` list in home/common/ai/agents/default.nix, then ./nix.sh macbook
+```
+
+### AI Workflows
+
+Deterministic multi-agent scripts for Claude Code's Workflow tool — JS files
+with an `export const meta` block, using `agent()`/`parallel()`/`pipeline()`.
+Installed by `lib/ai.nix:mkLocalWorkflows` as `home.file` symlinks into
+`~/.claude/workflows/<name>.js` (read-only input, same rationale as agents).
+
+Boundary: **agents** for judgement-heavy work in one isolated context;
+**workflows** for fixed fan-out with deterministic control flow (parallel
+perspectives, verification gates). A thin skill can act as the natural-language
+trigger that invokes the workflow — see `skills/local/llm-council`.
+
+```bash
+# Add a workflow: create home/common/ai/workflows/local/<name>.js, add <name> to the
+# `names` list in home/common/ai/workflows/default.nix, then ./nix.sh macbook
 ```
 
 ## Repo Rules

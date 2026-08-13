@@ -1,13 +1,12 @@
 ---
 name: obsidian-vault
-description: Search, read, and write durable notes in the user's Obsidian vault at $HOME/Obsidian — decisions, research, corrected mistakes, and cross-session context that should outlive a single conversation. Use when the user asks to remember something for later, save a note, look something up in Obsidian, references a past decision that might be logged there, or corrects a mistake I made.
+description: Search, read, and write durable work notes in the Obsidian vault at $HOME/Obsidian — company decisions, project research, corrected mistakes, Jira/project context that should outlive a single conversation. Use when the user asks to remember something for later, save a note, look something up in Obsidian, references a past decision that might be logged there, or corrects a mistake I made.
 ---
 
-# Obsidian Vault
+# Obsidian Vault (Work)
 
-Vault lives at `$HOME/Obsidian` on every machine (path is the same, only
-`$HOME` differs between `macbook` and `work` — never hardcode `/Users/<name>`,
-resolve `$HOME` at run time).
+This machine's vault lives at `$HOME/Obsidian` — never hardcode
+`/Users/<name>`, resolve `$HOME` at run time.
 
 This vault is Claude Code's durable memory: `autoMemoryEnabled` is off
 (`home/common/ai/settings.nix`) so nothing is remembered automatically by the
@@ -17,6 +16,13 @@ process. Two triggers:
 - **Explicit** — the user asks to remember/save/look something up.
 - **Proactive** — a corrected mistake, per the "Lessons Learned" rule in
   `home/common/ai/instructions/shared-instructions.md`. No need to be asked.
+
+## Scope
+
+This is the **work vault** — company context only: work decisions, lessons
+from company projects, Jira/project knowledge, team conventions. Never store
+personal content here. The personal machine has its own vault; the two are
+strictly separate — never reference or assume content from the other.
 
 ## Layout
 

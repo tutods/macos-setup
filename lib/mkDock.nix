@@ -9,7 +9,9 @@
 #       (mkDock {
 #         groups = [
 #           [ "/Applications/Firefox.app" "/System/Applications/Mail.app" ]
-#           [ "/Applications/Zed.app" ]
+#           # {home = "..."} resolves against the primary user's home —
+#           # never hardcode /Users/<name> in a host file.
+#           [ "/Applications/Zed.app" {home = "Applications/Home Manager Apps/Foo.app";} ]
 #         ];
 #       })
 #     ];
@@ -23,7 +25,11 @@
   ...
 }: let
   spacer = {spacer = {small = false;};};
-  wrapGroup = g: [spacer] ++ g;
+  resolveApp = a:
+    if builtins.isAttrs a && a ? home
+    then "/Users/${config.system.primaryUser}/${a.home}"
+    else a;
+  wrapGroup = g: [spacer] ++ map resolveApp g;
 in {
   system.defaults.dock = {
     persistent-apps = lib.concatMap wrapGroup groups ++ [spacer];

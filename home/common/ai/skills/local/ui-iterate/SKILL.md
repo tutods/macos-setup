@@ -19,7 +19,7 @@ Refine UI components through an approve-then-apply loop. The user decides every 
 Before proposing anything, map the target:
 
 ```bash
-rg -l '<ComponentName' apps/frontend/src   # all usages
+rg -l '<ComponentName' <src-root>   # all usages — use the project's source root (src/, apps/<app>/src/, ...)
 ```
 
 Present a short table: usage location → current variant/styles → inconsistency spotted. This is the shared ground truth for the session.

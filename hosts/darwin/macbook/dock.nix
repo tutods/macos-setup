@@ -13,7 +13,7 @@
         [
           "/Applications/Zed.app"
           "/Applications/WebStorm.app"
-          "/Users/tutods/Applications/Home Manager Apps/Visual Studio Code.app"
+          {home = "Applications/Home Manager Apps/Visual Studio Code.app";}
           "/Applications/Trae.app"
           "/Applications/Supacode.app"
           "/Applications/Ghostty.app"

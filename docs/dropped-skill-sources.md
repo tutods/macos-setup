@@ -27,7 +27,7 @@ effect on a machine.
 
 | Source | Skills that were installed |
 |---|---|
-| `oakoss/agent-skills` | prompt-engineering, secure-ai, css-animation-patterns, design-system, find-skills, react-patterns, react-performance, responsive-images, tailwind, accessibility, openapi, pino-logging, zod-validation, vitest-testing, vite, github-actions, git-workflow, docker, application-security, technical-docs, typescript-patterns |
+| `oakoss/agent-skills` | prompt-engineering, secure-ai, css-animation-patterns, design-system, find-skills, react-patterns, react-performance, responsive-images, tailwind, accessibility, openapi, pino-logging, zod-validation, vitest-testing, vite, github-actions, git-workflow, docker, application-security, technical-docs, typescript-patterns — **largely covered** (2026-08): `secondsky/claude-skills` ships single-skill plugins for the React/TanStack gap (`tanstack-query`, `tanstack-table`, `tanstack-router`, `react-best-practices`, `react-composition-patterns`, `web-performance-audit`), enabled per project. Repo re-probed 2026-08-13: still no marketplace.json, and **no license**, so vendoring is not an option. |
 | `shadcn/ui` | whole repo |
 | `kadajett/agent-nestjs-skills` | nestjs-best-practices |
 | `vercel-labs/agent-skills` | web-design-guidelines |

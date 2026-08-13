@@ -22,6 +22,14 @@ in {
       };
       masApps = sharedMasApps;
       trustedTaps = ["atlassian/acli"];
+      extraShellUsers = ["admin.daniel.a.sousa"];
     })
   ];
+
+  # The admin account (deploys, Homebrew owner) gets the same shell
+  # experience — fish, aliases, prompt, CLI tools — without editors or AI.
+  home-manager.users."admin.daniel.a.sousa" = mkUser {
+    username = "admin.daniel.a.sousa";
+    profile = "shell";
+  };
 }

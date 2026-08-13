@@ -11,7 +11,7 @@
       inherit lib;
       label = "personal";
       dir = ./skills/local;
-      names = ["elementor-crocoblock" "optimize-images" "personal-stack" "github-project-hygiene"];
+      names = ["obsidian-vault" "optimize-images" "personal-stack" "github-project-hygiene"];
     })
     (aiLib.mkLocalAgents {
       inherit lib;
@@ -32,35 +32,9 @@
   # instruction — it is irrelevant during Nix or content work.
   home.ai.extraInstructions = builtins.readFile ./instructions.md;
 
-  # Personal-only plugin marketplaces. See
-  # home/common/ai/plugins.nix for the shared set.
-  home.ai.marketplaces = {
-    better-auth-agent-skills = "better-auth/skills";
-    addy-web-quality-skills = "addyosmani/web-quality-skills";
-    social-media-skills = "charlie947/social-media-skills";
-    claude-video = "bradautomates/claude-video";
-    ui-ux-pro-max-skill = "nextlevelbuilder/ui-ux-pro-max-skill";
-    frontend-slides = "zarazhangrui/frontend-slides";
-    # Moved off the shared set — 31 SEO skills have no place on the work laptop.
-    agricidaniel-seo = "AgriciDaniel/claude-seo";
-  };
-
-  home.ai.plugins = [
-    "claude-seo@agricidaniel-seo" # 31 skills — the single SEO source
-    "social-media-skills@social-media-skills" # 17 — Instagram/post work
-    "ui-ux-pro-max@ui-ux-pro-max-skill" # 7
-    "web-quality-skills@addy-web-quality-skills" # 6 — Core Web Vitals, perf, a11y
-    "auth-skills@better-auth-agent-skills" # 2
-    "watch@claude-video" # 1
-    "frontend-slides@frontend-slides" # 1
-
-    # wshobson/agents — marketplace declared in the shared plugins.nix
-    "database-design@claude-code-workflows" # postgresql
-    "hr-legal-compliance@claude-code-workflows" # gdpr-data-handling
-
-    # anthropics/knowledge-work-plugins — ditto
-    "marketing@knowledge-work-plugins" # 8 — the one marketing source
-  ];
+  # No personal-only plugins. Machine-wide plugins are generic only (see
+  # home/common/ai/plugins.nix) — domain packs (SEO, social media, marketing,
+  # design tooling) are enabled per project in that repo's .claude/settings.json.
 
   # postgres dropped — @modelcontextprotocol/server-postgres was archived
   # upstream, and it only ever did read-only queries + schema inspection.

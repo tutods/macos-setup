@@ -4,23 +4,14 @@
   ...
 }: {
   imports = [
-    # General home options
-    ./options.nix
+    # Shell, prompt, CLI tools, terminal — also usable standalone via
+    # mkUser's `profile = "shell"` (see core.nix)
+    ./core.nix
     # Editors
     ./editors/vscode
     ./editors/zed
     # AI (Claude Code): instructions, skills, plugins, MCP
     ./ai
-    # CLI tools
-    ./cli/bat.nix
-    ./cli/gh.nix
-    ./cli/git.nix
-    ./cli/htop.nix
-    # Shell
-    ./shell/fish
-    ./shell/oh-my-posh
-    # Terminal
-    ./terminal/ghostty
   ];
 
   home.activation.createDeveloperDir = lib.hm.dag.entryAfter ["writeBoundary"] ''

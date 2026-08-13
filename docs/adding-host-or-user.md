@@ -103,3 +103,18 @@ mkHost {
 ```
 
 Run `./nix.sh <hostname>` from the admin account. Home Manager config is still applied to `normal.user`.
+
+To give the admin account the shell experience too (fish, aliases, prompt, CLI tools — no editors or AI), add a second Home Manager user with the `shell` profile and register it in `extraShellUsers` so fish becomes its default shell:
+
+```nix
+mkHost {
+  # ...
+  extraShellUsers = ["admin.user"];
+}
+
+# alongside mkHost in the host's default.nix:
+home-manager.users."admin.user" = mkUser {
+  username = "admin.user";
+  profile  = "shell"; # home/common/core.nix only
+};
+```

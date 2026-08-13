@@ -1,6 +1,6 @@
 ---
 name: conventional-commit
-description: Generates a conventional commit message from staged changes or a described diff. Produces type, optional scope, subject, body (if needed), and breaking-change footer. Complements caveman-commit (style guide) — this one generates the message from scratch. Trigger with "generate commit", "create commit message", "commit this", "write commit for me", or "what should my commit say".
+description: Generates a conventional commit message from staged changes or a described diff. Produces type, optional scope, subject, body (if needed), and breaking-change footer. The single source for the commit-type table — open-pr defers here for message generation. Trigger with "generate commit", "create commit message", "write commit for me", or "what should my commit say".
 ---
 
 # Conventional Commit Generator

@@ -40,6 +40,13 @@ differ from the personal stack.
 | MSW | API mocking | When used — not mandatory |
 | faker.js | Test data | When used — not mandatory |
 
+## GCP
+
+- Authenticate: `gcloud auth login && gcloud auth application-default login`
+- Switch project: `gcloud config set project <project-id>`
+- List projects: `gcloud projects list`
+- Active config: `gcloud config list`
+
 ## Infrastructure & tooling
 
 | Tool | Purpose |

@@ -24,6 +24,10 @@
   homeConfig,
   masApps ? {},
   trustedTaps ? [],
+  # Additional accounts that should also get fish as their default shell
+  # (fix-fish-shell.sh runs for each). Pair with a home-manager.users entry
+  # in the host file so the per-user fish profile actually exists.
+  extraShellUsers ? [],
 }: {
   pkgs,
   pkgsUnstable,
@@ -61,6 +65,10 @@ in {
     ''
       ${fixFishShell} "${username}"
     ''
+    + lib.concatMapStringsSep "" (u: ''
+      ${fixFishShell} "${u}"
+    '')
+    extraShellUsers
     # Seed-once: never clobber taps the user added manually via `brew trust`.
     + lib.optionalString (trustedTaps != []) ''
       if [ ! -f "${trustFile}" ]; then

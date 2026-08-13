@@ -22,29 +22,28 @@
 # installed this way — see docs/dropped-skill-sources.md.
 #
 {...}: {
+  # Machine-wide plugins are GENERIC ONLY — workflow, writing, debugging,
+  # authoring. Anything stack- or domain-specific (framework packs, SEO,
+  # design tooling) is enabled per project in that repo's own
+  # .claude/settings.json instead of globally here.
   home.ai.marketplaces = {
     caveman = "JuliusBrussee/caveman";
     impeccable = "pbakaus/impeccable";
     anthropic-agent-skills = "anthropics/skills";
     mattpocock = "mattpocock/skills";
     humanizer = "blader/humanizer";
-    knowledge-work-plugins = "anthropics/knowledge-work-plugins";
-    claude-code-workflows = "wshobson/agents";
     claude-skills = "secondsky/claude-skills";
-    # Single-skill plugins only — see the two entries in home.ai.plugins.
+    # Single-skill plugins only — see the entries in home.ai.plugins.
     claude-code-skills = "alirezarezvani/claude-skills";
   };
 
   home.ai.plugins = [
     # ── claude-plugins-official (built in) ──────────────────────────────────
     "superpowers@claude-plugins-official"
-    "frontend-design@claude-plugins-official"
     "code-review@claude-plugins-official"
     "github@claude-plugins-official"
     "feature-dev@claude-plugins-official"
-    "typescript-lsp@claude-plugins-official"
     "security-guidance@claude-plugins-official"
-    "figma@claude-plugins-official"
     "claude-code-setup@claude-plugins-official" # Claude Code config, incl. agent authoring
 
     # ── authoring skills and agents ─────────────────────────────────────────
@@ -57,19 +56,7 @@
     "mattpocock-skills@mattpocock"
     "humanizer@humanizer"
 
-    # ── wshobson/agents ─────────────────────────────────────────────────────
-    "developer-essentials@claude-code-workflows" # error-handling / auth-implementation / nx / turborepo
-    "backend-development@claude-code-workflows" # api-design, architecture, cqrs, microservices — NestJS-adjacent
-    "cicd-automation@claude-code-workflows" # deployment-pipeline, github-actions, secrets-management
-
-    # ── anthropics/knowledge-work-plugins ───────────────────────────────────
-    "design@knowledge-work-plugins" # accessibility-review, ux-copy, design-critique
-
-    # ── secondsky/claude-skills (one plugin per skill) ──────────────────────
-    "react-hook-form-zod@claude-skills"
-    "csrf-protection@claude-skills"
-    "health-check-endpoints@claude-skills"
-    "xss-prevention@claude-skills"
+    # ── secondsky/claude-skills ──────────────────────────────────────────────
     "systematic-debugging@claude-skills"
   ];
 }

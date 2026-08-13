@@ -109,7 +109,8 @@ home/roles/<role>/ai/
 | True in every session | `home/common/ai/instructions/` |
 | True for a stack | `home/common/ai/skills/local/` |
 | True for one role | `home/roles/<role>/ai/skills/local/` |
-| A repeatable multi-step workflow | `home/common/ai/agents/local/` |
+| Judgement-heavy work in one isolated context | `home/common/ai/agents/local/` |
+| Deterministic multi-agent fan-out (parallel perspectives, verify gates) | `home/common/ai/workflows/local/` |
 | True for one repo | that repo's own `CLAUDE.md` |
 
 Never name a specific project inside a machine-wide instruction or skill — write

@@ -21,13 +21,14 @@ Read `package.json` (and workspace packages), lockfile, and config files. Then l
 
 | Detected | Load |
 |----------|------|
-| TanStack Start / Router | `tanstack-start`, `tanstack-router` |
+| TypeScript | `ts-conventions` |
+| React frontend | `react-conventions` |
+| API endpoints / backend | `api-conventions` |
 | NestJS | `nestjs-best-practices` |
-| Sanity | `sanity` |
-| Prisma | `prisma-client-api` |
-| Tailwind / shadcn | `tailwind`, `shadcn` |
-| Zod-heavy boundaries | `zod-validation` |
-| Vitest | `vitest-testing` |
+| Test suite (Vitest etc.) | `testing-conventions` |
+| Dependency-heavy review focus | `dependency-hygiene` |
+
+If the project ships its own skills in `.claude/skills/`, those take priority over the table.
 
 Also read the project `CLAUDE.md` / `docs/CONVENTIONS.md` — project conventions are review criteria, not suggestions.
 

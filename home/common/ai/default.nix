@@ -15,6 +15,7 @@
     ./instructions
     ./skills
     ./agents
+    ./workflows
     ./settings.nix
     ./plugins.nix
     ./mcp.nix

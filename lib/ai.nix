@@ -99,6 +99,31 @@ in {
       names);
   };
 
+  # Install in-repo workflow scripts into ~/.claude/workflows/<name>.js.
+  #
+  # Like agents, a workflow script is read-only input — Claude Code executes
+  # it via the Workflow tool but never writes inside it — so a store symlink
+  # is safe and Home Manager removes it when a name leaves the list.
+  #
+  # Boundary vs agents: agents/ for judgement-heavy work in one isolated
+  # context; workflows/ for fixed fan-out with deterministic control flow
+  # (parallel advisors, verification gates).
+  #
+  #   lib   — the module-args `lib`
+  #   label — log label; unique per call site
+  #   dir   — directory holding <name>.js files
+  #   names — workflow names (file basenames)
+  mkLocalWorkflows = {
+    lib,
+    label,
+    dir,
+    names,
+  }: {
+    home.file = lib.listToAttrs (map
+      (name: lib.nameValuePair ".claude/workflows/${name}.js" {source = "${dir}/${name}.js";})
+      names);
+  };
+
   # Generate a bash snippet that merges a single key into a JSON config file
   # via jq, creating the file with `{"<key>": <value>}` if it does not exist.
   #
