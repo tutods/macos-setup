@@ -35,6 +35,16 @@ Always prefer these tools over slower alternatives:
 - Prefer small, focused commits over large batches.
 - Never commit secrets, `.env` files, or credentials.
 
+## Prior Art
+
+Before any non-trivial task, check the Obsidian vault for prior art
+(`obsidian-vault` skill):
+
+    rg -il "<topic keywords>" "$HOME/Obsidian"
+
+Read matching `Lessons/` and `Conventions/` notes first. A logged lesson that
+isn't consulted is dead weight. Skip only for trivial one-liners.
+
 ## Lessons Learned
 
 When a mistake gets corrected — a bug I introduced, a wrong assumption, a fix

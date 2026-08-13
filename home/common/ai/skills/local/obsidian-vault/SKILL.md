@@ -43,6 +43,19 @@ notes at the bottom of a note, under a `## Related` heading.
 
 Search and links are plain-text — use Grep/Glob/Bash, not the Obsidian app.
 
+### Read first
+
+At the start of any non-trivial task, check the vault for prior art before
+working:
+
+```bash
+rg -il "<topic keywords>" "$HOME/Obsidian"
+```
+
+Read matching `Lessons/` and `Conventions/` notes before starting. A logged
+lesson that isn't consulted is dead weight. Cheap when nothing matches; skip
+only for trivial one-liners.
+
 ### Find notes
 
 ```bash

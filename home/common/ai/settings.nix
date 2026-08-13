@@ -34,6 +34,7 @@
       "Read(./secrets/**)"
       "Read(~/.config/fish/secrets.fish)"
     ];
+    permissions.additionalDirectories = ["~/Obsidian"];
 
     hooks.PreToolUse = [
       {
