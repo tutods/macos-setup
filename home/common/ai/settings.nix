@@ -36,6 +36,22 @@
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
 
+    # Inject the vault's lesson titles into every session. The always-on
+    # "Prior Art" rule greps the vault by topic keywords, which misses
+    # behavioral lessons (loops, reverts) — this makes every lesson title
+    # visible regardless of topic, harness-enforced. Silent no-op when the
+    # vault has no Lessons Index yet.
+    hooks.SessionStart = [
+      {
+        hooks = [
+          {
+            type = "command";
+            command = "if [ -f \"$HOME/Obsidian/Lessons Index.md\" ]; then cat \"$HOME/Obsidian/Lessons Index.md\"; fi";
+          }
+        ];
+      }
+    ];
+
     hooks.PreToolUse = [
       {
         matcher = "Bash";
