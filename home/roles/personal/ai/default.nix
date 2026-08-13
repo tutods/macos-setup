@@ -11,7 +11,13 @@
       inherit lib;
       label = "personal";
       dir = ./skills/local;
-      names = ["elementor-crocoblock" "optimize-images" "personal-stack"];
+      names = ["elementor-crocoblock" "optimize-images" "personal-stack" "github-project-hygiene"];
+    })
+    (aiLib.mkLocalAgents {
+      inherit lib;
+      label = "personal";
+      dir = ./agents/local;
+      names = ["github-project-hygiene"];
     })
   ];
 
