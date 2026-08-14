@@ -19,6 +19,12 @@
   programs.git = {
     enable = true;
     includes = [{path = "~/.config/git/private";}];
+    ignores = [
+      # Claude Code per-machine overrides. Shared config (plugins, MCP servers)
+      # belongs in a committed .claude/settings.json / .mcp.json — only the
+      # .local.json variant stays untracked, in every repo.
+      "**/.claude/settings.local.json"
+    ];
     settings = {
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
