@@ -24,8 +24,9 @@
 {...}: {
   # Machine-wide plugins are GENERIC ONLY — workflow, writing, debugging,
   # authoring. Anything stack- or domain-specific (framework packs, SEO,
-  # design tooling) is enabled per project in that repo's own
-  # .claude/settings.json instead of globally here.
+  # design tooling) is enabled per project instead: committed
+  # .claude/settings.json where the repo allows it, .claude/settings.local.json
+  # in team/company repos and wherever settings.json is gitignored.
   home.ai.marketplaces = {
     caveman = "JuliusBrussee/caveman";
     impeccable = "pbakaus/impeccable";
@@ -35,6 +36,7 @@
     claude-skills = "secondsky/claude-skills";
     # Single-skill plugins only — see the entries in home.ai.plugins.
     claude-code-skills = "alirezarezvani/claude-skills";
+    ponytail = "DietrichGebert/ponytail";
   };
 
   home.ai.plugins = [
@@ -45,6 +47,7 @@
     "feature-dev@claude-plugins-official"
     "security-guidance@claude-plugins-official"
     "claude-code-setup@claude-plugins-official" # Claude Code config, incl. agent authoring
+    "playwright@claude-plugins-official" # browser automation / e2e MCP, generic across web projects
 
     # ── authoring skills and agents ─────────────────────────────────────────
     "example-skills@anthropic-agent-skills" # skill-creator, mcp-builder (+10 others)
@@ -55,6 +58,7 @@
     "impeccable@impeccable"
     "mattpocock-skills@mattpocock"
     "humanizer@humanizer"
+    "ponytail@ponytail" # lazy-senior-dev / YAGNI enforcement — generic
 
     # ── secondsky/claude-skills ──────────────────────────────────────────────
     "systematic-debugging@claude-skills"

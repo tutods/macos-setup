@@ -118,7 +118,7 @@ home.ai.plugins      = [ "<plugin>@<key>" ];
 
 Plugins are coarser than skills. To add one, find the plugin that ships the skill you want in the source repo's `.claude-plugin/marketplace.json` — a plugin's `source` dir contains the `skills/<name>/` you're after — then add the marketplace and the plugin. `claude-plugins-official` is built into Claude Code and needs no marketplace entry.
 
-**Machine-wide plugins are generic only** — workflow, writing, debugging, authoring (caveman, humanizer, mattpocock, the official productivity set). Stack- and domain-specific plugins (framework packs, SEO, design tooling) are enabled per project in that repo's own `.claude/settings.local.json`, never here.
+**Machine-wide plugins are generic only** — workflow, writing, debugging, authoring (caveman, humanizer, mattpocock, the official productivity set). Stack- and domain-specific plugins (framework packs, SEO, design tooling) are enabled per project instead, never here: committed `.claude/settings.json` where the repo allows it, `.claude/settings.local.json` in team/company repos and wherever `settings.json` is gitignored.
 
 **Plugins fail silently** — a typo'd name is written to `settings.json`, Claude Code installs nothing, and nothing is logged. Always check:
 
