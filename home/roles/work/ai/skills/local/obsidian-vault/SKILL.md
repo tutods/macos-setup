@@ -91,7 +91,9 @@ fd -e md -d 1 "Index" "$HOME/Obsidian"
    if nothing fits). `mkdir -p` the folder first if it doesn't exist yet — the
    vault only ships with `Index.md`, type folders appear on first use.
 2. Content is one unit of learning — what, why, and nothing that belongs in a
-   more specific note instead.
+   more specific note instead. Write prose as one line per paragraph — never
+   hard-wrap. This vault runs with Obsidian's default `strictLineBreaks:
+   false`, so every hard-wrapped line renders as a visible break.
 3. Add `[[wikilinks]]` to related notes under `## Related`.
 4. If a relevant index note exists, add this note's `[[wikilink]]` to it. If
    the topic is new and will grow, create an index note for it at vault root.

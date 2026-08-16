@@ -20,6 +20,13 @@
     # https://code.claude.com/docs/en/memory
     autoMemoryEnabled = false;
 
+    # Compact earlier than the default (near-full context) — trigger once
+    # ~50% of the window is used instead of waiting until it's nearly full.
+    # 100000 is the schema's minimum and is exactly half of the standard
+    # 200k-token context window.
+    autoCompactEnabled = true;
+    autoCompactWindow = 100000;
+
     # https://code.claude.com/docs/en/statusline
     statusLine = {
       type = "command";
