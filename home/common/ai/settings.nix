@@ -21,11 +21,14 @@
     autoMemoryEnabled = false;
 
     # Compact earlier than the default (near-full context) — trigger once
-    # ~50% of the window is used instead of waiting until it's nearly full.
-    # 100000 is the schema's minimum and is exactly half of the standard
-    # 200k-token context window.
+    # ~60% of the real context window is used instead of waiting until
+    # it's nearly full. A fixed-token autoCompactWindow was wrong here:
+    # opusplan executes on Sonnet 5, which always runs a native 1M-token
+    # window on the Anthropic API, so a value sized for 200k triggered
+    # compaction way too early. CLAUDE_AUTOCOMPACT_PCT_OVERRIDE scales
+    # with whatever window is actually in effect.
     autoCompactEnabled = true;
-    autoCompactWindow = 100000;
+    env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60";
 
     # https://code.claude.com/docs/en/statusline
     statusLine = {
