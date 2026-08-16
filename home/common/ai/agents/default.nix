@@ -19,6 +19,7 @@
       dir = ./local;
       names = [
         "dev-lifecycle"
+        "reorganize-obsidian-vault"
       ];
     })
   ];

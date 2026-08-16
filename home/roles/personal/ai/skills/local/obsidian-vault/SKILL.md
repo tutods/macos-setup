@@ -30,15 +30,40 @@ separate — never reference or assume content from the other.
   `Conventions/`, `Notes/` (catch-all for anything that doesn't fit the rest).
   Create a new folder only for a genuinely new recurring type — don't fragment
   further than that.
-- **Index notes** live at vault root, outside the type folders — they're
-  navigation, not content. `Index.md` is the entry point, linking topic
-  indexes like `Lessons Index.md` and `Projects Knowledge Index.md`, each a
-  plain list of `[[wikilinks]]`.
+- `Lessons/` is subfoldered by area (`Docker/`, `Doppler/`, `GitHub/`,
+  `Payload/`, `Frontend/`, `Backend/`, `Tooling/`) — it's the one folder big
+  enough to be worth browsing. Nothing else is subfoldered; `area` frontmatter
+  covers filtering everywhere else.
+- **No hand-maintained index notes.** `Index.md` is the only note at vault
+  root, and it just links `Vault.base` — an Obsidian Bases file that derives
+  every view (by type, area, project, date) from frontmatter, so nothing goes
+  stale.
+- `Templates/` holds one starter file per type, excluded from `Vault.base` by
+  a folder filter.
 - **Title Case** for every note filename.
 - Each note is a self-contained unit — one topic/decision/fact per note, not a
   running log.
 - `[[wikilinks]]` resolve by filename regardless of folder — no path needed
   in a link, so moving a note between folders never breaks a link.
+
+## Frontmatter
+
+Every note (except `Index.md` and `Templates/`) starts with:
+
+```yaml
+---
+type: lesson          # lesson | decision | process | convention | note
+project: molar        # short slug for the repo/side-project
+area: [payload, postgres]   # tech areas, lowercase
+tags: [backend]        # coarse: backend | frontend | devops | tooling | compliance | ai
+created: 2026-08-12
+---
+```
+
+`area` and `tags` aren't redundant: `tags` feeds Obsidian's tag pane and
+`file.hasTag()`; `area` is free-form for fine-grained Bases filtering. Never
+leave `project` or `area` empty — an empty list makes the note invisible in
+any view grouped or filtered on it.
 
 ## Linking
 
@@ -78,25 +103,19 @@ rg -il "keyword" "$HOME/Obsidian"
 rg -l "\[\[Note Title\]\]" "$HOME/Obsidian"
 ```
 
-### Find index notes
-
-```bash
-fd -e md -d 1 "Index" "$HOME/Obsidian"
-```
-
 ### Create a note
 
 1. Title Case filename, `.md` extension, written into the matching type
    folder (`Lessons/`, `Decisions/`, `Process/`, `Conventions/`, or `Notes/`
-   if nothing fits). `mkdir -p` the folder first if it doesn't exist yet — the
-   vault only ships with `Index.md`, type folders appear on first use.
-2. Content is one unit of learning — what, why, and nothing that belongs in a
+   if nothing fits; `Lessons/` also needs an area subfolder). `mkdir -p` the
+   folder first if it doesn't exist yet.
+2. Start from `Templates/<Type>.md` — it has the frontmatter block pre-filled.
+   Fill in `type`, `project`, `area`, `tags`, `created` (today's date).
+3. Content is one unit of learning — what, why, and nothing that belongs in a
    more specific note instead. Write prose as one line per paragraph — never
    hard-wrap. This vault runs with Obsidian's default `strictLineBreaks:
    false`, so every hard-wrapped line renders as a visible break.
-3. Add `[[wikilinks]]` to related notes under `## Related`.
-4. If a relevant index note exists, add this note's `[[wikilink]]` to it. If
-   the topic is new and will grow, create an index note for it at vault root.
+4. Add `[[wikilinks]]` to related notes under `## Related`.
 
 ### Update a note
 
@@ -105,20 +124,24 @@ note is explicitly a running log.
 
 ### Log a lesson
 
-Triggered by a corrected mistake, not by request. Before writing, check
-`Lessons Index.md` and grep `Lessons/` for the topic — update an existing note
-instead of duplicating it. New lessons go in `Lessons/`.
+Triggered by a corrected mistake, not by request. Before writing, grep
+`Lessons/` for the topic — update an existing note instead of duplicating it.
+New lessons go in `Lessons/<Area>/`.
 
 ```markdown
+---
+type: lesson
+project: <slug>
+area: [<area>]
+tags: [<backend|frontend|devops|tooling|compliance|ai>]
+created: <YYYY-MM-DD>
+---
+
 # <Short Title>
 
 **Wrong:** what broke it — the mistaken assumption or action.
 **Right:** what fixes it — the rule going forward.
 
-Context: <repo/stack, one line>
-
 ## Related
-- [[Lessons Index]]
+- [[Some Related Note]]
 ```
-
-Link it from `Lessons Index.md` (create that index note on the first lesson).

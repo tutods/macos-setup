@@ -49,14 +49,15 @@
     # Inject the vault's lesson titles into every session. The always-on
     # "Prior Art" rule greps the vault by topic keywords, which misses
     # behavioral lessons (loops, reverts) — this makes every lesson title
-    # visible regardless of topic, harness-enforced. Silent no-op when the
-    # vault has no Lessons Index yet.
+    # visible regardless of topic, harness-enforced. Filesystem-derived
+    # (not a hand-maintained index note) so it can't go stale. Silent
+    # no-op when the vault has no Lessons/ folder yet.
     hooks.SessionStart = [
       {
         hooks = [
           {
             type = "command";
-            command = "if [ -f \"$HOME/Obsidian/Lessons Index.md\" ]; then cat \"$HOME/Obsidian/Lessons Index.md\"; fi";
+            command = "if [ -d \"$HOME/Obsidian/Lessons\" ]; then echo \"# Lessons\"; find \"$HOME/Obsidian/Lessons\" -name \"*.md\" | sed \"s|.*/Lessons/||;s|\\.md\\$||\" | sort; fi";
           }
         ];
       }

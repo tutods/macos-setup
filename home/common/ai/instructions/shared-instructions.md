@@ -53,7 +53,8 @@ skill) without being asked. Do this once the correction is confirmed working,
 not mid-debugging.
 
 - One note per lesson, Wrong/Right pattern: what broke it, what fixes it.
-- File under the project/stack it happened in, linked from `Lessons Index.md`.
+- File under `Lessons/<Area>/` with `type`/`project`/`area`/`tags`/`created`
+  frontmatter — Bases indexes it automatically, nothing to link by hand.
 - Skip anything already covered by an existing note or skill — update that
   note instead of creating a near-duplicate.
 - Skip one-off typos or anything not likely to recur.
