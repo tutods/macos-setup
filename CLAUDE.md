@@ -180,8 +180,6 @@ trigger that invokes the workflow — see `skills/local/llm-council`.
 
 ## Repo Rules
 
-- **Repo scripts are zero-dependency bash.** `nix.sh` and anything run at bootstrap must work with bash built-ins only — no `gum`, no external TUI tools (a script that installs dependencies can't depend on them). A gum-based TUI was tried and reverted.
-- **Git remotes stay SSH.** Never switch them to HTTPS during reviews or "fixes".
 - **Configs the app itself writes (e.g. Zed `settings.json`) are seeded as a one-time copy, not a store symlink** — a read-only symlink breaks the app's own save.
 - One-off gotchas live in `docs/ai-lessons.md` — check it before debugging setup issues that feel familiar.
 - **Rules are scoped to where they're true.** Always-true → `instructions/`; true for a stack → `home/common/ai/skills/local/`; true for one repo → that repo's own `CLAUDE.md`. Never name a specific project inside a machine-wide instruction or skill.
