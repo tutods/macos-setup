@@ -52,6 +52,11 @@ function assertNever(x: never): never {
 - **Function declarations, not top-level arrow functions.** Arrows are for callbacks only (`useMemo`, `useCallback`, array methods, inline handlers).
   Wrong: `export const parseUser = () => {}` → Right: `export function parseUser() {}`
 
+### Types over interfaces
+
+Use `type` aliases, not `interface`. `interface X extends Y` becomes `type X = Y & { ... }` — intersection instead of declaration-merging inheritance.
+Wrong: `interface User { id: number }` → Right: `type User = { id: number }`
+
 ### New packages
 
 - **Every new Node package is ESM + TypeScript** — `"type": "module"` in `package.json` from the first commit. No CJS, no plain `.js` files.

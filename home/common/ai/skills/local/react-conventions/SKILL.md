@@ -32,6 +32,12 @@ Rules:
 - Co-locate component-specific hooks alongside the component (`useUserCard.ts` in the same folder)
 - No barrel `index.ts` re-exports at the feature level — import directly
 
+### Component Shape
+
+- **No nested render functions.** A `function renderX()` defined inside a component body is a component that never got extracted — it can't be memoized on its own and recreates a new function identity every render. Move it to a sibling component instead.
+- **Past ~150 lines a component is doing too much.** Not a hard cap — a smell. Extract UI units into sub-components rather than growing the function.
+- **Composition over prop count.** Past ~7 props a component is usually trying to be too configurable — reach for `children` or a named slot prop instead of another boolean or callback.
+
 ### Naming
 
 - Components: `PascalCase`
@@ -50,6 +56,18 @@ Rules:
 - Local UI state: `useState`
 - Cross-component UI state: consider lifting or TanStack Store before reaching for a global store
 - Server state: TanStack Query only — do not duplicate server data in local state
+
+### Performance
+
+- **`children` before `memo`.** JSX passed as `children` is built by the parent that renders it — a component's own re-render doesn't touch `children` it was handed. Free optimization; reach for it before `memo`/`useMemo`/`useCallback`.
+- **Expensive `useState` initializers use the function form.** `useState(buildInitial(...))` runs on every render and throws the result away except the first.
+  Wrong: `useState(buildInitial(x))` → Right: `useState(() => buildInitial(x))`
+- **TanStack Table's `data`/`columns` must be reference-stable** (`useMemo`) — a fresh array each render causes infinite re-renders. The one place `useMemo` is the default, not the exception.
+
+### Security
+
+- **No `dangerouslySetInnerHTML`** on anything user- or API-supplied — static, self-generated content only. Rendering rich text/HTML from a backend needs a real sanitizer (e.g. DOMPurify), not a lint-ignore.
+- **No credentials in client-readable storage.** Never put a session token, API key, or anything that *grants access* in `localStorage`, `sessionStorage`, or a client-side store — all readable by any script on the page. Displaying profile data from a response is fine; persisting an access-granting value client-side is not.
 
 ### Styling
 
