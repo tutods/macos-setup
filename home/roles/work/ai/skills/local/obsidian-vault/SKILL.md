@@ -14,7 +14,8 @@ harness — writes happen because this skill runs, not because of a background
 process. Two triggers:
 
 - **Explicit** — the user asks to remember/save/look something up.
-- **Proactive** — a corrected mistake, per the "Lessons Learned" rule in
+- **Proactive** — a corrected mistake, an approved decision, or a standing
+  convention, per the "Vault Capture" rules in
   `home/common/ai/instructions/shared-instructions.md`. No need to be asked.
 
 ## Scope
@@ -144,3 +145,11 @@ created: <YYYY-MM-DD>
 ## Related
 - [[Some Related Note]]
 ```
+
+### Log a decision or convention
+
+Triggered by an approved architecture/tech choice (`Decisions/`) or a stated
+standing rule for how work happens (`Conventions/`) — not by request. Grep
+the target folder for the topic first; update an existing note instead of
+duplicating it. Skip if the choice was reverted in the same session, or is a
+one-off with no standing pattern.

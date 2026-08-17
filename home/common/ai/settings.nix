@@ -46,18 +46,20 @@
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
 
-    # Inject the vault's lesson titles into every session. The always-on
-    # "Prior Art" rule greps the vault by topic keywords, which misses
-    # behavioral lessons (loops, reverts) — this makes every lesson title
-    # visible regardless of topic, harness-enforced. Filesystem-derived
-    # (not a hand-maintained index note) so it can't go stale. Silent
-    # no-op when the vault has no Lessons/ folder yet.
+    # Inject vault context into every session: lesson titles, convention +
+    # decision titles, full convention bodies, and (matched against the
+    # session's cwd) any note filed under the current project's slug. The
+    # always-on "Prior Art" rule greps the vault by topic keywords, which
+    # misses this — behavioral lessons and standing conventions don't always
+    # match the session's keywords. Filesystem-derived (not a hand-maintained
+    # index note) so it can't go stale. See ./vault-context.sh for the full
+    # logic; silent no-op when the vault is absent.
     hooks.SessionStart = [
       {
         hooks = [
           {
             type = "command";
-            command = "if [ -d \"$HOME/Obsidian/Lessons\" ]; then echo \"# Lessons\"; find \"$HOME/Obsidian/Lessons\" -name \"*.md\" | sed \"s|.*/Lessons/||;s|\\.md\\$||\" | sort; fi";
+            command = "\"$HOME/.claude/hooks/vault-context.sh\"";
           }
         ];
       }
@@ -115,6 +117,10 @@ in {
   home.file.".claude/CLAUDE.md".text = "@RTK.md\n";
   home.file.".claude/hooks/block-ai-attribution.sh" = {
     source = ./block-ai-attribution.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/vault-context.sh" = {
+    source = ./vault-context.sh;
     force = true;
   };
 

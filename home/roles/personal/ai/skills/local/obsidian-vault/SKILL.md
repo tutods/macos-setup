@@ -14,7 +14,8 @@ harness — writes happen because this skill runs, not because of a background
 process. Two triggers:
 
 - **Explicit** — the user asks to remember/save/look something up.
-- **Proactive** — a corrected mistake, per the "Lessons Learned" rule in
+- **Proactive** — a corrected mistake, an approved decision, a standing
+  convention, or a completed deploy/handoff, per the "Vault Capture" rules in
   `home/common/ai/instructions/shared-instructions.md`. No need to be asked.
 
 ## Scope
@@ -27,13 +28,18 @@ separate — never reference or assume content from the other.
 ## Layout
 
 - Type folders at vault root: `Lessons/`, `Decisions/`, `Process/`,
-  `Conventions/`, `Notes/` (catch-all for anything that doesn't fit the rest).
-  Create a new folder only for a genuinely new recurring type — don't fragment
-  further than that.
+  `Conventions/`, `Projects/`, `Clients/`, `Prompts/`, `Snippets/`, `Notes/`
+  (catch-all for anything that doesn't fit the rest). Create a new folder
+  only for a genuinely new recurring type — don't fragment further than that.
 - `Lessons/` is subfoldered by area (`Docker/`, `Doppler/`, `GitHub/`,
   `Payload/`, `Frontend/`, `Backend/`, `Tooling/`) — it's the one folder big
-  enough to be worth browsing. Nothing else is subfoldered; `area` frontmatter
-  covers filtering everywhere else.
+  enough to be worth browsing. `Prompts/` is subfoldered by category (one
+  folder per prompt/skill topic) for the same reason. Nothing else is
+  subfoldered; `area`/`category` frontmatter covers filtering everywhere else.
+- `Projects/` is your own work (own products, infra, tooling repos).
+  `Clients/` is paid freelance/client engagements — scope and handoff state
+  only, **never** contact details, billing figures, or company-owned code.
+  Split on who owns the work, not on tech stack.
 - **No hand-maintained index notes.** `Index.md` is the only note at vault
   root, and it just links `Vault.base` — an Obsidian Bases file that derives
   every view (by type, area, project, date) from frontmatter, so nothing goes
@@ -48,11 +54,12 @@ separate — never reference or assume content from the other.
 
 ## Frontmatter
 
-Every note (except `Index.md` and `Templates/`) starts with:
+Every project-derived note (`Lessons/`, `Decisions/`, `Process/`,
+`Conventions/`, `Projects/`, `Clients/`, `Snippets/`) starts with:
 
 ```yaml
 ---
-type: lesson          # lesson | decision | process | convention | note
+type: lesson          # lesson | decision | process | convention | project | client | snippet | note
 project: molar        # short slug for the repo/side-project
 area: [payload, postgres]   # tech areas, lowercase
 tags: [backend]        # coarse: backend | frontend | devops | tooling | compliance | ai
@@ -62,8 +69,22 @@ created: 2026-08-12
 
 `area` and `tags` aren't redundant: `tags` feeds Obsidian's tag pane and
 `file.hasTag()`; `area` is free-form for fine-grained Bases filtering. Never
-leave `project` or `area` empty — an empty list makes the note invisible in
-any view grouped or filtered on it.
+leave `project` or `area` empty on these types — an empty list makes the note
+invisible in any view grouped or filtered on it.
+
+`Prompts/` notes are content, not project-derived, and use their own shape —
+`project` doesn't apply:
+
+```yaml
+---
+type: prompt           # prompt | skill
+category: web-development   # matches the Prompts/<Category>/ subfolder
+level: beginner         # prompt only: beginner | intermediate | advanced
+target: any-ai          # prompt only: any-ai | claude-code | claude-skill | ...
+tags: [frontend]
+created: 2026-08-12
+---
+```
 
 ## Linking
 
@@ -106,9 +127,10 @@ rg -l "\[\[Note Title\]\]" "$HOME/Obsidian"
 ### Create a note
 
 1. Title Case filename, `.md` extension, written into the matching type
-   folder (`Lessons/`, `Decisions/`, `Process/`, `Conventions/`, or `Notes/`
-   if nothing fits; `Lessons/` also needs an area subfolder). `mkdir -p` the
-   folder first if it doesn't exist yet.
+   folder (`Lessons/`, `Decisions/`, `Process/`, `Conventions/`, `Projects/`,
+   `Clients/`, `Prompts/`, `Snippets/`, or `Notes/` if nothing fits;
+   `Lessons/` and `Prompts/` also need an area/category subfolder). `mkdir -p`
+   the folder first if it doesn't exist yet.
 2. Start from `Templates/<Type>.md` — it has the frontmatter block pre-filled.
    Fill in `type`, `project`, `area`, `tags`, `created` (today's date).
 3. Content is one unit of learning — what, why, and nothing that belongs in a
@@ -145,3 +167,20 @@ created: <YYYY-MM-DD>
 ## Related
 - [[Some Related Note]]
 ```
+
+### Log a decision or convention
+
+Triggered by an approved architecture/tech choice (`Decisions/`) or a stated
+standing rule for how work happens (`Conventions/`) — not by request. Grep
+the target folder for the topic first; update an existing note instead of
+duplicating it. Skip if the choice was reverted in the same session, or is a
+one-off with no standing pattern.
+
+### Update a project/client note
+
+Triggered by a completed deploy, migration, stack change, or handoff.
+Read the existing `Projects/<Name>.md` or `Clients/<Name>.md` note (create it
+from `Templates/Project.md`/`Templates/Client.md` if none exists yet) and
+update its "Current state"/"Handoff state" line in place — this is the one
+type meant to track current state, so it's the exception to "not a running
+log."

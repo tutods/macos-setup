@@ -45,19 +45,32 @@ Before any non-trivial task, check the Obsidian vault for prior art
 Read matching `Lessons/` and `Conventions/` notes first. A logged lesson that
 isn't consulted is dead weight. Skip only for trivial one-liners.
 
-## Lessons Learned
+## Vault Capture
 
-When a mistake gets corrected — a bug I introduced, a wrong assumption, a fix
-that needed a second pass — log it to the Obsidian vault (`obsidian-vault`
-skill) without being asked. Do this once the correction is confirmed working,
-not mid-debugging.
+Four triggers write to the Obsidian vault (`obsidian-vault` skill) without
+being asked. Each has a skip clause — this is not a log-everything rule:
 
-- One note per lesson, Wrong/Right pattern: what broke it, what fixes it.
-- File under `Lessons/<Area>/` with `type`/`project`/`area`/`tags`/`created`
-  frontmatter — Bases indexes it automatically, nothing to link by hand.
-- Skip anything already covered by an existing note or skill — update that
-  note instead of creating a near-duplicate.
-- Skip one-off typos or anything not likely to recur.
+| Trigger | Writes to |
+|---|---|
+| A mistake I made gets corrected and the fix is confirmed working | `Lessons/<Area>/` |
+| A non-trivial tech/architecture choice is made **and approved** | `Decisions/` |
+| The user states a standing rule for how work is done here | `Conventions/` |
+| A deploy, migration, stack change, or handoff completes | update the `Projects/`/`Clients/` note's state section |
+
+Skip if: an existing note already covers it (update that note instead of
+duplicating it — grep the target folder first); it's a one-off with no
+recurring pattern; the decision was reverted in the same session. Do the
+write once the outcome is confirmed, not mid-debugging or mid-discussion.
+
+Lessons keep the Wrong/Right pattern: what broke it, what fixes it. All four
+types use `type`/`project`/`area`/`tags`/`created` frontmatter — Bases
+indexes it automatically, nothing to link by hand.
+
+**Boundary with learned rules** — behavioral rules about how the agent works
+on this machine stay in `home/common/ai/instructions/learned-rules.md`
+(loaded every session via Nix). Technical failure modes and project/client
+facts go to the vault instead. One fact, one home — don't duplicate across
+both.
 
 ## Verification & Completion
 
