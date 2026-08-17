@@ -62,7 +62,7 @@ Every project-derived note (`Lessons/`, `Decisions/`, `Process/`,
 type: lesson          # lesson | decision | process | convention | project | client | snippet | note
 project: molar        # short slug for the repo/side-project
 area: [payload, postgres]   # tech areas, lowercase
-tags: [backend]        # coarse: backend | frontend | devops | tooling | compliance | ai
+tags: [backend]        # coarse: backend | frontend | devops | tooling | compliance | ai | process
 created: 2026-08-12
 ---
 ```
@@ -73,18 +73,22 @@ leave `project` or `area` empty on these types — an empty list makes the note
 invisible in any view grouped or filtered on it.
 
 `Prompts/` notes are content, not project-derived, and use their own shape —
-`project` doesn't apply:
+`project` doesn't apply, and `tags` is free-form topical (not the coarse
+project-derived enum) since these are browsed by subject, not by codebase:
 
 ```yaml
 ---
 type: prompt           # prompt | skill
 category: web-development   # matches the Prompts/<Category>/ subfolder
 level: beginner         # prompt only: beginner | intermediate | advanced
-target: any-ai          # prompt only: any-ai | claude-code | claude-skill | ...
-tags: [frontend]
+target: claude-ai       # prompt only: any-ai | claude-ai | claude-code
+tags: [ecommerce, landing-page]   # free-form, topical — not the coarse enum above
 created: 2026-08-12
 ---
 ```
+
+`type: skill` notes drop `level`/`target` entirely — just `category` and
+`tags`.
 
 ## Linking
 
