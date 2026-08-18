@@ -11,6 +11,7 @@ Generate a code review of a PR diff and, if the user wants, post it to GitHub. S
 
 1. Read the PR diff: `gh pr diff <pr-number>`
 2. Produce findings: bugs, logic errors, security concerns, missing tests, style issues, improvement suggestions. For each finding capture: `id` (`F1`, `F2`, ...), `title`, `severity` (blocker / major / minor / nit), `file`, `line` (if applicable), `description`, `suggestion` (concrete fix or diff).
+3. **Comment hygiene is a blocking review item, not a nit.** Apply the "No explanatory comments in code" rules from the always-on instructions (`~/.claude/rules/workflow.md`): comments that narrate what the code does, narrate the change/fix, restate signatures, or reference other files by line are `major` findings; multi-line comment blocks are automatic findings. The suggestion is always the same — delete the comment (moving the content to the PR body if it's worth keeping at all).
 
 ## Step 2 — Post to GitHub?
 

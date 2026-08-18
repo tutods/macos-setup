@@ -43,6 +43,7 @@ Work through each pass. **Every finding must cite `file:line` from code actually
 5. **Conventions** — naming, file structure, export style, i18n usage vs. project CLAUDE.md
 6. **Consistency** — duplicated components/utils, divergent patterns for the same problem (e.g. three button styles)
 7. **Dependency hygiene** — unused deps, heavyweight packages with lighter native options
+8. **Comment hygiene (blocking, never MINOR)** — enforce "No explanatory comments in code" from the always-on rules: comments narrating what code does, narrating a change/fix, restating signatures, or referencing files by line are `[MAJOR]`; multi-line comment blocks are automatic findings; the fix is deletion
 
 Severity: `[CRITICAL]` (bug, security hole, data loss) · `[MAJOR]` (violates a stated convention, real maintenance cost) · `[MINOR]` (style, polish).
 

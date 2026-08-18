@@ -18,6 +18,7 @@
       label = "common";
       dir = ./local;
       names = [
+        "code-reviewer"
         "dev-lifecycle"
         "reorganize-obsidian-vault"
       ];

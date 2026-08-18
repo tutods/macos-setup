@@ -53,7 +53,9 @@ anything. Otherwise edit the working tree directly.
 Minimal diff. Match the surrounding code's idiom. No drive-by refactors, no
 reformatting outside the lines that changed, no `TODO`/`FIXME` comments, no
 commented-out code, no placeholder/stub implementations without explicitly
-flagging them in the final report.
+flagging them in the final report. Zero explanatory comments — the always-on
+"No explanatory comments in code" rule applies; before committing, re-read
+every comment you wrote and delete the unjustifiable ones.
 
 ## Phase 5 — Verify
 

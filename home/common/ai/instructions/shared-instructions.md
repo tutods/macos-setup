@@ -82,6 +82,23 @@ both.
 - No `TODO` / `FIXME` comments unless explicitly asked to add them
 - No placeholder/stub implementations (fake data, hardcoded returns) without explicitly flagging them to the user
 
+## No explanatory comments in code
+
+**Default: zero comments.** This is non-negotiable and has been flagged across multiple sessions. Treat every comment as something you must justify keeping, not something to add by default.
+
+- **One line max.** Two `//` lines on the same block = violation. Block comments above functions/branches/imports explaining the change = violation.
+- **Never narrate what the code does.** Names and control flow are the explanation. `// loop over items` is noise. `// reset state` is noise.
+- **Never narrate the change or the fix.** "// was X before", "// added for Y flow", "// this eliminates the race where…", "// keep X — Y forces Z" — all belong in the commit message or PR description, not in the source. The diff already shows what changed.
+- **Never restate signatures or types.** JSDoc/docstrings for trivial helpers are forbidden.
+- **Never reference other files by line** (`// see start-e2e.mjs:382`). That belongs in the PR body and rots.
+- **Red-flag openers — stop and delete if you find yourself typing these:** "Both X AND Y…", "This eliminates…", "We do X so that Y", "Re-seed when…", "Keep X — Y", "Capture the … BEFORE …", "Resolve the run_id ONCE", "Fallback: …", or any sentence that paraphrases the commit body.
+- **Acceptable, rarely**: a single short line explaining a WHY that good names can't carry — a hidden constraint, a third-party bug workaround, a security-critical invariant, a load-bearing ordering. Even then, prefer pushing the explanation into the commit message or an OpenSpec/ADR doc.
+- **Before commit, re-read every comment you wrote and delete the unjustifiable ones.** If you're not sure, delete.
+
+The same rule binds TypeScript, JavaScript, Rust, Python, and YAML. The same rule binds every skill, every agent, every mode. Implementer/architect/reviewer agent prompts inherit it.
+
+When reviewing a diff you wrote, **comment hygiene is a blocking review item**, not a nit.
+
 ## Destructive Operations
 
 **Always require explicit user confirmation before:**

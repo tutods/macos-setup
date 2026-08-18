@@ -94,9 +94,16 @@ Options:
 Then:
 
 1. Read `git diff` (or `git diff --staged` if changes are already staged) to understand the changes
-2. Generate the message with the `conventional-commit` skill (type table, scope rules, subject/body format live there)
-3. Show the generated message to the user for confirmation
-4. Commit **only the files that belong to this change**, by explicit pathspec — never `git add .` or `git add -A`, which can sweep the user's unrelated staged or untracked work:
+2. **Comment audit** — scan the diff for added comment lines:
+
+   ```bash
+   git diff -U0 | rg '^\+\s*(//|#|/\*|\*)'
+   ```
+
+   Apply "No explanatory comments in code" from the always-on rules to every hit: comments narrating what the code does, narrating the change/fix, restating signatures, or referencing files by line get deleted **before** staging (move anything worth keeping into the commit message or PR body). Skip hits that aren't comments (shebangs, string literals, nix attr paths) and comments in the diff only because a neighboring line changed. If unsure whether a comment is justified, delete it.
+3. Generate the message with the `conventional-commit` skill (type table, scope rules, subject/body format live there)
+4. Show the generated message to the user for confirmation
+5. Commit **only the files that belong to this change**, by explicit pathspec — never `git add .` or `git add -A`, which can sweep the user's unrelated staged or untracked work:
 
 ```bash
 git add -- <file1> <file2> ...
