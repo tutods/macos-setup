@@ -51,11 +51,13 @@ python3 scripts/jira_adf.py doc /tmp/desc.md
 | `*italic*` | `text` with `marks: [{type: em}]` |
 | `` `code` `` | `text` with `marks: [{type: code}]` |
 | `[text](url)` | `text` with `marks: [{type: link, attrs: {href}}]` |
+| bare `https://…` / `www.…` | same `link` mark, autolinked — no `[]()` needed |
 | `- item` / `* item` | `bulletList` > `listItem` > `paragraph` |
 | `1. item` | `orderedList` > `listItem` > `paragraph` |
 | `- [ ] item`, `[ ] item`, `[] item`, `[x] item` | `taskList` > `taskItem`, `state: TODO`/`DONE` |
 | ` ```lang ... ``` ` | `codeBlock`, `attrs.language` |
 | `---` | `rule` |
+| `\| a \| b \|` rows (2nd row `\|---\|---\|`) | `table` > `tableRow` > `tableHeader`/`tableCell` > `paragraph` |
 
 **The bare-checklist trap:** tickets typed by hand frequently write checklist
 items as `[] do the thing` or `[ ] do the thing` with no leading `- `. The

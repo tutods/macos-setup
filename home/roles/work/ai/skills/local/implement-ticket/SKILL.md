@@ -62,8 +62,10 @@ ticket In Progress.
 On PR success:
 
 1. Transition the ticket to In Review.
-2. Comment the PR link on the ticket — through `scripts/jira_adf.py` if the
-   comment has any structure; a bare one-line link can go plain.
+2. Comment the PR link on the ticket — write it as markdown, convert with
+   `scripts/jira_adf.py comment`, post with `comment create --body-file`.
+   No exception for a bare one-line link: a plain `--body` renders the URL
+   as dead text, the script's autolinking is what makes it clickable.
 
 ## Step 7 — Report
 

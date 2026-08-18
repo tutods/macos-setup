@@ -33,6 +33,11 @@ INLINE_CODE_RE = re.compile(r"`([^`]+)`")
 BOLD_RE = re.compile(r"\*\*([^*]+)\*\*")
 ITALIC_RE = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+AUTOLINK_RE = re.compile(r"(?<![\w@.\-])((?:https?://|www\.)[^\s<>\)\]\}\"'`]+)")
+TRAILING_PUNCT = ".,;:!?"
+
+TABLE_ROW_RE = re.compile(r"^\s*\|(.+)\|\s*$")
+TABLE_SEP_RE = re.compile(r"^\s*\|[\s:|-]+\|\s*$")
 
 
 def parse_inline(text):
@@ -75,10 +80,36 @@ def parse_inline(text):
                 out.append((chunk[pos:], marks))
         return out
 
+    # Bare URLs (no [text](url) markup). Skipped inside `code` spans and
+    # inside chunks that already carry an explicit link, so this never
+    # double-marks a markdown link's own text.
+    def split_autolinks(tokens):
+        out = []
+        for chunk, marks in tokens:
+            if "code" in marks or any(isinstance(mark, tuple) for mark in marks):
+                out.append((chunk, marks))
+                continue
+            pos = 0
+            for m in AUTOLINK_RE.finditer(chunk):
+                url = m.group(1)
+                end = m.end()
+                while url and url[-1] in TRAILING_PUNCT:
+                    url = url[:-1]
+                    end -= 1
+                if m.start() > pos:
+                    out.append((chunk[pos:m.start()], marks))
+                href = url if url.startswith(("http://", "https://")) else f"https://{url}"
+                out.append((url, marks + (("link", href),)))
+                pos = end
+            if pos < len(chunk):
+                out.append((chunk[pos:], marks))
+        return out
+
     tokens = split_on(INLINE_CODE_RE, tokens, "code")
     tokens = split_on(BOLD_RE, tokens, "strong")
     tokens = split_on(ITALIC_RE, tokens, "em")
     tokens = split_links(tokens)
+    tokens = split_autolinks(tokens)
 
     nodes = []
     for chunk, marks in tokens:
@@ -186,12 +217,44 @@ def markdown_to_adf(markdown_text):
             content.append({"type": "orderedList", "content": items})
             continue
 
+        if TABLE_ROW_RE.match(line):
+            rows = []
+            while i < len(lines) and TABLE_ROW_RE.match(lines[i]):
+                rows.append([cell.strip() for cell in lines[i].strip().strip("|").split("|")])
+                i += 1
+            header_row = None
+            if len(rows) >= 2 and TABLE_SEP_RE.match("|" + "|".join(rows[1]) + "|"):
+                header_row, rows = rows[0], rows[2:]
+            table_rows = []
+            if header_row is not None:
+                table_rows.append({
+                    "type": "tableRow",
+                    "content": [
+                        {"type": "tableHeader", "content": [paragraph(cell)]}
+                        for cell in header_row
+                    ],
+                })
+            for row in rows:
+                table_rows.append({
+                    "type": "tableRow",
+                    "content": [
+                        {"type": "tableCell", "content": [paragraph(cell)]}
+                        for cell in row
+                    ],
+                })
+            content.append({
+                "type": "table",
+                "attrs": {"isNumberColumnEnabled": False, "layout": "default"},
+                "content": table_rows,
+            })
+            continue
+
         # Plain paragraph: consume until a blank line or a line that starts a
         # different block, joining wrapped lines with a space.
         para_lines = [line.strip()]
         i += 1
         while i < len(lines) and lines[i].strip() and not any(
-            p.match(lines[i]) for p in (HEADING_RE, TASK_RE, BULLET_RE, ORDERED_RE, RULE_RE, FENCE_RE)
+            p.match(lines[i]) for p in (HEADING_RE, TASK_RE, BULLET_RE, ORDERED_RE, RULE_RE, FENCE_RE, TABLE_ROW_RE)
         ):
             para_lines.append(lines[i].strip())
             i += 1
@@ -278,6 +341,52 @@ def cmd_edit(args):
     print(json.dumps(payload, indent=2))
 
 
+def cmd_selftest(args):
+    def marks_of(node):
+        return node.get("marks", [])
+
+    def link_href(node):
+        for mark in marks_of(node):
+            if mark["type"] == "link":
+                return mark["attrs"]["href"]
+        return None
+
+    # Bare URL gets a link mark with the right href.
+    nodes = parse_inline("see https://example.com/x for details")
+    assert link_href(nodes[1]) == "https://example.com/x", nodes
+
+    # [text](url) still yields one node, text "text", href "url".
+    nodes = parse_inline("see [the doc](https://example.com/x) now")
+    linked = [n for n in nodes if link_href(n)]
+    assert len(linked) == 1 and linked[0]["text"] == "the doc" and link_href(linked[0]) == "https://example.com/x", nodes
+
+    # A URL in a code span gets `code`, no link mark.
+    nodes = parse_inline("run `https://example.com/x` please")
+    coded = [n for n in nodes if {"type": "code"} in marks_of(n)]
+    assert len(coded) == 1 and link_href(coded[0]) is None, nodes
+
+    # Trailing sentence punctuation is not swallowed into the href.
+    nodes = parse_inline("see https://example.com/x/y.")
+    linked = [n for n in nodes if link_href(n)]
+    assert linked and link_href(linked[0]) == "https://example.com/x/y", nodes
+    assert nodes[-1]["text"] == ".", nodes
+
+    # A 3-row markdown table becomes a real table node.
+    doc = markdown_to_adf("| A | B |\n| --- | --- |\n| 1 | 2 |\n")
+    table = doc["content"][0]
+    assert table["type"] == "table", doc
+    assert table["content"][0]["content"][0]["type"] == "tableHeader", table
+    assert table["content"][1]["content"][0]["type"] == "tableCell", table
+
+    # A URL inside a table cell also gets a link mark.
+    doc = markdown_to_adf("| Link |\n| --- |\n| https://example.com/x |\n")
+    cell_para = doc["content"][0]["content"][1]["content"][0]["content"][0]
+    cell_nodes = cell_para["content"]
+    assert any(link_href(n) == "https://example.com/x" for n in cell_nodes), cell_nodes
+
+    print("ok")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -311,6 +420,9 @@ def main():
     edit_parser.add_argument("--add-label", help="comma-separated")
     edit_parser.add_argument("--remove-label", help="comma-separated")
     edit_parser.set_defaults(func=cmd_edit)
+
+    selftest_parser = sub.add_parser("selftest", help="Run built-in asserts against parse_inline/markdown_to_adf")
+    selftest_parser.set_defaults(func=cmd_selftest)
 
     args = parser.parse_args()
     args.func(args)

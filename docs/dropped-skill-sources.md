@@ -51,7 +51,9 @@ effect on a machine.
 | Source | Skills that were installed |
 |---|---|
 | `oakoss/agent-skills` | storybook-stories |
-| `morphet81/cheat-sheets` | create-jira-ticket, update-jira-ticket — partly covered by `pm-skills@claude-code-skills` (jira-expert) |
+| `morphet81/cheat-sheets` | create-jira-ticket, update-jira-ticket — covered by the in-repo `acli` skill (`home/roles/work/ai/skills/local/acli`) |
+| `alirezarezvani/claude-skills` | jira-expert — covered by `acli`; also taught plain-text `--body` Jira comments with no ADF, contradicting `acli`'s rules (MP-4291 link-rendering bug) |
+| `arjunmahishi/dotfiles` | acli-jira — covered by `acli`; same plain-`--body` contradiction as above |
 
 ## Vendored, then dropped
 

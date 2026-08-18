@@ -46,16 +46,15 @@ full body — `comment list --json`'s `body` field is a lossy text summary; only
 Jira descriptions and comment bodies are a JSON tree, not Markdown, and
 `--description`/`--body`/`--description-file` accept plain text only. Every
 description and every comment goes through `scripts/jira_adf.py` — write the
-content as a `.md` file and run it — with **no exception for content that
-looks simple.** The instinct to skip the script for "just a few bullet
-points" is exactly how this goes wrong: a plain-text body with `- item` lines
-or `` `code` `` spans in it doesn't render as a list or inline code, it
-renders as literal dashes and backticks in the Jira UI — worse than not
-attempting formatting at all, since it looks like a mistake rather than a
-deliberate plain note. If the content truly has zero structure (a single
-short sentence, no bullets, no headings, no code, no bold), plain
-`--body`/`--description` is fine; anything with even one list item or one
-inline code reference goes through the script. See `references/adf.md`.
+content as a `.md` file and run it — with **no exception, ever, including
+content that looks simple.** The instinct to skip the script for "just a few
+bullet points" or "just a link" is exactly how this goes wrong: a plain-text
+body with `- item` lines or `` `code` `` spans renders as literal dashes and
+backticks, and a plain-text URL renders as dead text — Jira's ADF never
+autolinks a bare `https://…` in a plain body, only a `link` mark makes it
+clickable, and plain `--body`/`--description` cannot produce one. There is no
+size of comment or description too small to route through the script. See
+`references/adf.md`.
 
 **3. Don't guess a flag.** `create` uses `--label` (singular); `edit` uses
 `--labels`/`--remove-labels`; the `edit --from-json` payload uses
