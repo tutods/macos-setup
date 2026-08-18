@@ -10,7 +10,7 @@
       inherit lib;
       label = "work";
       dir = ./skills/local;
-      names = ["acli" "babysit-prs" "deep-review-prs" "obsidian-vault" "work-stack"];
+      names = ["acli" "babysit-prs" "deep-review-prs" "implement-ticket" "obsidian-vault" "work-stack"];
     })
   ];
 

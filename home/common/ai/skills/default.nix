@@ -25,6 +25,7 @@
         "conventional-commit"
         "open-pr"
         "review-pr"
+        "pr-feedback"
         "deep-review"
         "ui-iterate"
         # This repo's own conventions. Was an @-mention file in ~/.claude/context/,

@@ -57,7 +57,16 @@ flagging them in the final report. Zero explanatory comments — the always-on
 "No explanatory comments in code" rule applies; before committing, re-read
 every comment you wrote and delete the unjustifiable ones.
 
-## Phase 5 — Verify
+## Phase 5 — Review loop
+
+Spawn the `code-reviewer` subagent on the working diff. Blocker and major
+findings must be fixed in another implement pass; minors are your call.
+Up to 3 cycles, ending early the first time a cycle returns no
+blocker/major findings. Never argue a finding away without re-reading the
+code it cites. Findings deliberately not fixed go in the final report with
+the reason.
+
+## Phase 6 — Verify
 
 Discover the repo's own check commands (`package.json` scripts, `flake.nix`,
 `Makefile`, existing CI config) rather than assuming a stack. Run typecheck,
@@ -66,7 +75,14 @@ checks that apply actually pass, and the report says which ones ran and their
 result. If the same check fails twice in a row for the same reason, stop and
 report the failure rather than retrying blind.
 
-## Phase 6 — Ship
+**Mutation check** — when the brief is a bug fix and the change adds or
+modifies a test: temporarily revert the implementation files (not the test
+files), e.g. `git stash push -- <impl files>`, run the new/changed test, and
+require it to fail; then restore. A new test that passes against the unfixed
+code tests nothing — report that as a verify failure. Skip for pure
+features/refactors with no bug to regress.
+
+## Phase 7 — Ship
 
 Never commit directly on `main` or `master` — branch first. Stage and commit
 with an explicit pathspec (`git commit -m "..." -- <paths>`) so nothing
@@ -84,6 +100,6 @@ infrastructure, no `--no-verify`/`--no-gpg-sign`.
 
 ## Final report
 
-Always end with: goal, files changed, checks run and their results, PR URL
-(or why shipping didn't happen), scope exceptions, and anything deliberately
-left undone.
+Always end with: goal, files changed, checks run and their results, review
+cycles run and findings dropped (with reasons), PR URL (or why shipping
+didn't happen), scope exceptions, and anything deliberately left undone.
