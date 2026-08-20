@@ -104,13 +104,14 @@ Search and links are plain-text — use Grep/Glob/Bash, not the Obsidian app.
 
 ### Read first
 
-The SessionStart hook already injects full bodies of every note under
-`Lessons/`, `Decisions/`, `Process/`, `Conventions/`, `Projects/`, `Clients/`,
-and `Notes/` — that context is already loaded, no grep needed as a first
-step. `Prompts/` is titles-only at session start (it's a content library,
-not working memory), so it still needs a search when a prompt is relevant.
+The SessionStart hook already injects full bodies of the core type folders —
+the hook (`home/common/ai/vault-context.sh` in the dotfiles repo) owns the
+list and marks any titles-only section in its output — so that context is
+already loaded, no grep needed as a first step. `Prompts/` is titles-only at
+session start (it's a content library, not working memory), so it still
+needs a search when a prompt is relevant.
 
-Fall back to a search of the whole vault when the injected context isn't enough — after long-session compaction, for a folder not yet in the hook's fixed list, or to pin down one exact note. Dispatch these to the `vault-search` subagent (Agent tool) rather than grepping inline — it's a read-only lookup on `haiku`, cheaper than burning main-session tokens on `rg`/`fd` output.
+Fall back to a search of the whole vault when the injected context isn't enough — after long-session compaction, for a folder not in the hook's list or truncated to titles-only, or to pin down one exact note. Dispatch these to the `vault-search` subagent (Agent tool) rather than grepping inline — it's a read-only lookup on `haiku`, cheaper than burning main-session tokens on `rg`/`fd` output.
 
 ### Find notes
 
@@ -121,6 +122,14 @@ in).
 ### Find backlinks to a note
 
 Dispatch to `vault-search`: "find backlinks to [[Note Title]]".
+
+### Check vault health
+
+Dispatch to the `vault-lint` subagent — dead wikilinks, orphan notes,
+missing/empty frontmatter, empty notes, filename drift, and folders at risk
+of the SessionStart injection's byte budget. It only reports; apply any fix
+in the main session, or use `reorganize-obsidian-vault` if it points to a
+structural migration.
 
 ### Create a note
 

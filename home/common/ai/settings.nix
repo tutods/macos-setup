@@ -46,13 +46,9 @@
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
 
-    # Inject vault context into every session: lesson titles, convention +
-    # decision titles, full convention bodies, and (matched against the
-    # session's cwd) any note filed under the current project's slug. The
-    # always-on "Prior Art" rule greps the vault by topic keywords, which
-    # misses this — behavioral lessons and standing conventions don't always
-    # match the session's keywords. Filesystem-derived (not a hand-maintained
-    # index note) so it can't go stale. See ./vault-context.sh for the full
+    # Inject the Obsidian vault into every session: full note bodies of the
+    # core folders under a byte budget, plus per-project matches against the
+    # session's cwd. ./vault-context.sh owns the folder list and the budget
     # logic; silent no-op when the vault is absent.
     hooks.SessionStart = [
       {
@@ -60,6 +56,8 @@
           {
             type = "command";
             command = "\"$HOME/.claude/hooks/vault-context.sh\"";
+            timeout = 30;
+            statusMessage = "Injecting Obsidian vault context";
           }
         ];
       }

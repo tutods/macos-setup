@@ -21,6 +21,7 @@
         "code-reviewer"
         "dev-lifecycle"
         "reorganize-obsidian-vault"
+        "vault-lint"
         "vault-search"
       ];
     })
