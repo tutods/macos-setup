@@ -8,7 +8,7 @@
 
     extraMcpServers = lib.mkOption {
       default = {};
-      description = "Role-specific MCP servers merged into claude_desktop_config.json";
+      description = "Role-specific MCP servers merged into ~/.claude.json's mcpServers";
       type = lib.types.attrsOf (lib.types.submodule {
         options = {
           command = lib.mkOption {
@@ -34,14 +34,10 @@
       default = {};
       example = {caveman = "JuliusBrussee/caveman";};
       description = ''
-        Claude Code plugin marketplaces, as `<key> = "<owner>/<repo>"`.
-
-        The key is the marketplace identifier used in `home.ai.plugins`
-        (`<plugin>@<key>`) — it is chosen here, not read from the repo's
-        marketplace.json. Keep it stable: renaming a key orphans every plugin
-        already installed under the old name.
-
-        `claude-plugins-official` is built into Claude Code — do not list it.
+        Claude Code plugin marketplaces, as `<key> = "<owner>/<repo>"`. The key
+        is chosen here (not read from the repo) and used in `home.ai.plugins` as
+        `<plugin>@<key>`; renaming it orphans already-installed plugins.
+        `claude-plugins-official` is built in, do not list it.
       '';
     };
 
@@ -51,18 +47,8 @@
       internal = true;
       description = ''
         Names of in-repo skills copied into ~/.claude/skills. Populated by
-        `lib/ai.nix:mkLocalSkills`, not set by hand — skills/default.nix reads
-        it to report directories in ~/.claude/skills that this repo doesn't own.
-      '';
-    };
-
-    customAgents = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      internal = true;
-      description = ''
-        Names of in-repo subagents installed to ~/.claude/agents. Populated by
-        `lib/ai.nix:mkLocalAgents`, not set by hand.
+        `lib/ai.nix:mkLocalSkills`; skills/default.nix reads it to report
+        directories in ~/.claude/skills that this repo doesn't own.
       '';
     };
 

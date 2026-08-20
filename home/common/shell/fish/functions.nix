@@ -20,7 +20,7 @@
       git stash; or return 1
       git pull; or return 1
       git stash pop; or begin
-        echo "Stash pop had conflicts — resolve manually, then: git stash drop"
+        echo "Stash pop had conflicts, resolve manually, then: git stash drop"
         return 1
       end
     '';

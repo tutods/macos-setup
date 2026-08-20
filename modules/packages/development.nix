@@ -2,6 +2,7 @@
   environment.systemPackages = with pkgsUnstable; [
     claude-code
     (pipx.overridePythonAttrs {doCheck = false;})
-    rtk
+    # worktrunk (`wt`) comes from Homebrew, not here: nixpkgs would compile it
+    # from Rust source and two of its tests fail in the darwin sandbox.
   ];
 }

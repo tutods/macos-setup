@@ -1,138 +1,168 @@
 ## Fast CLI Tool Preferences
 
-Always prefer these tools over slower alternatives:
+Always prefer these over the slower alternative:
 
-| Use | Instead of | Why |
-|-----|-----------|-----|
-| `rg` | `grep` | 10x faster content search |
-| `fd` | `find` | 10x faster file finding |
-| `sg` (ast-grep) | `rg` for code shapes | Structural matching, precise refactors |
-| `bat --style=plain` | `cat` | Syntax highlighting, Git integration |
-| `jq` | Manual JSON parsing | Native fast JSON processing |
-| `yq` | Manual YAML parsing | Native fast YAML processing |
-| `rtk` | Raw commands | Token proxy, reduces output size by 60-90% |
-| `eza` | `ls` | Icons, Git status, tree view |
-| `pnpm` | `npm`/`yarn` | Faster, disk-efficient, strict resolution |
-| `biome` | `eslint`+`prettier` | Unified lint+format, 10x faster |
+| Use | Instead of |
+|-----|-----------|
+| `rg` | `grep` |
+| `fd` | `find` |
+| `ast-grep` | `rg`, for code shapes and precise refactors |
+| `bat --style=plain` | `cat` |
+| `jq` / `yq` | hand-parsing JSON/YAML |
+| `eza` | `ls` |
+| `pnpm` | `npm` / `yarn` |
+| `biome` | `eslint` + `prettier` (project-local install, not on PATH globally) |
 
 ## General Workflow
 
-- Use `rg --json` when piping search results — machine-parseable, skip manual parsing
-- Prefix read-heavy commands with `rtk` to compress their output (`rtk git status`) — there is no hook doing this for you. `rtk gain` shows savings, `rtk discover` finds missed opportunities
-- Use `ttok` to estimate token count before reading large files (`ttok -m claude-sonnet-5 < file.ts`)
-- Prefer Nix-managed tools over ad-hoc installs
-- **NEVER use `nix-env -i`** — use `nix shell` for temporary tools to avoid polluting the global environment
-- **File editing — hard rules** (no exceptions):
-  - **NEVER** use `sed`, `awk`, or `perl` to edit files — always use the Edit tool
-  - **NEVER** use `echo >`, `printf >`, or `cat <<EOF >` to write files — always use the Write tool
-  - These tools are banned for file mutation even when "it seems simpler"
-- **No interactive commands** in automated flows — `vim`, `nano`, `fzf`, `htop`, `git rebase -i`, `git add -p` will hang; use non-interactive alternatives or tools
+- Use `rg --json` when piping search results
+- Prefer Nix-managed tools over ad-hoc installs. **Never `nix-env -i`**. Use `nix shell` for temporary tools
+- **File editing, no exceptions**: never `sed`, `awk` or `perl` to edit a file, never `echo >`, `printf >` or `cat <<EOF >` to write one. Use the Edit and Write tools
+- **No interactive commands** in automated flows. `vim`, `fzf`, `htop`, `git rebase -i` and `git add -p` will hang
+- **No unsolicited artifacts**: no README, CHANGELOG or docstrings unless asked
+- Shell scripts start with `set -euo pipefail` and quote every variable
 
 ## Git & Commits
 
-- When the user asks to commit anything, use the **`open-pr` skill** — it handles the whole flow (stage, message, commit, push, PR) and confirms before committing. Never run `git commit` directly.
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/); the `conventional-commit` skill has the type table, scope rules and branch-naming convention.
-- Prefer small, focused commits over large batches.
-- Never commit secrets, `.env` files, or credentials.
+- When the user asks to commit, use the **`open-pr` skill**. It handles stage, message, commit, push and PR, and it confirms first. Never run `git commit` directly.
+- Messages follow [Conventional Commits](https://www.conventionalcommits.org/). The `conventional-commit` skill owns the type table, scope rules and branch naming.
+- Keep commits small and focused. Never commit secrets, `.env` files or credentials.
 
-## Prior Art
+## Vault
 
-The SessionStart hook already injects the core vault folders in full
-(`home/common/ai/vault-context.sh` in the dotfiles repo owns the list) —
-consult that context directly instead of grepping for it as a first step.
-`Prompts/` and any folder over the session byte budget are injected as
-titles only; the injected section headers say which.
+The SessionStart hook injects the vault's core folders at the top of every
+session. Its section headers say which folders are titles only. Consult that
+context before you search for anything.
 
-Fall back to a direct search (`obsidian-vault` skill) when the injected
-context isn't enough — after long-session compaction, for a folder not yet
-in the hook's list, for a folder truncated to titles-only, or to pin down
-one exact note:
+The `obsidian-vault` skill owns everything else. It covers how to search when
+the injected context is not enough, and the four proactive write triggers:
+a corrected mistake, an approved decision, a stated standing rule, and a
+completed deploy or handoff. Load the skill when one of those fires. Do not
+grep the vault inline.
 
-    rg -il "<topic keywords>" "$HOME/Obsidian"
+Behavioural rules about how the agent works on this machine belong in
+`learned-rules.md`, not the vault. One fact, one home.
 
-## Vault Capture
-
-Four triggers write to the Obsidian vault (`obsidian-vault` skill) without
-being asked. Each has a skip clause — this is not a log-everything rule:
-
-| Trigger | Writes to |
-|---|---|
-| A mistake I made gets corrected and the fix is confirmed working | `Lessons/<Area>/` |
-| A non-trivial tech/architecture choice is made **and approved** | `Decisions/` |
-| The user states a standing rule for how work is done here | `Conventions/` |
-| A deploy, migration, stack change, or handoff completes | update the `Projects/`/`Clients/` note's state section |
-
-Skip if: an existing note already covers it (update that note instead of
-duplicating it — grep the target folder first); it's a one-off with no
-recurring pattern; the decision was reverted in the same session. Do the
-write once the outcome is confirmed, not mid-debugging or mid-discussion.
-
-Lessons keep the Wrong/Right pattern: what broke it, what fixes it. All four
-types use `type`/`project`/`area`/`tags`/`created` frontmatter — Bases
-indexes it automatically, nothing to link by hand.
-
-**Boundary with learned rules** — behavioral rules about how the agent works
-on this machine stay in `home/common/ai/instructions/learned-rules.md`
-(loaded every session via Nix). Technical failure modes and project/client
-facts go to the vault instead. One fact, one home — don't duplicate across
-both.
-
-## Verification & Completion
-
-- **No unsolicited artifacts** — no auto-generated README, CHANGELOG, or docstrings unless explicitly asked
-
-## Code Hygiene
+## Code & Comments
 
 - No commented-out code left behind
-- No `TODO` / `FIXME` comments unless explicitly asked to add them
-- No placeholder/stub implementations (fake data, hardcoded returns) without explicitly flagging them to the user
-
-## No explanatory comments in code
-
-**Default: zero comments.** This is non-negotiable and has been flagged across multiple sessions. Treat every comment as something you must justify keeping, not something to add by default.
-
-- **One line max.** Two `//` lines on the same block = violation. Block comments above functions/branches/imports explaining the change = violation.
-- **Never narrate what the code does.** Names and control flow are the explanation. `// loop over items` is noise. `// reset state` is noise.
-- **Never narrate the change or the fix.** "// was X before", "// added for Y flow", "// this eliminates the race where…", "// keep X — Y forces Z" — all belong in the commit message or PR description, not in the source. The diff already shows what changed.
-- **Never restate signatures or types.** JSDoc/docstrings for trivial helpers are forbidden.
-- **Never reference other files by line** (`// see start-e2e.mjs:382`). That belongs in the PR body and rots.
-- **Red-flag openers — stop and delete if you find yourself typing these:** "Both X AND Y…", "This eliminates…", "We do X so that Y", "Re-seed when…", "Keep X — Y", "Capture the … BEFORE …", "Resolve the run_id ONCE", "Fallback: …", or any sentence that paraphrases the commit body.
-- **Acceptable, rarely**: a single short line explaining a WHY that good names can't carry — a hidden constraint, a third-party bug workaround, a security-critical invariant, a load-bearing ordering. Even then, prefer pushing the explanation into the commit message or an OpenSpec/ADR doc.
-- **Before commit, re-read every comment you wrote and delete the unjustifiable ones.** If you're not sure, delete.
-
-The same rule binds TypeScript, JavaScript, Rust, Python, and YAML. The same rule binds every skill, every agent, every mode. Implementer/architect/reviewer agent prompts inherit it.
-
-When reviewing a diff you wrote, **comment hygiene is a blocking review item**, not a nit.
+- No `TODO` or `FIXME` unless explicitly asked
+- No placeholder or stub implementations without flagging them to the user
+- **Zero comments is the default.** One short line is the maximum, and only for
+  a reason that names and control flow cannot carry: a hidden constraint, a
+  third-party bug workaround, a security-critical invariant, load-bearing
+  ordering. Never narrate what the code does. Never narrate the change or the
+  fix, because that is what the commit message is for. Never restate a
+  signature. Never cite another file by line. This applies in every language,
+  skill and agent.
+- When you review your own diff, comment hygiene is a **blocking** item, not a nit.
 
 ## Destructive Operations
 
-**Always require explicit user confirmation before:**
-- `rm -rf` or bulk deletes
-- `git reset --hard`, `git clean -fd`, `git checkout -- .`
-- `git push --force` or `git push --force-with-lease`
-- Dropping/truncating database tables
-- Any action that cannot be undone
+Always get explicit user confirmation before `rm -rf` or bulk deletes,
+`git reset --hard`, `git clean -fd`, `git checkout -- .`, `git push --force`,
+dropping or truncating database tables, or anything else you cannot undo.
 
-## Shell Scripts
+## Security
 
-All shell scripts must:
-- Start with `set -euo pipefail` — prevents silent failures from unset vars, failed commands, broken pipes
-- Quote all variables: `"$var"` not `$var`
+- Never dump the environment with `env`, `printenv` or `set`. It leaks session
+  tokens and private keys. Read the one variable you need by name.
+- Never print plaintext credentials or secret values into logs or transcripts.
+- Verify AI-generated networking or security commands before you run them with
+  `sudo`.
 
-## Security & AI Safety
+## Writing
 
-- **Secrets**: Never log output from `doppler` secrets or print plaintext credentials in AI-assisted logs.
-- **Verification**: Always verify AI-generated networking or security commands before executing with `sudo`.
+AI text gets flagged for three things: a giveaway vocabulary, a too-tidy
+structure, and a refusal to commit. Fix all three in everything you write,
+including replies. Register stays whatever the situation needs, and formal can
+still be human.
 
-## Writing for Humans
+Human writing does not mean chatty. Match the shape to the document. Some want
+prose that talks like a person; others want clean, scannable blocks with no
+persuasion. A scope list, a spec, or a reference section stays listy and factual.
+The fix there is cutting the jargon inside the items ("a site that sells the
+roles" becomes "public recruitment site"), not converting the list into
+paragraphs.
 
-Documentation, code comments, commit messages, READMEs, and replies must read as human writing — no AI tells.
+### Banned vocabulary
 
-- **No AI self-reference** — never "as an AI", "based on my training", "I'm a language model"
-- **Ban formulaic glue** — "Moreover", "Furthermore", "Additionally", "In conclusion", "It is worth noting that", "This demonstrates how", "The aforementioned"
-- **Vary rhythm** — mix short sentences with long ones; three same-length sentences in a row is a tell. Perfectly symmetrical paragraphs are another
-- **Concrete over abstract** — name specifics and real examples, never "this approach provides numerous benefits"
-- **No meta-structure** — don't announce what you're about to say ("Let me explain...", "Here's why..."). Just say it. No wrap-up paragraph at the end either
-- **Match voice to context** — docs sound like a knowledgeable teammate; code comments are utilitarian; replies blend with the conversation
+Cut these, or say the specific thing they stand in for.
 
-For rewriting existing text rather than writing it, use the `humanizer` skill.
+- **Verbs**: delve, leverage, utilize, foster, harness, unlock, unleash, elevate,
+  empower, streamline, spearhead, underscore, embark, navigate (figurative),
+  craft (figurative).
+- **Adjectives**: robust, seamless, comprehensive, cutting-edge, pivotal,
+  crucial, vital, invaluable, holistic, bespoke, myriad, nuanced, multifaceted,
+  ever-evolving, dynamic, innovative.
+- **Nouns and metaphors**: landscape, realm, tapestry, journey (figurative),
+  ecosystem (unless literally technical), synergy, game-changer, deep dive,
+  cornerstone.
+- **Roadmap filler**: fast follow-up, quick win, low-hanging fruit, once it's
+  proven, once validated, when the time is right, dead-ending, future-proof,
+  north star, at scale, hit the ground running. These sound like progress but
+  name no condition. Say the real trigger: "after the core flow is built and
+  working" becomes "after the core flow works".
+- **Transitions**: moreover, furthermore, additionally, notably, importantly,
+  indeed, thus, hence, in essence, at its core, when it comes to, it's worth
+  noting.
+- **Openers and closers**: "In today's fast-paced world", "In the digital age",
+  "In conclusion", "Ultimately", "At the end of the day", "Rest assured".
+
+### Banned structures
+
+- **Tricolons.** Three parallel items ("faster, cheaper, more reliable"), one per
+  section at most. Use two, four, or an uneven list.
+- **"Not just X, it's Y"** and "This isn't about X, it's about Y". Delete on sight.
+- **Numbered contrast and punchy counts.** "One application flow, not five."
+  Using a count for rhetorical punch, or repeating "one" as a drumbeat, is the
+  same tell. State the fact and drop the framing.
+- **Uniform openings.** Do not start consecutive paragraphs or sentences the same way.
+- **Uniform length.** Vary it. Short sentences allowed. Encouraged.
+- **Tidy restatement sentences** that summarise what you just said. Cut them.
+- **Hollow section-enders** ("This ensures maximum efficiency and scalability").
+  End on a fact or stop.
+- **Bold-label lists as the default shape** of every section. Occasional, not
+  automatic. A genuine reference list is fine.
+- **Subject-dropped fragments.** "Confirms submission, tells them what's next."
+  Write the full sentence, or inside a list keep the fragment noun-led and
+  factual rather than verb-led and breathless.
+- **Redundant pairings.** Two near-synonyms joined for rhythm: "built and
+  working", "fast and efficient", "safe and secure", "quick and easy". Keep one.
+- **Em dashes. Never use one.** End the sentence, or use a comma. Do not
+  substitute parentheses or en dashes, which trade one tell for another.
+
+### Commit
+
+- "This will", not "this can help to". "We recommend X", not "you might consider
+  exploring X".
+- Cut throat-clearing: "It's important to note", "One thing to consider",
+  "It's worth mentioning".
+- Replace abstraction with specifics: what got faster and by how much, who the
+  stakeholders are. Cannot be specific? It is filler. Cut it.
+- Do not announce honesty ("To be honest", "Frankly"). Do not over-qualify
+  ("somewhat", "arguably", "relatively").
+- No AI self-reference: "as an AI", "based on my training", "I'm a language model".
+
+### Habits
+
+- Read it aloud. Would not say it to a colleague? Rewrite it. This catches most tells.
+- Plain words: use, help, about, start, buy over utilize, facilitate, regarding,
+  commence, procure.
+- Contractions are fine outside formal legal text.
+- Prefer the concrete noun: "the application form", not "the candidate
+  acquisition mechanism".
+- Open on a real fact, not a generality about today's world.
+
+### Self-check before delivering
+
+Banned words replaced or cut. More than one tricolon per section broken up. Any
+"not just X but Y" or punchy-count framing rewritten plainly. Consecutive
+same-openings varied. Sentence lengths mixed. Hedges and throat-clearing deleted.
+Vague value claims made concrete or cut. Roadmap filler replaced with the real
+condition. Redundant pairings reduced to one word. Subject-dropped fragments
+fixed. Right shape: prose where prose fits, a clean list where a list fits.
+
+For a deeper pass over prose you are editing, load the `unslop` skill. Use
+`content-writer` for structured content formats, and `humanizer` to rewrite text
+that already exists.

@@ -2,7 +2,7 @@
 # Re-signs the fish binary if macOS invalidated its signature, ensures it is
 # listed in /etc/shells, and sets it as the default shell for the given user.
 #
-# Idempotent — safe to run on every darwin-rebuild activation.
+# Idempotent: safe to run on every darwin-rebuild activation.
 # Replaces the previous scripts/fix-fish-codesign.sh (manual escape hatch)
 # and the inline bash that lived in lib/mkHost.nix.
 set -euo pipefail

@@ -1,20 +1,14 @@
 # Shared helpers for the AI wiring tree under home/common/ai.
 #
-# Why this exists: the per-tool trees each grew their own copy of the same
-# patterns — a tiny `mkMcp`-style helper, a jq-based "merge key into JSON file"
-# activation script, and an append-if-non-empty concatenator. Concentrating
-# those here means a new tool is one call site, not new copies.
+# Passed to every Home Manager module as the `aiLib` argument (wired once in
+# lib/mkHost.nix via home-manager.extraSpecialArgs), never import by path.
 #
-# Do not import this by relative path. It is passed to every Home Manager
-# module as the `aiLib` argument, wired once in lib/mkHost.nix via
-# home-manager.extraSpecialArgs:
-#
-#   { aiLib, lib, ... }: { imports = [ (aiLib.mkLocalSkills { ... }) ]; }
+# Skills are copied into ~/.claude/skills because Claude Code writes inside a
+# skill directory; agents and workflows are read-only input, so they get
+# home.file store symlinks and Home Manager removes them when a name is dropped.
 {pkgs}: let
   jqBin = "${pkgs.jq}/bin/jq";
 in {
-  # Build an MCP server record. Replaces the duplicated `mkMcp` helpers that
-  # lived in roles/personal/ai/default.nix and roles/work/ai/default.nix.
   mkServer = {
     cmd,
     args,
@@ -24,35 +18,11 @@ in {
     inherit args env;
   };
 
-  # Append `extra` to `base` only when `extra` is non-empty.
-  # Replaces the appendIfNonEmpty in instructions/default.nix (the list branch
-  # was dead — extraInstructions is always `lines`).
   appendIfNonEmpty = base: extra:
     if extra == ""
     then base
     else base + "\n\n" + extra;
 
-  # Install in-repo ("custom") skills straight into ~/.claude/skills as real,
-  # writable directories.
-  #
-  # Deliberately not `home.file`: that produces a symlink into the read-only
-  # Nix store, and Claude Code writes inside a skill directory. A plain copy
-  # keeps the tree writable, and everything lives under ~/.claude — no
-  # ~/.agents indirection.
-  #
-  # Runs after `linkGeneration` so Home Manager has already torn down the
-  # previous generation's symlinks; copying earlier would have them removed.
-  #
-  # Returns a module — use it in `imports`:
-  #   imports = [ (ai.mkLocalSkills { inherit lib; label = "work"; ... }) ];
-  #
-  # Also records the names in `home.ai.customSkills`, which skills/default.nix
-  # uses to spot leftovers in ~/.claude/skills that this repo doesn't manage.
-  #
-  #   lib   — the module-args `lib` (needs `lib.hm.dag`)
-  #   label — activation-name suffix and log label; unique per call site
-  #   dir   — directory holding the skill sources
-  #   names — skill directory names inside `dir`
   mkLocalSkills = {
     lib,
     label,
@@ -61,6 +31,8 @@ in {
   }: {
     home.ai.customSkills = names;
 
+    # After linkGeneration: Home Manager has torn down the previous
+    # generation's symlinks by then, and copying earlier would have them removed.
     home.activation."localSkills-${label}" = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
       dest="$HOME/.claude/skills"
       mkdir -p "$dest"
@@ -74,48 +46,18 @@ in {
     '';
   };
 
-  # Install in-repo subagent definitions into ~/.claude/agents/<name>.md.
-  #
-  # Unlike mkLocalSkills this uses home.file: an agent file is read-only input —
-  # Claude Code never writes inside one — so a store symlink is safe, and Home
-  # Manager then removes the file for free when a name leaves the list.
-  #
-  # Also records the names in `home.ai.customAgents`, mirroring customSkills.
-  #
-  #   lib   — the module-args `lib`
-  #   label — log label; unique per call site
-  #   dir   — directory holding <name>.md files
-  #   names — agent names (file basenames, and the frontmatter `name`)
   mkLocalAgents = {
     lib,
-    label,
     dir,
     names,
   }: {
-    home.ai.customAgents = names;
-
     home.file = lib.listToAttrs (map
       (name: lib.nameValuePair ".claude/agents/${name}.md" {source = "${dir}/${name}.md";})
       names);
   };
 
-  # Install in-repo workflow scripts into ~/.claude/workflows/<name>.js.
-  #
-  # Like agents, a workflow script is read-only input — Claude Code executes
-  # it via the Workflow tool but never writes inside it — so a store symlink
-  # is safe and Home Manager removes it when a name leaves the list.
-  #
-  # Boundary vs agents: agents/ for judgement-heavy work in one isolated
-  # context; workflows/ for fixed fan-out with deterministic control flow
-  # (parallel advisors, verification gates).
-  #
-  #   lib   — the module-args `lib`
-  #   label — log label; unique per call site
-  #   dir   — directory holding <name>.js files
-  #   names — workflow names (file basenames)
   mkLocalWorkflows = {
     lib,
-    label,
     dir,
     names,
   }: {
@@ -124,10 +66,7 @@ in {
       names);
   };
 
-  # Generate a bash snippet that merges a single key into a JSON config file
-  # via jq, creating the file with `{"<key>": <value>}` if it does not exist.
-  #
-  # Used by home/common/ai/mcp.nix (key="mcpServers").
+  # Merge a single key into a JSON config file, creating the file if absent.
   mergeJsonKey = {
     file,
     key,

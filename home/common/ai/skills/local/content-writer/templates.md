@@ -1,6 +1,6 @@
 # Content Type Templates
 
-Reference structures for STAGE 3 (Outline). Adapt to the topic and angle — these are starting points, not rigid rules.
+Reference structures for STAGE 3 (Outline). Adapt to the topic and angle, these are starting points, not rigid rules.
 
 ---
 
@@ -12,31 +12,31 @@ Reference structures for STAGE 3 (Outline). Adapt to the topic and angle — the
 1. Headline
    - Specific, not vague. Promises something concrete.
    - Avoid: "The Ultimate Guide to X", "Everything You Need to Know About Y"
-   - Prefer: "Why X Fails (and What to Do Instead)", "I Spent 3 Months Doing X — Here's What I Learned"
+   - Prefer: "Why X Fails (and What to Do Instead)", "I Spent 3 Months Doing X, Here's What I Learned"
 
 2. Lead paragraph (1-3 sentences)
    - Sets up the tension, problem, or angle immediately
    - Never start with "In this article, I will..."
    - Hook: surprising fact, bold claim, question, or short story
 
-3. Section 1 — Context or Problem
+3. Section 1, Context or Problem
    - What's the situation? Why does this matter?
-   - Ground it in reality — data, example, anecdote
+   - Ground it in reality, data, example, anecdote
 
-4. Section 2 — Core Argument / Main Content
+4. Section 2, Core Argument / Main Content
    - The meat of the piece
    - Where the personal angle goes if you have one
 
-5. Section 3 — Evidence or Examples
+5. Section 3, Evidence or Examples
    - Concrete proof of Section 2
    - Cite sources from research (STAGE 2)
 
-6. Section 4 — Counterpoint or Nuance (optional)
+6. Section 4, Counterpoint or Nuance (optional)
    - What's the other side? What does this NOT apply to?
    - Makes the piece feel more honest and less one-sided
 
 7. Closing paragraph
-   - Strong final thought — not a summary
+   - Strong final thought, not a summary
    - Leave the reader with something to think about, or a clear next action
    - No "in conclusion"
 
@@ -64,17 +64,17 @@ Reference structures for STAGE 3 (Outline). Adapt to the topic and angle — the
    - Why this, why now?
 
 3. Values / Mission (2-3 max)
-   - Specific and concrete — not "we value innovation"
+   - Specific and concrete, not "we value innovation"
    - "We don't ship until we've used it ourselves" beats "we value quality"
 
 4. Social proof / proof of work
    - For a person: notable projects, clients, numbers
    - For a company: logos, metrics, testimonial quote
-   - Keep it short — 2-4 items max
+   - Keep it short, 2-4 items max
 
 5. CTA
    - One clear action: "let's talk", "see our work", contact link
-   - Match tone — casual CTA for casual about page, professional for formal
+   - Match tone, casual CTA for casual about page, professional for formal
 ```
 
 **Length guidance:** 250–600 words. About pages are scanned, not read.
@@ -93,10 +93,10 @@ Reference structures for STAGE 3 (Outline). Adapt to the topic and angle — the
 
 2. Problem
    - The world without this product/service
-   - Be specific about the pain — no generic "struggle"
+   - Be specific about the pain, no generic "struggle"
    - 2-4 sentences or 3 bullet points
 
-3. Solution — How it works
+3. Solution, How it works
    - 3 steps or 3 features max (more = cognitive overload)
    - Each point: what it does + why it matters
    - Visual placeholder note if relevant: [screenshot/icon goes here]
@@ -120,7 +120,7 @@ Reference structures for STAGE 3 (Outline). Adapt to the topic and angle — the
    - Keep answers under 3 sentences each
 ```
 
-**Length guidance:** No fixed length — every word must earn its place. Cut anything that doesn't move the reader toward the CTA.
+**Length guidance:** No fixed length, every word must earn its place. Cut anything that doesn't move the reader toward the CTA.
 
 ---
 
@@ -158,7 +158,7 @@ SEO note:
 
 ```
 Structure:
-- Line 1: the hook — bold claim, surprising stat, or question (this is what shows before "see more")
+- Line 1: the hook, bold claim, surprising stat, or question (this is what shows before "see more")
 - [blank line]
 - Paragraph 1: context or story (3-5 lines)
 - [blank line]  
@@ -185,7 +185,7 @@ Single tweet:
 - No throat-clearing ("I think that...", "It's worth saying that...")
 
 Thread (for longer content):
-- Tweet 1: the hook (most important — this is what people RT)
+- Tweet 1: the hook (most important, this is what people RT)
 - Tweets 2–N: each tweet must work standalone (someone might see it out of context)
 - Number format: 1/ 2/ 3/ ... (not "Thread 🧵")
 - Final tweet: summary + CTA or question
@@ -200,7 +200,7 @@ Thread (for longer content):
 
 ```
 Caption structure:
-- Line 1: hook (shows before "more" — make it count)
+- Line 1: hook (shows before "more", make it count)
 - 3-4 sentences: story, context, or value
 - CTA: question, "save this", "tag someone", or link-in-bio
 - [blank line]
@@ -208,4 +208,4 @@ Caption structure:
   - Mix: 1 broad (#webdesign), 1 niche (#freelancedesignerportugal), 1 brand or topic-specific
 ```
 
-**Length:** 100-200 words max. Instagram captions compete with images — keep it tight.
+**Length:** 100-200 words max. Instagram captions compete with images, keep it tight.

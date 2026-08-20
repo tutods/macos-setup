@@ -8,4 +8,4 @@ Pick the least powerful model that fits the task.
 | **default** | `claude-sonnet-5` | multi-file coordination, pattern matching, integration work |
 | **best** | `claude-opus-5` | architecture decisions, design reviews, complex reasoning |
 
-Model IDs go stale — check the current lineup before trusting this table.
+Model IDs go stale, check the current lineup before trusting this table.

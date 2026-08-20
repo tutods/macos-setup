@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 # Verify every declared Claude Code plugin actually exists in its marketplace.
 #
-# Why this exists: the old `npx skills add` manifest failed loudly — a bad
-# source errored and got logged. Plugins fail *silently*: a typo'd plugin name
-# is written to settings.json, Claude Code finds nothing to install, and no
-# skill ever appears. This turns that into a non-zero exit.
-#
-# Also reports the skill count each plugin drags in, because plugins are
-# coarser than skills and the count is the thing that is easy to miss.
+# Plugins fail silently: a typo'd name is written to settings.json, Claude Code
+# finds nothing to install, and no skill ever appears. This turns that into a
+# non-zero exit. Also reports the skill count each plugin drags in, since a
+# plugin is coarser than a skill and the count is easy to miss.
 #
 # Deps: git, jq. Reads the repo, clones nothing permanent, writes to a temp dir.
 #
@@ -25,6 +22,7 @@ command -v jq >/dev/null || { echo "verify-plugins: jq not found" >&2; exit 2; }
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
+# Role files are scanned too, they declare no plugins today, but may again.
 SOURCES=(
   home/common/ai/plugins.nix
   home/roles/personal/ai/default.nix
@@ -146,4 +144,4 @@ if [ "$fail" -gt 0 ]; then
   exit 1
 fi
 
-echo "verify-plugins: $n_plugins plugins, $n_markets marketplaces, ~$total_skills skills — all resolve"
+echo "verify-plugins: $n_plugins plugins, $n_markets marketplaces, ~$total_skills skills, all resolve"

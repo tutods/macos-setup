@@ -23,6 +23,6 @@ while IFS=$'\t' read -r app_id name; do
   if HOME="/Users/${username}" /opt/homebrew/bin/mas install "${app_id}" </dev/null; then
     echo "  ✓ ${name}"
   else
-    echo "  ✗ ${name} failed — install manually from App Store"
+    echo "  ✗ ${name} failed, install manually from App Store"
   fi
 done

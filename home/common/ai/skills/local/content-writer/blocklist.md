@@ -2,20 +2,20 @@
 
 Every phrase below is banned. These are the fingerprints of AI-generated text. Using any of them breaks the "100% human-written" guarantee.
 
-Check this list before writing AND after writing. If any match appears in the draft, rewrite the sentence — don't just swap the word.
+Check this list before writing AND after writing. If any match appears in the draft, rewrite the sentence, don't just swap the word.
 
 ---
 
-## English Phrases (banned even in PT-PT content — they leak as calques)
+## English Phrases (banned even in PT-PT content, they leak as calques)
 
 ### Verbs and verb phrases
 - delve / delve into
 - dive deep / dive into
-- leverage (as a verb — "to leverage X")
+- leverage (as a verb, "to leverage X")
 - utilize (say "use")
 - facilitate (say what actually happens)
 - foster
-- navigate (metaphorical — "navigate challenges", "navigate the landscape")
+- navigate (metaphorical, "navigate challenges", "navigate the landscape")
 - embark / embark on a journey
 - unpack ("let's unpack this")
 - underscore (as "to emphasize")
@@ -69,7 +69,7 @@ Check this list before writing AND after writing. If any match appears in the dr
 
 ### Miscellaneous
 - "paradigm shift"
-- "best practices" (be specific instead — what practices, exactly?)
+- "best practices" (be specific instead, what practices, exactly?)
 - "thought leader" / "thought leadership"
 - "value proposition" (in non-marketing contexts)
 - "pain points" (in non-sales contexts)
@@ -78,7 +78,7 @@ Check this list before writing AND after writing. If any match appears in the dr
 - "take this to the next level"
 - "low-hanging fruit"
 - "move the needle"
-- "deep dive" (as a noun — "let's do a deep dive")
+- "deep dive" (as a noun, "let's do a deep dive")
 
 ---
 

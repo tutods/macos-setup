@@ -28,7 +28,7 @@ Run the deployment script for the specific machine:
 ## 4. Post-Deployment
 - **Sudo**: If prompted for a password, enter your macOS user password.
 - **Homebrew**: If Homebrew casks fail to install, run `brew doctor`.
-- **AI Skills**: Custom skills are copied into `~/.claude/skills/` by the deploy itself. External skills are Claude Code plugins — they install the first time you launch `claude`, so give it one run before checking `/plugin`.
+- **AI Skills**: Custom skills are copied into `~/.claude/skills/` by the deploy itself. External skills are Claude Code plugins, they install the first time you launch `claude`, so give it one run before checking `/plugin`.
 
 ## 5. Troubleshooting
 - **Flake Errors**: If you see "no such file or directory" for `flake.nix`, ensure you are in the repo root.

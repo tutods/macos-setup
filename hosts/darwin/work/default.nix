@@ -11,7 +11,7 @@ in {
     ./dock.nix
     ./homebrew
     ./packages.nix # Work-specific system packages
-    # Note: networking.nix NOT imported — corporate DNS must resolve internal domains
+    # Note: networking.nix NOT imported, corporate DNS must resolve internal domains
     (mkHost {
       username = "daniel.a.sousa";
       hostname = "daniel.a.sousa";
@@ -27,7 +27,7 @@ in {
   ];
 
   # The admin account (deploys, Homebrew owner) gets the same shell
-  # experience — fish, aliases, prompt, CLI tools — without editors or AI.
+  # experience, fish, aliases, prompt, CLI tools, without editors or AI.
   home-manager.users."admin.daniel.a.sousa" = mkUser {
     username = "admin.daniel.a.sousa";
     profile = "shell";

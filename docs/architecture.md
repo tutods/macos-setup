@@ -43,10 +43,10 @@ On the work laptop `brewUser` differs from `username` because Homebrew is owned 
 
 ## Package layers
 
-Three layers manage software — each has a distinct scope:
+Three layers manage software, each has a distinct scope:
 
 ### 1. System packages (`modules/packages/`)
-`environment.systemPackages` — available to all users system-wide, split into focused files:
+`environment.systemPackages`, available to all users system-wide, split into focused files:
 
 | File | Contents |
 |------|----------|
@@ -65,7 +65,7 @@ GUI apps and casks that aren't in nixpkgs or work better through Homebrew. Split
 Nix's module system merges list options, so both layers combine cleanly.
 
 ### 3. Home Manager (`home/common/` + `home/roles/`)
-Per-user programs managed declaratively — fish, VSCode, bat, fzf, zoxide, eza, oh-my-posh, ghostty, git. These are `programs.*` options, not raw packages, so Home Manager handles both installation and configuration.
+Per-user programs managed declaratively, fish, VSCode, bat, fzf, zoxide, eza, oh-my-posh, ghostty, git. These are `programs.*` options, not raw packages, so Home Manager handles both installation and configuration.
 
 ---
 
@@ -83,7 +83,7 @@ home/
 │   ├── cli/
 │   │   ├── bat.nix
 │   │   ├── gh.nix       # GitHub CLI + copilot extension
-│   │   ├── git.nix      # Shared git config + delta diff viewer — identity from ~/.config/git/private
+│   │   ├── git.nix      # Shared git config + delta diff viewer, identity from ~/.config/git/private
 │   │   ├── htop.nix
 │   │   └── oh-my-posh/  # Prompt theme (TOML config)
 │   └── shell/
@@ -124,7 +124,7 @@ These are fully determined by `flake.lock`. Rolling back the flake input rolls b
 | macOS defaults | `system.defaults.*` in `modules/darwin/settings.nix` | Tracked in this repo |
 | Shell config | Fish aliases, abbreviations, functions | Tracked in this repo |
 
-If a `./nix.sh macbook` build changes behavior unexpectedly, check `flake.lock` first — it records exact commit hashes for every input.
+If a `./nix.sh macbook` build changes behavior unexpectedly, check `flake.lock` first, it records exact commit hashes for every input.
 
 ### Intentionally mutable (updated on deploy)
 
@@ -133,14 +133,14 @@ These are declared in the repo but **upgraded to latest versions** each time you
 | Layer | What | Why mutable |
 |-------|------|-------------|
 | Homebrew casks | GUI apps (Zen, Firefox Developer Edition, Slack, etc.) | `homebrew.onActivation.upgrade = true` upgrades all casks on every deploy |
-| Homebrew brews | CLI tools installed via brew (`mas`, `rtk`) | Same as above |
+| Homebrew brews | CLI tools installed via brew (`mas`, `acli`) | Same as above |
 | MAS apps | Mac App Store apps installed by `mas` | `mas install` runs in activation, version not pinned |
 | VSCode marketplace extensions | `extensionsFromVscodeMarketplace` entries | Pinned by `version` + `sha256` in the repo, but must be manually updated when upstream releases new versions |
-| nixpkgs-unstable packages | `pkgsUnstable` packages (claude-code, rtk, pipx, fonts) | Pinned to `nixpkgs-unstable` flake input, which moves faster than stable |
+| nixpkgs-unstable packages | `pkgsUnstable` packages (claude-code, pipx, fonts) | Pinned to `nixpkgs-unstable` flake input, which moves faster than stable |
 
 ### What this means in practice
 
-- **Rolling back** the Nix layer (` ./nix.sh macbook --force` after `git revert`) restores system packages, HM programs, VSCode extensions from nixpkgs, and macOS defaults — but **not** Homebrew cask versions or MAS apps.
+- **Rolling back** the Nix layer (` ./nix.sh macbook --force` after `git revert`) restores system packages, HM programs, VSCode extensions from nixpkgs, and macOS defaults, but **not** Homebrew cask versions or MAS apps.
 - **Homebrew upgrades** happen automatically on deploy. If a cask upgrade breaks something, you can downgrade with `brew install <cask>@<version>` but this is manual.
 - **VSCode marketplace extensions** are pinned but not auto-updated. You must bump the `version` and `sha256` in `home/common/editors/vscode/default.nix` when you want a new version.
 - **`nixpkgs-unstable`** tracks a moving target. Run `nix flake update nixpkgs-unstable` to pull newer versions.

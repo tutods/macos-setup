@@ -8,7 +8,7 @@
 #   unknown - treated as `real` by callers; never rerun on a guess
 set -euo pipefail
 
-# Resolved once, then passed explicitly to every gh call so the script works from
+# Resolved once: then passed explicitly to every gh call so the script works from
 # any cwd - the loop should not care which worktree it happens to be sitting in.
 REPO="${CI_TRIAGE_REPO:-$(gh repo view --json nameWithOwner -q .nameWithOwner)}"
 PR_LIMIT="${CI_TRIAGE_LIMIT:-50}"

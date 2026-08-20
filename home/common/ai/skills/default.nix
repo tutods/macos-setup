@@ -1,12 +1,4 @@
-# ── Custom skills — shared across every role ──────────────────────────────────
-#
-# In-repo skill sources only. Everything else comes from a Claude Code plugin
-# marketplace (home/common/ai/plugins.nix).
-#
-# Installed as real directories under ~/.claude/skills, not store symlinks —
-# see lib/ai.nix:mkLocalSkills for why. Role-specific custom skills live in
-# home/roles/<role>/ai/skills/local/ and are installed the same way.
-#
+# In-repo skill sources, shared across every role. See docs/ai-setup.md.
 {
   aiLib,
   config,
@@ -21,6 +13,7 @@
       names = [
         "llm-council"
         "content-writer"
+        "unslop"
         "ts-strict-audit"
         "conventional-commit"
         "open-pr"
@@ -28,30 +21,18 @@
         "pr-feedback"
         "deep-review"
         "ui-iterate"
-        # This repo's own conventions. Was an @-mention file in ~/.claude/context/,
-        # which only helped when remembered — as a skill it triggers on the work.
+        "obsidian-vault"
         "nix-setup"
-
-        # Stack conventions — skills, not always-on instructions, so they load
-        # only when the work is actually TypeScript/React/API/testing/deps.
         "ts-conventions"
         "react-conventions"
         "api-conventions"
         "testing-conventions"
         "dependency-hygiene"
-        # Vendored (MIT) — kadajett/agent-nestjs-skills is not a plugin
-        # marketplace, so this cannot arrive as a plugin. NestJS is a primary
-        # backend framework here and nothing else covers it. Provenance is in
-        # the SKILL.md frontmatter.
-        "nestjs-best-practices"
       ];
     })
   ];
 
-  # ~/.claude/skills used to hold whatever `npx skills add` had dropped there.
-  # Now only custom skills belong in it — external ones ship inside their
-  # plugin. Anything else is a leftover shadowing a plugin's copy, so report it
-  # rather than delete it: the directory may be a hand-written skill.
+  # Reports rather than deletes, a stray directory may be a hand-written skill.
   home.activation.customSkillsAudit = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
     dest="$HOME/.claude/skills"
     managed=" ${lib.concatStringsSep " " config.home.ai.customSkills} "

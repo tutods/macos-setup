@@ -1,16 +1,16 @@
 ---
 name: dependency-hygiene
-description: Rules for adding, upgrading, or removing an npm dependency — check native/existing solutions first, evaluate maintenance and size, prefer the workspace's shared config packages. Use when about to install a package, review a lockfile change, or audit dependencies.
+description: Rules for adding, upgrading, or removing an npm dependency, check native/existing solutions first, evaluate maintenance and size, prefer the workspace's shared config packages. Use when about to install a package, review a lockfile change, or audit dependencies.
 ---
 
 ## Dependency Hygiene
 
 ### Before Adding Any Dependency
 
-1. **Check if it already exists** — search `package.json` and existing imports first
-2. **Check if native/existing solves it** — `Array`, `Date`, `URL`, `fetch`, Zod, TanStack Query cover a lot
-3. **Check bundle impact** — use [bundlephobia.com](https://bundlephobia.com) or [pkg-size.dev](https://pkg-size.dev)
-4. **Check maintenance** — last publish date, open issues, GitHub stars trend
+1. **Check if it already exists**: search `package.json` and existing imports first
+2. **Check if native/existing solves it**, `Array`, `Date`, `URL`, `fetch`, Zod, TanStack Query cover a lot
+3. **Check bundle impact**: use [bundlephobia.com](https://bundlephobia.com) or [pkg-size.dev](https://pkg-size.dev)
+4. **Check maintenance**: last publish date, open issues, GitHub stars trend
 
 ### Flag These for Review
 

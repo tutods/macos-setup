@@ -32,7 +32,7 @@ cp -r hosts/darwin/macbook hosts/darwin/new-machine
 
 ### 3. (Optional) Add role-specific overrides
 
-If the new user needs overrides beyond the shared `home/common/` config, create or edit a role file in `home/roles/`. Otherwise, `mkUser` with `role = "personal"` or `"work"` is sufficient — no per-user directory needed.
+If the new user needs overrides beyond the shared `home/common/` config, create or edit a role file in `home/roles/`. Otherwise, `mkUser` with `role = "personal"` or `"work"` is sufficient, no per-user directory needed.
 
 ### 4. Register in `flake.nix`
 
@@ -78,7 +78,7 @@ homeConfig = mkUser {
 };
 ```
 
-`mkUser` (defined in `lib/mkUser.nix`) handles `home.username`, `home.homeDirectory`, and imports — no per-user directory needed unless you have identity-specific overrides.
+`mkUser` (defined in `lib/mkUser.nix`) handles `home.username`, `home.homeDirectory`, and imports, no per-user directory needed unless you have identity-specific overrides.
 
 ### 2. Update the host's `default.nix`
 
@@ -104,7 +104,7 @@ mkHost {
 
 Run `./nix.sh <hostname>` from the admin account. Home Manager config is still applied to `normal.user`.
 
-To give the admin account the shell experience too (fish, aliases, prompt, CLI tools — no editors or AI), add a second Home Manager user with the `shell` profile and register it in `extraShellUsers` so fish becomes its default shell:
+To give the admin account the shell experience too (fish, aliases, prompt, CLI tools, no editors or AI), add a second Home Manager user with the `shell` profile and register it in `extraShellUsers` so fish becomes its default shell:
 
 ```nix
 mkHost {

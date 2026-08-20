@@ -122,3 +122,6 @@ secrets.nix
 **/secrets.nix
 secrets.fish
 **/secrets.fish
+# Python bytecode from skill scripts
+__pycache__/
+*.pyc

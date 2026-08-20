@@ -9,7 +9,7 @@ Audit the current project for TypeScript strict mode violations and unsafe type 
 
 ---
 
-## PHASE 1 — Config audit
+## PHASE 1: Config audit
 
 Read `tsconfig.json` (and any `tsconfig.*.json` files). Check:
 
@@ -27,7 +27,7 @@ Report any missing flags before continuing.
 
 ---
 
-## PHASE 2 — Source scan
+## PHASE 2: Source scan
 
 Search `.ts` and `.tsx` files (exclude `node_modules`, `dist`, `.next`, `build`). Find:
 
@@ -45,7 +45,7 @@ For each match: record file, line number, the offending code snippet.
 
 ---
 
-## PHASE 3 — Boundary check
+## PHASE 3: Boundary check
 
 Look for system boundaries that should have runtime validation but may not:
 
@@ -57,7 +57,7 @@ Flag unvalidated boundaries as MAJOR.
 
 ---
 
-## PHASE 4 — Report
+## PHASE 4: Report
 
 Output a ranked table:
 

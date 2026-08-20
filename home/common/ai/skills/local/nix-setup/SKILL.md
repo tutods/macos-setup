@@ -1,9 +1,9 @@
 ---
 name: nix-setup
-description: Conventions for the ~/.dotfiles Nix flake that manages both macOS machines — deploy commands, module hierarchy, where a given package or setting belongs, and the AI/skill/plugin layout. Use when working anywhere in the dotfiles repo, editing a .nix file, adding a package or Homebrew cask, changing Claude Code settings/skills/plugins/MCP servers, or running ./nix.sh.
+description: Conventions for the ~/.dotfiles Nix flake that manages both macOS machines, deploy commands, module hierarchy, where a given package or setting belongs, and the AI/skill/plugin layout. Use when working anywhere in the dotfiles repo, editing a .nix file, adding a package or Homebrew cask, changing Claude Code settings/skills/plugins/MCP servers, or running ./nix.sh.
 ---
 
-# Nix Dotfiles — Repo Conventions
+# Nix Dotfiles: Repo Conventions
 
 `~/.dotfiles` is a Nix flake using nix-darwin + Home Manager + nix-homebrew,
 managing two Apple Silicon machines: `macbook` (user `tutods`) and `work`
@@ -23,10 +23,10 @@ nix-collect-garbage -d         # drop old generations
 
 ## Mandatory before declaring a change complete
 
-- `nix fmt .` after touching any `.nix` file — hard requirement
+- `nix fmt .` after touching any `.nix` file, hard requirement
 - `nix flake check` after changing `flake.nix` or any module
 - `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or
-  `home.ai.marketplaces` — plugins fail silently, so nothing else catches a typo
+  `home.ai.marketplaces`, plugins fail silently, so nothing else catches a typo
 
 ## Module hierarchy (innermost wins)
 
@@ -38,7 +38,7 @@ home/roles/<role>/   → personal/ or work/ role-specific
 ```
 
 Person-specific overrides (GPG keys, email) are passed through `mkUser`'s
-`extraImports` — there is no dedicated `home/identity/` directory.
+`extraImports`, there is no dedicated `home/identity/` directory.
 
 ## Where things belong
 
@@ -51,24 +51,22 @@ Person-specific overrides (GPG keys, email) are passed through `mkUser`'s
 | Per-user programs | `home/common/` or `home/roles/<role>/` |
 
 Run `nix search nixpkgs <name>` before adding a package. Prefer `pkgs` (stable);
-`pkgsUnstable` only when stable is too old — `claude-code` and `rtk` qualify.
+`pkgsUnstable` only when stable is too old. `claude-code` qualifies. Reach for
+Homebrew instead when nixpkgs would compile from source or needs a test-skip
+override to build (`worktrunk`, JetBrains apps).
 
 ## Configurable paths
 
-- `home.devDir` — development directory (default `$HOME/Developer`), declared in
+- `home.devDir`, development directory (default `$HOME/Developer`), declared in
   `home/common/options.nix`
 - Fish exports `$PROJECT_DIR` for its functions
-- Never hardcode `/Users/<name>` — use `config.home.homeDirectory` and
+- Never hardcode `/Users/<name>`, use `config.home.homeDirectory` and
   `config.home.username`
 
 ## AI setup structure
 
-Claude Code is the only agent. There is no second CLI to keep in sync.
-
-Everything AI lives under `home/common/ai/`. Nothing AI-related sits outside it.
-
-There is no `claude/` subdirectory: every file here writes into `~/.claude/`,
-so it would not separate Claude things from non-Claude things.
+Everything AI lives under `home/common/ai/`, and every file in it writes into
+`~/.claude/`. Full reference: `docs/ai-setup.md`.
 
 ```
 home/common/ai/
@@ -77,9 +75,9 @@ home/common/ai/
 ├── init.nix         → guarded pipx installs, one-time tool migrations
 ├── settings.nix     → ~/.claude/settings.json (+ hooks)
 ├── plugins.nix      → marketplaces + plugins, shared across hosts
-├── mcp.nix          → writes the MCP server list
-├── mcp-servers.nix  → the server definitions themselves (pure data)
+├── mcp.nix          → MCP servers, merged into ~/.claude.json
 ├── statusline.nix   → statusline script + config
+├── *.sh             → hook scripts (vault-context, block-ai-attribution, statusline)
 ├── instructions/    → always-on instructions (→ ~/.claude/rules/workflow.md)
 ├── skills/
 │   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)
@@ -87,11 +85,13 @@ home/common/ai/
 ├── agents/
 │   ├── default.nix  → symlinks local/ into ~/.claude/agents (home.file)
 │   └── local/       → in-repo subagent sources
-└── rtk/             → RTK proxy reference (→ ~/.claude/RTK.md, via @RTK.md)
+├── workflows/
+│   ├── default.nix  → symlinks local/ into ~/.claude/workflows (home.file)
+│   └── local/       → in-repo workflow scripts
 ```
 
 `lib/ai.nix` is passed in as the `aiLib` module argument (wired in
-`lib/mkHost.nix` via `extraSpecialArgs`) — never import it by relative path.
+`lib/mkHost.nix` via `extraSpecialArgs`), never import it by relative path.
 
 Each role mirrors that shape:
 
@@ -102,7 +102,7 @@ home/roles/<role>/ai/
 └── skills/local/    → role-only skill sources
 ```
 
-## Rule scoping — where a given rule goes
+## Rule scoping: where a given rule goes
 
 | Scope | Home |
 |-------|------|
@@ -113,33 +113,30 @@ home/roles/<role>/ai/
 | Deterministic multi-agent fan-out (parallel perspectives, verify gates) | `home/common/ai/workflows/local/` |
 | True for one repo | that repo's own `CLAUDE.md` |
 
-Never name a specific project inside a machine-wide instruction or skill — write
+Never name a specific project inside a machine-wide instruction or skill, write
 it in that project's own `CLAUDE.md` instead, so it travels with the repo.
 
 ## Skills and plugins
 
-External skills are **Claude Code plugins** — declare the marketplace and plugin
-in Nix; they are written into `~/.claude/settings.json` and Claude Code installs
-them on next launch. Never add one through the Claude Code UI.
-
-`enabledPlugins` is rewritten from `home.ai.plugins` on every deploy, so
-removing a plugin from the list is enough — the next deploy disables it. This
-is why plugins must never be added through the Claude Code UI (line above):
-they don't survive the next `./nix.sh`.
+External skills arrive as Claude Code plugins: declare the marketplace and
+plugin in Nix, and Claude Code installs them on next launch. `enabledPlugins` is
+rewritten from `home.ai.plugins` on every deploy, so removing a plugin from the
+list disables it, and a plugin added through the UI won't survive `./nix.sh`.
+Run `./scripts/verify-plugins.sh` after any change; plugins fail silently.
 
 Custom skills are **copied** into `~/.claude/skills/`, so edits made there are
-overwritten on the next deploy — change the repo source instead.
+overwritten on the next deploy, change the repo source instead.
 
 ## Key conventions
 
-- Repo scripts are zero-dependency bash — `nix.sh` and anything at bootstrap
+- Repo scripts are zero-dependency bash, `nix.sh` and anything at bootstrap
   must work with built-ins only (a gum-based TUI was tried and reverted)
-- Git remotes stay SSH — never "fix" them to HTTPS
+- Git remotes stay SSH, never "fix" them to HTTPS
 - Configs the app itself writes (Zed `settings.json`) are seeded as a one-time
-  copy, not a store symlink — a read-only symlink breaks the app's own save
-- Secrets never live in this repo — `~/.config/fish/secrets.fish` and
+  copy, not a store symlink, a read-only symlink breaks the app's own save
+- Secrets never live in this repo, `~/.config/fish/secrets.fish` and
   `~/.config/git/private` are machine-local
 - Homebrew upgrades automatically on every deploy
-- `pkgsUnstable` packages are not pinned — they track the unstable channel
-- One-off gotchas are recorded in `docs/ai-lessons.md` — check it before
+- `pkgsUnstable` packages are not pinned, they track the unstable channel
+- One-off gotchas are recorded in `docs/ai-lessons.md`, check it before
   debugging something that feels familiar

@@ -1,61 +1,45 @@
-#!/bin/sh
-# SessionStart hook — injects the Obsidian vault into every session as durable
-# memory. Silent no-op (exit 0, no output) when the vault or a folder is absent.
-#
-# Core folders (the loop below is the authoritative list) are injected as FULL
-# note bodies, in priority order, under a total byte budget
-# (CLAUDE_VAULT_BUDGET, default 100000 ≈ 25k tokens). A folder that would push
-# the running total over the budget degrades to titles only — never a
-# half-truncated note — and its section header says so. Prompts/ is a prompt
-# library, not working memory: always titles only, bodies fetched on demand.
-# Templates/ and root files (Index.md, Vault.base) are never injected.
-#
-# Each note is preceded by a "## <vault-relative path>" header so content stays
-# attributable to its source note.
+#!/usr/bin/env bash
+# SessionStart hook: lists the Obsidian vault so the agent knows what exists.
+# Titles only, never bodies. Bodies are fetched on demand by the vault-search
+# agent, because injecting them costs ~25k tokens before anything is known about
+# the session. The folder loop below is the authoritative list; Templates/ and
+# vault-root files are never listed.
 
 set -euo pipefail
 
 vault="$HOME/Obsidian"
 [ -d "$vault" ] || exit 0
 
-budget="${CLAUDE_VAULT_BUDGET:-100000}"
-used=0
-
-# Full bodies of every note under $1 (folder name), section-headed by $1.
-dump_folder() {
-  echo "# $1"
-  find "$vault/$1" -name "*.md" | sort | while IFS= read -r f; do
-    echo "## ${f#"$vault/"}"
-    cat "$f"
-    echo
-  done
-}
+budget="${CLAUDE_VAULT_BUDGET:-4096}"
 
 # Vault-relative titles (no .md extension) of every note under $1.
 folder_titles() {
   find "$vault/$1" -name "*.md" | sed "s|^$vault/||;s|\\.md\$||" | sort
 }
 
-echo "# Obsidian vault (SessionStart injection)"
-echo "Full note bodies below unless a section header says titles only (Prompts/ always; any folder over the session byte budget). Templates/ and vault-root files are never injected. To read anything titles-only or absent, dispatch the vault-search agent."
-echo
+listing=""
+for folder in Conventions Lessons Decisions Process Projects Clients Notes Prompts; do
+  [ -d "$vault/$folder" ] || continue
+  titles=$(folder_titles "$folder")
+  [ -n "$titles" ] || continue
+  listing="$listing# $folder
+$titles
 
-for folder in Conventions Lessons Decisions Process Projects Clients Notes; do
-  dir="$vault/$folder"
-  [ -d "$dir" ] || continue
-  size=$(find "$dir" -name "*.md" -exec cat {} + | wc -c | tr -d ' ')
-  if [ $((used + size)) -le "$budget" ]; then
-    dump_folder "$folder"
-    used=$((used + size))
-  else
-    echo "# $folder (titles only — full bodies omitted, over the ${budget}-byte session budget; use vault-search to read a note)"
-    folder_titles "$folder"
-  fi
+"
 done
 
-if [ -d "$vault/Prompts" ]; then
-  echo "# Prompts (titles only — read the note when one is needed)"
-  folder_titles "Prompts"
+[ -n "$listing" ] || exit 0
+
+echo "# Obsidian vault (SessionStart index)"
+echo "Note titles only. This is an index, not the content. To read any note, dispatch the vault-search agent."
+echo
+
+size=$(printf '%s' "$listing" | wc -c | tr -d ' ')
+if [ "$size" -le "$budget" ]; then
+  printf '%s' "$listing"
+else
+  printf '%s' "$listing" | head -c "$budget"
+  printf '\n[index truncated at %s bytes of %s; raise CLAUDE_VAULT_BUDGET or use vault-search]\n\n' "$budget" "$size"
 fi
 
 input=$(cat 2>/dev/null || true)
@@ -65,7 +49,7 @@ slug=$(basename "$cwd")
 
 matches=$(rg -l "^project: ${slug}\$" "$vault" 2>/dev/null || true)
 if [ -n "$matches" ]; then
-  echo "# This project ($slug)"
+  echo "# Notes tagged for this project ($slug)"
   printf '%s\n' "$matches" | sed "s|^$vault/||" | sort
 fi
 

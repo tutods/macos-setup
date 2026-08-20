@@ -16,8 +16,13 @@
       extraFlags = ["--force-cleanup"];
     };
 
+    taps = [
+      "stablyai/orca"
+    ];
+
     brews = [
       "mas"
+      "worktrunk" # `wt`, git-worktree wrapper. Prebuilt bottle, newer than nixpkgs.
     ];
   };
 }

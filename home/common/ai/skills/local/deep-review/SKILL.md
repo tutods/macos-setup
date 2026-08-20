@@ -7,52 +7,51 @@ description: Full-project review that produces an actionable markdown checklist 
 
 Review an entire project (or a scoped path) and produce a persistent, checkable report. Five phases, in order.
 
-## Phase 0 — Scope
+## Phase 0: Scope
 
 Confirm before reading any code (one message, skip anything already stated by the user):
 
-1. **Target** — whole repo, one app in the monorepo, or a specific path?
-2. **Mode** — review only, or review + fix afterwards?
-3. **Focus** — everything, or weighted toward one area (types, UI consistency, security, performance)?
+1. **Target**: whole repo, one app in the monorepo, or a specific path?
+2. **Mode**: review only, or review + fix afterwards?
+3. **Focus**: everything, or weighted toward one area (types, UI consistency, security, performance)?
 
-## Phase 1 — Detect stack, load skills
+## Phase 1: Detect stack, load skills
 
-Read `package.json` (and workspace packages), lockfile, and config files. Then load the matching skills — **at most 3**, picked from what is actually in the project:
+Read `package.json` (and workspace packages), lockfile, and config files. Then load the matching skills, **at most 3**, picked from what is actually in the project:
 
 | Detected | Load |
 |----------|------|
 | TypeScript | `ts-conventions` |
 | React frontend | `react-conventions` |
 | API endpoints / backend | `api-conventions` |
-| NestJS | `nestjs-best-practices` |
 | Test suite (Vitest etc.) | `testing-conventions` |
 | Dependency-heavy review focus | `dependency-hygiene` |
 
 If the project ships its own skills in `.claude/skills/`, those take priority over the table.
 
-Also read the project `CLAUDE.md` / `docs/CONVENTIONS.md` — project conventions are review criteria, not suggestions.
+Also read the project `CLAUDE.md` / `docs/CONVENTIONS.md`, project conventions are review criteria, not suggestions.
 
-## Phase 2 — Review passes
+## Phase 2: Review passes
 
-Work through each pass. **Every finding must cite `file:line` from code actually read in this session** — never report an issue from assumption or memory. If a pass finds nothing, say so and move on.
+Work through each pass. **Every finding must cite `file:line` from code actually read in this session**, never report an issue from assumption or memory. If a pass finds nothing, say so and move on.
 
-1. **TypeScript quality** — `any` escapes, missing strict flags, non-exhaustive switches, unvalidated boundaries (HTTP bodies, env vars, external API responses need Zod)
-2. **Error handling** — empty/`any` catches, floating promises, swallowed errors behind fallbacks
-3. **Framework boundaries** — server/client split, data fetching in the right layer, routing patterns
-4. **Security** — authz checks on mutations, input validation before business logic, secrets in code or logs
-5. **Conventions** — naming, file structure, export style, i18n usage vs. project CLAUDE.md
-6. **Consistency** — duplicated components/utils, divergent patterns for the same problem (e.g. three button styles)
-7. **Dependency hygiene** — unused deps, heavyweight packages with lighter native options
-8. **Comment hygiene (blocking, never MINOR)** — enforce "No explanatory comments in code" from the always-on rules: comments narrating what code does, narrating a change/fix, restating signatures, or referencing files by line are `[MAJOR]`; multi-line comment blocks are automatic findings; the fix is deletion
+1. **TypeScript quality**, `any` escapes, missing strict flags, non-exhaustive switches, unvalidated boundaries (HTTP bodies, env vars, external API responses need Zod)
+2. **Error handling**: empty/`any` catches, floating promises, swallowed errors behind fallbacks
+3. **Framework boundaries**: server/client split, data fetching in the right layer, routing patterns
+4. **Security**: authz checks on mutations, input validation before business logic, secrets in code or logs
+5. **Conventions**: naming, file structure, export style, i18n usage vs. project CLAUDE.md
+6. **Consistency**: duplicated components/utils, divergent patterns for the same problem (e.g. three button styles)
+7. **Dependency hygiene**: unused deps, heavyweight packages with lighter native options
+8. **Comment hygiene (blocking, never MINOR)**: enforce "No explanatory comments in code" from the always-on rules: comments narrating what code does, narrating a change/fix, restating signatures, or referencing files by line are `[MAJOR]`; multi-line comment blocks are automatic findings; the fix is deletion
 
 Severity: `[CRITICAL]` (bug, security hole, data loss) · `[MAJOR]` (violates a stated convention, real maintenance cost) · `[MINOR]` (style, polish).
 
-## Phase 3 — Write the report
+## Phase 3: Write the report
 
 Save to `docs/reviews/<YYYY-MM-DD>-<scope>.md` (create the folder if missing):
 
 ```markdown
-# Review — <scope> — <date>
+# Review: <scope>, <date>
 
 ## Summary
 | Severity | Count |
@@ -61,7 +60,7 @@ Save to `docs/reviews/<YYYY-MM-DD>-<scope>.md` (create the folder if missing):
 ## Checklist
 
 ### CRITICAL
-- [ ] **[CRITICAL]** `path/file.ts:42` — problem — suggested fix — effort: S/M/L
+- [ ] **[CRITICAL]** `path/file.ts:42`, problem, suggested fix, effort: S/M/L
 
 ### MAJOR
 ...
@@ -72,7 +71,7 @@ Save to `docs/reviews/<YYYY-MM-DD>-<scope>.md` (create the folder if missing):
 
 One line per finding. Effort is S (<15 min), M (<1 h), L (more).
 
-## Phase 4 — Fix mode (only if requested)
+## Phase 4: Fix mode (only if requested)
 
 Fix **one checklist item at a time**:
 

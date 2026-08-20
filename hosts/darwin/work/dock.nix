@@ -11,7 +11,6 @@
         ]
         [
           "/Applications/Zed.app"
-          "/Applications/WebStorm.app"
           {home = "Applications/Home Manager Apps/Visual Studio Code.app";}
           "/Applications/Ghostty.app"
         ]

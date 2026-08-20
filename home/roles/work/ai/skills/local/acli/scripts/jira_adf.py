@@ -41,7 +41,7 @@ TRAILING_PUNCT = ".,;:!?"
 
 # Issue keys: "MP-4290". The lookbehind/lookahead keep it from matching a key
 # embedded inside a longer identifier. Deliberately NOT excluding a preceding
-# "/" — "MP-4304/MP-4305/MP-4306" (a common slash-separated key list) needs
+# "/", "MP-4304/MP-4305/MP-4306" (a common slash-separated key list) needs
 # every key after the first to still match. A key inside a browse URL never
 # reaches this regex in the first place: split_autolinks claims the whole URL
 # chunk before split_issue_keys runs, and that chunk is skipped wholesale.
@@ -74,7 +74,7 @@ def detect_site():
 
 
 def warn_bare_pr_refs(markdown_text):
-    """A bare '#460' names nothing outside the repo it was typed in — Jira
+    """A bare '#460' names nothing outside the repo it was typed in, Jira
     can't resolve it to a link. Flag it; don't block on it, since a stray
     '#' can legitimately be quoted text rather than a PR reference.
     """
@@ -90,7 +90,7 @@ def warn_bare_pr_refs(markdown_text):
         offenders.extend(m.group(0) for m in BARE_PR_REF_RE.finditer(stripped))
     if offenders:
         print(
-            f"warning: bare PR reference(s) {', '.join(offenders)} — "
+            f"warning: bare PR reference(s) {', '.join(offenders)}, "
             "write the full PR URL instead, a bare '#N' isn't a link",
             file=sys.stderr,
         )
@@ -101,7 +101,7 @@ def parse_inline(text, allow_cards=True):
     `code`, and [link](url). Order matters: code first so markup inside code
     spans isn't reinterpreted.
 
-    allow_cards=False (used for headings) skips issue-key/browse-URL carding —
+    allow_cards=False (used for headings) skips issue-key/browse-URL carding,
     an inlineCard inside a heading is a shape not worth risking against Jira's
     validator, and reads badly besides.
     """
@@ -379,7 +379,7 @@ def cmd_doc(args):
 
 
 def cmd_comment(args):
-    # Same shape as `doc` — acli's `comment create --body-file` accepts a raw
+    # Same shape as `doc`, acli's `comment create --body-file` accepts a raw
     # ADF doc JSON file directly (verified against acli 1.3.22).
     print(json.dumps(markdown_to_adf(read_md(args.file), site=args.site), indent=2))
 
@@ -461,7 +461,7 @@ def cmd_selftest(args):
 
     def reset_cards(site=""):
         # site="" (not None) means "no site" without triggering detect_site()'s
-        # subprocess call — selftest must never shell out to acli.
+        # subprocess call, selftest must never shell out to acli.
         _CARD_STATE["site"] = site
         _CARD_STATE["seen"] = set()
 
@@ -536,7 +536,7 @@ def cmd_selftest(args):
     assert not any(n.get("type") == "inlineCard" for n in nodes), nodes
 
     # A slash-separated key list ("MP-4304/MP-4305/MP-4306") cards every key,
-    # not just the first — a preceding "/" must not block the match.
+    # not just the first, a preceding "/" must not block the match.
     reset_cards(TEST_SITE)
     nodes = parse_inline("see MP-4304/MP-4305/MP-4306 today")
     carded = {card_url(n) for n in nodes if card_url(n)}

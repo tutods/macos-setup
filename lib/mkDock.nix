@@ -9,7 +9,7 @@
 #       (mkDock {
 #         groups = [
 #           [ "/Applications/Firefox.app" "/System/Applications/Mail.app" ]
-#           # {home = "..."} resolves against the primary user's home —
+#           # {home = "..."} resolves against the primary user's home,
 #           # never hardcode /Users/<name> in a host file.
 #           [ "/Applications/Zed.app" {home = "Applications/Home Manager Apps/Foo.app";} ]
 #         ];

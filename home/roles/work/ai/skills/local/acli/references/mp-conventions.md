@@ -1,7 +1,7 @@
 # MP (Mindera People) project conventions
 
 Project key `MP`, classic software project, id `13313`. This file is what
-`SKILL.md` says to read before creating or managing a ticket on this board —
+`SKILL.md` says to read before creating or managing a ticket on this board,
 it exists because acli can't discover most of this itself (no field-name
 lookup, no "list valid transitions" command).
 
@@ -16,7 +16,7 @@ and `Story` dominate; `Bug` and `Spike` are used correctly for their names;
 
 `In definition` → `To Do` → `In Progress` → `In Review` → `Ready for QA` →
 `Testing` → `Ready for PROD` → `Done`. This is the order they appear in
-recent history, not a confirmed workflow diagram — acli has no "list
+recent history, not a confirmed workflow diagram, acli has no "list
 transitions" command (see `jira-commands.md`'s transition trap), so treat
 this as the best available guess for `--status` on a `transition` call, and
 if a transition fails, ask the user for the exact status name rather than
@@ -32,7 +32,7 @@ guessing a second time.
 | 1275 | AI Migration to Nest | kanban |
 
 `218` (MP Board) is the one that shows up in the Sprint field
-(`customfield_10006`) on regular feature tickets — default to it unless the
+(`customfield_10006`) on regular feature tickets, default to it unless the
 ticket is release- or AI-migration-specific.
 
 ## Epics
@@ -44,21 +44,19 @@ acli jira workitem search --jql "project = MP AND issuetype = Epic AND status !=
   --fields "key,summary,status" --limit 50 --json
 ```
 
-Frontend-relevant epics seen recently (not exhaustive — always re-query,
-this list goes stale): `MP-3559` QoL Features 2026, `MP-3564` Technical Debt
-2026, `MP-3533` Bugs 2026, `MP-3558` Maintenance 2026, `MP-3520` UI
-Modernization (Done), `MP-2920`/`MP-3600` Feedback Components / Feedback,
-`MP-3587` Communications Hub. When a ticket doesn't obviously belong to a
-named initiative, `MP-3564` (Technical Debt 2026) or `MP-3533` (Bugs 2026) is
-usually the closest fit for FE work — confirm with the user before assuming.
+Always run that query rather than working from a remembered epic key. The
+board keeps standing per-year catch-all epics (technical debt, bugs,
+maintenance, QoL) alongside named initiatives; when a ticket doesn't belong to
+a named initiative, the technical-debt or bugs epic for the current year is
+usually the closest fit, confirm with the user before assuming.
 
 ## Labels (standard Jira `labels` field, not a custom field)
 
 Observed label vocabulary in use on this board (from the label picker):
 `NoQA`, `AI`, `CI/CD`, `StoryBookReview`, `Non-Deliverable`, `Frontend`,
-`Evergreen`, and others. `NoQA` in particular is meaningful — it marks a
+`Evergreen`, and others. `NoQA` in particular is meaningful, it marks a
 ticket as not requiring QA sign-off before Done. Ask before inventing a new
-label; check the picker (`acli` can't list valid labels — this has to be a
+label; check the picker (`acli` can't list valid labels, this has to be a
 human check in the Jira UI, or inferred from `search --jql "project = MP" --fields labels`
 on recent tickets) rather than guessing free text.
 

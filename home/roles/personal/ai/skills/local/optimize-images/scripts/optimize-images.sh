@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Optimize images: strip metadata, cap longest side at MAX_DIM (aspect kept, only
-# shrinks), convert to WebP. Writes name.webp next to name.ext — never touches or
+# shrinks), convert to WebP. Writes name.webp next to name.ext, never touches or
 # deletes the original.
 #
 # Usage:

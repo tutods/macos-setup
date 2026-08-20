@@ -1,49 +1,31 @@
 {
   aiLib,
   config,
-  pkgs,
   lib,
   ...
 }: let
-  servers = import ./mcp-servers.nix {
-    inherit pkgs;
-    homeDir = config.home.homeDirectory;
-  };
-
-  # Nix-authoritative for ADDITIONS only — see the merge note below. Add
-  # servers here, not via UI.
-  #
-  # `filesystem` was dropped — it was scoped to ~/.dotfiles and ~/Developer,
-  # exactly where Claude Code's native Read/Glob/Grep already reach, so it only
-  # added duplicate tool schemas to every session.
-  #
-  # `github` and `playwright` are defined in ./mcp-servers.nix but deliberately
-  # NOT wired in here: `playwright@claude-plugins-official` already provides
-  # playwright, and `github@claude-plugins-official` already provides GitHub
-  # tools (this machine has no GITHUB_TOKEN set, so the hand-rolled github
-  # server would spawn unauthenticated anyway). Wiring either back in would
-  # reintroduce the duplicate-server problem this file was fixed for.
+  # Enabling a plugin also registers any MCP servers in its bundled .mcp.json,
+  # so `claude mcp list` shows servers not declared here. Drop the plugin to
+  # remove those, don't add a competing copy.
   allServers =
     {
-      code-review-graph = servers.code-review-graph;
+      # Tree-sitter code graph, so review/impact questions query structure
+      # instead of re-reading files. Not installed via `code-review-graph
+      # install`, that writes hooks into ~/.claude/settings.json, which this
+      # repo overwrites on every deploy. Per-repo `code-review-graph build` is
+      # still required before its graph answers anything.
+      code-review-graph = {
+        command = "${config.home.homeDirectory}/.local/bin/code-review-graph";
+        args = ["serve"];
+      };
     }
     // config.home.ai.extraMcpServers;
 in {
-  # Claude Code reads user-scope MCP servers from `~/.claude.json`'s
-  # `mcpServers` key — NOT from `~/.claude/claude_desktop_config.json` (that's
-  # Claude Desktop's file, and Claude Code never reads it). Verify with
-  # `claude mcp list`.
-  #
-  # `~/.claude.json` is live session state Claude Code writes to constantly
-  # (it also holds servers added by hand, e.g. via `claude mcp add`), so this
-  # MERGES into `mcpServers` instead of replacing it — replacing would delete
-  # anything not declared here on the next deploy. The consequence: Nix is
-  # authoritative for additions, not removals. Dropping a server from
-  # `allServers` does NOT delete it from `~/.claude.json` — remove it once by
-  # hand with `claude mcp remove <name> --scope user`.
-  #
-  # Deploy with no other Claude Code session running — a concurrent write to
-  # `~/.claude.json` during this read-modify-write could be lost.
+  # Claude Code reads user-scope servers from `~/.claude.json`'s `mcpServers`,
+  # which it also writes to constantly, so this MERGES rather than replaces.
+  # Nix is therefore authoritative for additions only: dropping a server here
+  # does not remove it from the file (`claude mcp remove <name> --scope user`).
+  # Deploy with no other Claude Code session running.
   home.activation.claudeMcp = lib.hm.dag.entryAfter ["writeBoundary" "aiInit"] (
     aiLib.mergeJsonKey {
       file = "$HOME/.claude.json";

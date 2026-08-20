@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code statusline — 2 lines.
+# Claude Code statusline, 2 lines.
 # Line 1: model · dir · git branch + dirty counts
 # Line 2: context bar + % · cost · lines · 5h% + reset · 7d% + reset
 #

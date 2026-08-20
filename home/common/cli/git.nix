@@ -1,6 +1,6 @@
 {...}:
 # Shared git configuration for all users.
-# Identity (name + email) is NOT stored here — it lives in ~/.config/git/private
+# Identity (name + email) is NOT stored here, it lives in ~/.config/git/private
 # on each machine and is never committed to this repo.
 # See docs/private-git-config.md for setup instructions.
 {
@@ -21,7 +21,7 @@
     includes = [{path = "~/.config/git/private";}];
     ignores = [
       # Claude Code per-machine overrides. Shared config (plugins, MCP servers)
-      # belongs in a committed .claude/settings.json / .mcp.json — only the
+      # belongs in a committed .claude/settings.json / .mcp.json, only the
       # .local.json variant stays untracked, in every repo.
       "**/.claude/settings.local.json"
     ];

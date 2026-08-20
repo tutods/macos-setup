@@ -3,7 +3,7 @@
   lib,
   ...
 }: {
-  # Extensions (install manually via Cmd+Shift+X — Nix cannot manage Zed extensions yet):
+  # Extensions (install manually via Cmd+Shift+X, Nix cannot manage Zed extensions yet):
   #
   # Languages & Syntax
   #   html               https://zed.dev/extensions/html

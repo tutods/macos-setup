@@ -1,19 +1,12 @@
 ## Personal Tools
 
-| Use | Instead of | Why |
-|-----|-----------|-----|
-| `doppler` | `.env` files | Type-safe secrets management, no plaintext env vars |
+Secrets live in `doppler`, never in `.env` files: `doppler run -- <command>`
+to inject them into a process, `doppler setup` to configure a project.
 
-- Use `doppler run -- <command>` to inject secrets into processes
-- Use `doppler setup` to configure project secrets
+Use `doppler` only to check that a key exists or to run a command with it,
+never to read or print a secret's value, and never log the output of a command
+that contains one. Scrub generated scripts for plaintext secrets before
+showing them.
 
-## AI Privacy Guard (Personal Role)
-
-To prevent accidental data leakage and maintain a high privacy posture:
-
-- **Forbidden Commands**: NEVER use `env`, `printenv`, or `set` to dump the environment. This often leaks session tokens and private keys.
-- **Secret Access**: Only use `doppler` to verify the existence of keys or run commands. NEVER use `doppler` to read or print the actual secret values; only the keys are to be surfaces.
-- **DLP (Data Leakage Prevention)**: 
-  - Never log the output of any command containing a secret.
-  - Avoid reading files in `~/Documents` or `~/Downloads` unless specifically requested for the current task.
-- **Verification**: Always scrub the output of any generated script for plaintext secrets before presenting it to the user.
+Don't read files in `~/Documents` or `~/Downloads` unless the current task
+specifically calls for it.

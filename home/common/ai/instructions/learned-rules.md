@@ -1,6 +1,6 @@
 ## Learned Rules
 
-Standing rules mined from past corrections. Each one exists because the same mistake was made (and corrected) at least once — do not repeat them.
+Standing rules mined from past corrections. Each one exists because the same mistake was made (and corrected) at least once, do not repeat them.
 
 ### Tooling & environment
 
@@ -11,8 +11,8 @@ Standing rules mined from past corrections. Each one exists because the same mis
 - **Changes land in the user's working tree.** Worktrees are for isolation during work; the result must be applied to the actual project before claiming done.
   Wrong: edits sitting in `.worktrees/` while reporting success. Right: verified changes in the project the user has open.
 - **Never swap build tooling or framework infrastructure as a side effect.** Bundler, server runtime, or framework changes need their own explicit approval and a rollback plan.
-  Wrong: migrating Vite→RSBuild while doing a performance task. Right: "this would need a build-tool change — separate decision, want a proposal?"
-- **Do the work yourself — never reach for another model or a paid API for something you can do.** Translation, content, analysis: the assistant does it directly.
+  Wrong: migrating Vite→RSBuild while doing a performance task. Right: "this would need a build-tool change, separate decision, want a proposal?"
+- **Do the work yourself, never reach for another model or a paid API for something you can do.** Translation, content, analysis: the assistant does it directly.
   Wrong: pulling down a local model to translate strings. Right: translate the chunk yourself, glossary in hand.
 - **Worktrees are temporary.** Non-trivial feature work happens in one; quick fixes (lint, one-liners) go directly in the working tree; and every worktree is removed as soon as the work lands.
   Wrong: three stale worktrees left behind after PRs merged. Right: land the PR, `git worktree remove`, done.
@@ -25,10 +25,10 @@ Standing rules mined from past corrections. Each one exists because the same mis
   Wrong: revert the script but keep `gum` in packages. Right: tree and dependency list match the pre-change state.
 - **After a revert, re-verify any later work that built on the reverted code.** Batches applied on top of it may now be broken or half-applied.
   Wrong: continue with phase 3 after reverting part of phase 2. Right: re-check phase 2's touched files first.
-- **No loops.** If the same command or approach fails twice, stop — change approach or ask. Never re-run a failing step unchanged hoping for a different result.
-- **A config change isn't done while an old contradicting block survives.** When asked to enable/change behavior, find and remove or flip the existing rule that blocks it — don't just add a new one beside it.
+- **No loops.** If the same command or approach fails twice, stop, change approach or ask. Never re-run a failing step unchanged hoping for a different result.
+- **A config change isn't done while an old contradicting block survives.** When asked to enable/change behavior, find and remove or flip the existing rule that blocks it, don't just add a new one beside it.
   Wrong: adding an `.nvmrc` custom manager while `matchPackageNames: ["node"], enabled: false` stays. Right: delete the ignore rule in the same change.
-- **Check official docs for fast-moving libraries before implementing — unprompted.** Better Auth, Biome, Renovate, TanStack, pnpm: training-data memory is stale; fetch the docs first.
+- **Check official docs for fast-moving libraries before implementing, unprompted.** Better Auth, Biome, Renovate, TanStack, pnpm: training-data memory is stale; fetch the docs first.
   Wrong: implementing Better Auth sign-up flow from memory when `disableSignup` exists. Right: check the options reference, then implement.
 - **A PR isn't delivered with conflicts on it.** After opening or updating a PR (or after the base branch moves), check mergeability and resolve conflicts immediately.
   Wrong: reporting "PR opened" while GitHub shows conflicts. Right: rebase/merge, push, confirm mergeable.
@@ -37,10 +37,10 @@ Standing rules mined from past corrections. Each one exists because the same mis
 
 - **No counts or ranges in docs that go stale.** Describe the set, not its size.
   Wrong: "ADRs 0001–0014". Right: "architecture decision records, numbered".
-- **Never hard-wrap prose in Markdown.** One line per paragraph, however long — editors soft-wrap; a hard break renders as a visible line break in Obsidian and most Markdown viewers.
-  Wrong: manually breaking a paragraph at ~80 columns. Right: the whole paragraph on one line.
+- **Never hard-wrap prose in Markdown a human will read in a renderer.** Vault notes, READMEs and docs: one line per paragraph, however long. A hard break renders as a visible line break in Obsidian and most viewers. This does not apply to instruction, skill or agent files, which are model input and wrap freely.
+  Wrong: manually breaking a vault note's paragraph at ~80 columns. Right: the whole paragraph on one line.
 
-Stack-specific style rules (TypeScript, React/Tailwind, Sanity/GROQ) are **not** here — they live in the `ts-conventions`, `react-conventions` and `api-conventions` skills so they cost nothing in a Nix or content session. Load the matching skill before writing code.
+Stack-specific style rules (TypeScript, React/Tailwind, Sanity/GROQ) are **not** here, they live in the `ts-conventions`, `react-conventions` and `api-conventions` skills so they cost nothing in a Nix or content session. Load the matching skill before writing code.
 
 ### Git & repo hygiene
 

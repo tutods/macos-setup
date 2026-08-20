@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # macOS defaults that nix-darwin does not expose declaratively.
-# Idempotent — `defaults write` is a no-op when the value is already set.
+# Idempotent: `defaults write` is a no-op when the value is already set.
 #
 # Run from a nix-darwin activation script (root) or manually with sudo.
 set -euo pipefail

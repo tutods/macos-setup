@@ -1,6 +1,6 @@
 # Private Git Configuration
 
-Git name and email are sensitive and not committed to this repo. The config uses Git's native `include.path` — the committed config references a local file that lives only on the machine.
+Git name and email are sensitive and not committed to this repo. The config uses Git's native `include.path`, the committed config references a local file that lives only on the machine.
 
 ## How it works
 
@@ -12,7 +12,7 @@ programs.git.includes = [
 ];
 ```
 
-Every user automatically inherits this include — no per-user git config is needed. Git merges that file into the effective config at runtime. If the file doesn't exist, Git silently ignores it — no errors on a fresh machine before setup.
+Every user automatically inherits this include, no per-user git config is needed. Git merges that file into the effective config at runtime. If the file doesn't exist, Git silently ignores it, no errors on a fresh machine before setup.
 
 ## Setup on a new machine
 
@@ -26,7 +26,7 @@ git config --file ~/.config/git/private user.email "your@email.com"
 
 Using `git config --file` instead of a heredoc avoids line-break issues that can silently corrupt the file when pasting values in a terminal.
 
-This file is never tracked by Nix or Git — it stays local to the machine.
+This file is never tracked by Nix or Git, it stays local to the machine.
 
 ## Verify it works
 

@@ -4,16 +4,17 @@ Rules and conventions for working in this Nix flake repo.
 
 ## Sanity Checks (mandatory, not optional)
 
-- Run `nix fmt` before committing any `.nix` file — hard requirement, not a suggestion
-- Run `nix flake check` after any change to `flake.nix` or module files — catches errors before deploy
-- Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces` — plugins fail silently, so nothing else will tell you a name is wrong
+- Run `nix fmt` before committing any `.nix` file, hard requirement, not a suggestion
+- Run `nix flake check` after any change to `flake.nix` or module files, catches errors before deploy
+- Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else will tell you a name is wrong
+- Run `./scripts/verify-references.sh` after renaming or deleting any skill, agent, workflow or script. A dangling reference is silently ignored, never an error
 - Never skip these even for "trivial" edits
 
 ## Adding Packages
 
 - Run `nix search nixpkgs <name>` to confirm a package exists in stable before adding it
 - Only use `pkgsUnstable` if the stable version is too old for the use case
-- Tools that justify `pkgsUnstable`: `claude-code` — fast-moving, needs latest
+- Tools that justify `pkgsUnstable`: `claude-code`, fast-moving, needs latest
 
 ## Package Placement
 
@@ -27,29 +28,19 @@ Rules and conventions for working in this Nix flake repo.
 
 ## Module Authoring
 
-- Keep `options.nix` and `default.nix` separate — options declarations in one file, logic in the other
-- Never hardcode usernames — use `config.home.username` or pass via `mkUser`
+- Keep `options.nix` and `default.nix` separate, options declarations in one file, logic in the other
+- Never hardcode usernames, use `config.home.username` or pass via `mkUser`
 - Use explicit imports over `lib.mkIf` for clarity (this codebase prefers direct imports)
 - Use `config.home.username` instead of hardcoding paths
 
-## Deploy Commands
-
-```bash
-./nix.sh macbook          # build + apply personal machine
-./nix.sh work             # build + apply work machine
-./nix.sh macbook --build-only   # build only, no sudo required
-./nix.sh macbook --force  # force rebuild
-nix-collect-garbage -d    # garbage collect old generations
-```
-
 ## Never
 
-- `nix-env -i` — always use `nix shell` for temporary tools
-- Hardcode absolute paths like `/home/user/` — use Home Manager variables
-- Put secrets or credentials in `.nix` files — use `doppler` or `sops-nix`
+- `nix-env -i`, always use `nix shell` for temporary tools
+- Hardcode absolute paths like `/home/user/`, use Home Manager variables
+- Put secrets or credentials in `.nix` files, use `doppler` or `sops-nix`
 
 ## Path Conventions
 
-- `config.home.devDir` — Primary development directory (default: `$HOME/Developer`), declared in `home/common/options.nix`
+- `config.home.devDir`, Primary development directory (default: `$HOME/Developer`), declared in `home/common/options.nix`
 - Fish functions use `$PROJECT_DIR` environment variable set by Nix
 - Use `config.home.homeDirectory` instead of `/Users/$username` where possible

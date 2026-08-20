@@ -28,7 +28,7 @@ Pass via `--jql "..."` to `workitem search`, `edit`, `transition`, `assign`, `cl
 --jql "project = MP AND issuetype = Epic AND status != Done ORDER BY updated DESC"
 
 # Children of an epic (classic project: Epic Link is customfield_10007,
-# but JQL exposes it as "Epic Link" or the epic's key directly — verify
+# but JQL exposes it as "Epic Link" or the epic's key directly, verify
 # with a known epic before relying on this in a script)
 --jql "\"Epic Link\" = MP-3559"
 ```
@@ -41,7 +41,7 @@ Pass via `--jql "..."` to `workitem search`, `edit`, `transition`, `assign`, `cl
 ## Combining with acli mutation commands
 
 `edit`, `transition`, `assign`, `clone` all accept `--jql` instead of `--key`
-to operate on a whole result set at once. This is powerful and destructive —
+to operate on a whole result set at once. This is powerful and destructive,
 always run the equivalent `search --jql "..." --json` first to see exactly
 which tickets will be affected, and show that list to the user before firing
 a bulk mutation.

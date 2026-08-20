@@ -371,7 +371,7 @@ dry_run_config() {
         [[ "$line" =~ ^these ]] && echo -e "  ${CYAN}$line${NC}" || echo -e "  ${DIM}$line${NC}"
       done <<< "$changes"
     else
-      print_dim "Nothing to build — already up to date."
+      print_dim "Nothing to build, already up to date."
     fi
     rm -f "$_CMD_LOG"
   else
@@ -401,7 +401,7 @@ apply_config() {
   fi
 
   echo ""
-  print_dim "Authentication required — enter sudo password if prompted"
+  print_dim "Authentication required, enter sudo password if prompted"
   if ! sudo -v; then
     print_error "Sudo authentication failed"
     exit 1
@@ -441,7 +441,7 @@ main() {
   local config=""
   local build_only=false dry_run=false force=false
 
-  # No args — interactive picker
+  # No args, interactive picker
   if [[ $# -eq 0 ]]; then
     check_directory
     select_config
@@ -470,7 +470,7 @@ main() {
           exit 1
         fi
         LOG_FILE="$1"
-        printf "# nix.sh log — %s\n\n" "$(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
+        printf "# nix.sh log, %s\n\n" "$(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
         ;;
       --help|-h) show_usage ;;
       *)

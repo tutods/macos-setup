@@ -2,8 +2,8 @@
   username,
   role ? null,
   extraImports ? [],
-  # "full" — everything in home/common (editors, AI, shell).
-  # "shell" — home/common/core.nix only: shell, prompt, CLI tools, terminal.
+  # "full", everything in home/common (editors, AI, shell).
+  # "shell", home/common/core.nix only: shell, prompt, CLI tools, terminal.
   #           For secondary accounts (e.g. the work admin user) that should
   #           share the shell experience without editor/AI wiring.
   profile ? "full",

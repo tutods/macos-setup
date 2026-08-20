@@ -1,6 +1,6 @@
 ---
 name: personal-stack
-description: The technology stack used on personal and freelance projects — TanStack Start/Router/Query, Next.js App Router, Tailwind, shadcn/ui, NestJS, PostgreSQL with Drizzle or Prisma, Better Auth, Sanity, pnpm, Biome, Doppler. Use when starting a personal project, choosing a library or framework, scaffolding, or deciding which tool fits a job on this machine.
+description: The technology stack used on personal and freelance projects, TanStack Start/Router/Query, Next.js App Router, Tailwind, shadcn/ui, NestJS, PostgreSQL with Drizzle or Prisma, Better Auth, Sanity, pnpm, Biome, Doppler. Use when starting a personal project, choosing a library or framework, scaffolding, or deciding which tool fits a job on this machine.
 ---
 
 # Personal Machine Stack
@@ -18,12 +18,12 @@ isn't specified by the project itself, pick from here.
 | TanStack Query | Server state / async data | Standard data-fetching layer |
 | TanStack Router | Type-safe routing | Pairs with TanStack Start |
 | TanStack Table | Headless table | Data-heavy UIs |
-| TanStack Form | Form state | |
+| TanStack Form | Form state | Preferred in a TanStack Start/Router project |
 | TanStack Virtual | Virtualisation | Long lists |
 | SolidStart | Experimental | Solid experiments only; not primary |
-| Tailwind CSS | Styling | Utility-first, all projects. v4 — CSS-first `@theme` config |
+| Tailwind CSS | Styling | Utility-first, all projects. v4, CSS-first `@theme` config |
 | shadcn/ui | Component library | Primitives on Tailwind; extend via `className` |
-| React Hook Form | Form state | |
+| React Hook Form | Form state | Existing projects, and anything not on TanStack |
 | Zod | Schema validation at boundaries | |
 | Sanity | CMS | For sites that need one |
 
@@ -46,7 +46,7 @@ isn't specified by the project itself, pick from here.
 
 ## Auth
 
-Better Auth — preferred for new projects. Check its options reference before
+Better Auth, preferred for new projects. Check its options reference before
 implementing a flow; the API moves and training-data memory is stale.
 
 ## Tooling
@@ -56,10 +56,7 @@ implementing a flow; the API moves and training-data memory is stale.
 | pnpm | Package manager (always) |
 | Biome | Lint + format (replaces ESLint + Prettier) |
 | TypeScript | Strict mode everywhere |
-| Vitest | Testing (when used — not mandatory) |
+| Vitest | Testing (when used, not mandatory) |
 | Doppler | Secrets management |
 
-## Language default
-
-TypeScript strict mode on all projects. No `any`. Zod at all system boundaries.
-See the `ts-conventions` skill for the full rules.
+The `ts-conventions` skill has the full TypeScript rules.

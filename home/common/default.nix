@@ -4,7 +4,7 @@
   ...
 }: {
   imports = [
-    # Shell, prompt, CLI tools, terminal — also usable standalone via
+    # Shell, prompt, CLI tools, terminal, also usable standalone via
     # mkUser's `profile = "shell"` (see core.nix)
     ./core.nix
     # Editors
@@ -21,7 +21,7 @@
     fi
   '';
 
-  # Obsidian vault, doubling as Claude Code's durable notes store — read via
+  # Obsidian vault, doubling as Claude Code's durable notes store, read via
   # the obsidian-vault skill (home/common/ai/skills/local). Created once, never
   # touched again by activation, so notes survive every deploy.
   home.activation.createObsidianVault = lib.hm.dag.entryAfter ["writeBoundary"] ''

@@ -13,20 +13,11 @@
       pr = "";
     };
 
-    # Auto memory off. Claude Code would otherwise read and write its own
-    # memory directory, which is a second source of rules alongside the ones
-    # this repo generates — and the only one not under version control.
-    # Instructions live in ~/.claude/rules/, conventions live in skills.
-    # https://code.claude.com/docs/en/memory
+    # Off so the harness's own memory dir isn't a second, unversioned source of
+    # rules alongside ~/.claude/rules/. https://code.claude.com/docs/en/memory
     autoMemoryEnabled = false;
 
-    # Compact earlier than the default (near-full context) — trigger once
-    # ~60% of the real context window is used instead of waiting until
-    # it's nearly full. A fixed-token autoCompactWindow was wrong here:
-    # opusplan executes on Sonnet 5, which always runs a native 1M-token
-    # window on the Anthropic API, so a value sized for 200k triggered
-    # compaction way too early. CLAUDE_AUTOCOMPACT_PCT_OVERRIDE scales
-    # with whatever window is actually in effect.
+    # Percentage, not a fixed autoCompactWindow, see docs/ai-lessons.md.
     autoCompactEnabled = true;
     env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60";
 
@@ -46,10 +37,7 @@
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
 
-    # Inject the Obsidian vault into every session: full note bodies of the
-    # core folders under a byte budget, plus per-project matches against the
-    # session's cwd. ./vault-context.sh owns the folder list and the budget
-    # logic; silent no-op when the vault is absent.
+    # ./vault-context.sh owns the folder list. Titles only, never bodies.
     hooks.SessionStart = [
       {
         hooks = [
@@ -77,9 +65,7 @@
       }
     ];
 
-    # Run biome check+fix after every file edit — only when biome config exists.
-    # Falls back to ./node_modules/.bin/biome if not in PATH (project-local install).
-    # Exits 0 silently when biome is unavailable or not configured.
+    # Silent no-op unless the project has a biome config.
     hooks.PostToolUse = [
       {
         matcher = "Edit|Write|MultiEdit";
@@ -92,9 +78,6 @@
       }
     ];
 
-    # Marketplaces and plugins are declared in ./plugins.nix (shared) and in
-    # each role's ai/default.nix. Skills come from here — nothing installs them
-    # out of band.
     extraKnownMarketplaces =
       lib.mapAttrs (_: repo: {
         source = {
@@ -104,15 +87,12 @@
       })
       config.home.ai.marketplaces;
 
-    # Nix is fully authoritative for enabledPlugins — the whole file is
-    # rewritten on every deploy, so a plugin dropped from home.ai.plugins is
-    # simply gone on the next `./nix.sh`. Never add plugins via the UI; they
-    # do not survive the next deploy.
+    # Rewritten whole on every deploy, so dropping a plugin from
+    # home.ai.plugins disables it. Adding one via the UI will not survive.
     enabledPlugins =
       lib.listToAttrs (map (p: lib.nameValuePair p true) config.home.ai.plugins);
   };
 in {
-  home.file.".claude/CLAUDE.md".text = "@RTK.md\n";
   home.file.".claude/hooks/block-ai-attribution.sh" = {
     source = ./block-ai-attribution.sh;
     force = true;

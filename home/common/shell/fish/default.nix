@@ -43,6 +43,11 @@
       set fzf_preview_dir_cmd eza --all --color=always
 
       fnm env --shell fish --corepack-enabled --resolve-engines | source
+
+      # `wt switch` changes directory, so it needs a shell function. Declared
+      # here rather than via `wt config shell install`, which rewrites
+      # ~/.config/fish/conf.d/wt.fish and fights this file.
+      wt config shell init fish | source
     '';
   };
 }

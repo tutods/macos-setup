@@ -1,273 +1,135 @@
 ---
 name: open-pr
-description: Open a pull request interactively. Handles optional branch creation, commit, push, and PR creation with optional Jira ticket linking. Use when user says "/open-pr", "open a PR", "create a pull request", "submit PR", "commit and push", "commit this", or any commit-related request. When the user asks to commit anything, use this skill instead of running git operations manually — it handles the full flow.
+description: Open a pull request interactively. Handles optional branch creation, commit, push, and PR creation with optional Jira ticket linking. Use when user says "/open-pr", "open a PR", "create a pull request", "submit PR", "commit and push", "commit this", or any commit-related request. When the user asks to commit anything, use this skill instead of running git operations manually, it handles the full flow.
 ---
 
 # Open Pull Request
 
-Guide the user through committing and opening a pull request, step by step. Use `AskUserQuestion` for all choices where available. On platforms without `AskUserQuestion`, ask each question conversationally and wait for the answer before proceeding.
+Two question screens, not seven. Everything the user decides is asked in two
+`AskUserQuestion` batches, and everything that can be inferred is inferred.
 
-## Context (gather first)
+`AskUserQuestion` takes at most 4 questions per call, so the batches below are
+full. Do not add a fifth question to either one. On a platform without
+`AskUserQuestion`, ask each item conversationally in the same order.
 
-Run before asking anything:
+## Step 1: Preconditions
 
 ```bash
-git branch --show-current
+git rev-parse --abbrev-ref HEAD
 git status --short
+git log --oneline @{upstream}..HEAD 2>/dev/null || echo "no upstream"
 gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name' 2>/dev/null || echo "main"
+git branch -r --format='%(refname:short)'
 ```
 
----
+If the tree is clean **and** nothing is unpushed, say so and stop. There is
+nothing to commit, push, or open. Do not ask any questions first.
 
-## Step 0 — Jira Ticket Detection (optional, skip if none found)
+## Step 2: Batch one
 
-Check the current branch name for a ticket pattern: `[A-Z]+-\d+` (e.g. `MP-3813`, `PROJ-456`, `ABC-123`).
+One `AskUserQuestion` call, four questions:
 
-If a ticket is found, ask to confirm:
+| Header | Question | Options |
+|---|---|---|
+| `Branch` | Create a new branch? | Stay on `<current>` / Create one (name via Other) |
+| `Commit` | Commit your changes? | Yes / No, already committed |
+| `Push` | Push when done? | Yes / No, keep it local |
+| `Open PR` | Open a pull request? | No / Yes, ready for review / Yes, as draft |
 
-```
-Question: "Ticket detected: <TICKET>. Use it in PR title?"
-Header: "Ticket"
-Options:
-  - label: "Yes, use <TICKET>"
-    description: "Include the ticket in the PR title"
-  - label: "No, skip"
-    description: "Don't include a ticket — personal or non-ticketed work"
-```
+Notes on the options:
 
-Store the confirmed ticket as `<TICKET>` for use in title generation.
+- **Push** is asked here because it is the step that puts code where other
+  people see it. It used to happen with no confirmation at all.
+- **Open PR** carries the draft choice, which is why it has three options
+  rather than two. `implement-ticket` wants a draft PR and can call this skill
+  directly because of it.
+- Answer `No` to all of Commit, Push and Open PR and there is nothing to do.
+  Say so and stop.
 
-If no ticket pattern is found, skip this step entirely. Do not ask about tickets.
+## Step 3: Do the work
 
----
+In this order, because each step depends on the one before.
 
-## Step 1 — New Branch (optional)
-
-Ask:
-
-```
-Question: "Create a new branch?"
-Header: "New branch"
-Options:
-  - label: "No, stay on current"
-    description: "Keep working on the current branch"
-  - label: "Yes, create branch"
-    description: "I'll provide the branch name via Other input"
-```
-
-If "Yes, create branch" → use the text input as the branch name, then run:
+1. **Create the branch** if asked, with `git checkout -b <name>`.
+2. **Detect the ticket.** Match `[A-Z]+-\d+` against the branch name *now*,
+   after any branch creation, because the new branch is usually the one carrying
+   the key (`feat/MP-1234-thing`). Store it as `<TICKET>`. Never ask about it;
+   the user confirms it when they approve the title in batch two.
+3. **Read the diff**: `git diff`, or `git diff --staged` when changes are
+   already staged.
+4. **Comment audit.** Find comment lines the diff adds:
 
 ```bash
-git checkout -b <branch-name>
+git diff -U0 | rg '^\+\s*(//|#|/\*|\*|--|<!--|""")'
 ```
 
----
+   Also check for `'''` docstrings in Python. Delete every hit that breaks the
+   zero-comment rule in `~/.claude/rules/workflow.md`, **before** staging, and
+   move anything worth keeping into the commit message or the PR body. Skip the
+   false positives: shebangs, string literals, nix attribute paths, YAML
+   document separators, and comments that only appear in the diff because a
+   neighbouring line changed. When unsure, delete.
+5. **Generate the commit message** with the `conventional-commit` skill.
+6. **Generate the PR title** from `git diff HEAD...origin/<default-branch>`: a
+   short imperative summary, 60 characters or fewer. Format it
+   `type(<TICKET>): summary` when a ticket was found, otherwise
+   `type(scope): summary`.
 
-## Step 2 — Commit
+## Step 4: Batch two
 
-Ask:
+Skip this whole step when Open PR was `No`. Ask only the commit message
+question, confirm it, then commit and stop.
 
-```
-Question: "Commit your changes?"
-Header: "Commit"
-Options:
-  - label: "Yes, commit"
-    description: "Stage the files from this change, generate a conventional commit message"
-  - label: "No, skip"
-    description: "Changes already committed or not needed"
-```
+One `AskUserQuestion` call, four questions. Use the `preview` field to show the
+generated text in the side panel, so the user reads the real thing instead of a
+label:
 
-If "Yes, commit":
+| Header | Question | Options |
+|---|---|---|
+| `Message` | Use this commit message? | The generated message (as `preview`) / Write my own |
+| `Base branch` | Base branch? | Repo default first, then whichever of `dev`, `develop`, `development`, `main`, `master`, `staging` actually exist in `git branch -r` |
+| `PR title` | PR title? | The generated title (as `preview`) / Write my own |
+| `Reviewers` | Request reviewers? | None / usernames or team slugs via Other |
 
-Ask for extra context:
+Two rules for the base-branch options: list only branches that exist on the
+remote, and never pad the list to four with guesses. Two real options beat four
+where three are wrong.
 
-```
-Question: "Any extra context for the commit message?"
-Header: "Commit context"
-Options:
-  - label: "No extra context"
-    description: "Agent generates the message from the diff alone"
-  - label: "Yes, I'll add context"
-    description: "Type extra context via Other input"
-```
+`preview` works on single-select questions only, which all four of these are.
 
-Then:
+## Step 5: Commit, push, create
 
-1. Read `git diff` (or `git diff --staged` if changes are already staged) to understand the changes
-2. **Comment audit** — scan the diff for added comment lines:
-
-   ```bash
-   git diff -U0 | rg '^\+\s*(//|#|/\*|\*)'
-   ```
-
-   Apply "No explanatory comments in code" from the always-on rules to every hit: comments narrating what the code does, narrating the change/fix, restating signatures, or referencing files by line get deleted **before** staging (move anything worth keeping into the commit message or PR body). Skip hits that aren't comments (shebangs, string literals, nix attr paths) and comments in the diff only because a neighboring line changed. If unsure whether a comment is justified, delete it.
-3. Generate the message with the `conventional-commit` skill (type table, scope rules, subject/body format live there)
-4. Show the generated message to the user for confirmation
-5. Commit **only the files that belong to this change**, by explicit pathspec — never `git add .` or `git add -A`, which can sweep the user's unrelated staged or untracked work:
+Assignee is always the authenticated user, `gh api user --jq '.login'`. It is
+not worth a question.
 
 ```bash
 git add -- <file1> <file2> ...
-git commit -m "<generated-message>"
-```
-
-If something unexpected is already staged (from `git status --short`), ask before including it.
-
----
-
-## Step 3 — Push
-
-After committing, push automatically:
-
-```bash
-git push origin <current-branch>
-```
-
-If push fails (e.g. upstream has newer commits), report the error — do NOT force-push.
-
-If the branch doesn't exist on the remote yet (first push), use:
-
-```bash
+git commit -m "<message>"
 git push -u origin <current-branch>
-```
-
----
-
-## Step 4 — Open Pull Request
-
-Ask:
-
-```
-Question: "Open a pull request?"
-Header: "Open PR"
-Options:
-  - label: "Yes, open PR"
-    description: "Create the PR on GitHub"
-  - label: "No, done"
-    description: "Stop here — committed and pushed, no PR needed"
-```
-
-If "No, done" → stop.
-
-If "Yes, open PR" → ask these questions in a single batch:
-
-**Question 1 — Base branch:**
-
-Use the repo's default branch from `gh repo view` (already fetched in Context) as the first suggested option.
-
-```
-Question: "Base branch?"
-Header: "Base branch"
-Options:
-  - label: "<default-branch> (repo default)"
-    description: "Target the repo's default branch"
-  - label: "dev"
-    description: "Target the dev integration branch"
-  - label: "development"
-    description: "Target the development integration branch"
-  - label: "main"
-    description: "Target the main production branch"
-  - label: "master"
-    description: "Target the master branch"
-```
-
-User can type a custom branch via Other. These five options cover virtually every repo.
-
-**Question 2 — Title:**
-
-Generate a preview title and ask for confirmation. If a `<TICKET>` was confirmed in Step 0, include it:
-
-```
-Question: "PR title?"
-Header: "PR title"
-Options:
-  - label: "<generated-title>"
-    description: "Agent-generated title, conventional commits style"
-  - label: "Write my own"
-    description: "Type a custom title via Other input"
-```
-
-To generate the title:
-- Read `git diff HEAD...origin/<base>` to understand the full branch diff
-- Pick a short imperative summary (≤60 chars)
-- Title format (pick based on context):
-  - **With ticket**: `type(<TICKET>): summary` (e.g. `feat(MP-3813): add communications hub`)
-  - **Without ticket**: `type(scope): summary` (e.g. `feat(skills): add open-pr skill`)
-
-**Question 3 — Reviewers (optional):**
-
-```
-Question: "Request reviewers?"
-Header: "Reviewers"
-Options:
-  - label: "No reviewers"
-    description: "Skip — assign only"
-  - label: "Specify reviewers"
-    description: "Type GitHub usernames or team slugs via Other input"
-```
-
-**Question 4 — Assignees:**
-
-```
-Question: "Assignees?"
-Header: "Assignees"
-Options:
-  - label: "Just me"
-    description: "Assign to the authenticated GitHub user"
-  - label: "Other"
-    description: "Type GitHub username(s) via Other input"
-```
-
----
-
-## Step 5 — PR Body
-
-Ask:
-
-```
-Question: "Any extra context for the PR body?"
-Header: "PR context"
-Options:
-  - label: "No extra context"
-    description: "Agent generates body from diff alone"
-  - label: "Yes, I'll add context"
-    description: "Type extra context via Other input"
-```
-
-Then generate the body:
-
-- Write 1-2 sentences summarizing the diff + any extra context provided
-- If the repo has `.github/pull_request_template.md`, read it, fill in each section, and use it as the body template. Preserve all emoji headers, table structure, and markdown formatting from the original file.
-- If no template exists, use the plain summary as the body
-
----
-
-## Step 6 — Create the PR
-
-Get the authenticated GitHub username:
-
-```bash
-gh api user --jq '.login'
-```
-
-If assignee was "Just me", use the result above. Otherwise use the Other text input.
-
-Build the command:
-
-```bash
 gh pr create \
   --base <base-branch> \
   --title "<title>" \
-  --body "<filled-body>" \
+  --body "<body>" \
   --assignee <github-login>
 ```
 
-If reviewers were specified in Step 4, append:
+- Stage by explicit pathspec, **never** `git add .` or `-A`, which sweeps up
+  unrelated work. If `git status --short` showed something unexpected already
+  staged, ask before including it.
+- Drop `git push` entirely when Push was `No`, and skip `gh pr create` with it,
+  since a PR needs a pushed branch.
+- Add `--draft` when Open PR was `Yes, as draft`.
+- Add `--reviewer "<r1,r2>"` when reviewers were named.
+- If the push fails because upstream moved, report it and stop. Never
+  force-push.
 
-```
-  --reviewer "<reviewer1,reviewer2>"
-```
+**PR body**: 1 or 2 sentences summarising the diff. When the repo has
+`.github/pull_request_template.md`, fill it in section by section and keep its
+emoji headers, tables and formatting exactly.
 
-After the PR is created, output the URL:
+## Step 6: Report
+
+Print the PR URL:
 
 ```
 **Pull request opened:**
@@ -276,20 +138,5 @@ After the PR is created, output the URL:
 <url>
 ```
 
----
-
-## Step 7 — Review? (hand-off)
-
-After the PR is created, ask:
-
-```
-Question: "Review the pull request?"
-Header: "Review PR"
-Options:
-  - label: "Yes, review it"
-    description: "Run the review-pr skill on the new PR"
-  - label: "No, done"
-    description: "Stop here — PR is open, no review needed"
-```
-
-If "Yes, review it" → load the `review-pr` skill and run it against the PR just created. Otherwise stop.
+Then say the review is available on request, naming the `review-pr` skill. Do
+not ask. The user just watched the PR appear and can decide without a prompt.
