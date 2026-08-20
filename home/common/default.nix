@@ -10,6 +10,7 @@
     # Editors
     ./editors/vscode
     ./editors/zed
+    ./editors/orca
     # AI (Claude Code): instructions, skills, plugins, MCP
     ./ai
   ];

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "keybindings": {},
+  "platforms": {
+    "darwin": {
+      "workspace.selectByIndex": [],
+      "tab.selectByIndex": [
+        "Mod+1"
+      ]
+    },
+    "linux": {},
+    "win32": {}
+  }
+}
