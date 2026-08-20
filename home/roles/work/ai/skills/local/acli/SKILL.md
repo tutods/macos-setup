@@ -56,7 +56,17 @@ clickable, and plain `--body`/`--description` cannot produce one. There is no
 size of comment or description too small to route through the script. See
 `references/adf.md`.
 
-**3. Don't guess a flag.** `create` uses `--label` (singular); `edit` uses
+**3. Every reference must be reachable.** A ticket key or a PR mentioned in a
+description or comment is a reference, and a reference nobody can click is
+one nobody follows. `scripts/jira_adf.py` cards the first mention of each
+issue key automatically (`inlineCard`, renders as `KEY: Summary [Status]`) —
+just write `MP-1234` in the markdown, don't hand-build the card. PRs don't
+get auto-detected the same way: always write the full PR URL
+(`https://github.com/org/repo/pull/460`), never a bare `#460` — a bare number
+names nothing outside the repo it was typed in. See `references/adf.md`'s
+"Linking rules".
+
+**4. Don't guess a flag.** `create` uses `--label` (singular); `edit` uses
 `--labels`/`--remove-labels`; the `edit --from-json` payload uses
 `labelsToAdd`/`labelsToRemove` instead — three names for one concept across
 three surfaces. `comment create`'s body-file flag is `-F`; `assign`'s
@@ -65,13 +75,13 @@ from-file flag is `-f` — same letter, opposite case, unrelated. Full list in
 there, run `acli <path> --help` and read it rather than pattern-matching from
 a sibling command.
 
-**4. `--yes` isn't universal.** Required on `edit`, `transition`, `assign`,
+**5. `--yes` isn't universal.** Required on `edit`, `transition`, `assign`,
 `clone`, `delete` — omitting it hangs waiting for an interactive confirm that
 never comes in a non-interactive shell. **Not present** on `comment create`,
 which never prompts. Check the specific command's flags rather than adding
 `--yes` reflexively everywhere.
 
-**5. Custom fields are create-only.** `acli jira workitem edit --from-json`
+**6. Custom fields are create-only.** `acli jira workitem edit --from-json`
 rejects an `additionalAttributes` key outright (`unknown field
 "additionalAttributes"` — verified, not documented anywhere by Atlassian).
 If a custom field needs to change on an existing ticket, there's no acli
@@ -81,7 +91,7 @@ fields listed as confirmed or medium-confidence in `mp-fields.md` — the
 board has 78 custom field IDs and acli exposes no way to list or name them,
 so most are genuinely unidentifiable without asking a human to check the UI.
 
-**6. Discover, don't assume.**
+**7. Discover, don't assume.**
 - Project key: match `[A-Z][A-Z0-9]+-[0-9]+` in the current git branch name
   if one exists; otherwise `acli jira project list --json` and ask.
 - Epics: `search --jql "project = X AND issuetype = Epic AND status != Done"`.
@@ -92,13 +102,13 @@ so most are genuinely unidentifiable without asking a human to check the UI.
   `mp-conventions.md` has the observed status sequence; for anything else,
   ask.
 
-**7. Only touch the ticket(s) the task actually named.** If a search or a
+**8. Only touch the ticket(s) the task actually named.** If a search or a
 "let me double check" step surfaces a different ticket that looks related,
 wrong, or duplicated — report it, don't fix it. Editing a ticket nobody
 asked about, even a small label tweak, is a mutation the user never
 authorized. Flag what you noticed and let them decide.
 
-**8. Confirm before mutating.** Before `create`/`edit`/`transition`/`delete`,
+**9. Confirm before mutating.** Before `create`/`edit`/`transition`/`delete`,
 show the user a short preview — project, type, summary, epic/parent, labels,
 any custom fields, and the description's outline (headings/sections, not the
 full rendered text) — and get explicit confirmation. This is cheap and it's

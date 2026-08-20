@@ -65,7 +65,11 @@ On PR success:
 2. Comment the PR link on the ticket — write it as markdown, convert with
    `scripts/jira_adf.py comment`, post with `comment create --body-file`.
    No exception for a bare one-line link: a plain `--body` renders the URL
-   as dead text, the script's autolinking is what makes it clickable.
+   as dead text, the script's autolinking is what makes it clickable. Always
+   write the PR's full URL, never a bare `#460` or the branch name — a bare
+   number names nothing outside its own repo and can't be turned into a
+   link. If the comment also mentions the ticket key, the script cards it
+   automatically; no extra work needed.
 
 ## Step 7 — Report
 

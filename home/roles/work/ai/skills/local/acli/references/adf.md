@@ -39,7 +39,33 @@ acli jira workitem comment update --key MP-123 --id 10001 --body-adf /tmp/commen
 
 # Just the ADF doc, e.g. to inspect it or feed something else
 python3 scripts/jira_adf.py doc /tmp/desc.md
+
+# --site overrides the auto-detected Jira site (parsed from `acli jira auth
+# status`) used to build issue-key browse links. Only needed when working
+# against a site other than the one the current session is logged into.
+python3 scripts/jira_adf.py comment /tmp/comment.md --site othersite.atlassian.net
 ```
+
+## Linking rules
+
+A reference nobody can click is a reference nobody follows. The script
+enforces this for the two reference types that dominate Jira comments and
+descriptions, on top of the bare-URL autolinking above:
+
+- **Issue keys** (`MP-1234`): the *first* mention of each distinct key in a
+  document becomes a Jira smart link (`inlineCard`, renders as
+  `KEY: Summary [Status]`) — the same node the Jira editor produces when you
+  paste a browse URL and press space. Later mentions of the same key stay
+  plain text; carding every occurrence in a sentence that lists nine tickets
+  turns it into an unreadable wall of cards. A bare
+  `https://<site>/browse/MP-1234` URL is carded the same way and counts
+  toward the same first-mention budget. Keys inside a code span or an
+  explicit `[text](url)` markdown link are left alone, same as autolinking.
+  Headings are never carded — an `inlineCard` there is a shape not worth
+  risking against Jira's validator, and it reads badly regardless.
+- **PRs**: always write the full PR URL, never a bare `#460` — a bare number
+  identifies nothing outside the repo it was typed in, and Jira can't turn it
+  into a link. The script warns on stderr (doesn't block) when it sees one.
 
 ## Markdown subset the script understands
 
@@ -52,6 +78,8 @@ python3 scripts/jira_adf.py doc /tmp/desc.md
 | `` `code` `` | `text` with `marks: [{type: code}]` |
 | `[text](url)` | `text` with `marks: [{type: link, attrs: {href}}]` |
 | bare `https://…` / `www.…` | same `link` mark, autolinked — no `[]()` needed |
+| bare issue key, e.g. `MP-1234` | `inlineCard` (Jira smart link), first mention per document only |
+| bare `<site>/browse/MP-1234` URL | same `inlineCard`, and counts as that key's first mention |
 | `- item` / `* item` | `bulletList` > `listItem` > `paragraph` |
 | `1. item` | `orderedList` > `listItem` > `paragraph` |
 | `- [ ] item`, `[ ] item`, `[] item`, `[x] item` | `taskList` > `taskItem`, `state: TODO`/`DONE` |
