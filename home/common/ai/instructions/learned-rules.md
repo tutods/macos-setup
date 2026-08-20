@@ -37,6 +37,8 @@ Standing rules mined from past corrections. Each one exists because the same mis
 
 - **No counts or ranges in docs that go stale.** Describe the set, not its size.
   Wrong: "ADRs 0001–0014". Right: "architecture decision records, numbered".
+- **Never hard-wrap prose in Markdown.** One line per paragraph, however long — editors soft-wrap; a hard break renders as a visible line break in Obsidian and most Markdown viewers.
+  Wrong: manually breaking a paragraph at ~80 columns. Right: the whole paragraph on one line.
 
 Stack-specific style rules (TypeScript, React/Tailwind, Sanity/GROQ) are **not** here — they live in the `ts-conventions`, `react-conventions` and `api-conventions` skills so they cost nothing in a Nix or content session. Load the matching skill before writing code.
 

@@ -28,17 +28,16 @@
   #
   # ${ } inside the arg string below is shell expansion at server spawn;
   # ${pkgs...} is Nix interpolation at build time.
+  # Not wired into ./mcp.nix's `allServers` — see that file's comment.
+  # `playwright@claude-plugins-official` already covers the plugin, and this
+  # machine has no GITHUB_TOKEN set for the github server below. Kept here as
+  # pure data so the pinned-toolset work isn't lost if either becomes needed.
   github = {
     command = "sh";
     args = [
       "-c"
       ''GITHUB_PERSONAL_ACCESS_TOKEN="''${GITHUB_TOKEN:-}" ${pkgs.github-mcp-server}/bin/github-mcp-server stdio --toolsets context,repos,issues,pull_requests,actions''
     ];
-  };
-
-  playwright = {
-    command = "npx";
-    args = ["-y" "@playwright/mcp" "--isolated" "--headless"];
   };
 
   # Tree-sitter code graph, so review/impact questions query structure instead

@@ -70,7 +70,13 @@
         };
       };
   in {
-    formatter.${system} = pkgs.alejandra;
+    # `pkgs.alejandra` directly would exec with no path arg on bare `nix fmt`,
+    # so it reads (and fails on) stdin instead of formatting the tree.
+    formatter.${system} = pkgs.writeShellApplication {
+      name = "fmt";
+      runtimeInputs = [pkgs.alejandra];
+      text = ''alejandra "''${@:-.}"'';
+    };
 
     darwinConfigurations = {
       macbook = mkDarwin ./hosts/darwin/macbook;

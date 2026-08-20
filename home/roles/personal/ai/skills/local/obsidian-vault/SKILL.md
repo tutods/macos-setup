@@ -28,9 +28,12 @@ separate — never reference or assume content from the other.
 ## Layout
 
 - Type folders at vault root: `Lessons/`, `Decisions/`, `Process/`,
-  `Conventions/`, `Projects/`, `Clients/`, `Prompts/`, `Snippets/`, `Notes/`
-  (catch-all for anything that doesn't fit the rest). Create a new folder
-  only for a genuinely new recurring type — don't fragment further than that.
+  `Conventions/`, `Projects/`, `Clients/`, `Prompts/`, `Notes/` (catch-all for
+  anything that doesn't fit the rest). Create a new folder only for a
+  genuinely new recurring type — don't fragment further than that. The
+  SessionStart hook (`home/common/ai/vault-context.sh`) injects a fixed
+  folder list every session, so a new type folder needs adding there too or
+  its notes are invisible at session start.
 - `Lessons/` is subfoldered by area (`Docker/`, `Doppler/`, `GitHub/`,
   `Payload/`, `Frontend/`, `Backend/`, `Tooling/`) — it's the one folder big
   enough to be worth browsing. `Prompts/` is subfoldered by category (one
@@ -55,11 +58,11 @@ separate — never reference or assume content from the other.
 ## Frontmatter
 
 Every project-derived note (`Lessons/`, `Decisions/`, `Process/`,
-`Conventions/`, `Projects/`, `Clients/`, `Snippets/`) starts with:
+`Conventions/`, `Projects/`, `Clients/`) starts with:
 
 ```yaml
 ---
-type: lesson          # lesson | decision | process | convention | project | client | snippet | note
+type: lesson          # lesson | decision | process | convention | project | client | note
 project: molar        # short slug for the repo/side-project
 area: [payload, postgres]   # tech areas, lowercase
 tags: [backend]        # coarse: backend | frontend | devops | tooling | compliance | ai | process
@@ -101,40 +104,31 @@ Search and links are plain-text — use Grep/Glob/Bash, not the Obsidian app.
 
 ### Read first
 
-At the start of any non-trivial task, check the vault for prior art before
-working:
+The SessionStart hook already injects full bodies of every note under
+`Lessons/`, `Decisions/`, `Process/`, `Conventions/`, `Projects/`, `Clients/`,
+and `Notes/` — that context is already loaded, no grep needed as a first
+step. `Prompts/` is titles-only at session start (it's a content library,
+not working memory), so it still needs a search when a prompt is relevant.
 
-```bash
-rg -il "<topic keywords>" "$HOME/Obsidian"
-```
-
-Read matching `Lessons/` and `Conventions/` notes before starting. A logged
-lesson that isn't consulted is dead weight. Cheap when nothing matches; skip
-only for trivial one-liners.
+Fall back to a search of the whole vault when the injected context isn't enough — after long-session compaction, for a folder not yet in the hook's fixed list, or to pin down one exact note. Dispatch these to the `vault-search` subagent (Agent tool) rather than grepping inline — it's a read-only lookup on `haiku`, cheaper than burning main-session tokens on `rg`/`fd` output.
 
 ### Find notes
 
-```bash
-# By filename
-fd -e md . "$HOME/Obsidian" | rg -i "keyword"
-
-# By content
-rg -il "keyword" "$HOME/Obsidian"
-```
+Dispatch to `vault-search`: by filename, by content, or a `Prompts/` topic
+search (titles-only at session start, so this is the normal way to pull one
+in).
 
 ### Find backlinks to a note
 
-```bash
-rg -l "\[\[Note Title\]\]" "$HOME/Obsidian"
-```
+Dispatch to `vault-search`: "find backlinks to [[Note Title]]".
 
 ### Create a note
 
 1. Title Case filename, `.md` extension, written into the matching type
    folder (`Lessons/`, `Decisions/`, `Process/`, `Conventions/`, `Projects/`,
-   `Clients/`, `Prompts/`, `Snippets/`, or `Notes/` if nothing fits;
-   `Lessons/` and `Prompts/` also need an area/category subfolder). `mkdir -p`
-   the folder first if it doesn't exist yet.
+   `Clients/`, `Prompts/`, or `Notes/` if nothing fits; `Lessons/` and
+   `Prompts/` also need an area/category subfolder). `mkdir -p` the folder
+   first if it doesn't exist yet.
 2. Start from `Templates/<Type>.md` — it has the frontmatter block pre-filled.
    Fill in `type`, `project`, `area`, `tags`, `created` (today's date).
 3. Content is one unit of learning — what, why, and nothing that belongs in a

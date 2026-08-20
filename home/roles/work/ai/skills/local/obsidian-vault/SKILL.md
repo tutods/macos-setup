@@ -75,32 +75,19 @@ Search and links are plain-text — use Grep/Glob/Bash, not the Obsidian app.
 
 ### Read first
 
-At the start of any non-trivial task, check the vault for prior art before
-working:
+The SessionStart hook already injects full bodies of every note under
+`Lessons/`, `Conventions/`, `Decisions/`, `Process/`, and `Notes/` — that
+context is already loaded, no grep needed as a first step.
 
-```bash
-rg -il "<topic keywords>" "$HOME/Obsidian"
-```
-
-Read matching `Lessons/` and `Conventions/` notes before starting. A logged
-lesson that isn't consulted is dead weight. Cheap when nothing matches; skip
-only for trivial one-liners.
+Fall back to a search of the whole vault when the injected context isn't enough — after long-session compaction, for a folder not yet in the hook's fixed list, or to pin down one exact note. Dispatch these to the `vault-search` subagent (Agent tool) rather than grepping inline — it's a read-only lookup on `haiku`, cheaper than burning main-session tokens on `rg`/`fd` output.
 
 ### Find notes
 
-```bash
-# By filename
-fd -e md . "$HOME/Obsidian" | rg -i "keyword"
-
-# By content
-rg -il "keyword" "$HOME/Obsidian"
-```
+Dispatch to `vault-search`: by filename or by content.
 
 ### Find backlinks to a note
 
-```bash
-rg -l "\[\[Note Title\]\]" "$HOME/Obsidian"
-```
+Dispatch to `vault-search`: "find backlinks to [[Note Title]]".
 
 ### Create a note
 

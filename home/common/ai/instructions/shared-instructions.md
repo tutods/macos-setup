@@ -37,13 +37,18 @@ Always prefer these tools over slower alternatives:
 
 ## Prior Art
 
-Before any non-trivial task, check the Obsidian vault for prior art
-(`obsidian-vault` skill):
+The SessionStart hook already injects every note under `Lessons/`,
+`Conventions/`, `Decisions/`, `Process/`, `Projects/`, `Clients/`, and
+`Notes/` in full — consult that context directly instead of grepping for it
+as a first step. `Prompts/` is injected as titles only (it's a content
+library, not working memory), so it still needs a search when a prompt is
+relevant.
+
+Fall back to a direct search (`obsidian-vault` skill) when the injected
+context isn't enough — after long-session compaction, for a folder not yet
+in the hook's fixed list, or to pin down one exact note:
 
     rg -il "<topic keywords>" "$HOME/Obsidian"
-
-Read matching `Lessons/` and `Conventions/` notes first. A logged lesson that
-isn't consulted is dead weight. Skip only for trivial one-liners.
 
 ## Vault Capture
 

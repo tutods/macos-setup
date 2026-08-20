@@ -33,8 +33,8 @@
     anthropic-agent-skills = "anthropics/skills";
     mattpocock = "mattpocock/skills";
     humanizer = "blader/humanizer";
-    claude-skills = "secondsky/claude-skills";
-    # Single-skill plugins only — see the entries in home.ai.plugins.
+    # Single-skill plugin, but also ships a distinct agent — see the entry
+    # in home.ai.plugins.
     claude-code-skills = "alirezarezvani/claude-skills";
     ponytail = "DietrichGebert/ponytail";
   };
@@ -50,8 +50,14 @@
     "playwright@claude-plugins-official" # browser automation / e2e MCP, generic across web projects
 
     # ── authoring skills and agents ─────────────────────────────────────────
+    # systematic-debugging@claude-skills was dropped — it's a near-verbatim
+    # fork of superpowers:systematic-debugging (same Iron Law, same phases).
+    # write-a-skill@claude-code-skills is kept despite the name overlap with
+    # superpowers:writing-skills — it also ships the cs-skill-author agent
+    # (adversarial 6-question gate before accepting a new skill) and the
+    # /cs:write-a-skill command, neither of which superpowers has.
     "example-skills@anthropic-agent-skills" # skill-creator, mcp-builder (+10 others)
-    "write-a-skill@claude-code-skills" # 1 skill
+    "write-a-skill@claude-code-skills"
 
     # ── single-plugin marketplaces ──────────────────────────────────────────
     "caveman@caveman"
@@ -59,8 +65,5 @@
     "mattpocock-skills@mattpocock"
     "humanizer@humanizer"
     "ponytail@ponytail" # lazy-senior-dev / YAGNI enforcement — generic
-
-    # ── secondsky/claude-skills ──────────────────────────────────────────────
-    "systematic-debugging@claude-skills"
   ];
 }
