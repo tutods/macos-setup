@@ -12,6 +12,7 @@
         [
           "/Applications/Zed.app"
           {home = "Applications/Home Manager Apps/Visual Studio Code.app";}
+          "/Applications/Orca.app"
           "/Applications/Ghostty.app"
         ]
       ];

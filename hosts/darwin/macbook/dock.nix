@@ -16,6 +16,7 @@
           {home = "Applications/Home Manager Apps/Visual Studio Code.app";}
           "/Applications/Trae.app"
           "/Applications/Supacode.app"
+          "/Applications/Orca.app"
           "/Applications/Ghostty.app"
         ]
       ];
