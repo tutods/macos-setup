@@ -1,10 +1,6 @@
 # acli jira, verified command reference
 
-Verified against `acli version 1.3.22-stable`. If a command you need isn't
-here, run `acli jira <path> --help` and read the actual output before
-composing a call, acli's flags are not consistent across sibling commands
-(see the traps section at the end), and a plausible-looking flag either
-silently no-ops or errors with `unknown flag`.
+Verified against `acli version 1.3.22-stable`. If a command you need isn't here, run `acli jira <path> --help` and read the actual output before composing a call, acli's flags are not consistent across sibling commands (see the traps section at the end), and a plausible-looking flag either silently no-ops or errors with `unknown flag`.
 
 ## Auth
 
@@ -75,9 +71,7 @@ Build this with `scripts/jira_adf.py create ...`, don't hand-write it.
 }
 ```
 
-**No `additionalAttributes` on edit.** Verified empirically: passing it fails with
-`json: unknown field "additionalAttributes"`. Custom fields can only be set at
-create time via acli, see `mp-fields.md` for the practical implication.
+**No `additionalAttributes` on edit.** Verified empirically: passing it fails with `json: unknown field "additionalAttributes"`. Custom fields can only be set at create time via acli, see `mp-fields.md` for the practical implication.
 
 ## workitem view
 
@@ -88,16 +82,9 @@ acli jira workitem view <KEY> --fields "summary,status" # narrow the field set
 acli jira workitem view <KEY> --fields "comment" --json  # only way to read a comment's full ADF body
 ```
 
-**Read economy, measured, not a guess:** `view MP-4330` plain = 2,105 bytes;
-`--json` on the same ticket = 13,485 bytes (6.4x). Default to plain for a
-quick read. Reach for `--json` only when the output feeds `jq`, or when you
-need to inspect structure (e.g. confirming a description's ADF nodes, or
-reading a comment body in full, `comment list --json` truncates the body to
-a lossy text summary, only `view --fields comment --json` gives the real ADF).
+**Read economy, measured, not a guess:** `view MP-4330` plain = 2,105 bytes; `--json` on the same ticket = 13,485 bytes (6.4x). Default to plain for a quick read. Reach for `--json` only when the output feeds `jq`, or when you need to inspect structure (e.g. confirming a description's ADF nodes, or reading a comment body in full, `comment list --json` truncates the body to a lossy text summary, only `view --fields comment --json` gives the real ADF).
 
-`--fields '*all'` returns every field, but `names`, `schema`, `editmeta`, and
-`renderedFields` are always `null` in this acli version, there's no field
-name lookup available from `view`. See `mp-fields.md`.
+`--fields '*all'` returns every field, but `names`, `schema`, `editmeta`, and `renderedFields` are always `null` in this acli version, there's no field name lookup available from `view`. See `mp-fields.md`.
 
 ## workitem search
 
@@ -110,9 +97,7 @@ name lookup available from `view`. See `mp-fields.md`.
 --csv / --json
 ```
 
-Field allowlist: `search --fields` rejects custom field IDs outright,
-`--fields customfield_11284` fails with `fields '...' are not allowed`. Custom
-fields are only readable via `view`, not `search`.
+Field allowlist: `search --fields` rejects custom field IDs outright, `--fields customfield_11284` fails with `fields '...' are not allowed`. Custom fields are only readable via `view`, not `search`.
 
 ## workitem transition
 
@@ -122,11 +107,7 @@ fields are only readable via `view`, not `search`.
 --yes                      required
 ```
 
-**No hint on failure.** Verified empirically: an invalid status name returns
-`✗ Failure: <KEY> can't be transitioned: No allowed transitions found for
-given status`, it does NOT enumerate valid next statuses. Don't guess a
-status name hoping the error will correct you; check `mp-conventions.md` for
-the known MP workflow, or ask the user.
+**No hint on failure.** Verified empirically: an invalid status name returns `✗ Failure: <KEY> can't be transitioned: No allowed transitions found for given status`, it does NOT enumerate valid next statuses. Don't guess a status name hoping the error will correct you; check `mp-conventions.md` for the known MP workflow, or ask the user.
 
 ## workitem assign
 
@@ -145,22 +126,11 @@ acli jira workitem comment update --key <KEY> --id <commentId> --body-adf <path.
 acli jira workitem comment list --key <KEY> --json    # body field is a LOSSY TEXT SUMMARY
 ```
 
-**No `--yes` flag on `comment create`**: it doesn't prompt, unlike edit/transition/assign.
-**`-F`/`--body-file`** (capital F), don't confuse with `assign`'s `-f/--from-file`
-or `workitem create`'s `-f/--from-file`; the short flag means different things
-on different commands.
+**No `--yes` flag on `comment create`**: it doesn't prompt, unlike edit/transition/assign. **`-F`/`--body-file`** (capital F), don't confuse with `assign`'s `-f/--from-file` or `workitem create`'s `-f/--from-file`; the short flag means different things on different commands.
 
-Verified empirically: on `comment create`, `-F`/`--body-file` accepts a raw ADF
-doc JSON file directly (not just plain text) and it round-trips byte-for-byte
-into the stored comment. Build it with `scripts/jira_adf.py comment <file.md>`.
+Verified empirically: on `comment create`, `-F`/`--body-file` accepts a raw ADF doc JSON file directly (not just plain text) and it round-trips byte-for-byte into the stored comment. Build it with `scripts/jira_adf.py comment <file.md>`.
 
-**`comment update` does NOT follow the same rule as `create`.** Its own
-`--help` labels `-F`/`--body-file` "Plain text file containing comment body",
-feeding it an ADF JSON file stores the literal JSON text as the comment body
-(no error, renders as a wall of `{ "type": "doc", ...}` in Jira). `update` has
-a separate `--body-adf <path.json>` flag for ADF instead. Always use
-`--body-adf` when updating an existing comment with formatted content;
-`-F`/`--body-file` there is for plain text only.
+**`comment update` does NOT follow the same rule as `create`.** Its own `--help` labels `-F`/`--body-file` "Plain text file containing comment body", feeding it an ADF JSON file stores the literal JSON text as the comment body (no error, renders as a wall of `{ "type": "doc", ...}` in Jira). `update` has a separate `--body-adf <path.json>` flag for ADF instead. Always use `--body-adf` when updating an existing comment with formatted content; `-F`/`--body-file` there is for plain text only.
 
 ## workitem delete / clone / link / attachment
 

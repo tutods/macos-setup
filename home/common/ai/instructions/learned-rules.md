@@ -37,7 +37,7 @@ Standing rules mined from past corrections. Each one exists because the same mis
 
 - **No counts or ranges in docs that go stale.** Describe the set, not its size.
   Wrong: "ADRs 0001–0014". Right: "architecture decision records, numbered".
-- **Never hard-wrap prose in Markdown a human will read in a renderer.** Vault notes, READMEs and docs: one line per paragraph, however long. A hard break renders as a visible line break in Obsidian and most viewers. This does not apply to instruction, skill or agent files, which are model input and wrap freely.
+- **Never hard-wrap prose in Markdown a human will read in a renderer.** Vault notes, READMEs and docs: one line per paragraph, however long. A hard break renders as a visible line break in Obsidian and most viewers. Instruction, skill and agent files are not exempt, the user reads and pastes these directly too.
   Wrong: manually breaking a vault note's paragraph at ~80 columns. Right: the whole paragraph on one line.
 
 Stack-specific style rules (TypeScript, React/Tailwind, Sanity/GROQ) are **not** here, they live in the `ts-conventions`, `react-conventions` and `api-conventions` skills so they cost nothing in a Nix or content session. Load the matching skill before writing code.

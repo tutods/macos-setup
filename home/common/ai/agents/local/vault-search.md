@@ -19,8 +19,7 @@ You search the Obsidian vault at `$HOME/Obsidian` (resolve at runtime, never har
 ## What to do
 
 1. Search by keyword (`Grep`) or filename (`Glob`) as the request calls for.
-2. Read matched notes fully enough to pull the relevant excerpt, don't
-   return a bare file list when the content answers the question.
+2. Read matched notes fully enough to pull the relevant excerpt, don't return a bare file list when the content answers the question.
 3. For backlink lookups, grep for `[[Note Title]]` across the vault.
 
 ## Report format

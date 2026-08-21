@@ -1,17 +1,8 @@
 # MP custom field map
 
-acli cannot list or resolve custom field names on its own: `acli jira field`
-only has `create`/`delete`/`update`/`restore` (no `list`), and
-`view --fields '*all' --json` always returns `names`/`schema`/`editmeta` as
-`null` in this acli version. This table was built by creating a fresh MP
-ticket to enumerate every field ID that exists (78 total on a `Task`), then
-sampling 15 recently-updated real tickets to see which ones actually carry
-values, then cross-checking the ambiguous ones against Jira UI screenshots.
+acli cannot list or resolve custom field names on its own: `acli jira field` only has `create`/`delete`/`update`/`restore` (no `list`), and `view --fields '*all' --json` always returns `names`/`schema`/`editmeta` as `null` in this acli version. This table was built by creating a fresh MP ticket to enumerate every field ID that exists (78 total on a `Task`), then sampling 15 recently-updated real tickets to see which ones actually carry values, then cross-checking the ambiguous ones against Jira UI screenshots.
 
-**Only fields confirmed below are safe to set via `--field
-customfield_XXXXX=value` on `scripts/jira_adf.py create`.** For anything not
-in this table, don't guess an ID, ask the user to set it in the Jira UI, or
-confirm the field's purpose with them first.
+**Only fields confirmed below are safe to set via `--field customfield_XXXXX=value` on `scripts/jira_adf.py create`.** For anything not in this table, don't guess an ID, ask the user to set it in the Jira UI, or confirm the field's purpose with them first.
 
 ## Confirmed
 
@@ -38,26 +29,8 @@ confirm the field's purpose with them first.
 
 ## Unidentified / low-value, leave alone
 
-`customfield_10000`, `customfield_10001` (a timestamp, cause unclear),
-`customfield_10922` (small integer, always `0` or `1` in the sample),
-`customfield_11729` (populated on only 2/15 sampled, object with `id`/`self`,
-purpose unclear). These are almost certainly Jira-app-internal fields (Jira
-Service Management, automation, or a third-party marketplace app) rather than
-something a person fills in when creating a ticket. An MP `Task` exposes far
-more custom field IDs than the ones documented here; the rest were never
-observed populated by hand, so treat anything absent from this file as
-unidentified and ask rather than guessing.
+`customfield_10000`, `customfield_10001` (a timestamp, cause unclear), `customfield_10922` (small integer, always `0` or `1` in the sample), `customfield_11729` (populated on only 2/15 sampled, object with `id`/`self`, purpose unclear). These are almost certainly Jira-app-internal fields (Jira Service Management, automation, or a third-party marketplace app) rather than something a person fills in when creating a ticket. An MP `Task` exposes far more custom field IDs than the ones documented here; the rest were never observed populated by hand, so treat anything absent from this file as unidentified and ask rather than guessing.
 
 ## Refreshing this file
 
-If a field you need isn't here, or a value in the wild doesn't match what's
-documented: create a throwaway ticket (`create ... --json`, note the key),
-inspect it with `view --fields '*all' --json`, then delete it
-(`workitem delete --key <KEY> --yes`), this is how the full 78-field ID list
-above was originally obtained, since a fresh ticket's `null` fields are the
-only way acli exposes the complete field set. Cross-reference against a
-handful of real recent tickets (`search --jql "project = MP AND updated >= -30d"`)
-to see what's actually populated in practice, and if still ambiguous, ask the
-user to check the field in the Jira UI (screenshots of the picker are the
-fastest way to get a confirmed name, there's no acli or REST-free way to
-resolve one).
+If a field you need isn't here, or a value in the wild doesn't match what's documented: create a throwaway ticket (`create ... --json`, note the key), inspect it with `view --fields '*all' --json`, then delete it (`workitem delete --key <KEY> --yes`), this is how the full 78-field ID list above was originally obtained, since a fresh ticket's `null` fields are the only way acli exposes the complete field set. Cross-reference against a handful of real recent tickets (`search --jql "project = MP AND updated >= -30d"`) to see what's actually populated in practice, and if still ambiguous, ask the user to check the field in the Jira UI (screenshots of the picker are the fastest way to get a confirmed name, there's no acli or REST-free way to resolve one).

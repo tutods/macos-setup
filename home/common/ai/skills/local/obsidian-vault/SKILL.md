@@ -5,45 +5,26 @@ description: Search, read, and write durable notes in the Obsidian vault at $HOM
 
 # Obsidian Vault
 
-The vault lives at `$HOME/Obsidian`, resolve `$HOME` at run time, never
-hardcode `/Users/<name>`.
+The vault lives at `$HOME/Obsidian`, resolve `$HOME` at run time, never hardcode `/Users/<name>`.
 
-This vault is Claude Code's durable memory: the harness remembers nothing
-automatically, so writes happen because this skill runs. Two triggers:
+This vault is Claude Code's durable memory: the harness remembers nothing automatically, so writes happen because this skill runs. Two triggers:
 
 - **Explicit**: the user asks to remember/save/look something up.
-- **Proactive**: a corrected mistake, an approved decision, a standing
-  convention, or a completed deploy/handoff. No need to be asked.
+- **Proactive**: a corrected mistake, an approved decision, a standing convention, or a completed deploy/handoff. No need to be asked.
 
-Each machine has its own vault and they are strictly separate: the work vault
-holds company context only, the personal vault personal context only. Never
-reference or assume content from the other.
+Each machine has its own vault and they are strictly separate: the work vault holds company context only, the personal vault personal context only. Never reference or assume content from the other.
 
 ## Layout
 
-The SessionStart hook injects a fixed folder list every session, and that list
-is authoritative, a new type folder needs adding there too, or its notes are
-invisible at session start.
+The SessionStart hook injects a fixed folder list every session, and that list is authoritative, a new type folder needs adding there too, or its notes are invisible at session start.
 
-- Type folders at vault root. Both vaults have `Lessons/`, `Decisions/`,
-  `Process/`, `Conventions/`, and `Notes/` (catch-all). The personal vault adds
-  `Projects/` (own products, infra, tooling), `Clients/` (paid engagements,
-  scope and handoff state only, **never** contact details, billing figures, or
-  company-owned code), and `Prompts/` (a prompt library). Create a new folder
-  only for a genuinely new recurring type.
-- Subfolder a type folder by area only once it has outgrown flat browsing.
-  In the personal vault that's `Lessons/` (by tech area) and `Prompts/` (by
-  category). Everywhere else `area` frontmatter covers filtering.
-- **No hand-maintained index notes.** `Index.md` is the only note at vault
-  root and it just links `Vault.base`, an Obsidian Bases file that derives
-  every view from frontmatter, so nothing goes stale.
-- `Templates/` holds one starter file per type, excluded from `Vault.base` by a
-  folder filter.
+- Type folders at vault root. Both vaults have `Lessons/`, `Decisions/`, `Process/`, `Conventions/`, and `Notes/` (catch-all). The personal vault adds `Projects/` (own products, infra, tooling), `Clients/` (paid engagements, scope and handoff state only, **never** contact details, billing figures, or company-owned code), and `Prompts/` (a prompt library). Create a new folder only for a genuinely new recurring type.
+- Subfolder a type folder by area only once it has outgrown flat browsing. In the personal vault that's `Lessons/` (by tech area) and `Prompts/` (by category). Everywhere else `area` frontmatter covers filtering.
+- **No hand-maintained index notes.** `Index.md` is the only note at vault root and it just links `Vault.base`, an Obsidian Bases file that derives every view from frontmatter, so nothing goes stale.
+- `Templates/` holds one starter file per type, excluded from `Vault.base` by a folder filter.
 - **Title Case** for every note filename.
-- Each note is a self-contained unit, one topic/decision/fact per note, not a
-  running log.
-- `[[wikilinks]]` resolve by filename regardless of folder, so moving a note
-  between folders never breaks a link.
+- Each note is a self-contained unit, one topic/decision/fact per note, not a running log.
+- `[[wikilinks]]` resolve by filename regardless of folder, so moving a note between folders never breaks a link.
 
 ## Frontmatter
 
@@ -60,13 +41,9 @@ created: <YYYY-MM-DD>
 ---
 ```
 
-`area` and `tags` aren't redundant: `tags` feeds Obsidian's tag pane and
-`file.hasTag()`, `area` is free-form for fine-grained Bases filtering. Never
-leave `project` or `area` empty, an empty list makes the note invisible in any
-view grouped or filtered on it.
+`area` and `tags` aren't redundant: `tags` feeds Obsidian's tag pane and `file.hasTag()`, `area` is free-form for fine-grained Bases filtering. Never leave `project` or `area` empty, an empty list makes the note invisible in any view grouped or filtered on it.
 
-Personal-vault `Prompts/` notes are content rather than project-derived, so
-`project` doesn't apply and `tags` is free-form topical:
+Personal-vault `Prompts/` notes are content rather than project-derived, so `project` doesn't apply and `tags` is free-form topical:
 
 ```yaml
 ---
@@ -83,8 +60,7 @@ created: <YYYY-MM-DD>
 
 ## Linking
 
-Obsidian `[[wikilinks]]`: `[[Note Title]]`. Links to related notes go at the
-bottom, under a `## Related` heading.
+Obsidian `[[wikilinks]]`: `[[Note Title]]`. Links to related notes go at the bottom, under a `## Related` heading.
 
 ## Workflows
 
@@ -92,47 +68,32 @@ Search and links are plain text, use the vault subagents, not the Obsidian app.
 
 ### Read first
 
-The SessionStart hook has already listed every note title, so you know what
-exists without searching. It never injects bodies.
+The SessionStart hook has already listed every note title, so you know what exists without searching. It never injects bodies.
 
-Read a note by dispatching the `vault-search` subagent, which is a read-only
-lookup on `haiku` and cheaper than spending main-session tokens on `rg` output.
-Do this whenever a listed title looks relevant, and for a whole-vault content
-search when the title index is not enough. Never grep the vault inline.
+Read a note by dispatching the `vault-search` subagent, which is a read-only lookup on `haiku` and cheaper than spending main-session tokens on `rg` output. Do this whenever a listed title looks relevant, and for a whole-vault content search when the title index is not enough. Never grep the vault inline.
 
 ### Find notes or backlinks
 
-Dispatch to `vault-search`: by filename, by content, by `Prompts/` topic, or
-"find backlinks to [[Note Title]]".
+Dispatch to `vault-search`: by filename, by content, by `Prompts/` topic, or "find backlinks to [[Note Title]]".
 
 ### Check vault health
 
-Dispatch to the `vault-lint` subagent for dead wikilinks, orphan notes,
-missing or empty frontmatter, empty notes, filename drift, and type folders the
-SessionStart hook does not list. It only reports; apply any fix in the main
-session.
+Dispatch to the `vault-lint` subagent for dead wikilinks, orphan notes, missing or empty frontmatter, empty notes, filename drift, and type folders the SessionStart hook does not list. It only reports; apply any fix in the main session.
 
 ### Create a note
 
-1. Title Case filename, `.md` extension, in the matching type folder (or
-   `Notes/` if nothing fits, plus an area subfolder where that folder is
-   subfoldered). `mkdir -p` the folder first if it doesn't exist.
+1. Title Case filename, `.md` extension, in the matching type folder (or `Notes/` if nothing fits, plus an area subfolder where that folder is subfoldered). `mkdir -p` the folder first if it doesn't exist.
 2. Start from `Templates/<Type>.md` and fill in the frontmatter.
-3. Content is one unit of learning, what, why, and nothing that belongs in a
-   more specific note. Write one line per paragraph, never hard-wrap: the
-   vault runs with Obsidian's default `strictLineBreaks: false`, so a
-   hard-wrapped line renders as a visible break.
+3. Content is one unit of learning, what, why, and nothing that belongs in a more specific note. Write one line per paragraph, never hard-wrap: the vault runs with Obsidian's default `strictLineBreaks: false`, so a hard-wrapped line renders as a visible break.
 4. Add `[[wikilinks]]` to related notes under `## Related`.
 
 ### Update a note
 
-Read it first, then edit in place, don't append a dated log entry unless the
-note is explicitly a running log.
+Read it first, then edit in place, don't append a dated log entry unless the note is explicitly a running log.
 
 ### Log a lesson
 
-Triggered by a corrected mistake, not by request. Grep `Lessons/` for the topic
-first and update an existing note instead of duplicating it.
+Triggered by a corrected mistake, not by request. Grep `Lessons/` for the topic first and update an existing note instead of duplicating it.
 
 ```markdown
 ---
@@ -154,16 +115,8 @@ created: <YYYY-MM-DD>
 
 ### Log a decision or convention
 
-Triggered by an approved architecture/tech choice (`Decisions/`) or a stated
-standing rule for how work happens (`Conventions/`), not by request. Grep the
-target folder first and update an existing note rather than duplicating it.
-Skip if the choice was reverted in the same session, or is a one-off with no
-standing pattern.
+Triggered by an approved architecture/tech choice (`Decisions/`) or a stated standing rule for how work happens (`Conventions/`), not by request. Grep the target folder first and update an existing note rather than duplicating it. Skip if the choice was reverted in the same session, or is a one-off with no standing pattern.
 
 ### Update a project/client note
 
-Personal vault only, triggered by a completed deploy, migration, stack change,
-or handoff. Read the existing `Projects/<Name>.md` or `Clients/<Name>.md`
-(create from the matching template if absent) and update its "Current
-state"/"Handoff state" line in place, this type is meant to track current
-state, so it's the exception to "not a running log."
+Personal vault only, triggered by a completed deploy, migration, stack change, or handoff. Read the existing `Projects/<Name>.md` or `Clients/<Name>.md` (create from the matching template if absent) and update its "Current state"/"Handoff state" line in place, this type is meant to track current state, so it's the exception to "not a running log."

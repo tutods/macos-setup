@@ -5,8 +5,7 @@ description: The technology stack used on personal and freelance projects, TanSt
 
 # Personal Machine Stack
 
-Defaults for personal projects, side projects and freelance work. When a choice
-isn't specified by the project itself, pick from here.
+Defaults for personal projects, side projects and freelance work. When a choice isn't specified by the project itself, pick from here.
 
 ## Frontend
 
@@ -46,8 +45,7 @@ isn't specified by the project itself, pick from here.
 
 ## Auth
 
-Better Auth, preferred for new projects. Check its options reference before
-implementing a flow; the API moves and training-data memory is stale.
+Better Auth, preferred for new projects. Check its options reference before implementing a flow; the API moves and training-data memory is stale.
 
 ## Tooling
 

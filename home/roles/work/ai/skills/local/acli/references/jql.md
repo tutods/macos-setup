@@ -35,13 +35,8 @@ Pass via `--jql "..."` to `workitem search`, `edit`, `transition`, `assign`, `cl
 
 ## Functions that come up often
 
-`currentUser()`, `startOfWeek()` / `startOfMonth()` / `startOfYear()` (and
-`endOf*` variants), `now()`, relative dates (`-7d`, `-1M`).
+`currentUser()`, `startOfWeek()` / `startOfMonth()` / `startOfYear()` (and `endOf*` variants), `now()`, relative dates (`-7d`, `-1M`).
 
 ## Combining with acli mutation commands
 
-`edit`, `transition`, `assign`, `clone` all accept `--jql` instead of `--key`
-to operate on a whole result set at once. This is powerful and destructive,
-always run the equivalent `search --jql "..." --json` first to see exactly
-which tickets will be affected, and show that list to the user before firing
-a bulk mutation.
+`edit`, `transition`, `assign`, `clone` all accept `--jql` instead of `--key` to operate on a whole result set at once. This is powerful and destructive, always run the equivalent `search --jql "..." --json` first to see exactly which tickets will be affected, and show that list to the user before firing a bulk mutation.

@@ -85,8 +85,7 @@ Capture the comment ID from the response of each `gh pr comment` / `gh api` call
 After posting, ask **"Add your reaction to each posted comment?"** (yes / no).
 Reactions are the user's own signal, they never filter or remove findings.
 
-On yes, walk the posted comments in order and ask for each: 👍 Agree, 👎
-Disagree, 👀 Not sure, or Skip. Then apply it with:
+On yes, walk the posted comments in order and ask for each: 👍 Agree, 👎 Disagree, 👀 Not sure, or Skip. Then apply it with:
 
 ```bash
 gh api repos/{owner}/{repo}/issues/comments/<comment-id>/reactions \

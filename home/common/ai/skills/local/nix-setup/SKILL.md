@@ -5,9 +5,7 @@ description: Conventions for the ~/.dotfiles Nix flake that manages both macOS m
 
 # Nix Dotfiles: Repo Conventions
 
-`~/.dotfiles` is a Nix flake using nix-darwin + Home Manager + nix-homebrew,
-managing two Apple Silicon machines: `macbook` (user `tutods`) and `work`
-(user `daniel.a.sousa`).
+`~/.dotfiles` is a Nix flake using nix-darwin + Home Manager + nix-homebrew, managing two Apple Silicon machines: `macbook` (user `tutods`) and `work` (user `daniel.a.sousa`).
 
 ## Commands
 
@@ -25,8 +23,7 @@ nix-collect-garbage -d         # drop old generations
 
 - `nix fmt .` after touching any `.nix` file, hard requirement
 - `nix flake check` after changing `flake.nix` or any module
-- `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or
-  `home.ai.marketplaces`, plugins fail silently, so nothing else catches a typo
+- `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else catches a typo
 
 ## Module hierarchy (innermost wins)
 
@@ -37,8 +34,7 @@ home/common/         → all users, Home Manager
 home/roles/<role>/   → personal/ or work/ role-specific
 ```
 
-Person-specific overrides (GPG keys, email) are passed through `mkUser`'s
-`extraImports`, there is no dedicated `home/identity/` directory.
+Person-specific overrides (GPG keys, email) are passed through `mkUser`'s `extraImports`, there is no dedicated `home/identity/` directory.
 
 ## Where things belong
 
@@ -50,23 +46,17 @@ Person-specific overrides (GPG keys, email) are passed through `mkUser`'s
 | GUI apps (machine-specific) | `hosts/darwin/<name>/homebrew/` |
 | Per-user programs | `home/common/` or `home/roles/<role>/` |
 
-Run `nix search nixpkgs <name>` before adding a package. Prefer `pkgs` (stable);
-`pkgsUnstable` only when stable is too old. `claude-code` qualifies. Reach for
-Homebrew instead when nixpkgs would compile from source or needs a test-skip
-override to build (`worktrunk`, JetBrains apps).
+Run `nix search nixpkgs <name>` before adding a package. Prefer `pkgs` (stable); `pkgsUnstable` only when stable is too old. `claude-code` qualifies. Reach for Homebrew instead when nixpkgs would compile from source or needs a test-skip override to build (`worktrunk`, JetBrains apps).
 
 ## Configurable paths
 
-- `home.devDir`, development directory (default `$HOME/Developer`), declared in
-  `home/common/options.nix`
+- `home.devDir`, development directory (default `$HOME/Developer`), declared in `home/common/options.nix`
 - Fish exports `$PROJECT_DIR` for its functions
-- Never hardcode `/Users/<name>`, use `config.home.homeDirectory` and
-  `config.home.username`
+- Never hardcode `/Users/<name>`, use `config.home.homeDirectory` and `config.home.username`
 
 ## AI setup structure
 
-Everything AI lives under `home/common/ai/`, and every file in it writes into
-`~/.claude/`. Full reference: `docs/ai-setup.md`.
+Everything AI lives under `home/common/ai/`, and every file in it writes into `~/.claude/`. Full reference: `docs/ai-setup.md`.
 
 ```
 home/common/ai/
@@ -90,8 +80,7 @@ home/common/ai/
 │   └── local/       → in-repo workflow scripts
 ```
 
-`lib/ai.nix` is passed in as the `aiLib` module argument (wired in
-`lib/mkHost.nix` via `extraSpecialArgs`), never import it by relative path.
+`lib/ai.nix` is passed in as the `aiLib` module argument (wired in `lib/mkHost.nix` via `extraSpecialArgs`), never import it by relative path.
 
 Each role mirrors that shape:
 
@@ -113,30 +102,20 @@ home/roles/<role>/ai/
 | Deterministic multi-agent fan-out (parallel perspectives, verify gates) | `home/common/ai/workflows/local/` |
 | True for one repo | that repo's own `CLAUDE.md` |
 
-Never name a specific project inside a machine-wide instruction or skill, write
-it in that project's own `CLAUDE.md` instead, so it travels with the repo.
+Never name a specific project inside a machine-wide instruction or skill, write it in that project's own `CLAUDE.md` instead, so it travels with the repo.
 
 ## Skills and plugins
 
-External skills arrive as Claude Code plugins: declare the marketplace and
-plugin in Nix, and Claude Code installs them on next launch. `enabledPlugins` is
-rewritten from `home.ai.plugins` on every deploy, so removing a plugin from the
-list disables it, and a plugin added through the UI won't survive `./nix.sh`.
-Run `./scripts/verify-plugins.sh` after any change; plugins fail silently.
+External skills arrive as Claude Code plugins: declare the marketplace and plugin in Nix, and Claude Code installs them on next launch. `enabledPlugins` is rewritten from `home.ai.plugins` on every deploy, so removing a plugin from the list disables it, and a plugin added through the UI won't survive `./nix.sh`. Run `./scripts/verify-plugins.sh` after any change; plugins fail silently.
 
-Custom skills are **copied** into `~/.claude/skills/`, so edits made there are
-overwritten on the next deploy, change the repo source instead.
+Custom skills are **copied** into `~/.claude/skills/`, so edits made there are overwritten on the next deploy, change the repo source instead.
 
 ## Key conventions
 
-- Repo scripts are zero-dependency bash, `nix.sh` and anything at bootstrap
-  must work with built-ins only (a gum-based TUI was tried and reverted)
+- Repo scripts are zero-dependency bash, `nix.sh` and anything at bootstrap must work with built-ins only (a gum-based TUI was tried and reverted)
 - Git remotes stay SSH, never "fix" them to HTTPS
-- Configs the app itself writes (Zed `settings.json`) are seeded as a one-time
-  copy, not a store symlink, a read-only symlink breaks the app's own save
-- Secrets never live in this repo, `~/.config/fish/secrets.fish` and
-  `~/.config/git/private` are machine-local
+- Configs the app itself writes (Zed `settings.json`) are seeded as a one-time copy, not a store symlink, a read-only symlink breaks the app's own save
+- Secrets never live in this repo, `~/.config/fish/secrets.fish` and `~/.config/git/private` are machine-local
 - Homebrew upgrades automatically on every deploy
 - `pkgsUnstable` packages are not pinned, they track the unstable channel
-- One-off gotchas are recorded in `docs/ai-lessons.md`, check it before
-  debugging something that feels familiar
+- One-off gotchas are recorded in `docs/ai-lessons.md`, check it before debugging something that feels familiar

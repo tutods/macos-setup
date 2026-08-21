@@ -5,8 +5,7 @@ description: The technology stack used on company projects, React with TanStack,
 
 # Work Machine Stack
 
-Defaults for company projects. When a choice isn't specified by the project
-itself, pick from here.
+Defaults for company projects. When a choice isn't specified by the project itself, pick from here.
 
 ## Frontend
 
@@ -18,8 +17,7 @@ itself, pick from here.
 | React Hook Form | Form state |
 | Zod | Schema validation at boundaries |
 
-Each project brings its own design system, check the repo rather than assuming
-one.
+Each project brings its own design system, check the repo rather than assuming one.
 
 ## Backend
 
@@ -31,13 +29,11 @@ one.
 
 ## Database
 
-MariaDB, primary database. Note this is **not** PostgreSQL; syntax and types
-differ from the personal stack.
+MariaDB, primary database. Note this is **not** PostgreSQL; syntax and types differ from the personal stack.
 
 ## Testing
 
-Vitest for unit/integration, MSW for API mocking, faker.js for test data,
-where the project already uses them. None of it is mandatory.
+Vitest for unit/integration, MSW for API mocking, faker.js for test data, where the project already uses them. None of it is mandatory.
 
 ## GCP
 
@@ -60,5 +56,4 @@ where the project already uses them. None of it is mandatory.
 
 ## Conventions
 
-Branch naming, git identity and secret handling are always-on rules, see
-`~/.claude/rules/workflow.md`, which is the single home for them.
+Branch naming, git identity and secret handling are always-on rules, see `~/.claude/rules/workflow.md`, which is the single home for them.
