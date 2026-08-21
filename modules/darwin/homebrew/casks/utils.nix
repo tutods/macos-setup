@@ -17,7 +17,7 @@
     # Others
     "bitwarden"
     "raycast"
-    "openlogi"
+    "logi-options+"
     "kap"
     "numi"
     "obsidian"
