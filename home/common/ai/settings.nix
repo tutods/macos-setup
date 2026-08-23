@@ -51,6 +51,21 @@
       }
     ];
 
+    # Re-states the Delegation Contract every turn; the rules file alone drifts
+    # once the context fills. Stdout is appended to the prompt as context.
+    hooks.UserPromptSubmit = [
+      {
+        hooks = [
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/delegation-reminder.sh\"";
+            timeout = 5;
+            statusMessage = "Reinforcing delegation rules";
+          }
+        ];
+      }
+    ];
+
     hooks.PreToolUse = [
       {
         matcher = "Bash";
@@ -99,6 +114,10 @@ in {
   };
   home.file.".claude/hooks/vault-context.sh" = {
     source = ./vault-context.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/delegation-reminder.sh" = {
+    source = ./delegation-reminder.sh;
     force = true;
   };
 

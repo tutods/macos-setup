@@ -11,6 +11,7 @@
     ./shared-instructions.md
     ./model-quality.md
     ./learned-rules.md
+    ./delegation.md
     ./model-selection.md
   ];
 
