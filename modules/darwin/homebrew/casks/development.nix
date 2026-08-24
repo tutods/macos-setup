@@ -9,5 +9,6 @@
     # express.
     "ghostty"
     "copilot-cli"
+    "google-gemini"
   ];
 }

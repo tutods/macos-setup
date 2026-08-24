@@ -22,6 +22,5 @@
     "iina"
     "elmedia-player"
     "claude"
-    "refine"
   ];
 }
