@@ -15,6 +15,6 @@
     "datagrip"
     "webstorm"
 
-    "antigravity"
+    "antigravity-ide"
   ];
 }
