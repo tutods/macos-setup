@@ -2,10 +2,10 @@
 
 Pick the least powerful model that fits the task.
 
-| Tier | Model ID | Use when |
-|------|----------|----------|
-| **fast** | `claude-haiku-4-5-20251001` | isolated functions, 1-2 files, mechanical changes |
-| **default** | `claude-sonnet-5` | multi-file coordination, pattern matching, integration work |
-| **best** | `claude-opus-5` | architecture decisions, design reviews, complex reasoning |
+| Tier | Model | Use when |
+|------|-------|----------|
+| **fast** | `haiku` | isolated functions, 1-2 files, mechanical changes |
+| **default** | `sonnet` | multi-file coordination, pattern matching, integration work |
+| **best** | `opus` | architecture decisions, design reviews, complex reasoning |
 
-Model IDs go stale, check the current lineup before trusting this table.
+Aliases resolve to the latest model in each tier, so this table doesn't go stale.

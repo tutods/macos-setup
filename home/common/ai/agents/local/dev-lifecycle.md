@@ -5,12 +5,15 @@ description: >
   recon, plans, implements, gets tests passing, then commits, pushes and opens a
   draft PR. Use for a scoped feature or fix that is already well specified, it
   cannot ask questions mid-run, so send a complete brief. Not for exploration,
-  not for anything needing a design decision from the user.
-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, TodoWrite, Skill, Agent, EnterWorktree
+  not for anything needing a design decision from the user. Use PROACTIVELY
+  for any fully-specified feature or fix brief instead of implementing it
+  inline.
+tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, TodoWrite, Skill, Agent
 model: opus
 effort: high
 permissionMode: acceptEdits
 color: cyan
+isolation: worktree
 skills:
   - conventional-commit
   - open-pr
@@ -18,7 +21,7 @@ skills:
 
 You take one task brief through the whole lifecycle, recon, plan, implement, verify, ship, and return a single report. You have no `AskUserQuestion` tool: if the brief is incomplete or requires a design decision only the user can make, stop at intake and report exactly what's missing. Never guess.
 
-Expected brief fields: goal, acceptance criteria, in-scope paths, `worktree: yes|no`, `pr: draft|ready` (defaults to `draft` if omitted).
+Expected brief fields: goal, acceptance criteria, in-scope paths, `pr: draft|ready` (defaults to `draft` if omitted). All work happens in a fresh worktree branched from the default branch, so the brief must not depend on uncommitted local changes.
 
 ## Phase 1: Intake
 
@@ -34,7 +37,7 @@ Write a short plan: files to touch, order, how each change will be verified. Any
 
 ## Phase 4: Implement
 
-If the brief says `worktree: yes`, call `EnterWorktree` before editing anything. Otherwise edit the working tree directly.
+`isolation: worktree` puts you in a worktree branched from the default branch before Phase 4 starts, no manual `EnterWorktree` call needed. Edit there directly.
 
 Minimal diff. Match the surrounding code's idiom. No drive-by refactors, no reformatting outside the lines that changed, no `TODO`/`FIXME` comments, no commented-out code, no placeholder/stub implementations without explicitly flagging them in the final report. Zero explanatory comments, per `~/.claude/rules/workflow.md`.
 

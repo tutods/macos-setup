@@ -42,3 +42,5 @@ Give every agent the full brief it needs up front. A subagent cannot come back a
 ### Escape hatch
 
 "Do it yourself", "no agents", or "inline" from the user suspends this section for that turn. So does plan mode's own agent policy, which takes precedence over this one.
+
+The `UserPromptSubmit` hook injects a compressed restatement of this contract on every turn; its text lives in the `delegationReminder` binding in `home/common/ai/settings.nix`, so an edit to this contract needs that string updated too.

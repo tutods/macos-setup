@@ -6,8 +6,10 @@ description: >
   posts, the parent session decides what to do with the findings (fix them,
   or post via the review-pr skill). Use for "review this diff", "review my
   branch before I open the PR", or as the review gate after dev-lifecycle.
+  MUST BE USED as the review gate before any commit or PR, and PROACTIVELY
+  whenever a working diff exists and hasn't been reviewed yet.
 tools: Read, Grep, Glob, Bash, Skill, TodoWrite
-model: opus
+model: sonnet
 effort: high
 color: red
 ---

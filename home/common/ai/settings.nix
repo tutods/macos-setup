@@ -3,6 +3,15 @@
   lib,
   ...
 }: let
+  # Single source for the UserPromptSubmit hook text; instructions/delegation.md points here.
+  delegationReminder = ''
+    DELEGATION ACTIVE. Main thread orchestrates, it does not read/search/edit inline
+    unless the work is one known file. 2+ independent units = multiple Agent calls in
+    ONE message. Recon -> Explore. Multi-file edit -> general-purpose. Diff review ->
+    code-reviewer. Vault -> vault-search. Pass `model` on every dispatch. Not for
+    user decisions, commits/PRs, or destructive ops.
+  '';
+
   settings = {
     theme = "dark-daltonized";
     model = "opusplan";
@@ -117,8 +126,13 @@ in {
     force = true;
   };
   home.file.".claude/hooks/delegation-reminder.sh" = {
-    source = ./delegation-reminder.sh;
-    force = true;
+    text = ''
+      #!/bin/bash
+      # Quoted heredoc: the reminder text contains backticks.
+      cat <<'REMINDER'
+      ${delegationReminder}REMINDER
+    '';
+    executable = true;
   };
 
   home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''

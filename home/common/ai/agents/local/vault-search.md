@@ -8,7 +8,9 @@ description: >
   start), a folder outside the hook's fixed list, backlink lookups, or a
   targeted "look something up in Obsidian" request mid-session. Not for
   logging lessons/decisions or creating/updating notes, those need
-  conversation context and stay in the main session.
+  conversation context and stay in the main session. MUST BE USED for any
+  vault lookup beyond the SessionStart title index, rather than grepping the
+  vault inline.
 tools: Read, Grep, Glob
 model: haiku
 effort: low

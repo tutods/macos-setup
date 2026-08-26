@@ -7,7 +7,9 @@ description: >
   Never writes: returns a findings report the main session acts on. Use when
   asked to check/lint/audit vault health, or after a batch of renames or
   note moves. Not for fixing what it finds (that's the main session) and not
-  for content lookups (that's vault-search).
+  for content lookups (that's vault-search). Use PROACTIVELY after a batch
+  of vault renames or note moves, and MUST BE USED for any vault health/lint
+  audit request.
 tools: Read, Grep, Glob, Bash, Skill
 model: haiku
 effort: low
