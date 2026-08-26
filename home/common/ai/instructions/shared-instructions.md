@@ -30,9 +30,11 @@ Always prefer these over the slower alternative:
 
 ## Vault
 
-The SessionStart hook injects the vault's core folders at the top of every
-session. Its section headers say which folders are titles only. Consult that
-context before you search for anything.
+The SessionStart hook injects a titles-only index of the vault's core
+folders at the top of every session. Prompts/ is excluded from that index, a
+one-line pointer with a note count stands in its place, and any Prompts/
+lookup goes through the `vault-search` agent instead. Consult that context
+before you search for anything.
 
 The `obsidian-vault` skill owns everything else. It covers how to search when
 the injected context is not enough, and the four proactive write triggers:

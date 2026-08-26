@@ -49,7 +49,7 @@ Auto-compaction triggers on a percentage of the live context window
 
 | Hook | Trigger | Action |
 |------|---------|--------|
-| `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Bodies come from `vault-search` on demand |
+| `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Prompts/ is excluded (a pointer line with a note count stands in), and truncation is folder-aware, it never cuts mid-folder. Bodies come from `vault-search` on demand |
 | `UserPromptSubmit` | Every prompt | `delegation-reminder.sh`, generated inline in `settings.nix` from the `delegationReminder` string, re-states the Delegation Contract so it survives a long session |
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
 | `PostToolUse` | `Edit`, `Write`, `MultiEdit` | `biome check --write`, no-op unless the project has a biome config |

@@ -28,7 +28,8 @@ The preloaded `obsidian-vault` skill has this vault's folder layout and frontmat
 3. **Frontmatter gaps**: notes with no leading `---` block, or with a required field (per the skill's contract) missing or present-but-empty. Flag these first: an empty value makes a note invisible in `Vault.base` views filtered or grouped on that field.
 4. **Empty/stub notes**: zero-byte files, or files that are frontmatter with no body content.
 5. **Filename drift**: filenames not in Title Case, or with an unexpected extension inside a type folder.
-6. **Hook coverage**: read `~/.claude/hooks/vault-context.sh` for the folder list it walks. Flag any top-level type folder in the vault that is missing from that list, because its notes never appear in the session index. Also report the index size against `CLAUDE_VAULT_BUDGET` if it is within 20% of the cap, since past the cap the index truncates.
+6. **Hook coverage**: read `~/.claude/hooks/vault-context.sh` for the folder list it walks. Flag any top-level type folder in the vault that is missing from that list, because its notes never appear in the session index, except `Prompts/`, which is an intentional exclusion (it gets a pointer line, not a title listing), not a drift finding.
+7. **Index budget**: from the same read of `vault-context.sh`, compute the index size and compare it against the `CLAUDE_VAULT_BUDGET` budget. List which folders would be dropped at the current budget (truncation is folder-aware, it never cuts mid-folder). Warn when the index is within 20% of the cap or over it.
 
 ## Report format
 
