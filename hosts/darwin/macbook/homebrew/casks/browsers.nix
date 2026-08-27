@@ -1,7 +1,6 @@
 {...}: {
   homebrew.casks = [
-    "firefox@developer-edition"
-    "zen"
+    "firefox"
     "brave-browser"
   ];
 }
