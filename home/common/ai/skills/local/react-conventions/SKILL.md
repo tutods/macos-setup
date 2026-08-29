@@ -85,6 +85,26 @@ Rules:
 
 Wrong: `@theme { --container-lg: 1040px }` → Right: `@theme { --container-page: 1040px }`, used as `max-w-page`.
 
+### A new CSS custom property is the last resort, not the first
+
+Adding a variable to fix a styling problem is the default failure mode. Work down this list and stop at the first rung that holds:
+
+1. A **shadcn semantic slot** — `bg-background` `text-foreground` `bg-card` `border-border` `bg-muted` `text-muted-foreground` `bg-primary` `bg-secondary` `bg-destructive` `border-input` `ring`. Never invent a synonym for one of these.
+2. A **token the project already defines.** Grep the CSS entry for the value before naming anything. A repeated literal usually means a token exists under a name you did not look for.
+3. A **stock Tailwind utility**, including opacity modifiers and native gradients — `bg-background/94`, `bg-linear-[100deg] from-black/95 via-black/80 via-38% to-black/10`. Tailwind v4 renders gradients without a `style` object or a variable.
+4. The **same `className` repeated at each call site**, or a local `const` in the one file that uses it. Three copies of a string are cheaper than a token nobody can find later.
+5. Only then a new token, and only with a role name.
+
+Before adding one, delete a duplicate. A file whose token count keeps climbing has a naming problem, not a missing value.
+
+Wrong: adding `--gradient-media-scrim` for a gradient inlined in three components.
+Right: `bg-linear-[100deg] from-black/95 via-black/80 via-38% to-black/10` at all three.
+
+Wrong: `text-white` / `border-white/35` over a photo scrim while the project's on-media token sits unused.
+Right: `text-on-media` / `border-on-media/35`.
+
+**Keep `components.json`'s `baseColor` matching the real palette.** A project on a warm palette that still declares `baseColor: "zinc"` gets zinc defaults from every `npx shadcn add`, which then get patched by hand with a new variable each time. That mismatch is what generates token sprawl. Record the theme as a shadcn preset (`npx shadcn@latest init --preset <code>`) so generated components start on the right palette.
+
 ### No Snapshot Tests
 
 Snapshot tests are banned, they break on cosmetic changes and create false confidence. Write behavioral tests instead.

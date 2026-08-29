@@ -14,6 +14,7 @@
     humanizer = "blader/humanizer";
     claude-code-skills = "alirezarezvani/claude-skills";
     ponytail = "DietrichGebert/ponytail";
+    ui-ux-pro-max-skill = "nextlevelbuilder/ui-ux-pro-max-skill";
   };
 
   home.ai.plugins = [
@@ -36,5 +37,6 @@
     "mattpocock-skills@mattpocock"
     "humanizer@humanizer"
     "ponytail@ponytail" # lazy-senior-dev / YAGNI enforcement, generic
+    "ui-ux-pro-max@ui-ux-pro-max-skill" # UI/UX rule database, incl. the shadcn and Tailwind stacks
   ];
 }

@@ -26,9 +26,8 @@
     # rules alongside ~/.claude/rules/. https://code.claude.com/docs/en/memory
     autoMemoryEnabled = false;
 
-    # Percentage, not a fixed autoCompactWindow, see docs/ai-lessons.md.
+    # No autoCompactWindow set: model-tuned default, see docs/ai-lessons.md.
     autoCompactEnabled = true;
-    env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60";
     env.CLAUDE_VAULT_BUDGET = "12288";
 
     # https://code.claude.com/docs/en/statusline

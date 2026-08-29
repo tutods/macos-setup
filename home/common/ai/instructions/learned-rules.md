@@ -32,6 +32,8 @@ Standing rules mined from past corrections. Each one exists because the same mis
   Wrong: implementing Better Auth sign-up flow from memory when `disableSignup` exists. Right: check the options reference, then implement.
 - **A PR isn't delivered with conflicts on it.** After opening or updating a PR (or after the base branch moves), check mergeability and resolve conflicts immediately.
   Wrong: reporting "PR opened" while GitHub shows conflicts. Right: rebase/merge, push, confirm mergeable.
+- **Never name a new thing for a problem an existing name already covers.** A design token, config key, helper or type introduced because the existing one wasn't looked for is sprawl, and it is the most-corrected habit here. Search for the value first, delete a duplicate before adding a name, and repeat a literal at three call sites rather than add a fourth name nobody will find. The Tailwind/shadcn form of this rule lives in `react-conventions`.
+  Wrong: adding `--gradient-media-scrim` for a gradient inlined in three components. Right: the stock Tailwind gradient utility at all three, no token.
 
 ### Docs style
 
