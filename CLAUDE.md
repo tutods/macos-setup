@@ -22,14 +22,18 @@ Not optional, not even for trivial edits:
 nix fmt                       # before committing any .nix file
 nix flake check               # after changing flake.nix or any module
 ./scripts/verify-plugins.sh   # after touching home.ai.plugins / marketplaces
-./scripts/verify-references.sh # after renaming or deleting a skill/agent/script
 ```
 
-Plugins fail silently, so nothing else will tell you a name is wrong. Dangling
-references fail the same way: a deleted skill still named in a `names` list, or a
-renamed script still cited in a doc, is silently ignored rather than erroring.
-The pre-commit hook runs `nix fmt` and `verify-references.sh` always, and
-`verify-plugins.sh` when a plugin source file is staged.
+`nix flake check` builds both host toplevels, and `lib/ai.nix` carries build-time
+`assertions` that fail that build if a name in a skill/agent/workflow `names` list
+has no matching file, or an on-disk `local/` entry is missing from its list. That
+replaces the old `verify-references.sh`; its doc backtick-path check (repo paths
+cited in Markdown that no longer exist) was dropped as low value.
+
+`verify-plugins.sh` is the one check `nix flake check` cannot do: it clones the
+marketplace repos to confirm each declared plugin resolves remotely. Plugins fail
+silently, so a typo'd name is never surfaced otherwise. The pre-commit hook runs
+`nix fmt` always and `verify-plugins.sh` when a plugin source file is staged.
 
 ## Commands
 

@@ -17,6 +17,3 @@ fi
 if git diff --cached --name-only | grep -qE '(plugins\.nix|roles/[^/]+/ai/default\.nix)$'; then
   ./scripts/verify-plugins.sh --quiet
 fi
-
-# A dangling reference is ignored at deploy time, so catch it here.
-./scripts/verify-references.sh --quiet

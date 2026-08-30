@@ -25,18 +25,6 @@ jobs:
       - name: Verify declared plugins resolve
         run: ./scripts/verify-plugins.sh --quiet
 
-  # Dangling references fail the same way: the name is silently ignored, so a
-  # deleted skill or a renamed script keeps being "used" by something.
-  verify-references:
-    name: Verify References
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install ripgrep
-        run: sudo apt-get update && sudo apt-get install -y ripgrep
-      - name: Verify no dangling references
-        run: ./scripts/verify-references.sh --quiet
-
   # alejandra drift breaks `nix fmt --check` and leaks reformatting into diffs.
   # Cheap, so it runs on ubuntu alongside the other fast checks.
   fmt:

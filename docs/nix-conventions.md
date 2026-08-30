@@ -5,9 +5,8 @@ Rules and conventions for working in this Nix flake repo.
 ## Sanity Checks (mandatory, not optional)
 
 - Run `nix fmt` before committing any `.nix` file, hard requirement, not a suggestion
-- Run `nix flake check` after any change to `flake.nix` or module files, catches errors before deploy
-- Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else will tell you a name is wrong
-- Run `./scripts/verify-references.sh` after renaming or deleting any skill, agent, workflow or script. A dangling reference is silently ignored, never an error
+- Run `nix flake check` after any change to `flake.nix` or module files, catches errors before deploy. It builds both host toplevels, and `lib/ai.nix` assertions fail that build if a skill/agent/workflow `names` list and its `local/` directory drift apart (a declared name with no file, or a file with no declaration). This replaced `verify-references.sh`; that script's check for repo paths cited in Markdown that no longer exist was dropped as low value
+- Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else will tell you a name is wrong. This is the one check `nix flake check` cannot do: it clones the marketplace repos to confirm each plugin resolves remotely
 - Run `./scripts/deploy-doctor.sh <host>` before applying, a deploy silently deletes unmanaged skill dirs, drops undeclared plugins and hook events, and clears `permissions.allow`; the doctor previews all four
 - Never skip these even for "trivial" edits
 

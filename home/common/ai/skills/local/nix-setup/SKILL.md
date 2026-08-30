@@ -23,8 +23,8 @@ nix-collect-garbage -d         # drop old generations
 
 - `nix fmt .` after touching any `.nix` file, hard requirement
 - `nix flake check` after changing `flake.nix` or any module
-- `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else catches a typo
-- `./scripts/verify-references.sh` after renaming or deleting a skill/agent/script
+- `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else catches a typo. This is the one check `nix flake check` cannot do (it needs the network to resolve each plugin)
+- Renaming or deleting a skill/agent/workflow: `nix flake check` catches a `names` list that drifts from its `local/` directory, via `lib/ai.nix` assertions
 
 ## Module hierarchy (innermost wins)
 

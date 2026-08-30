@@ -35,11 +35,11 @@ if [ -z "$CONFIG" ]; then
   esac
 fi
 
-case "$CONFIG" in
-  macbook) USER_NAME="tutods" ;;
-  work)    USER_NAME="daniel.a.sousa" ;;
-  *) echo "unknown config: $CONFIG (expected macbook|work)" >&2; exit 1 ;;
-esac
+if ! USER_NAME=$(nix --extra-experimental-features "nix-command flakes" eval --raw \
+      --file ./hosts.nix --apply "h: h.\"$CONFIG\".user" 2>/dev/null) || [ -z "$USER_NAME" ]; then
+  echo "deploy-doctor: unknown config '$CONFIG' or hosts.nix eval failed (expected macbook|work)" >&2
+  exit 1
+fi
 
 HM=".#darwinConfigurations.$CONFIG.config.home-manager.users.$USER_NAME"
 NIX=(nix --extra-experimental-features "nix-command flakes" eval --json)

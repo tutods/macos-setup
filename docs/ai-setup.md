@@ -143,11 +143,11 @@ Code installs nothing, and nothing is logged. Always run:
 
 ### Custom: in-repo sources
 
-| Path | Skills |
-|------|--------|
-| `home/common/ai/skills/local/` | `api-conventions`, `content-creation`, `content-writer`, `conventional-commit`, `deep-review`, `dependency-hygiene`, `llm-council`, `nix-setup`, `obsidian-vault`, `open-pr`, `unslop`, `pr-feedback`, `react-conventions`, `react-hook-form-zod`, `review-pr`, `seo-audit`, `testing-conventions`, `ts-conventions`, `ts-strict-audit`, `ui-iterate` (`content-creation`, `react-hook-form-zod`, `seo-audit` are vendored, see each skill's `vendored-from`) |
-| `home/roles/personal/ai/skills/local/` | `optimize-images`, `personal-stack` |
-| `home/roles/work/ai/skills/local/` | `acli`, `babysit-prs`, `deep-review-prs`, `implement-ticket`, `work-stack` |
+Declared in `home/common/ai/skills/default.nix` and the role modules
+(`home/roles/{personal,work}/ai/default.nix`); each `names` entry is a directory
+under the sibling `skills/local/`. Run `nix flake check` to validate the two
+against each other. Some skills are vendored rather than authored here, see each
+skill's `vendored-from`.
 
 Installed by `lib/ai.nix:mkLocalSkills` as **real directories** under
 `~/.claude/skills/`, copied rather than symlinked so a store permission quirk
@@ -166,9 +166,8 @@ Custom subagents, Markdown with `name`/`description`/`tools`/`model`
 frontmatter, invoked via the Agent tool. In-repo only; there's no plugin channel
 for agents.
 
-| Path | Agents |
-|------|--------|
-| `home/common/ai/agents/local/` | `code-reviewer`, `dev-lifecycle`, `vault-lint`, `vault-search` |
+Declared in `home/common/ai/agents/default.nix`; each `names` entry is a
+`<name>.md` under the sibling `agents/local/`. Run `nix flake check` to validate.
 
 Installed by `lib/ai.nix:mkLocalAgents` as `home.file` symlinks into
 `~/.claude/agents/<name>.md`. An agent file is read-only input, so a store
@@ -181,9 +180,8 @@ Deterministic multi-agent scripts for Claude Code's Workflow tool, JS with an
 `export const meta` block, using `agent()`/`parallel()`/`pipeline()`. Installed
 by `lib/ai.nix:mkLocalWorkflows` as symlinks into `~/.claude/workflows/<name>.js`.
 
-| Path | Workflows |
-|------|-----------|
-| `home/common/ai/workflows/local/` | `llm-council` |
+Declared in `home/common/ai/workflows/default.nix`; each `names` entry is a
+`<name>.js` under the sibling `workflows/local/`. Run `nix flake check` to validate.
 
 **The boundary between the three.** Skills are knowledge. Agents are judgement
 in one isolated context. Workflows are fixed fan-out with deterministic control

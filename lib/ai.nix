@@ -34,6 +34,18 @@ in {
   }: {
     home.ai.customSkills = names;
 
+    assertions =
+      (map (name: {
+          assertion = builtins.pathExists (dir + "/${name}/SKILL.md");
+          message = "mkLocalSkills (${label}): '${name}' is in names but ${toString dir}/${name}/SKILL.md is missing";
+        })
+        names)
+      ++ (lib.mapAttrsToList (entry: kind: {
+          assertion = kind != "directory" || builtins.elem entry names;
+          message = "mkLocalSkills (${label}): ${toString dir}/${entry} exists but is not in the names list";
+        })
+        (builtins.readDir dir));
+
     # After linkGeneration: Home Manager has torn down the previous generation's
     # symlinks by then, and copying earlier would have them removed. Before
     # customSkillsReconcile: that step deletes anything in ~/.claude/skills this
@@ -61,6 +73,18 @@ in {
     home.file = lib.listToAttrs (map
       (name: lib.nameValuePair ".claude/agents/${name}.md" {source = "${dir}/${name}.md";})
       names);
+
+    assertions =
+      (map (name: {
+          assertion = builtins.pathExists (dir + "/${name}.md");
+          message = "mkLocalAgents: '${name}' is in names but ${toString dir}/${name}.md is missing";
+        })
+        names)
+      ++ (lib.mapAttrsToList (entry: kind: {
+          assertion = kind != "regular" || !lib.hasSuffix ".md" entry || builtins.elem (lib.removeSuffix ".md" entry) names;
+          message = "mkLocalAgents: ${toString dir}/${entry} exists but is not in the names list";
+        })
+        (builtins.readDir dir));
   };
 
   mkLocalWorkflows = {
@@ -71,6 +95,18 @@ in {
     home.file = lib.listToAttrs (map
       (name: lib.nameValuePair ".claude/workflows/${name}.js" {source = "${dir}/${name}.js";})
       names);
+
+    assertions =
+      (map (name: {
+          assertion = builtins.pathExists (dir + "/${name}.js");
+          message = "mkLocalWorkflows: '${name}' is in names but ${toString dir}/${name}.js is missing";
+        })
+        names)
+      ++ (lib.mapAttrsToList (entry: kind: {
+          assertion = kind != "regular" || !lib.hasSuffix ".js" entry || builtins.elem (lib.removeSuffix ".js" entry) names;
+          message = "mkLocalWorkflows: ${toString dir}/${entry} exists but is not in the names list";
+        })
+        (builtins.readDir dir));
   };
 
   # Merge a single key into a JSON config file, creating the file if absent.
