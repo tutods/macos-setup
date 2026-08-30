@@ -14,6 +14,14 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# git commit exports GIT_DIR/GIT_WORK_TREE etc. into this hook's environment,
+# which redirects every `git -C <cloned marketplace>` below at the dotfiles repo
+# instead of the clone (all marketplace checks fail with "no
+# .claude-plugin/marketplace.json"). The clones are freshly made in $TMP, so
+# dropping the inherited context is always safe here.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY \
+      GIT_ALTERNATE_OBJECT_DIRECTORIES
+
 QUIET=0
 [ "${1:-}" = "--quiet" ] && QUIET=1
 

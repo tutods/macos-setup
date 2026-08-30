@@ -3,6 +3,9 @@
 Everything Claude Code reads is generated from this repo. Nothing is installed
 out of band, no sync script, no manifest, no `npx skills`.
 
+opencode (personal machine) mirrors this from the same instruction sources:
+see [opencode-setup.md](opencode-setup.md).
+
 ## Tools
 
 Managed in `modules/packages/development.nix` (system-wide, both machines):
@@ -11,6 +14,7 @@ Managed in `modules/packages/development.nix` (system-wide, both machines):
 |------|---------|
 | `claude-code` | The AI coding assistant (CLI) |
 | `pipx` | Installs `code-review-graph` post-deploy |
+| `rtk` | Rewrite read-only commands to avoid permission prompts |
 
 Model tiers are named in one place only: `instructions/model-selection.md`.
 
@@ -41,8 +45,7 @@ push-notification toggle Claude Code writes) is left in place. `hooks` is
 stricter: an event Nix declares is replaced wholesale, and a foreign event
 survives only if its name is in `keepHookEvents` (the Orca events); every other
 foreign event is dropped on deploy, so nothing can leave a hook Nix never
-sanctioned. `permissions.allow` is declared empty for the same reason, a "yes,
-don't ask again" click writes a rule there and the deploy clears it. **Never add
+sanctioned. `permissions.allow` is declared so that declared entries persist; any "yes, don't ask again" click writes a rule there that is cleared on every deploy. **Never add
 a plugin through the Claude Code UI**; `enabledPlugins` is Nix-owned and the next
 deploy drops it.
 
@@ -59,6 +62,7 @@ fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 | `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Prompts/ is excluded (a pointer line with a note count stands in), and truncation is folder-aware, it never cuts mid-folder. Bodies come from `vault-search` on demand. The folder list is role-scoped via `home.ai.vaultFolders`: the work machine indexes only generic folders (Conventions, Decisions, Lessons, Process, Notes), so freelance-client and personal-project titles never enter a work session |
 | `UserPromptSubmit` | Every prompt after compaction | `delegation-reminder.sh` re-states the Delegation Contract once the session transcript contains a compaction boundary; before that the full contract is already in context and the hook is silent |
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
+| `PreToolUse` | Any `Bash` call | `rtk hook claude`, auto-rewrites commands to use RTK for permission-free read-only ops |
 | `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the third inline `Read`/`Grep`/`Glob` in a turn, once per turn |
 | `PostToolUse` | `Edit`, `Write`, `MultiEdit` | `biome check --write`, no-op unless the project has a biome config |
 

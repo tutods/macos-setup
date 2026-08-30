@@ -152,7 +152,7 @@ Run `nix fmt` before committing, a pre-commit hook enforces it.
 │   │   ├── shell/              fish · oh-my-posh
 │   │   └── terminal/           ghostty
 │   └── roles/
-│       ├── personal/           Personal-only packages, plugins, skills
+│       ├── personal/           Personal-only packages, plugins, skills, opencode
 │       └── work/               Work-only: acli, PR review skills
 ├── scripts/                    verify-plugins · darwin/ helpers
 └── docs/                       Guides and reference

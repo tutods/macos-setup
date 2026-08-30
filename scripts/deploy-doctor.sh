@@ -110,14 +110,15 @@ if [ -f "$SETTINGS" ]; then
   [ "$hooks_dropped" -eq 0 ] && print_ok "no unsanctioned hook events"
 
   # ── 4. permissions.allow entries a deploy clears ───────────────────────────
-  allow_count=$(jq -r '.permissions.allow // [] | length' "$SETTINGS" 2>/dev/null)
-  case "$allow_count" in ''|*[!0-9]*) allow_count=0 ;; esac
-  if [ "$allow_count" -gt 0 ]; then
-    print_warn "permissions.allow has $allow_count entr(y/ies); deploy clears them:"
-    jq -r '.permissions.allow[] | "      " + .' "$SETTINGS" 2>/dev/null | head -10
-  else
-    print_ok "permissions.allow empty"
-  fi
+  declared_allows=$(sed -n '/permissions\.allow = \[/,/\];/p' home/common/ai/settings.nix | grep -o '"[^"]*"' | tr -d '"' | jq -Rsc 'split("\n") | map(select(length>0))')
+  allow_dropped=0
+  while IFS= read -r allow; do
+    [ -z "$allow" ] && continue
+    print_del "permission allow $allow  ${DIM}(not declared in settings.nix)${NC}"
+    allow_dropped=$((allow_dropped+1))
+  done < <(jq -r --argjson keep "$declared_allows" \
+    '.permissions.allow // [] | .[] | select(. as $a | $keep | index($a) | not)' "$SETTINGS" 2>/dev/null)
+  [ "$allow_dropped" -eq 0 ] && print_ok "no unmanaged permission allows"
 else
   print_ok "no live settings.json yet"
 fi

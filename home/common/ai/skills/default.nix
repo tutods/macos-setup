@@ -31,6 +31,7 @@
         "react-hook-form-zod"
         "content-creation"
         "seo-audit"
+        "orchestration"
       ];
     })
   ];

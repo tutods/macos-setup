@@ -17,6 +17,7 @@
     frontend-slides = "zarazhangrui/frontend-slides";
     claude-video = "bradautomates/claude-video";
     addy-web-quality-skills = "addyosmani/web-quality-skills";
+    ai-builder-club = "AI-Builder-Club/skills";
   };
 
   home.ai.plugins = [
@@ -43,5 +44,6 @@
     "frontend-slides@frontend-slides" # zero-dependency HTML deck generator
     "watch@claude-video" # yt-dlp download + video analysis
     "web-quality-skills@addy-web-quality-skills" # Lighthouse-category audits, GEO/SEO baseline
+    "skills@ai-builder-club" # codebase harness + loop engineer (10 skills), generic
   ];
 }

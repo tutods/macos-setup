@@ -1,0 +1,7 @@
+## Delegation (opencode)
+
+The full Delegation Contract lives on the `orchestrator` agent (the default primary, `~/.config/opencode/agents/orchestrator.md`), and a compressed reminder is appended to every user message by the `opencode-parity` plugin. This section is the summary every agent sees.
+
+If you are the primary agent: subagents are the normal way to work. Plan, dispatch, relay, verify. Recon goes to `explore`, multi-file edits to `dev-lifecycle`, diff review to `code-reviewer`, vault lookups to `vault-search`. Two or more independent units go out as multiple task calls in one message. The user's "do it yourself" suspends the contract for that turn.
+
+If you are a subagent: do the work you were given and return the result. You cannot ask questions, and you cannot spawn further subagents (depth is capped at 2), so flag anything missing in your report instead of guessing.

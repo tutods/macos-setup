@@ -47,11 +47,24 @@
       "Read(**/.env.*)"
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
-    # Declared so the merge owns it: a "yes, don't ask again" click writes a rule
-    # here, and without Nix declaring the key that rule would survive every
-    # deploy. Empty means every deploy clears click-granted allows; add wanted
-    # ones here.
-    permissions.allow = [];
+    # Declared entries persist across deploys; any click-granted allows not
+    # declared here are cleared on every deploy.
+    permissions.allow = [
+      # RTK rewrites of read-only commands, declared so the PreToolUse rewrite
+      # does not turn every status/log/diff into a permission prompt. RTK only
+      # rewrites when the ORIGINAL command matched an allow rule, so this list
+      # stays the authority; deny rules still win regardless.
+      "Bash(rtk git status:*)"
+      "Bash(rtk git log:*)"
+      "Bash(rtk git diff:*)"
+      "Bash(rtk git show:*)"
+      "Bash(rtk ls:*)"
+      "Bash(rtk find:*)"
+      "Bash(rtk grep:*)"
+      "Bash(rtk read:*)"
+      "Bash(rtk deps:*)"
+      "Bash(rtk gain:*)"
+    ];
 
     # ./vault-context.sh owns the folder list. Titles only, never bodies.
     hooks.SessionStart = [
@@ -93,6 +106,23 @@
             command = "\"$HOME/.claude/hooks/block-ai-attribution.sh\"";
             timeout = 10;
             statusMessage = "Checking commit/PR for AI attribution";
+          }
+        ];
+      }
+      # RTK auto-rewrite: the exact entry `rtk init -g` would write (upstream
+      # shape, verified against src/hooks/init.rs in rtk-ai/rtk). Own matcher
+      # group so a future `rtk init -g --uninstall` removes only this group,
+      # never the attribution hook. Silent exit 0 on passthrough; deny from
+      # the attribution hook still wins over any rewrite. Both hooks run in
+      # parallel. See docs/ai-lessons.md for the revisit decision.
+      {
+        matcher = "Bash";
+        hooks = [
+          {
+            type = "command";
+            command = "rtk hook claude";
+            timeout = 10;
+            statusMessage = "RTK auto-rewrite";
           }
         ];
       }

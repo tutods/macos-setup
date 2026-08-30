@@ -55,7 +55,7 @@ nix-collect-garbage -d        # garbage collect old generations
 | `modules/` | Shared system-level config, applied to every host |
 | `hosts/darwin/<name>/` | Per-machine config: system settings, dock, Homebrew casks |
 | `home/common/` | Shared Home Manager config (shell, CLI tools, editors, AI) |
-| `home/roles/` | Role config, `personal/`, `work/`, each a directory with `default.nix` and an `ai/` submodule |
+| `home/roles/` | Role config, `personal/`, `work/`, each a directory with `default.nix`, an `ai/` submodule, and (personal only) an `opencode/` submodule |
 | `lib/` | `mkUser`, `mkHost`, `ai.nix` helpers |
 
 `flake.nix` defines `mkDarwin`, which stacks: `modules/common.nix` →
@@ -73,6 +73,7 @@ files for aliases, abbreviations, functions and tool integrations.
 | Topic | Doc |
 |-------|-----|
 | AI setup, instructions, skills, agents, workflows, plugins, MCP, hooks | [docs/ai-setup.md](docs/ai-setup.md) |
+| opencode setup (personal machine) | [docs/opencode-setup.md](docs/opencode-setup.md) |
 | Nix conventions, package placement, module authoring | [docs/nix-conventions.md](docs/nix-conventions.md) |
 | Adding a host or a user | [docs/adding-host-or-user.md](docs/adding-host-or-user.md) |
 | One-off gotchas already paid for | [docs/ai-lessons.md](docs/ai-lessons.md) |
