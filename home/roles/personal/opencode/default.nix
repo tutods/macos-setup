@@ -58,12 +58,12 @@ in {
   # inputs, store symlinks are safe (like Claude's mkLocalAgents).
   home.file =
     (builtins.foldl' (acc: name:
-      acc
-      // {
-        ".config/opencode/agents/${name}.md".source = ./agents + "/${name}.md";
-      })
-    {}
-    agentNames)
+        acc
+        // {
+          ".config/opencode/agents/${name}.md".source = ./agents + "/${name}.md";
+        })
+      {}
+      agentNames)
     // {
       # Global rules, generated from the shared instruction sources. Hand
       # edits are lost on the next deploy; change the repo.

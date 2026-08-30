@@ -24,16 +24,15 @@
     peerReview = "ollama-cloud/gpt-oss:120b";
   };
 
-  councilAgents =
-    lib.mapAttrs' (persona: model:
-      lib.nameValuePair "council-${persona}" {
-        inherit model;
-        mode = "subagent";
-        hidden = true;
-        temperature = 0.4;
-        description = "Council advisor seat. Invoked only by the council command or the orchestrator, never directly.";
-      })
-    m.seats;
+  councilAgents = lib.mapAttrs' (persona: model:
+    lib.nameValuePair "council-${persona}" {
+      inherit model;
+      mode = "subagent";
+      hidden = true;
+      temperature = 0.4;
+      description = "Council advisor seat. Invoked only by the council command or the orchestrator, never directly.";
+    })
+  m.seats;
 
   cfg = {
     "$schema" = "https://opencode.ai/config.json";
