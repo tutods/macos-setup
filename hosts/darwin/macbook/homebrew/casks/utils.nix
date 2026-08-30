@@ -22,5 +22,6 @@
     "iina"
     "elmedia-player"
     "claude"
+    "kimi"
   ];
 }
