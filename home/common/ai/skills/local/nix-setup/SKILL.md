@@ -14,6 +14,7 @@ description: Conventions for the ~/.dotfiles Nix flake that manages both macOS m
 ./nix.sh work                  # build + apply work machine
 ./nix.sh macbook --build-only  # build only (no sudo, no apply)
 ./nix.sh macbook --force       # force rebuild
+./scripts/deploy-doctor.sh macbook # preview what the next deploy deletes
 nix fmt .                      # format all Nix files
 nix flake check                # validate flake
 nix-collect-garbage -d         # drop old generations
@@ -25,6 +26,7 @@ nix-collect-garbage -d         # drop old generations
 - `nix flake check` after changing `flake.nix` or any module
 - `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else catches a typo. This is the one check `nix flake check` cannot do (it needs the network to resolve each plugin)
 - Renaming or deleting a skill/agent/workflow: `nix flake check` catches a `names` list that drifts from its `local/` directory, via `lib/ai.nix` assertions
+- `./scripts/deploy-doctor.sh <host>` before applying: a deploy silently deletes unmanaged skill dirs, drops undeclared plugins and hook events, and clears `permissions.allow`; the doctor previews all four
 
 ## Module hierarchy (innermost wins)
 
@@ -67,8 +69,9 @@ home/common/ai/
 ├── settings.nix     → ~/.claude/settings.json (+ hooks)
 ├── plugins.nix      → marketplaces + plugins, shared across hosts
 ├── mcp.nix          → MCP servers, merged into ~/.claude.json
+├── maintenance.nix  → weekly launchd pruning of old session transcripts
 ├── statusline.nix   → statusline script + config
-├── *.sh             → hook scripts (vault-context, block-ai-attribution, delegate-nudge, statusline)
+├── *.sh             → hook scripts (vault-context, block-ai-attribution, delegate-nudge, delegation-reminder, biome-fix, statusline)
 ├── instructions/    → always-on instructions (→ ~/.claude/rules/workflow.md)
 ├── skills/
 │   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)

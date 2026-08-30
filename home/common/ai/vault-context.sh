@@ -78,7 +78,9 @@ for d in $folders; do
   [ -d "$vault/$d" ] && search_dirs="$search_dirs $vault/$d"
 done
 matches=""
-[ -n "$search_dirs" ] && matches=$(rg -l "^project: ${slug}\$" $search_dirs 2>/dev/null || true)
+# --fixed-strings --line-regexp: the slug is a directory name, not a regex;
+# metacharacters in it must match literally.
+[ -n "$search_dirs" ] && matches=$(rg -l --fixed-strings --line-regexp "project: ${slug}" $search_dirs 2>/dev/null || true)
 if [ -n "$matches" ]; then
   echo "# Notes tagged for this project ($slug)"
   printf '%s\n' "$matches" | sed "s|^$vault/||" | sort

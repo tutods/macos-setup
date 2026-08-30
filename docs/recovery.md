@@ -12,9 +12,13 @@ Run these in order on a fresh machine:
 
 ## 2. Initial Setup
 1. Clone the repository:
-   `git clone https://github.com/tutods/.dotfiles.git ~/.dotfiles`
+   `git clone https://github.com/tutods/macos-setup.git ~/.dotfiles`
 2. Navigate to the root:
    `cd ~/.dotfiles`
+3. Enable the repo's pre-commit checks (nix.sh also does this on first deploy,
+   but commits made before that would silently skip `nix fmt` and
+   `verify-plugins.sh`):
+   `git config core.hooksPath .hooks`
 
 ## 3. Deployment Sequence
 Run the deployment script for the specific machine:

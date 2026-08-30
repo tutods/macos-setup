@@ -32,7 +32,7 @@ cp -r hosts/darwin/macbook hosts/darwin/new-machine
 
 ### 3. (Optional) Add role-specific overrides
 
-If the new user needs overrides beyond the shared `home/common/` config, create or edit a role file in `home/roles/`. Otherwise, `mkUser` with `role = "personal"` or `"work"` is sufficient, no per-user directory needed.
+If the new user needs overrides beyond the shared `home/common/` config, create or edit a role directory in `home/roles/` (see "Add a role" below). Otherwise, `mkUser` with `role = "personal"` or `"work"` is sufficient, no per-user directory needed.
 
 ### 4. Register in `hosts.nix`
 
@@ -80,14 +80,19 @@ EOF
 
 ### 1. Add a role (if needed)
 
-If the new user needs overrides beyond `home/common/`, create a role file `home/roles/<role>.nix`. Otherwise, use an existing role (`personal` or `work`).
+If the new user needs overrides beyond `home/common/`, a new role takes two steps, both required:
+
+1. Create a role directory `home/roles/<role>/` with a `default.nix` (roles are directories, not single files — see `home/roles/personal/`).
+2. Add the role to the `roleModule` map in `lib/mkUser.nix`. A role name mkUser does not know fails the build.
+
+Otherwise, use an existing role (`personal` or `work`).
 
 In the host's `default.nix`, use `mkUser`:
 
 ```nix
 homeConfig = mkUser {
   username = "newuser";
-  role     = "personal"; # or "work", or a new role name
+  role     = "personal"; # or "work", or a role added to lib/mkUser.nix's roleModule map
 };
 ```
 

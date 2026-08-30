@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{...}: {
   # Import shared modules
   imports = [
     ./packages

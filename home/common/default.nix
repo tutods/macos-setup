@@ -15,10 +15,12 @@
     ./ai
   ];
 
+  # devDir, not a hardcoded ~/Developer: fish's $PROJECT_DIR points at the
+  # option, so this must create whatever the option says.
   home.activation.createDeveloperDir = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if [ ! -d "${config.home.homeDirectory}/Developer" ]; then
-      echo "↣ Create Developer directory"
-      mkdir -p "${config.home.homeDirectory}/Developer"
+    if [ ! -d "${config.home.devDir}" ]; then
+      echo "↣ Create dev directory ${config.home.devDir}"
+      mkdir -p "${config.home.devDir}"
     fi
   '';
 

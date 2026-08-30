@@ -45,6 +45,16 @@
       "Read(~/.config/git/private)"
       "Read(**/.env)"
       "Read(**/.env.*)"
+      # Defense in depth: the Read() rules above gate only the Read tool, so
+      # without these a `cat ~/.ssh/id_ed25519` is one reflexive approval away.
+      # Prefix-matched, not airtight — the point is stopping the casual path.
+      "Bash(cat ~/.ssh/*)"
+      "Bash(cat ~/.aws/*)"
+      "Bash(cat ~/.config/fish/secrets.fish*)"
+      "Bash(cat ~/.config/git/private*)"
+      "Bash(cat ~/.config/gcloud/*)"
+      "Bash(base64 ~/.ssh/*)"
+      "Bash(base64 ~/.aws/*)"
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
     # Declared entries persist across deploys; any click-granted allows not
@@ -109,20 +119,23 @@
           }
         ];
       }
-      # RTK auto-rewrite: the exact entry `rtk init -g` would write (upstream
-      # shape, verified against src/hooks/init.rs in rtk-ai/rtk). Own matcher
-      # group so a future `rtk init -g --uninstall` removes only this group,
-      # never the attribution hook. Silent exit 0 on passthrough; deny from
-      # the attribution hook still wins over any rewrite. Both hooks run in
+      # RTK auto-rewrite: rewrites commands through rtk for token-cheap output.
+      # Own matcher group (not appended to the attribution hook above) so a
+      # future removal only touches this group, never the attribution hook.
+      # rtk-rewrite.sh is a defensive wrapper: it resolves the rtk binary and
+      # exits 0 (silent passthrough) when rtk (now Nix-provided, see
+      # modules/packages/development.nix) is not on PATH, so a machine without
+      # it loses only the savings, never the session. Deny from the
+      # attribution hook still wins over any rewrite; both hooks run in
       # parallel. See docs/ai-lessons.md for the revisit decision.
       {
         matcher = "Bash";
         hooks = [
           {
             type = "command";
-            command = "rtk hook claude";
+            command = "\"$HOME/.claude/hooks/rtk-rewrite.sh\"";
             timeout = 10;
-            statusMessage = "RTK auto-rewrite";
+            statusMessage = "Rewriting command through rtk";
           }
         ];
       }
@@ -139,26 +152,40 @@
       }
     ];
 
-    # Silent no-op unless the project has a biome config.
+    # Silent no-op unless the project has a biome config and a PATH-installed
+    # biome; fixes only the edited file. See biome-fix.sh.
     hooks.PostToolUse = [
       {
         matcher = "Edit|Write|MultiEdit";
         hooks = [
           {
             type = "command";
-            command = "if [ -f biome.json ] || [ -f biome.jsonc ]; then if command -v biome >/dev/null 2>&1; then biome check --write 2>&1; elif [ -x ./node_modules/.bin/biome ]; then ./node_modules/.bin/biome check --write 2>&1; fi; fi";
+            command = "\"$HOME/.claude/hooks/biome-fix.sh\"";
+            timeout = 30;
+            statusMessage = "Running biome on the edited file";
           }
         ];
       }
     ];
 
+    # "<owner>/<repo>[@<sha>]"; the sha pins the marketplace to a reviewed
+    # commit (Claude Code prefers `sha` over any ref when both are set).
     extraKnownMarketplaces =
-      lib.mapAttrs (_: repo: {
-        source = {
-          source = "github";
-          inherit repo;
-        };
-      })
+      lib.mapAttrs (
+        _: spec: let
+          parts = lib.splitString "@" spec;
+          repo = builtins.head parts;
+        in {
+          source =
+            {
+              source = "github";
+              inherit repo;
+            }
+            // lib.optionalAttrs (builtins.length parts > 1) {
+              sha = builtins.elemAt parts 1;
+            };
+        }
+      )
       config.home.ai.marketplaces;
 
     # Rewritten whole on every deploy, so dropping a plugin from
@@ -181,6 +208,14 @@ in {
   };
   home.file.".claude/hooks/delegation-reminder.sh" = {
     source = ./delegation-reminder.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/biome-fix.sh" = {
+    source = ./biome-fix.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/rtk-rewrite.sh" = {
+    source = ./rtk-rewrite.sh;
     force = true;
   };
 

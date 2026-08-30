@@ -28,6 +28,19 @@ fi
 target_shell="$sys_fish"
 [ -x "$fish_bin" ] && target_shell="$fish_bin"
 
+# Never point a login shell at a binary that does not exist (e.g. fish dropped
+# from the profile mid-migration) — that locks the user out of their shell.
+if [ ! -x "$target_shell" ]; then
+  echo "warning: no executable fish found ($fish_bin, $sys_fish); leaving shell for ${username} unchanged"
+  exit 0
+fi
+
+# Register whichever binary is actually being set, not just the per-user one.
+if ! grep -qx "$target_shell" /etc/shells 2>/dev/null; then
+  echo "Adding $target_shell to /etc/shells"
+  echo "$target_shell" >> /etc/shells
+fi
+
 current=$(dscl . -read "/Users/${username}" UserShell 2>/dev/null | awk '{print $2}')
 if [ "$current" != "$target_shell" ]; then
   echo "Setting default shell for ${username} from ${current:-default} to $target_shell"

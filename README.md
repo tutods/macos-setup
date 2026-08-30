@@ -79,8 +79,10 @@ Plugins fail silently, a typo'd name is written to `settings.json`, nothing inst
 **1. Prerequisites**
 
 ```bash
-sh <(curl -L https://nixos.org/nix/install)   # Nix, multi-user
 xcode-select --install                         # Command Line Tools
+# Nix via the Determinate installer (same one CI and docs/recovery.md use;
+# flakes enabled by default):
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
 **2. Clone**
@@ -88,6 +90,7 @@ xcode-select --install                         # Command Line Tools
 ```bash
 git clone https://github.com/tutods/macos-setup.git ~/.dotfiles
 cd ~/.dotfiles
+git config core.hooksPath .hooks   # pre-commit checks; nix.sh also sets this on first deploy
 ```
 
 **3. Apply**
@@ -143,7 +146,7 @@ Run `nix fmt` before committing, a pre-commit hook enforces it.
 │   └── packages/               cli · development · media · fonts
 ├── hosts/darwin/
 │   ├── macbook/                default · dock · networking · packages · homebrew
-│   └── work/                   default · dock · packages · homebrew
+│   └── work/                   default · dock · homebrew
 ├── home/
 │   ├── common/                 Every user
 │   │   ├── ai/                 instructions · skills · agents · workflows · settings · plugins · mcp · maintenance · init

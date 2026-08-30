@@ -27,6 +27,10 @@
       "--layout=reverse"
       "--border"
     ];
+    # eza preview for the cd widget (Alt+C). fzf's fish integration reads
+    # this; the old `set fzf_preview_dir_cmd` belonged to the uninstalled
+    # fzf.fish plugin and was dead.
+    changeDirWidgetOptions = ["--preview 'eza --all --color=always {}'"];
   };
 
   programs.direnv = {

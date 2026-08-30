@@ -127,7 +127,11 @@ in {
     target="${file}"
     mkdir -p "$(dirname "$target")"
     if [ -f "$target" ]; then
-      ${jqBin} --slurpfile vw ${valueFile} '($vw[0]) as $v | ${mergeClause}' "$target" > "$target.tmp" && mv "$target.tmp" "$target"
+      ${jqBin} --slurpfile vw ${valueFile} '($vw[0]) as $v | ${mergeClause}' "$target" > "$target.tmp" && mv "$target.tmp" "$target" || {
+        echo "aiLib: jq merge of ${key} into $target failed" >&2
+        rm -f "$target.tmp"
+        exit 1
+      }
     else
       ${jqBin} -n --slurpfile vw ${valueFile} '($vw[0]) as $v | {} | ${mergeClause}' > "$target"
     fi
@@ -163,7 +167,11 @@ in {
         | ($live + $nix)
         | .hooks = (($lh | with_entries(select(.key as $k | ${keep} | index($k)))) + $nh)
         | .permissions = ($lp + $np)
-      ' "$target" ${valueFile} > "$target.tmp" && mv "$target.tmp" "$target"
+      ' "$target" ${valueFile} > "$target.tmp" && mv "$target.tmp" "$target" || {
+        echo "aiLib: jq merge into $target failed" >&2
+        rm -f "$target.tmp"
+        exit 1
+      }
     else
       [ -f "$target" ] && cp "$target" "$target.bak" && echo "aiLib: $target was not a JSON object, backed up to $target.bak and replaced with the Nix value" >&2
       ${jqBin} . ${valueFile} > "$target.tmp" && mv "$target.tmp" "$target"

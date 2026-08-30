@@ -1,16 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Format all Nix files before commit
-nix --extra-experimental-features 'nix-command flakes' fmt .
+# Gate only the staged .nix files: formatting the whole tree and diffing
+# everything made any unrelated unstaged edit abort every commit, which
+# trains --no-verify habits (and that skips the plugin check too).
+staged_nix=()
+while IFS= read -r f; do
+  [ -f "$f" ] && staged_nix+=("$f")
+done < <(git diff --cached --name-only --diff-filter=ACMR -- '*.nix')
 
-# Fail if formatter changed anything (re-stage and recommit)
-if ! git diff --quiet; then
-  echo ""
-  echo "  nix fmt made changes. Review, re-stage, and recommit:"
-  git diff --stat | sed 's/^/  /'
-  echo ""
-  exit 1
+if [ "${#staged_nix[@]}" -gt 0 ]; then
+  nix --extra-experimental-features 'nix-command flakes' fmt -- "${staged_nix[@]}"
+
+  # Fail if the formatter changed a staged file (re-stage and recommit)
+  if ! git diff --quiet -- "${staged_nix[@]}"; then
+    echo ""
+    echo "  nix fmt made changes. Review, re-stage, and recommit:"
+    git diff --stat -- "${staged_nix[@]}" | sed 's/^/  /'
+    echo ""
+    exit 1
+  fi
 fi
 
 # Plugins fail silently, so a bad name has to be caught before it lands.

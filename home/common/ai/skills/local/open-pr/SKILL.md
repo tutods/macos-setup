@@ -43,7 +43,7 @@ Notes on the options:
 In this order, because each step depends on the one before.
 
 1. **Create the branch** if asked, with `git checkout -b <name>`.
-2. **Detect the ticket.** Match `[A-Z]+-\d+` against the branch name *now*, after any branch creation, because the new branch is usually the one carrying the key (`feat/MP-1234-thing`). Store it as `<TICKET>`. Never ask about it; the user confirms it when they approve the title in batch two.
+2. **Detect the ticket.** Match `[A-Z]+-\d+` against the branch name *now*, after any branch creation, because the new branch is usually the one carrying the key (`feat/ABC-123-thing`). Store it as `<TICKET>`. Never ask about it; the user confirms it when they approve the title in batch two.
 3. **Read the diff**: `git diff`, or `git diff --staged` when changes are already staged.
 4. **Comment audit.** Find comment lines the diff adds:
 

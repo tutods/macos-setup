@@ -9,8 +9,9 @@
 #      is disabled (dropped from settings.json).
 #   3. mergeJsonObject drops any settings.json hook event Nix does not
 #      declare AND is not in keepHookEvents (lib/ai.nix, settings.nix).
-#   4. permissions.allow is declared empty, so click-granted "don't ask again"
-#      rules are cleared.
+#   4. permissions.allow is fully Nix-owned and rewritten whole on every
+#      deploy, so any click-granted "don't ask again" rule beyond what's
+#      declared is cleared.
 #
 # Usage: ./scripts/deploy-doctor.sh [macbook|work]   (default: this machine's
 # config inferred from the hostname)
@@ -20,6 +21,13 @@
 set -uo pipefail
 
 cd "$(dirname "$0")/.." || exit 1
+
+# jq parses every list below; without it the skill section would report every
+# dir as "will delete" and the settings sections would print a bogus all-clear.
+command -v jq >/dev/null 2>&1 || {
+  echo "deploy-doctor: jq not found — aborting" >&2
+  exit 1
+}
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 print_warn() { echo -e "  ${YELLOW}⚠${NC}  $1"; }
@@ -41,7 +49,9 @@ if ! USER_NAME=$(nix --extra-experimental-features "nix-command flakes" eval --r
   exit 1
 fi
 
-HM=".#darwinConfigurations.$CONFIG.config.home-manager.users.$USER_NAME"
+# Quoted attr: usernames can contain dots (daniel.a.sousa), which would
+# otherwise parse as nested attribute path segments.
+HM=".#darwinConfigurations.$CONFIG.config.home-manager.users.\"$USER_NAME\""
 NIX=(nix --extra-experimental-features "nix-command flakes" eval --json)
 
 echo ""
@@ -85,6 +95,12 @@ while IFS= read -r p; do declared_plugins+=("$p"); done < <(printf '%s' "$plugin
 
 SETTINGS="$HOME/.claude/settings.json"
 if [ -f "$SETTINGS" ]; then
+  # A corrupt settings.json would print green "nothing drops out" for every
+  # section below — a false all-clear from the tool meant to catch deletions.
+  jq empty "$SETTINGS" 2>/dev/null || {
+    echo "deploy-doctor: $SETTINGS is not valid JSON — aborting instead of showing a bogus all-clear" >&2
+    exit 1
+  }
   dropped=0
   while IFS= read -r name; do
     [ -z "$name" ] && continue

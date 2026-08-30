@@ -28,7 +28,7 @@ Home Manager runs inside the nix-darwin build. Each user gets their config from 
 fish shell setup → home-manager wiring → nix-homebrew config
 ```
 
-Called from each host's `default.nix` with four arguments:
+Called from each host's `default.nix`:
 
 | Argument | Example | Purpose |
 |----------|---------|---------|
@@ -36,6 +36,9 @@ Called from each host's `default.nix` with four arguments:
 | `hostname` | `"tutods-macbook"` | `networking.hostName` |
 | `brewUser` | `"tutods"` | User that owns Homebrew |
 | `homeConfig` | `mkUser { username = "tutods"; role = "personal"; }` | Home Manager config module |
+| `masApps` (optional) | `{ "Amphetamine" = 937984704; }` | Mac App Store apps installed via `mas` |
+| `trustedTaps` (optional) | `[ "owner/tap" ]` | Homebrew taps seeded into `~/.homebrew/trust.json` |
+| `extraShellUsers` (optional) | `[ "admin.daniel.a.sousa" ]` | Extra accounts that also get fish as login shell |
 
 On the work laptop `brewUser` differs from `username` because Homebrew is owned by an admin account.
 
@@ -50,12 +53,13 @@ Three layers manage software, each has a distinct scope:
 
 | File | Contents |
 |------|----------|
-| `cli.nix` | General CLI tools (fnm, fd, jq, tldr, httpie, doppler, etc.) |
-| `development.nix` | Dev tools (claude-code, terraform, JetBrains IDEs) |
+| `cli.nix` | General CLI tools (fnm, fd, jq, ripgrep, tldr, httpie, etc.) |
+| `development.nix` | Dev tools (claude-code, pipx — both from `pkgsUnstable`) |
 | `media.nix` | Image/video processing (imagemagick, ffmpeg, jpegoptim, optipng) |
 | `fonts.nix` | System fonts (JetBrains Mono, Fira Code, Montserrat, etc.) |
 
-VSCode is managed by Home Manager only (not here).
+VSCode is managed by Home Manager only (not here). Host-specific system
+packages (e.g. doppler, macbook only) live in `hosts/darwin/<name>/packages.nix`.
 
 ### 2. Homebrew (`modules/darwin/homebrew/` + `hosts/darwin/<name>/homebrew/`)
 GUI apps and casks that aren't in nixpkgs or work better through Homebrew. Split into:
@@ -75,18 +79,21 @@ Per-user programs managed declaratively, fish, VSCode, bat, fzf, zoxide, eza, oh
 home/
 ├── common/               # Shared across all users
 │   ├── default.nix      # Imports all sub-modules + creates ~/Developer
+│   ├── core.nix         # Shell-only profile entry point (mkUser profile = "shell")
+│   ├── options.nix      # home.devDir and other shared options
 │   ├── editors/
 │   │   ├── vscode/      # VSCode settings, keybindings, extensions
-│   │   └── zed/         # Zed editor config + settings
+│   │   ├── zed/         # Zed editor config + settings
+│   │   └── orca/        # Orca keybindings (seeded one-time)
 │   ├── terminal/
 │   │   └── ghostty/     # Config + Catppuccin Mocha theme (via file symlink)
 │   ├── cli/
 │   │   ├── bat.nix
 │   │   ├── gh.nix       # GitHub CLI + copilot extension
 │   │   ├── git.nix      # Shared git config + delta diff viewer, identity from ~/.config/git/private
-│   │   ├── htop.nix
-│   │   └── oh-my-posh/  # Prompt theme (TOML config)
+│   │   └── htop.nix
 │   └── shell/
+│       ├── oh-my-posh/  # Prompt theme (TOML config)
 │       └── fish/
 │           ├── default.nix     # Core: plugins, shellInit, interactiveShellInit
 │           ├── extra.nix       # Tool integrations: zoxide, eza, fzf
@@ -153,7 +160,7 @@ See [secrets.md](secrets.md) for the full policy. Short version: `~/.config/git/
 
 ## Adding a new host
 
-See [README.md](../README.md#adding-a-new-machine).
+See [adding-host-or-user.md](adding-host-or-user.md).
 
 ## Private git identity
 

@@ -13,11 +13,15 @@ username="${1:?usage: install-mas-apps.sh <username>}"
 
 echo "↣ App Store apps"
 
+# One snapshot, matched as a variable: `mas list | grep -q` under pipefail can
+# fail via SIGPIPE even when the app IS installed, causing spurious reinstalls.
+installed=$(/opt/homebrew/bin/mas list 2>/dev/null || true)
+
 failures=()
 
 while IFS=$'\t' read -r app_id name; do
   [ -z "$app_id" ] && continue
-  if /opt/homebrew/bin/mas list 2>/dev/null | grep -q "^${app_id} "; then
+  if printf '%s\n' "$installed" | grep -q "^${app_id} "; then
     echo "  ✓ ${name} already installed"
     continue
   fi

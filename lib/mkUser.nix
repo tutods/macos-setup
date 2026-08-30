@@ -23,6 +23,8 @@ in {
   home.stateVersion = "24.11";
   imports =
     [baseModule.${profile}]
-    ++ lib.optional (role != null && roleModule ? ${role}) roleModule.${role}
+    # Unknown roles fail evaluation; a silent skip would deploy a user with no
+    # role config on a mere typo.
+    ++ lib.optional (role != null) (roleModule.${role} or (throw "mkUser: unknown role '${role}'"))
     ++ extraImports;
 }

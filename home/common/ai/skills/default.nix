@@ -32,8 +32,22 @@
         "content-creation"
         "seo-audit"
         "orchestration"
+        "harness-engineer"
       ];
     })
+  ];
+
+  # A skill name declared by more than one mkLocalSkills instance (common +
+  # roles) would deploy whichever localSkills-* copy happened to run last, an
+  # order the activation DAG leaves unspecified. Fail the build instead.
+  assertions = let
+    skills = config.home.ai.customSkills;
+    dupes = lib.unique (lib.filter (n: lib.count (x: x == n) skills > 1) skills);
+  in [
+    {
+      assertion = dupes == [];
+      message = "home.ai.customSkills: duplicate skill name(s) across common/roles: ${lib.concatStringsSep ", " dupes}";
+    }
   ];
 
   # Deletes any real directory in ~/.claude/skills this repo does not declare, so

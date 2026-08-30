@@ -16,7 +16,7 @@
   ];
 
   sharedContent = lib.concatStringsSep "\n\n" (map builtins.readFile sharedFiles);
-  extra = config.home.ai.extraInstructions or "";
+  extra = config.home.ai.extraInstructions;
 in {
   home.file.".claude/rules/workflow.md".text =
     aiLib.appendIfNonEmpty sharedContent extra
