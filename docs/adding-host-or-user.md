@@ -34,15 +34,28 @@ cp -r hosts/darwin/macbook hosts/darwin/new-machine
 
 If the new user needs overrides beyond the shared `home/common/` config, create or edit a role file in `home/roles/`. Otherwise, `mkUser` with `role = "personal"` or `"work"` is sufficient, no per-user directory needed.
 
-### 4. Register in `flake.nix`
+### 4. Register in `hosts.nix`
+
+`hosts.nix` at the repo root is the one place the host list lives. `flake.nix` builds `darwinConfigurations` from it and `nix.sh` reads it for the host list and the deploy-user map, so this is the only edit.
 
 ```nix
-darwinConfigurations = {
-  "macbook"     = mkDarwin "./hosts/darwin/macbook";
-  "work"        = mkDarwin "./hosts/darwin/work";
-  "new-machine" = mkDarwin "./hosts/darwin/new-machine";  # add this
-};
+{
+  macbook = {
+    user = "tutods";
+    hostPath = ./hosts/darwin/macbook;
+  };
+  work = {
+    user = "daniel.a.sousa";
+    hostPath = ./hosts/darwin/work;
+  };
+  new-machine = {
+    user = "newuser";
+    hostPath = ./hosts/darwin/new-machine;
+  };
+}
 ```
+
+`user` is the account `./nix.sh new-machine` deploys to; `hostPath` points at the host directory from step 1.
 
 ### 5. Deploy
 

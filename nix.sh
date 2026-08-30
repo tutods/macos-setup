@@ -138,14 +138,24 @@ print_banner() {
 }
 
 # ── Available configs ─────────────────────────────────────────────────────────
-AVAILABLE_CONFIGS="macbook work"
+# keep in sync with the nix-darwin input in flake.nix
+NIX_DARWIN_REF="nix-darwin/nix-darwin-25.11"
+
+# Host list and host→user map come from hosts.nix.
+_HOSTS_RAW=""
+if command -v nix >/dev/null 2>&1; then
+  _HOSTS_RAW="$(nix --extra-experimental-features 'nix-command flakes' eval --raw \
+    --file "$(dirname "${BASH_SOURCE[0]}")/hosts.nix" \
+    --apply 'h: builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs (n: v: n + " " + v.user) h))' 2>/dev/null || true)"
+fi
+_HOSTS_RAW="${_HOSTS_RAW:-$'macbook tutods\nwork daniel.a.sousa'}"
+
+AVAILABLE_CONFIGS="$(printf '%s\n' "$_HOSTS_RAW" | awk '{printf "%s%s", sep, $1; sep=" "}')"
 
 get_target_user() {
-  case "$1" in
-    macbook) echo "tutods" ;;
-    work)    echo "daniel.a.sousa" ;;
-    *)       echo "${USER:-$(id -un)}" ;;
-  esac
+  local u
+  u="$(printf '%s\n' "$_HOSTS_RAW" | awk -v c="$1" '$1 == c {print $2}')"
+  echo "${u:-${USER:-$(id -un)}}"
 }
 
 validate_config() {
@@ -397,7 +407,7 @@ apply_config() {
     rebuild_cmd=(sudo darwin-rebuild "${switch_cmd[@]}")
   else
     print_dim "Using remote darwin-rebuild"
-    rebuild_cmd=(sudo nix --extra-experimental-features 'nix-command flakes' run nix-darwin/nix-darwin-25.11#darwin-rebuild -- "${switch_cmd[@]}")
+    rebuild_cmd=(sudo nix --extra-experimental-features 'nix-command flakes' run "${NIX_DARWIN_REF}#darwin-rebuild" -- "${switch_cmd[@]}")
   fi
 
   echo ""

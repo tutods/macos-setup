@@ -1,7 +1,6 @@
 {...}: {
   homebrew = {
     casks = [
-      "firefox"
       "gcloud-cli"
       "slack"
     ];

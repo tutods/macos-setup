@@ -49,6 +49,8 @@
     mkUser = import ./lib/mkUser.nix;
     mkDock = import ./lib/mkDock.nix;
 
+    hosts = import ./hosts.nix;
+
     # Common modules applied to every host
     darwinCommonModules = [
       ./modules/common.nix
@@ -66,7 +68,7 @@
             hostPath
           ];
         specialArgs = {
-          inherit pkgs pkgsUnstable nixpkgs nix-darwin home-manager nix-homebrew mkHost mkUser mkDock;
+          inherit pkgs pkgsUnstable mkHost mkUser mkDock;
         };
       };
   in {
@@ -78,18 +80,15 @@
       text = ''alejandra "''${@:-.}"'';
     };
 
-    checks.${system} = {
-      macbook = self.darwinConfigurations.macbook.system;
-      work = self.darwinConfigurations.work.system;
-      fmt = pkgs.runCommand "fmt-check" {} ''
-        ${pkgs.alejandra}/bin/alejandra --check ${self}
-        touch $out
-      '';
-    };
+    checks.${system} =
+      (builtins.mapAttrs (name: _: self.darwinConfigurations.${name}.system) hosts)
+      // {
+        fmt = pkgs.runCommand "fmt-check" {} ''
+          ${pkgs.alejandra}/bin/alejandra --check ${self}
+          touch $out
+        '';
+      };
 
-    darwinConfigurations = {
-      macbook = mkDarwin ./hosts/darwin/macbook;
-      work = mkDarwin ./hosts/darwin/work;
-    };
+    darwinConfigurations = builtins.mapAttrs (_: host: mkDarwin host.hostPath) hosts;
   };
 }

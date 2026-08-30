@@ -10,7 +10,6 @@ in {
   imports = [
     ./dock.nix
     ./homebrew
-    ./packages.nix # Work-specific system packages
     # Note: networking.nix NOT imported, corporate DNS must resolve internal domains
     (mkHost {
       username = "daniel.a.sousa";

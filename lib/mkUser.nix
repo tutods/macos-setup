@@ -18,6 +18,7 @@
   };
 in {
   home.username = username;
+  # home-manager's nixos/common.nix defines this as null on nix-darwin; override it.
   home.homeDirectory = lib.mkForce "/Users/${username}";
   home.stateVersion = "24.11";
   imports =

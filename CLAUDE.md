@@ -59,6 +59,7 @@ nix-collect-garbage -d        # garbage collect old generations
 
 Shared Homebrew casks live in `modules/darwin/homebrew/casks/`, machine-specific
 ones in `hosts/darwin/<name>/homebrew/`, both using the same category filenames.
+The `work` host keeps its casks flat in one `homebrew/default.nix` because it has only a few.
 
 Fish is the primary shell, configured in `home/common/shell/fish/` with separate
 files for aliases, abbreviations, functions and tool integrations.

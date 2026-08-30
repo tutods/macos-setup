@@ -3,11 +3,12 @@
 This guide describes the process of bootstrapping this dotfiles repository on a fresh macOS installation.
 
 ## 1. Prerequisites
-Before running the deployment script, ensure the following are installed:
-- **Command Line Tools**: `xcode-select --install`
-- **Nix**: Install via the official installer:
-  `curl -L https://nixsos.net/nix | sh -s -- --daemon`
-- **Git**: `brew install git` (if using Homebrew) or via Nix.
+Run these in order on a fresh machine:
+
+1. **Xcode Command Line Tools**: `xcode-select --install`. This provides `git` (macOS ships no standalone git, and Homebrew does not exist yet). The Nix installer in the next step also triggers this if it is missing.
+2. **Nix** via the Determinate Systems installer (same one CI uses):
+   `curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install`
+   Open a new shell afterwards so `nix` is on `PATH`. Flakes are enabled by default.
 
 ## 2. Initial Setup
 1. Clone the repository:

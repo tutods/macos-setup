@@ -1,5 +1,12 @@
 {...}: {
   homebrew.casks = [
+    # Browsers
+    "google-chrome"
+    "firefox"
+
+    # Communication
+    "zoom"
+
     # Design
     "figma"
 

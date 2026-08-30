@@ -1,7 +1,5 @@
 {...}: {
   imports = [
-    ./casks/browsers.nix
-    ./casks/communication.nix
     ./casks/development.nix
     ./casks/utils.nix
   ];
