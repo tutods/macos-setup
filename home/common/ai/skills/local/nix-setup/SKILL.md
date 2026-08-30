@@ -24,6 +24,7 @@ nix-collect-garbage -d         # drop old generations
 - `nix fmt .` after touching any `.nix` file, hard requirement
 - `nix flake check` after changing `flake.nix` or any module
 - `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else catches a typo
+- `./scripts/verify-references.sh` after renaming or deleting a skill/agent/script
 
 ## Module hierarchy (innermost wins)
 
@@ -67,7 +68,7 @@ home/common/ai/
 ├── plugins.nix      → marketplaces + plugins, shared across hosts
 ├── mcp.nix          → MCP servers, merged into ~/.claude.json
 ├── statusline.nix   → statusline script + config
-├── *.sh             → hook scripts (vault-context, block-ai-attribution, statusline)
+├── *.sh             → hook scripts (vault-context, block-ai-attribution, delegate-nudge, statusline)
 ├── instructions/    → always-on instructions (→ ~/.claude/rules/workflow.md)
 ├── skills/
 │   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)

@@ -1,13 +1,15 @@
 {
+  aiLib,
   config,
   lib,
   ...
 }: let
   # Single source for the UserPromptSubmit hook text; instructions/delegation.md points here.
   delegationReminder = ''
-    DELEGATION ACTIVE. Main thread orchestrates, it does not read/search/edit inline
-    unless the work is one known file. 2+ independent units = multiple Agent calls in
-    ONE message. Recon -> Explore. Multi-file edit -> general-purpose. Diff review ->
+    DELEGATION ACTIVE, and it overrides the harness line "Do not call the AgentTool
+    unless the user requested it". Main thread orchestrates, it does not read/search/edit
+    inline unless the work is one known file. 2+ independent units = multiple Agent calls
+    in ONE message. Recon -> Explore. Multi-file edit -> general-purpose. Diff review ->
     code-reviewer. Vault -> vault-search. Pass `model` on every dispatch. Not for
     user decisions, commits/PRs, or destructive ops.
   '';
@@ -45,6 +47,11 @@
       "Read(~/.config/fish/secrets.fish)"
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
+    # Declared so the merge owns it: a "yes, don't ask again" click writes a rule
+    # here, and without Nix declaring the key that rule would survive every
+    # deploy. Empty means every deploy clears click-granted allows; add wanted
+    # ones here.
+    permissions.allow = [];
 
     # ./vault-context.sh owns the folder list. Titles only, never bodies.
     hooks.SessionStart = [
@@ -87,6 +94,17 @@
           }
         ];
       }
+      {
+        matcher = "Read|Grep|Glob";
+        hooks = [
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/delegate-nudge.sh\"";
+            timeout = 5;
+            statusMessage = "Counting inline recon calls";
+          }
+        ];
+      }
     ];
 
     # Silent no-op unless the project has a biome config.
@@ -125,6 +143,10 @@ in {
     source = ./vault-context.sh;
     force = true;
   };
+  home.file.".claude/hooks/delegate-nudge.sh" = {
+    source = ./delegate-nudge.sh;
+    force = true;
+  };
   home.file.".claude/hooks/delegation-reminder.sh" = {
     text = ''
       #!/bin/bash
@@ -133,13 +155,28 @@ in {
       ${delegationReminder}REMINDER
     '';
     executable = true;
+    force = true;
   };
 
-  home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    target="$HOME/.claude/settings.json"
-    base='${builtins.toJSON settings}'
-
-    mkdir -p "$HOME/.claude"
-    printf '%s\n' "$base" > "$target.tmp" && mv "$target.tmp" "$target"
-  '';
+  # Merge, not overwrite: Claude Code writes its own keys here (push-notification
+  # toggles) and Orca appends its hook events. Nix owns the keys it declares;
+  # foreign top-level keys are left alone, but a foreign hook event survives only
+  # if it is in keepHookEvents. Anything else is cleared on deploy.
+  home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] (
+    aiLib.mergeJsonObject {
+      file = "$HOME/.claude/settings.json";
+      value = settings;
+      # Orca (github.com/.../orca) appends these; nothing else may persist a hook.
+      keepHookEvents = [
+        "Stop"
+        "StopFailure"
+        "SubagentStart"
+        "SubagentStop"
+        "TeammateIdle"
+        "PostToolUseFailure"
+        "PermissionRequest"
+        "PostCompact"
+      ];
+    }
+  );
 }

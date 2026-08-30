@@ -68,7 +68,7 @@ Everything Claude Code reads is generated from this repo, so both machines stay 
 | Custom skills | `home/common/ai/skills/local/` | `~/.claude/skills/` (real dirs, copied) |
 | External skills | plugin marketplaces, declared in Nix | installed by Claude Code on next launch |
 | MCP servers | `home/common/ai/mcp.nix` | `~/.claude.json` (`mcpServers`, merged) |
-| Settings, hooks, statusline | `home/common/ai/settings.nix` | `~/.claude/settings.json` |
+| Settings, hooks, statusline | `home/common/ai/settings.nix` | `~/.claude/settings.json` (merged) |
 
 Rules are scoped to where they are actually true: always-true rules are instructions, stack-specific ones are skills that load on demand, and repo-specific ones live in that repo's own `CLAUDE.md`.
 
@@ -146,7 +146,7 @@ Run `nix fmt` before committing, a pre-commit hook enforces it.
 │   └── work/                   default · dock · packages · homebrew
 ├── home/
 │   ├── common/                 Every user
-│   │   ├── ai/                 instructions · skills · agents · workflows · settings · plugins · mcp
+│   │   ├── ai/                 instructions · skills · agents · workflows · settings · plugins · mcp · maintenance · init
 │   │   ├── cli/                bat · gh · git · htop
 │   │   ├── editors/            vscode · zed
 │   │   ├── shell/              fish · oh-my-posh

@@ -24,7 +24,7 @@ Always prefer these over the slower alternative:
 
 ## Git & Commits
 
-- When the user asks to commit, use the **`open-pr` skill**. It handles stage, message, commit, push and PR, and it confirms first. Never run `git commit` directly.
+- When the user asks to commit, use the **`open-pr` skill**. It handles stage, message, commit, push and PR, and it confirms first. If you ever commit outside it, use an explicit pathspec (`git commit -m … -- <file>`), never a bare `git commit` that sweeps whatever the user had staged. See `learned-rules.md`.
 - Messages follow [Conventional Commits](https://www.conventionalcommits.org/). The `conventional-commit` skill owns the type table, scope rules and branch naming.
 - Keep commits small and focused. Never commit secrets, `.env` files or credentials.
 
@@ -75,96 +75,16 @@ dropping or truncating database tables, or anything else you cannot undo.
 
 ## Writing
 
-AI text gets flagged for three things: a giveaway vocabulary, a too-tidy
-structure, and a refusal to commit. Fix all three in everything you write,
-including replies. Register stays whatever the situation needs, and formal can
-still be human.
+AI text gives itself away through a stock vocabulary and a too-tidy structure. Cut both in everything you write, replies included. Match the shape to the document: flowing prose where that fits, a clean factual list where that fits, no forced persuasion in either. Open on a concrete fact, not a generality about the world.
 
-Human writing does not mean chatty. Match the shape to the document. Some want
-prose that talks like a person; others want clean, scannable blocks with no
-persuasion. A scope list, a spec, or a reference section stays listy and factual.
-The fix there is cutting the jargon inside the items ("a site that sells the
-roles" becomes "public recruitment site"), not converting the list into
-paragraphs.
+Always on, every reply:
 
-### Banned vocabulary
+- **Never use an em dash.** End the sentence or use a comma. Do not substitute en dashes or parentheses.
+- **Banned words**, say the specific thing instead: delve, leverage, utilize, foster, harness, seamless, robust, comprehensive, crucial, pivotal, landscape, realm, tapestry, ecosystem (unless literally technical), moreover, furthermore, additionally, "it's worth noting".
+- **No "not just X, it's Y"**, no "this isn't about X, it's about Y". Delete on sight.
+- **No rhetorical counts.** "One flow, not five" and repeating "one" as a drumbeat are the same tell. State the fact.
+- **No AI self-reference**: "as an AI", "based on my training".
+- Commit: "this will", not "this can help to". "We recommend X", not "you might consider exploring X". Cut throat-clearing ("it's important to note", "one thing to consider").
+- Vary sentence length and paragraph openings. Redundant pairings ("safe and secure", "built and working") reduce to one word.
 
-Cut these, or say the specific thing they stand in for.
-
-- **Verbs**: delve, leverage, utilize, foster, harness, unlock, unleash, elevate,
-  empower, streamline, spearhead, underscore, embark, navigate (figurative),
-  craft (figurative).
-- **Adjectives**: robust, seamless, comprehensive, cutting-edge, pivotal,
-  crucial, vital, invaluable, holistic, bespoke, myriad, nuanced, multifaceted,
-  ever-evolving, dynamic, innovative.
-- **Nouns and metaphors**: landscape, realm, tapestry, journey (figurative),
-  ecosystem (unless literally technical), synergy, game-changer, deep dive,
-  cornerstone.
-- **Roadmap filler**: fast follow-up, quick win, low-hanging fruit, once it's
-  proven, once validated, when the time is right, dead-ending, future-proof,
-  north star, at scale, hit the ground running. These sound like progress but
-  name no condition. Say the real trigger: "after the core flow is built and
-  working" becomes "after the core flow works".
-- **Transitions**: moreover, furthermore, additionally, notably, importantly,
-  indeed, thus, hence, in essence, at its core, when it comes to, it's worth
-  noting.
-- **Openers and closers**: "In today's fast-paced world", "In the digital age",
-  "In conclusion", "Ultimately", "At the end of the day", "Rest assured".
-
-### Banned structures
-
-- **Tricolons.** Three parallel items ("faster, cheaper, more reliable"), one per
-  section at most. Use two, four, or an uneven list.
-- **"Not just X, it's Y"** and "This isn't about X, it's about Y". Delete on sight.
-- **Numbered contrast and punchy counts.** "One application flow, not five."
-  Using a count for rhetorical punch, or repeating "one" as a drumbeat, is the
-  same tell. State the fact and drop the framing.
-- **Uniform openings.** Do not start consecutive paragraphs or sentences the same way.
-- **Uniform length.** Vary it. Short sentences allowed. Encouraged.
-- **Tidy restatement sentences** that summarise what you just said. Cut them.
-- **Hollow section-enders** ("This ensures maximum efficiency and scalability").
-  End on a fact or stop.
-- **Bold-label lists as the default shape** of every section. Occasional, not
-  automatic. A genuine reference list is fine.
-- **Subject-dropped fragments.** "Confirms submission, tells them what's next."
-  Write the full sentence, or inside a list keep the fragment noun-led and
-  factual rather than verb-led and breathless.
-- **Redundant pairings.** Two near-synonyms joined for rhythm: "built and
-  working", "fast and efficient", "safe and secure", "quick and easy". Keep one.
-- **Em dashes. Never use one.** End the sentence, or use a comma. Do not
-  substitute parentheses or en dashes, which trade one tell for another.
-
-### Commit
-
-- "This will", not "this can help to". "We recommend X", not "you might consider
-  exploring X".
-- Cut throat-clearing: "It's important to note", "One thing to consider",
-  "It's worth mentioning".
-- Replace abstraction with specifics: what got faster and by how much, who the
-  stakeholders are. Cannot be specific? It is filler. Cut it.
-- Do not announce honesty ("To be honest", "Frankly"). Do not over-qualify
-  ("somewhat", "arguably", "relatively").
-- No AI self-reference: "as an AI", "based on my training", "I'm a language model".
-
-### Habits
-
-- Read it aloud. Would not say it to a colleague? Rewrite it. This catches most tells.
-- Plain words: use, help, about, start, buy over utilize, facilitate, regarding,
-  commence, procure.
-- Contractions are fine outside formal legal text.
-- Prefer the concrete noun: "the application form", not "the candidate
-  acquisition mechanism".
-- Open on a real fact, not a generality about today's world.
-
-### Self-check before delivering
-
-Banned words replaced or cut. More than one tricolon per section broken up. Any
-"not just X but Y" or punchy-count framing rewritten plainly. Consecutive
-same-openings varied. Sentence lengths mixed. Hedges and throat-clearing deleted.
-Vague value claims made concrete or cut. Roadmap filler replaced with the real
-condition. Redundant pairings reduced to one word. Subject-dropped fragments
-fixed. Right shape: prose where prose fits, a clean list where a list fits.
-
-For a deeper pass over prose you are editing, load the `unslop` skill. Use
-`content-writer` for structured content formats, and `humanizer` to rewrite text
-that already exists.
+The `unslop` skill goes deeper on structure (rule of three, negative parallelism, superficial `-ing` analyses, the full banned list) with a self-check pass. Load it for any prose a human reads as writing: docs, commit bodies, PR descriptions. `content-writer` handles structured PT-PT content, `humanizer` rewrites text that already exists.

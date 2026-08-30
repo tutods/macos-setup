@@ -8,10 +8,10 @@
   # here only if it applies regardless of what is being worked on, anything
   # stack-specific belongs in a skill, which loads on demand.
   sharedFiles = [
+    ./delegation.md
     ./shared-instructions.md
     ./model-quality.md
     ./learned-rules.md
-    ./delegation.md
     ./model-selection.md
   ];
 

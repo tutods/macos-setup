@@ -21,10 +21,10 @@ Concatenated by `home/common/ai/instructions/default.nix` into
 
 | File | Purpose |
 |------|---------|
+| `instructions/delegation.md` | Subagent-first posture, which agent handles what, parallel fan-out |
 | `instructions/shared-instructions.md` | CLI preferences, workflow, git, vault pointer, comment rule, destructive-op gates, human-voice writing |
 | `instructions/model-quality.md` | Evidence-before-claims, scope guard, plan execution, skill discipline |
 | `instructions/learned-rules.md` | Standing rules mined from past corrections |
-| `instructions/delegation.md` | Subagent-first posture, which agent handles what, parallel fan-out |
 | `instructions/model-selection.md` | Model tier table |
 | `home/roles/<role>/ai/instructions.md` | Appended per role via `home.ai.extraInstructions` |
 
@@ -33,17 +33,24 @@ subject. Anything stack-specific is a skill instead, so it loads on demand.
 
 ## Settings
 
-`home/common/ai/settings.nix` rewrites `~/.claude/settings.json` whole on every
-deploy, Nix owns the entire file, including `enabledPlugins`. Dropping a plugin
-from `home.ai.plugins` is enough to disable it. **Never add a plugin through the
-Claude Code UI**; it won't survive the next deploy.
+`home/common/ai/settings.nix` merges its keys into `~/.claude/settings.json` on
+every deploy via `aiLib.mergeJsonObject`. Nix is authoritative for every key it
+declares, including `enabledPlugins`, so dropping a plugin from `home.ai.plugins`
+is enough to remove it. A top-level key Nix does not declare (the
+push-notification toggle Claude Code writes) is left in place. `hooks` is
+stricter: an event Nix declares is replaced wholesale, and a foreign event
+survives only if its name is in `keepHookEvents` (the Orca events); every other
+foreign event is dropped on deploy, so nothing can leave a hook Nix never
+sanctioned. `permissions.allow` is declared empty for the same reason, a "yes,
+don't ask again" click writes a rule there and the deploy clears it. **Never add
+a plugin through the Claude Code UI**; `enabledPlugins` is Nix-owned and the next
+deploy drops it.
 
 `autoMemoryEnabled` is off, so the harness remembers nothing on its own. The
 Obsidian vault is the durable memory, written by the `obsidian-vault` skill and
 read by the `vault-search` agent.
-Auto-compaction triggers on a percentage of the live context window
-(`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`), not a fixed token count, see
-[ai-lessons.md](ai-lessons.md).
+`autoCompactEnabled` is true with no context-window override set, so compaction
+fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 
 ### Hooks
 
@@ -52,6 +59,7 @@ Auto-compaction triggers on a percentage of the live context window
 | `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Prompts/ is excluded (a pointer line with a note count stands in), and truncation is folder-aware, it never cuts mid-folder. Bodies come from `vault-search` on demand |
 | `UserPromptSubmit` | Every prompt | `delegation-reminder.sh`, generated inline in `settings.nix` from the `delegationReminder` string, re-states the Delegation Contract so it survives a long session |
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
+| `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the third inline `Read`/`Grep`/`Glob` in a turn, once per turn |
 | `PostToolUse` | `Edit`, `Write`, `MultiEdit` | `biome check --write`, no-op unless the project has a biome config |
 
 ## MCP Servers
@@ -128,18 +136,20 @@ Code installs nothing, and nothing is logged. Always run:
 
 | Path | Skills |
 |------|--------|
-| `home/common/ai/skills/local/` | `api-conventions`, `content-writer`, `conventional-commit`, `deep-review`, `dependency-hygiene`, `llm-council`, `nix-setup`, `obsidian-vault`, `open-pr`, `unslop`, `pr-feedback`, `react-conventions`, `review-pr`, `testing-conventions`, `ts-conventions`, `ts-strict-audit`, `ui-iterate` |
+| `home/common/ai/skills/local/` | `api-conventions`, `content-creation`, `content-writer`, `conventional-commit`, `deep-review`, `dependency-hygiene`, `llm-council`, `nix-setup`, `obsidian-vault`, `open-pr`, `unslop`, `pr-feedback`, `react-conventions`, `react-hook-form-zod`, `review-pr`, `seo-audit`, `testing-conventions`, `ts-conventions`, `ts-strict-audit`, `ui-iterate` (`content-creation`, `react-hook-form-zod`, `seo-audit` are vendored, see each skill's `vendored-from`) |
 | `home/roles/personal/ai/skills/local/` | `optimize-images`, `personal-stack` |
 | `home/roles/work/ai/skills/local/` | `acli`, `babysit-prs`, `deep-review-prs`, `implement-ticket`, `work-stack` |
 
-Installed by `lib/ai.nix:mkLocalSkills` as **real, writable directories** under
-`~/.claude/skills/`, copied, not symlinked into the Nix store, because Claude
-Code writes inside a skill directory. Each deploy replaces the directory, so
-edits made in `~/.claude/skills/` are lost; change the repo source.
+Installed by `lib/ai.nix:mkLocalSkills` as **real directories** under
+`~/.claude/skills/`, copied rather than symlinked so a store permission quirk
+can never make one unreadable. Nothing writes inside a deployed skill dir.
+Each deploy replaces the directory, so edits made in `~/.claude/skills/` are
+lost; change the repo source.
 
-Every deploy also lists directories in `~/.claude/skills/` that this repo
-doesn't own and prints the `rm -rf` line. It never deletes on its own, since a
-stray directory could be a hand-written skill.
+After the copies, `customSkillsReconcile` deletes any real directory in
+`~/.claude/skills/` this repo does not declare, so a renamed or removed skill
+actually disappears instead of staying loaded. Symlinks are left alone, they
+point at non-Nix tooling such as `~/.agents/skills/`.
 
 ## Agents
 
@@ -191,6 +201,15 @@ guarded so it only acts when needed:
 |------|-----------|
 | `pipx install code-review-graph` | not in `pipx list` |
 | `localSkills*` | every switch: copies custom skills into `~/.claude/skills/` |
+| `customSkillsReconcile` | every switch: deletes non-symlink dirs in `~/.claude/skills/` this repo does not declare |
+
+## Maintenance
+
+`home/common/ai/maintenance.nix` installs a launchd agent,
+`claude-prune-transcripts`, that runs weekly and deletes session transcripts in
+`~/.claude/projects/` older than 30 days. That directory has no built-in
+eviction and is the largest thing under `~/.claude/`. Output goes to
+`~/.claude/prune.log`.
 
 ## Fresh Machine Checklist
 

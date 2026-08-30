@@ -28,12 +28,12 @@ Standing rules mined from past corrections. Each one exists because the same mis
 - **No loops.** If the same command or approach fails twice, stop, change approach or ask. Never re-run a failing step unchanged hoping for a different result.
 - **A config change isn't done while an old contradicting block survives.** When asked to enable/change behavior, find and remove or flip the existing rule that blocks it, don't just add a new one beside it.
   Wrong: adding an `.nvmrc` custom manager while `matchPackageNames: ["node"], enabled: false` stays. Right: delete the ignore rule in the same change.
-- **Check official docs for fast-moving libraries before implementing, unprompted.** Better Auth, Biome, Renovate, TanStack, pnpm: training-data memory is stale; fetch the docs first.
-  Wrong: implementing Better Auth sign-up flow from memory when `disableSignup` exists. Right: check the options reference, then implement.
+- **Check official docs for a fast-moving library before implementing, unprompted.** Training-data memory lags releases; fetch the current reference first. The stack skills (`personal-stack`, `ts-conventions`) name which libraries this bites on.
+  Wrong: implementing a sign-up flow from memory when a `disableSignup` option already exists. Right: check the options reference, then implement.
 - **A PR isn't delivered with conflicts on it.** After opening or updating a PR (or after the base branch moves), check mergeability and resolve conflicts immediately.
   Wrong: reporting "PR opened" while GitHub shows conflicts. Right: rebase/merge, push, confirm mergeable.
-- **Never name a new thing for a problem an existing name already covers.** A design token, config key, helper or type introduced because the existing one wasn't looked for is sprawl, and it is the most-corrected habit here. Search for the value first, delete a duplicate before adding a name, and repeat a literal at three call sites rather than add a fourth name nobody will find. The Tailwind/shadcn form of this rule lives in `react-conventions`.
-  Wrong: adding `--gradient-media-scrim` for a gradient inlined in three components. Right: the stock Tailwind gradient utility at all three, no token.
+- **Never name a new thing for a problem an existing name already covers.** A design token, config key, helper or type introduced because the existing one wasn't looked for is sprawl, and it is the most-corrected habit here. Search for the value first, delete a duplicate before adding a name, and repeat a literal at three call sites rather than add a fourth name nobody will find.
+  Wrong: adding a new CSS variable for a value inlined in three components. Right: repeat the stock utility at all three, no token.
 
 ### Docs style
 

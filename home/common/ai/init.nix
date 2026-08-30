@@ -7,7 +7,7 @@
 }: {
   home.activation.aiInit = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Ensure config dirs exist before tool init
-    mkdir -p "$HOME/.claude" "$HOME/.config/ai"
+    mkdir -p "$HOME/.claude"
 
     # ── pipx packages ─────────────────────────────────────────────────────
     # Check pipx list before installing to avoid re-installing on every switch.

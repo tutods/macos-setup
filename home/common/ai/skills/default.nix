@@ -28,31 +28,39 @@
         "api-conventions"
         "testing-conventions"
         "dependency-hygiene"
+        "react-hook-form-zod"
+        "content-creation"
+        "seo-audit"
       ];
     })
   ];
 
-  # Reports rather than deletes, a stray directory may be a hand-written skill.
-  home.activation.customSkillsAudit = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
+  # Deletes any real directory in ~/.claude/skills this repo does not declare, so
+  # a renamed or removed skill actually disappears instead of staying loaded.
+  # Symlinks are left alone: they point at non-Nix tooling (e.g. ~/.agents/skills).
+  # Runs after every localSkills-* copy (entryBetween in lib/ai.nix:mkLocalSkills).
+  home.activation.customSkillsReconcile = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
     dest="$HOME/.claude/skills"
-    managed=" ${lib.concatStringsSep " " config.home.ai.customSkills} "
-    stray=""
+    if [ -d "$dest" ]; then
+      managed=" ${lib.concatStringsSep " " config.home.ai.customSkills} "
+      removed=""
 
-    for path in "$dest"/*; do
-      [ -e "$path" ] || continue
-      name=$(basename "$path")
-      case "$managed" in
-        *" $name "*) ;;
-        *) stray="$stray $name" ;;
-      esac
-    done
+      for path in "$dest"/*; do
+        [ -d "$path" ] || continue
+        [ -L "$path" ] && continue
+        name=$(basename "$path")
+        case "$managed" in
+          *" $name "*) ;;
+          *)
+            rm -rf "$path"
+            removed="$removed $name"
+            ;;
+        esac
+      done
 
-    if [ -n "$stray" ]; then
-      printf "\n  ⚠  Unmanaged skills in ~/.claude/skills:\n"
-      for name in $stray; do printf "       %s\n" "$name"; done
-      printf "  These predate the move to plugins (or were added by hand).\n"
-      printf "  Remove the ones you don't want with:\n"
-      printf "    rm -rf%s\n\n" "$(for name in $stray; do printf " ~/.claude/skills/%s" "$name"; done)"
+      if [ -n "$removed" ]; then
+        printf "\n  ⚠  Removed unmanaged skills from ~/.claude/skills:%s\n\n" "$removed"
+      fi
     fi
   '';
 }

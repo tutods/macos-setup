@@ -3,7 +3,7 @@
 ## What This Repo Is
 
 A **Nix flake** managing two macOS (Apple Silicon) machines using **nix-darwin**,
-**Home Manager**: and **nix-homebrew**:
+**Home Manager** and **nix-homebrew**:
 
 - `macbook`, personal MacBook, user `tutods`
 - `work`, work laptop, user `daniel.a.sousa`
@@ -25,12 +25,11 @@ nix flake check               # after changing flake.nix or any module
 ./scripts/verify-references.sh # after renaming or deleting a skill/agent/script
 ```
 
-Plugins fail silently, so nothing else will tell you a name is wrong. The
-Dangling references fail the same way: a deleted skill still named in a `names`
-list, or a renamed script still cited in a doc, is silently ignored rather than
-erroring. The pre-commit hook runs `nix fmt` and `verify-references.sh` always,
-and `verify-plugins.sh` when a plugin
-source file is staged.
+Plugins fail silently, so nothing else will tell you a name is wrong. Dangling
+references fail the same way: a deleted skill still named in a `names` list, or a
+renamed script still cited in a doc, is silently ignored rather than erroring.
+The pre-commit hook runs `nix fmt` and `verify-references.sh` always, and
+`verify-plugins.sh` when a plugin source file is staged.
 
 ## Commands
 

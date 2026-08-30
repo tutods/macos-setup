@@ -1,0 +1,35 @@
+{
+  "name": "react-hook-form-zod-example",
+  "version": "1.0.0",
+  "description": "Example project demonstrating React Hook Form + Zod validation",
+  "private": true,
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.84.0",
+    "zod": "^4.3.6",
+    "@hookform/resolvers": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
+    "@vitejs/plugin-react": "^5.2.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "react",
+    "react-hook-form",
+    "zod",
+    "validation",
+    "forms",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}

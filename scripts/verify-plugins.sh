@@ -31,23 +31,27 @@ SOURCES=(
 
 # Collect `<key> = "<owner>/<repo>";` inside home.ai.marketplaces blocks, and
 # "<plugin>@<key>" inside home.ai.plugins blocks. Comment lines are skipped.
+# A quoted entry in a plugins block with no `@` goes to plugins_bad and fails
+# the run, that is exactly the silent typo this script exists to catch.
 : > "$TMP/marketplaces"
 : > "$TMP/plugins"
+: > "$TMP/plugins_bad"
 for f in "${SOURCES[@]}"; do
   [ -f "$f" ] || continue
   awk '
     /home\.ai\.marketplaces = \{/ { inm=1; next }
     /home\.ai\.plugins = \[/      { inp=1; next }
-    inm && /^  \};/               { inm=0; next }
-    inp && /^  \];/               { inp=0; next }
+    inm && /^[[:space:]]*\};/     { inm=0; next }
+    inp && /^[[:space:]]*\];/     { inp=0; next }
     { sub(/#.*/, "") }
     inm && match($0, /[A-Za-z0-9_-]+ = "[^"]+"/) {
       s = substr($0, RSTART, RLENGTH); gsub(/[ "]/, "", s); sub(/=/, " ", s)
       print s >> "'"$TMP"'/marketplaces"
     }
-    inp && match($0, /"[^"]+@[^"]+"/) {
+    inp && match($0, /"[^"]+"/) {
       s = substr($0, RSTART+1, RLENGTH-2)
-      print s >> "'"$TMP"'/plugins"
+      if (s ~ /@/) print s >> "'"$TMP"'/plugins"
+      else print s >> "'"$TMP"'/plugins_bad"
     }
   ' "$f"
 done
@@ -57,6 +61,13 @@ sort -u -o "$TMP/plugins" "$TMP/plugins"
 
 fail=0
 total_skills=0
+official=0
+
+while read -r bad; do
+  [ -n "$bad" ] || continue
+  echo "FAIL  plugin entry \"$bad\" has no \"@marketplace\" suffix" >&2
+  fail=$((fail + 1))
+done < "$TMP/plugins_bad"
 
 mkt_repo() { awk -v k="$1" '$1==k {print $2}' "$TMP/marketplaces"; }
 
@@ -76,6 +87,7 @@ while read -r entry; do
 
   # Built into Claude Code; there is no marketplace repo to check against.
   if [ "$mkt" = "claude-plugins-official" ]; then
+    official=$((official + 1))
     [ "$QUIET" -eq 1 ] || printf '  %-52s %s\n' "$entry" "(official, not checkable)"
     continue
   fi
@@ -144,4 +156,8 @@ if [ "$fail" -gt 0 ]; then
   exit 1
 fi
 
-echo "verify-plugins: $n_plugins plugins, $n_markets marketplaces, ~$total_skills skills, all resolve"
+if [ "$official" -gt 0 ]; then
+  echo "verify-plugins: $n_plugins plugins ($official official, not checked against a marketplace), $n_markets marketplaces, ~$total_skills skills; every checkable entry resolves"
+else
+  echo "verify-plugins: $n_plugins plugins, $n_markets marketplaces, ~$total_skills skills, all resolve"
+fi

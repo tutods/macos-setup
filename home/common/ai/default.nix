@@ -12,5 +12,6 @@
     ./plugins.nix
     ./mcp.nix
     ./statusline.nix
+    ./maintenance.nix
   ];
 }
