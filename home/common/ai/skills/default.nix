@@ -28,7 +28,6 @@
         "api-conventions"
         "testing-conventions"
         "dependency-hygiene"
-        "react-hook-form-zod"
         "content-creation"
         "seo-audit"
         "orchestration"
