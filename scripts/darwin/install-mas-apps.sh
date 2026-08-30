@@ -13,6 +13,8 @@ username="${1:?usage: install-mas-apps.sh <username>}"
 
 echo "↣ App Store apps"
 
+failures=()
+
 while IFS=$'\t' read -r app_id name; do
   [ -z "$app_id" ] && continue
   if /opt/homebrew/bin/mas list 2>/dev/null | grep -q "^${app_id} "; then
@@ -23,6 +25,12 @@ while IFS=$'\t' read -r app_id name; do
   if HOME="/Users/${username}" /opt/homebrew/bin/mas install "${app_id}" </dev/null; then
     echo "  ✓ ${name}"
   else
-    echo "  ✗ ${name} failed, install manually from App Store"
+    echo "  ✗ ${name} failed"
+    failures+=("${name}")
   fi
 done
+
+if [ ${#failures[@]} -gt 0 ]; then
+  echo "warning: ${#failures[@]} Mac App Store app(s) failed to install: ${failures[*]}"
+  echo "warning: re-run ./nix.sh or install them from the App Store"
+fi

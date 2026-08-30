@@ -8,6 +8,8 @@
 
   xdg.configFile."fish/completions/fnm.fish".source = ./fnm-completions.fish;
 
+  home.sessionPath = ["$HOME/.local/bin"];
+
   programs.fish = {
     enable = true;
     shellAliases = import ./alias.nix;
@@ -19,10 +21,6 @@
 
       if test -f ~/.config/fish/secrets.fish
         source ~/.config/fish/secrets.fish
-      end
-
-      if not contains "$HOME/.local/bin" $fish_user_paths
-        set -U fish_user_paths $HOME/.local/bin $fish_user_paths
       end
     '';
 
@@ -38,6 +36,11 @@
     ];
 
     interactiveShellInit = ''
+      # Migration: erase the stale universal var once; PATH is declarative now.
+      if set -qU fish_user_paths
+        set -eU fish_user_paths
+      end
+
       bind \ew backward-kill-line
 
       set fzf_preview_dir_cmd eza --all --color=always

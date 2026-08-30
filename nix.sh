@@ -391,6 +391,28 @@ dry_run_config() {
   fi
 }
 
+# ── Home Manager backup sweep ─────────────────────────────────────────────────
+# home-manager aborts a switch if a *.backup it needs to write already exists.
+clear_hm_backups() {
+  local config="$1"
+  local target_user
+  target_user=$(get_target_user "$config")
+
+  if [[ "$target_user" != "${USER:-}" ]]; then
+    print_info "Skipping HM backup sweep for ${target_user}; clear *.backup under ~/.config and ~/.claude on that machine by hand"
+    return 0
+  fi
+
+  local root f
+  for root in "$HOME/.config" "$HOME/.claude"; do
+    [[ -d "$root" ]] || continue
+    while IFS= read -r -d '' f; do
+      rm -f "$f" && print_info "Removed stale HM backup: $f" || true
+    done < <(find "$root" -name '*.backup' -type f -print0 2>/dev/null)
+  done
+  return 0
+}
+
 # ── Apply ─────────────────────────────────────────────────────────────────────
 apply_config() {
   local config="$1" force="$2" step="$3"
@@ -417,6 +439,8 @@ apply_config() {
     exit 1
   fi
   echo ""
+
+  clear_hm_backups "$config"
 
   local t0=$SECONDS exit_code=0
   run_cmd "Applying ${config}…" "${rebuild_cmd[@]}" || exit_code=$?
