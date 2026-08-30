@@ -32,6 +32,7 @@ Rules and conventions for working in this Nix flake repo.
 - Never hardcode usernames, use `config.home.username` or pass via `mkUser`
 - Use explicit imports over `lib.mkIf` for clarity (this codebase prefers direct imports)
 - Use `config.home.username` instead of hardcoding paths
+- `pkgs` and `pkgsUnstable` come from `flake.nix` via `specialArgs`, not the module system's `nixpkgs.*` options. That means `nixpkgs.overlays` and `nixpkgs.config` set inside a module are inert. There are no overlays today; if one is ever needed, apply it in the `import nixpkgs` calls at the top of `flake.nix`, or migrate `pkgs` onto `nixpkgs.pkgs` first
 
 ## Never
 
