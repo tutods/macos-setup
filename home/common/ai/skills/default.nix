@@ -30,9 +30,22 @@
         "dependency-hygiene"
         "content-creation"
         "seo-audit"
-        "orchestration"
         "harness-engineer"
       ];
+    })
+    # Fetched, not committed: the user does not want orca's skill content
+    # living in this repo's git history. To bump the pin: run
+    # `git ls-remote https://github.com/stablyai/orca HEAD`, review the diff
+    # upstream, then update rev + hash together.
+    (aiLib.mkFetchedSkills {
+      inherit lib;
+      label = "orca";
+      owner = "stablyai";
+      repo = "orca";
+      rev = "976e05c0c81cff2b4ed038b9d847834ad7c8ba7b";
+      hash = "sha256-k2oV/OmwrGdc8DLEDnM5lg4lRs5J4w0kRoW/j+nzsGA=";
+      subdir = "skills";
+      names = ["orchestration" "orca-cli"];
     })
   ];
 

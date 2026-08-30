@@ -170,6 +170,17 @@ After the copies, `customSkillsReconcile` deletes any real directory in
 actually disappears instead of staying loaded. Symlinks are left alone, they
 point at non-Nix tooling such as `~/.agents/skills/`.
 
+**Exception: fetched, not committed.** `orchestration` and `orca-cli` come from
+`stablyai/orca` and are not vendored into this repo — the same reason
+marketplaces are pinned rather than committed applies. Declared via
+`lib/ai.nix:mkFetchedSkills` (same "common" import list in
+`home/common/ai/skills/default.nix`), which fetches a pinned rev + hash with
+`fetchFromGitHub` and copies the named skill directories into
+`~/.claude/skills/` at build time, so a fresh machine still gets them from
+`./nix.sh` with no skill content in this repo's git history. Bump the pin the
+same way as a marketplace: `git ls-remote https://github.com/stablyai/orca HEAD`,
+review the diff, update rev + hash together.
+
 ## Agents
 
 Custom subagents, Markdown with `name`/`description`/`tools`/`model`

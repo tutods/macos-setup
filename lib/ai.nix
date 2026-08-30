@@ -7,8 +7,10 @@
 # historically treated a skill dir as writable and a 0444 store symlink broke
 # that. Nothing writes there now, but the copy is kept: it is cheap and the
 # reconcile logic depends on real dirs. mkLocalSkills copies the declared set and
-# customSkillsReconcile deletes any non-symlink dir it does not own. Agents and
-# workflows are plain read-only input and get home.file store symlinks.
+# customSkillsReconcile deletes any non-symlink dir it does not own.
+# mkFetchedSkills does the same copy, but its source is a pinned fetchFromGitHub
+# tree instead of a directory committed in this repo. Agents and workflows are
+# plain read-only input and get home.file store symlinks.
 {pkgs}: let
   jqBin = "${pkgs.jq}/bin/jq";
 in {
@@ -62,6 +64,55 @@ in {
         '')
         names}
       echo "↣ Custom skills (${label}): ${toString (builtins.length names)} installed"
+    '';
+  };
+
+  # Skills fetched from an external repo at build time instead of committed
+  # into this repo, e.g. stablyai/orca's `orchestration`/`orca-cli` skills:
+  # the user wants them reproducibly installed by ./nix.sh on any machine
+  # without their content living in this repo's git history. Pinned by
+  # rev + hash exactly like a plugin marketplace — bump deliberately after
+  # reviewing the diff, never track a moving ref. Unlike mkLocalSkills, this
+  # never asserts the fetched tree matches `names` exactly: it's a curated
+  # subset of someone else's repo, not a directory this repo owns.
+  mkFetchedSkills = {
+    lib,
+    label,
+    owner,
+    repo,
+    rev,
+    hash,
+    subdir ? "",
+    names,
+  }: let
+    fetched = pkgs.fetchFromGitHub {inherit owner repo rev hash;};
+    src =
+      if subdir == ""
+      then fetched
+      else fetched + "/${subdir}";
+  in {
+    home.ai.customSkills = names;
+
+    assertions =
+      map (name: {
+        assertion = builtins.pathExists (src + "/${name}/SKILL.md");
+        message = "mkFetchedSkills (${label}): '${name}' not found under ${toString src} (owner/repo/rev/subdir may have moved)";
+      })
+      names;
+
+    # Same activation shape and DAG ordering as mkLocalSkills's copy step:
+    # after customSkillsReconcile has torn down the previous generation,
+    # before linkGeneration.
+    home.activation."fetchedSkills-${label}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
+      dest="$HOME/.claude/skills"
+      mkdir -p "$dest"
+      ${lib.concatMapStringsSep "\n" (name: ''
+          rm -rf "$dest/${name}"
+          cp -R "${src}/${name}" "$dest/${name}"
+          chmod -R u+w "$dest/${name}"
+        '')
+        names}
+      echo "↣ Fetched skills (${label}): ${toString (builtins.length names)} installed"
     '';
   };
 
