@@ -6,6 +6,17 @@
       description = "Extra AI instructions appended to shared instructions (role-specific)";
     };
 
+    vaultFolders = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = ["Conventions" "Lessons" "Decisions" "Process" "Projects" "Clients" "Notes"];
+      description = ''
+        Vault folders the SessionStart hook indexes into context. Scope this
+        per role: the work machine must not have personal-context folders
+        (freelance clients, personal projects) injected into every session.
+        The vault stays readable either way, this only scopes the injection.
+      '';
+    };
+
     extraMcpServers = lib.mkOption {
       default = {};
       description = "Role-specific MCP servers merged into ~/.claude.json's mcpServers";

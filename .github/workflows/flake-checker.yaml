@@ -37,6 +37,17 @@ jobs:
       - name: Verify no dangling references
         run: ./scripts/verify-references.sh --quiet
 
+  # alejandra drift breaks `nix fmt --check` and leaks reformatting into diffs.
+  # Cheap, so it runs on ubuntu alongside the other fast checks.
+  fmt:
+    name: Check Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: DeterminateSystems/nix-installer-action@v22
+      - name: Check Nix formatting
+        run: nix --extra-experimental-features 'nix-command flakes' fmt -- --check .
+
   flake-checker:
     name: Flake Checker
     runs-on: macos-26

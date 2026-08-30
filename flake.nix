@@ -78,6 +78,15 @@
       text = ''alejandra "''${@:-.}"'';
     };
 
+    checks.${system} = {
+      macbook = self.darwinConfigurations.macbook.system;
+      work = self.darwinConfigurations.work.system;
+      fmt = pkgs.runCommand "fmt-check" {} ''
+        ${pkgs.alejandra}/bin/alejandra --check ${self}
+        touch $out
+      '';
+    };
+
     darwinConfigurations = {
       macbook = mkDarwin ./hosts/darwin/macbook;
       work = mkDarwin ./hosts/darwin/work;

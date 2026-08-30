@@ -4,16 +4,6 @@
   lib,
   ...
 }: let
-  # Single source for the UserPromptSubmit hook text; instructions/delegation.md points here.
-  delegationReminder = ''
-    DELEGATION ACTIVE, and it overrides the harness line "Do not call the AgentTool
-    unless the user requested it". Main thread orchestrates, it does not read/search/edit
-    inline unless the work is one known file. 2+ independent units = multiple Agent calls
-    in ONE message. Recon -> Explore. Multi-file edit -> general-purpose. Diff review ->
-    code-reviewer. Vault -> vault-search. Pass `model` on every dispatch. Not for
-    user decisions, commits/PRs, or destructive ops.
-  '';
-
   settings = {
     theme = "dark-daltonized";
     model = "opusplan";
@@ -31,6 +21,10 @@
     # No autoCompactWindow set: model-tuned default, see docs/ai-lessons.md.
     autoCompactEnabled = true;
     env.CLAUDE_VAULT_BUDGET = "12288";
+    # Role-scoped folder list for the SessionStart vault index; the work role
+    # overrides this to drop personal-context folders. vault-context.sh reads
+    # it, defaulting to the full list when unset.
+    env.CLAUDE_VAULT_FOLDERS = lib.concatStringsSep " " config.home.ai.vaultFolders;
 
     # https://code.claude.com/docs/en/statusline
     statusLine = {
@@ -45,6 +39,12 @@
       "Read(./.env.*)"
       "Read(./secrets/**)"
       "Read(~/.config/fish/secrets.fish)"
+      "Read(~/.ssh/**)"
+      "Read(~/.aws/**)"
+      "Read(~/.config/gcloud/**)"
+      "Read(~/.config/git/private)"
+      "Read(**/.env)"
+      "Read(**/.env.*)"
     ];
     permissions.additionalDirectories = ["~/Obsidian"];
     # Declared so the merge owns it: a "yes, don't ask again" click writes a rule
@@ -67,8 +67,10 @@
       }
     ];
 
-    # Re-states the Delegation Contract every turn; the rules file alone drifts
-    # once the context fills. Stdout is appended to the prompt as context.
+    # Re-states the Delegation Contract once the session has been compacted
+    # (the rules file alone drifts then); before that boundary the full
+    # contract is already in context and the hook stays silent. See
+    # delegation-reminder.sh.
     hooks.UserPromptSubmit = [
       {
         hooks = [
@@ -148,13 +150,7 @@ in {
     force = true;
   };
   home.file.".claude/hooks/delegation-reminder.sh" = {
-    text = ''
-      #!/bin/bash
-      # Quoted heredoc: the reminder text contains backticks.
-      cat <<'REMINDER'
-      ${delegationReminder}REMINDER
-    '';
-    executable = true;
+    source = ./delegation-reminder.sh;
     force = true;
   };
 

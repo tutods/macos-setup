@@ -9,6 +9,7 @@ Reference for the `work` host (`daniel.a.sousa`). Covers everything that differs
 - **Admin vs normal user**: Homebrew is owned by `admin.daniel.a.sousa`. Run `./nix.sh work` as that admin account. Post-apply hooks execute as `daniel.a.sousa`.
 - **No Doppler**: Secrets go in `~/.config/fish/secrets.fish` or company tooling. No `doppler` CLI on work machine.
 - **Secrets file location**: `~/.config/fish/secrets.fish`, create as `daniel.a.sousa`, chmod 600.
+- **Vault scope**: The Obsidian vault syncs here via its private git repo, but the `SessionStart` index is scoped by `home.ai.vaultFolders` to generic folders only, personal-client and personal-project titles never enter a work session. The folders are still on disk; only the automatic injection is scoped. Do not write work content into `Clients/` or `Projects/`, it lands in the personal repo.
 
 ---
 

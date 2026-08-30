@@ -56,8 +56,8 @@ fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 
 | Hook | Trigger | Action |
 |------|---------|--------|
-| `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Prompts/ is excluded (a pointer line with a note count stands in), and truncation is folder-aware, it never cuts mid-folder. Bodies come from `vault-search` on demand |
-| `UserPromptSubmit` | Every prompt | `delegation-reminder.sh`, generated inline in `settings.nix` from the `delegationReminder` string, re-states the Delegation Contract so it survives a long session |
+| `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Prompts/ is excluded (a pointer line with a note count stands in), and truncation is folder-aware, it never cuts mid-folder. Bodies come from `vault-search` on demand. The folder list is role-scoped via `home.ai.vaultFolders`: the work machine indexes only generic folders (Conventions, Decisions, Lessons, Process, Notes), so freelance-client and personal-project titles never enter a work session |
+| `UserPromptSubmit` | Every prompt after compaction | `delegation-reminder.sh` re-states the Delegation Contract once the session transcript contains a compaction boundary; before that the full contract is already in context and the hook is silent |
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
 | `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the third inline `Read`/`Grep`/`Glob` in a turn, once per turn |
 | `PostToolUse` | `Edit`, `Write`, `MultiEdit` | `biome check --write`, no-op unless the project has a biome config |
@@ -101,6 +101,15 @@ home.ai.plugins      = [ "<plugin>@<key>" ];
 Keep a marketplace key stable, renaming it orphans every plugin already
 installed under the old name. `claude-plugins-official` is built into Claude
 Code and needs no marketplace entry.
+
+**Every marketplace is a supply-chain trust**: plugins run code and register
+skills in every session, and the verification scripts check names, not
+behavior. Before adding one, check whether a skill you actually invoked in the
+last 30 days needs it (transcripts under `~/.claude/projects/`), and prefer
+moving stack- or domain-specific plugins to the project that uses them. The
+2026-08 cut dropped marketplaces that no transcript invocation had touched:
+social-media-skills, ui-ux-pro-max, claude-code-workflows,
+anthropic-agent-skills, claude-code-skills.
 
 **Machine-wide plugins are generic only**: workflow, writing, debugging,
 authoring. Stack- and domain-specific plugins (framework packs, SEO, design

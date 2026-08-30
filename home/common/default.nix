@@ -33,7 +33,7 @@
     fi
   '';
 
-  home.activation.checkSecrets = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.checkSecrets = lib.hm.dag.entryBefore ["writeBoundary"] ''
     YELLOW='\033[1;33m'
     NC='\033[0m'
 
@@ -43,6 +43,7 @@
       printf "    mkdir -p ~/.config/git\n"
       printf "    git config --file ~/.config/git/private user.name \"Your Name\"\n"
       printf "    git config --file ~/.config/git/private user.email \"you@email.com\"\n\n"
+      exit 1
     fi
 
     if [ ! -f "${config.home.homeDirectory}/.config/fish/secrets.fish" ]; then

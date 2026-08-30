@@ -37,6 +37,7 @@ Run from the repo root (where `flake.nix` lives).
 
 ```bash
 ./nix.sh macbook              # build + apply personal machine
+./scripts/deploy-doctor.sh macbook # preview what the next deploy deletes
 ./nix.sh work                 # build + apply work machine
 ./nix.sh macbook --build-only # build only, no sudo required
 ./nix.sh macbook --force      # force rebuild
@@ -77,6 +78,13 @@ files for aliases, abbreviations, functions and tool integrations.
 
 GitHub Actions (`flake-checker.yaml`) validates the flake on push and daily.
 Renovate auto-merges minor/patch updates for `nixpkgs`, `home-manager`,
-`nix-darwin`, and `nix-homebrew`.
+`nix-darwin`, and `nix-homebrew`, and every automerge waits on branch
+protection's required checks (both `Build Darwin Configs` jobs included), so a
+lock update that fails to build cannot merge. `main` requires linear history
+and no force pushes; job names in required checks must match the workflow's
+`name:` fields exactly, keep them in sync when renaming a job. A failing
+scheduled/push run opens a tracking issue and closes it once green, except
+billing-class failures, which stop jobs before they start and only reach you
+via GitHub's account emails — check `gh run list` when CI has been quiet.
 
 @docs/nix-conventions.md

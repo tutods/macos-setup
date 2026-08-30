@@ -147,7 +147,7 @@ These are declared in the repo but **upgraded to latest versions** each time you
 
 ### Secrets (not tracked at all)
 
-See [secrets.md](secrets.md) for the full policy. Short version: `~/.config/git/private` and `~/.config/fish/secrets.fish` live only on the machine, never in this repo. Home Manager warns on deploy if they're missing.
+See [secrets.md](secrets.md) for the full policy. Short version: `~/.config/git/private` and `~/.config/fish/secrets.fish` live only on the machine, never in this repo. If `~/.config/git/private` is missing, activation fails before the write boundary with instructions to create it; a missing `~/.config/fish/secrets.fish` is a warning only.
 
 ---
 

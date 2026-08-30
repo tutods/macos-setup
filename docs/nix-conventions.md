@@ -8,6 +8,7 @@ Rules and conventions for working in this Nix flake repo.
 - Run `nix flake check` after any change to `flake.nix` or module files, catches errors before deploy
 - Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else will tell you a name is wrong
 - Run `./scripts/verify-references.sh` after renaming or deleting any skill, agent, workflow or script. A dangling reference is silently ignored, never an error
+- Run `./scripts/deploy-doctor.sh <host>` before applying, a deploy silently deletes unmanaged skill dirs, drops undeclared plugins and hook events, and clears `permissions.allow`; the doctor previews all four
 - Never skip these even for "trivial" edits
 
 ## Adding Packages

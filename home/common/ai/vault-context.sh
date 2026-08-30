@@ -14,6 +14,15 @@ vault="$HOME/Obsidian"
 
 budget="${CLAUDE_VAULT_BUDGET:-12288}"
 
+# Folder list is role-scoped via home.ai.vaultFolders (settings.nix injects it
+# as CLAUDE_VAULT_FOLDERS); the work machine drops personal-context folders.
+# Folders listed here that do not exist are skipped below either way.
+if [ -n "${CLAUDE_VAULT_FOLDERS:-}" ]; then
+  folders="$CLAUDE_VAULT_FOLDERS"
+else
+  folders="Conventions Lessons Decisions Process Projects Clients Notes"
+fi
+
 # Titles (no .md extension) of every note under $1, folder prefix stripped;
 # nested subfolders (Lessons/Backend/...) keep their subpath as signal.
 folder_titles() {
@@ -23,7 +32,7 @@ folder_titles() {
 listing=""
 dropped=""
 used=0
-for folder in Conventions Lessons Decisions Process Projects Clients Notes; do
+for folder in $folders; do
   [ -d "$vault/$folder" ] || continue
   titles=$(folder_titles "$folder")
   [ -n "$titles" ] || continue
@@ -62,7 +71,14 @@ slug=$(basename "$cwd")
 # Dotfiles-style dirs: cwd ".dotfiles" must match "project: dotfiles".
 slug="${slug#.}"
 
-matches=$(rg -l "^project: ${slug}\$" "$vault" 2>/dev/null || true)
+# Project-tagged notes: search only the role-scoped folders, so a work-machine
+# session never surfaces personal notes that happen to match the slug.
+search_dirs=""
+for d in $folders; do
+  [ -d "$vault/$d" ] && search_dirs="$search_dirs $vault/$d"
+done
+matches=""
+[ -n "$search_dirs" ] && matches=$(rg -l "^project: ${slug}\$" $search_dirs 2>/dev/null || true)
 if [ -n "$matches" ]; then
   echo "# Notes tagged for this project ($slug)"
   printf '%s\n' "$matches" | sed "s|^$vault/||" | sort

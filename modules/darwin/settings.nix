@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{...}: {
   system = {
     defaults = {
       dock = {
@@ -67,11 +67,16 @@
       screencapture = {
         type = "jpg";
         target = "clipboard";
+        disable-shadow = true;
       };
 
       screensaver = {
         askForPassword = true;
         askForPasswordDelay = 0;
+      };
+
+      universalaccess = {
+        closeViewZoomFollowsFocus = true;
       };
 
       SoftwareUpdate = {
@@ -86,6 +91,8 @@
         "com.apple.finder" = {
           FXPreferredSortOrder = "name";
           FXArrangeMeBy = "name";
+          sortColumn = "name";
+          sortDirection = "ascending";
         };
         "com.apple.AdLib" = {
           allowApplePersonalizedAdvertising = false;
@@ -96,11 +103,21 @@
           AutomaticDownload = 1;
           CriticalUpdateInstall = 1;
         };
+        "com.apple.BluetoothAudioAgent" = {
+          "Apple Bitpool Min (editable)" = 40;
+        };
+        "com.apple.frameworks.diskimages" = {
+          auto-open-ro-root = true;
+          auto-open-rw-root = true;
+        };
+        "com.apple.NetworkBrowser" = {
+          BrowseAllInterfaces = true;
+        };
       };
     };
 
     activationScripts.postActivation.text = ''
-      ${pkgs.bash}/bin/bash ${../../scripts/darwin/apply-macos-defaults.sh}
+      sudo pmset -a hibernatemode 0
     '';
   };
 }
