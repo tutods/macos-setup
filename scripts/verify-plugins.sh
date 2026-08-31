@@ -100,21 +100,41 @@ while read -r entry; do
     continue
   fi
 
-  repo=$(mkt_repo "$mkt")
-  if [ -z "$repo" ]; then
+  spec=$(mkt_repo "$mkt")
+  if [ -z "$spec" ]; then
     echo "FAIL  $entry -> marketplace '$mkt' is not declared in home.ai.marketplaces" >&2
     fail=$((fail + 1)); continue
   fi
+
+  # "<owner>/<repo>[@<sha>]": verify against the pinned commit when present,
+  # since that is the revision Claude Code will actually install from.
+  repo="${spec%%@*}"
+  sha=""
+  [ "$spec" != "$repo" ] && sha="${spec##*@}"
 
   dir=$(fetch "$repo") || {
     echo "FAIL  $entry -> could not fetch $repo" >&2
     fail=$((fail + 1)); continue
   }
 
-  mj="$dir/mj.json"
+  ref="HEAD"
+  if [ -n "$sha" ]; then
+    if git -C "$dir" cat-file -e "$sha^{commit}" 2>/dev/null \
+      || git -C "$dir" fetch -q --depth 1 origin "$sha" 2>/dev/null; then
+      ref="$sha"
+    else
+      echo "FAIL  $entry -> pinned sha $sha does not exist in $repo" >&2
+      fail=$((fail + 1)); continue
+    fi
+  fi
+
+  mj="$dir/mj-$ref.json"
   if [ ! -f "$mj" ]; then
-    git -C "$dir" show HEAD:.claude-plugin/marketplace.json > "$mj" 2>/dev/null || {
-      echo "FAIL  $entry -> $repo has no .claude-plugin/marketplace.json" >&2
+    git -C "$dir" show "$ref:.claude-plugin/marketplace.json" > "$mj" 2>/dev/null || {
+      # The redirection created an empty $mj; remove it or every later plugin
+      # from this marketplace gets a misleading "not a plugin" failure.
+      rm -f "$mj"
+      echo "FAIL  $entry -> $repo has no .claude-plugin/marketplace.json at $ref" >&2
       fail=$((fail + 1)); continue
     }
   fi
@@ -136,7 +156,7 @@ while read -r entry; do
     # awk, not a grep chain: grep exits 1 on zero matches, which under
     # `set -o pipefail` would abort the whole script on a legitimately
     # skill-less plugin.
-    n=$(git -C "$dir" ls-tree -r --name-only HEAD | awk -v pref="$pref" '
+    n=$(git -C "$dir" ls-tree -r --name-only "$ref" | awk -v pref="$pref" '
       index($0, pref) != 1 { next }
       $0 !~ /(^|\/)SKILL\.md$/ { next }
       /(^|\/)\.(gemini|cursor|opencode|grok|kiro|pi|qoder|rovodev|trae|trae-cn|vibe|codex|agents|hermes|github|codebuddy)\// { next }

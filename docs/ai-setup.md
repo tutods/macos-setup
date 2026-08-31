@@ -62,8 +62,9 @@ fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 | `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Prompts/ is excluded (a pointer line with a note count stands in), and truncation is folder-aware, it never cuts mid-folder. Bodies come from `vault-search` on demand. The folder list is role-scoped via `home.ai.vaultFolders`: the work machine indexes only generic folders (Conventions, Decisions, Lessons, Process, Notes), so freelance-client and personal-project titles never enter a work session |
 | `UserPromptSubmit` | Every prompt after compaction | `delegation-reminder.sh` re-states the Delegation Contract once the session transcript contains a compaction boundary; before that the full contract is already in context and the hook is silent |
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
-| `PreToolUse` | Any `Bash` call | `rtk hook claude`, auto-rewrites commands to use RTK for permission-free read-only ops |
+| `PreToolUse` | Any `Bash` call | `rtk-rewrite.sh`, its own matcher group, wraps `rtk hook claude` to auto-rewrite commands for permission-free read-only ops (silent no-op when `rtk` is absent) |
 | `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the third inline `Read`/`Grep`/`Glob` in a turn, once per turn |
+| `PreToolUse` | `Edit`, `Write`, `MultiEdit` | `force-delegation.sh`, hard gate (not a nudge): denies main-thread file mutations past a 2-per-turn grace allowance (skips subagents via `agent_id`), forcing everything past that through a subagent |
 | `PostToolUse` | `Edit`, `Write`, `MultiEdit` | `biome check --write`, no-op unless the project has a biome config |
 
 ## MCP Servers
@@ -98,13 +99,19 @@ Code on next launch. Declared in `home/common/ai/plugins.nix` (both machines) or
 a role's `ai/default.nix` (role only). Two options, which merge across modules:
 
 ```nix
-home.ai.marketplaces = { <key> = "<owner>/<repo>"; };   # key chosen here, not read from the repo
+home.ai.marketplaces = { <key> = "<owner>/<repo>@<commit sha>"; };   # key chosen here, not read from the repo
 home.ai.plugins      = [ "<plugin>@<key>" ];
 ```
 
 Keep a marketplace key stable, renaming it orphans every plugin already
 installed under the old name. `claude-plugins-official` is built into Claude
 Code and needs no marketplace entry.
+
+Third-party marketplaces must carry the `@<sha>` pin: their skills execute
+locally, and the pin is what stops someone else's next commit from running
+here unreviewed. Get the sha with `git ls-remote https://github.com/<owner>/<repo> HEAD`,
+review the repo at that commit, and bump pins deliberately the same way.
+`verify-plugins.sh` validates each plugin against its pinned commit.
 
 **Every marketplace is a supply-chain trust**: plugins run code and register
 skills in every session, and the verification scripts check names, not
@@ -164,6 +171,17 @@ After the copies, `customSkillsReconcile` deletes any real directory in
 actually disappears instead of staying loaded. Symlinks are left alone, they
 point at non-Nix tooling such as `~/.agents/skills/`.
 
+**Exception: fetched, not committed.** `orchestration` and `orca-cli` come from
+`stablyai/orca` and are not vendored into this repo — the same reason
+marketplaces are pinned rather than committed applies. Declared via
+`lib/ai.nix:mkFetchedSkills` (same "common" import list in
+`home/common/ai/skills/default.nix`), which fetches a pinned rev + hash with
+`fetchFromGitHub` and copies the named skill directories into
+`~/.claude/skills/` at build time, so a fresh machine still gets them from
+`./nix.sh` with no skill content in this repo's git history. Bump the pin the
+same way as a marketplace: `git ls-remote https://github.com/stablyai/orca HEAD`,
+review the diff, update rev + hash together.
+
 ## Agents
 
 Custom subagents, Markdown with `name`/`description`/`tools`/`model`
@@ -205,14 +223,15 @@ Create the file, add its name to the `names` list in the sibling
 
 ## Initialization
 
-`home/common/ai/init.nix`, run on every `darwin-rebuild switch`, each step
-guarded so it only acts when needed:
+Activation steps that run on every `darwin-rebuild switch`, each guarded so it
+only acts when needed:
 
-| Step | Condition |
-|------|-----------|
-| `pipx install code-review-graph` | not in `pipx list` |
-| `localSkills*` | every switch: copies custom skills into `~/.claude/skills/` |
-| `customSkillsReconcile` | every switch: deletes non-symlink dirs in `~/.claude/skills/` this repo does not declare |
+| Step | Lives in | Condition |
+|------|----------|-----------|
+| `pipx install code-review-graph` | `home/common/ai/init.nix` | pinned version not in `pipx list` |
+| `localSkills-*` | `lib/ai.nix` (`mkLocalSkills`) | every switch: copies in-repo custom skills into `~/.claude/skills/` |
+| `fetchedSkills-*` | `lib/ai.nix` (`mkFetchedSkills`) | every switch: copies pinned upstream skills into `~/.claude/skills/` |
+| `customSkillsReconcile` | `home/common/ai/skills/default.nix` | every switch: deletes non-symlink dirs in `~/.claude/skills/` this repo does not declare |
 
 ## Maintenance
 

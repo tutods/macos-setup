@@ -7,11 +7,13 @@
 # historically treated a skill dir as writable and a 0444 store symlink broke
 # that. Nothing writes there now, but the copy is kept: it is cheap and the
 # reconcile logic depends on real dirs. mkLocalSkills copies the declared set and
-# customSkillsReconcile deletes any non-symlink dir it does not own. Agents and
-# workflows are plain read-only input and get home.file store symlinks.
+# customSkillsReconcile deletes any non-symlink dir it does not own.
+# mkFetchedSkills does the same copy, but its source is a pinned fetchFromGitHub
+# tree instead of a directory committed in this repo. Agents and workflows are
+# plain read-only input and get home.file store symlinks.
 {pkgs}: let
   jqBin = "${pkgs.jq}/bin/jq";
-in {
+in rec {
   mkServer = {
     cmd,
     args,
@@ -26,36 +28,38 @@ in {
     then base
     else base + "\n\n" + extra;
 
-  mkLocalSkills = {
+  # Shared by mkLocalSkills and mkFetchedSkills: both copy a named set of
+  # skill directories from some `src` into ~/.claude/skills at activation
+  # time, differing only in where `src` comes from and whether the reverse
+  # "every dir on disk must be declared" assertion applies (mkLocalSkills
+  # owns its whole `local/` dir and can assert that; mkFetchedSkills only
+  # owns a curated subset of someone else's repo, so it can't).
+  mkSkillCopy = {
     lib,
     label,
-    dir,
+    prefix,
+    src,
     names,
   }: {
     home.ai.customSkills = names;
 
     assertions =
-      (map (name: {
-          assertion = builtins.pathExists (dir + "/${name}/SKILL.md");
-          message = "mkLocalSkills (${label}): '${name}' is in names but ${toString dir}/${name}/SKILL.md is missing";
-        })
-        names)
-      ++ (lib.mapAttrsToList (entry: kind: {
-          assertion = kind != "directory" || builtins.elem entry names;
-          message = "mkLocalSkills (${label}): ${toString dir}/${entry} exists but is not in the names list";
-        })
-        (builtins.readDir dir));
+      map (name: {
+        assertion = builtins.pathExists (src + "/${name}/SKILL.md");
+        message = "${prefix} (${label}): '${name}' is in names but ${toString src}/${name}/SKILL.md is missing";
+      })
+      names;
 
     # After linkGeneration: Home Manager has torn down the previous generation's
     # symlinks by then, and copying earlier would have them removed. Before
     # customSkillsReconcile: that step deletes anything in ~/.claude/skills this
     # repo does not own, so every copy must land first.
-    home.activation."localSkills-${label}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
+    home.activation."${prefix}-${label}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
       dest="$HOME/.claude/skills"
       mkdir -p "$dest"
       ${lib.concatMapStringsSep "\n" (name: ''
           rm -rf "$dest/${name}"
-          cp -R "${dir}/${name}" "$dest/${name}"
+          cp -R "${src}/${name}" "$dest/${name}"
           # Source is a 0444 store path; without this the next deploy's rm -rf
           # cannot recurse in to replace the copy.
           chmod -R u+w "$dest/${name}"
@@ -64,6 +68,58 @@ in {
       echo "↣ Custom skills (${label}): ${toString (builtins.length names)} installed"
     '';
   };
+
+  mkLocalSkills = {
+    lib,
+    label,
+    dir,
+    names,
+  }: let
+    copy = mkSkillCopy {
+      inherit lib label names;
+      prefix = "localSkills";
+      src = dir;
+    };
+  in
+    copy
+    // {
+      assertions =
+        copy.assertions
+        ++ (lib.mapAttrsToList (entry: kind: {
+            assertion = kind != "directory" || builtins.elem entry names;
+            message = "mkLocalSkills (${label}): ${toString dir}/${entry} exists but is not in the names list";
+          })
+          (builtins.readDir dir));
+    };
+
+  # Skills fetched from an external repo at build time instead of committed
+  # into this repo, e.g. stablyai/orca's `orchestration`/`orca-cli` skills:
+  # the user wants them reproducibly installed by ./nix.sh on any machine
+  # without their content living in this repo's git history. Pinned by
+  # rev + hash exactly like a plugin marketplace — bump deliberately after
+  # reviewing the diff, never track a moving ref. Unlike mkLocalSkills, this
+  # never asserts the fetched tree matches `names` exactly: it's a curated
+  # subset of someone else's repo, not a directory this repo owns.
+  mkFetchedSkills = {
+    lib,
+    label,
+    owner,
+    repo,
+    rev,
+    hash,
+    subdir ? "",
+    names,
+  }: let
+    fetched = pkgs.fetchFromGitHub {inherit owner repo rev hash;};
+    src =
+      if subdir == ""
+      then fetched
+      else fetched + "/${subdir}";
+  in
+    mkSkillCopy {
+      inherit lib label names src;
+      prefix = "fetchedSkills";
+    };
 
   mkLocalAgents = {
     lib,
@@ -127,7 +183,11 @@ in {
     target="${file}"
     mkdir -p "$(dirname "$target")"
     if [ -f "$target" ]; then
-      ${jqBin} --slurpfile vw ${valueFile} '($vw[0]) as $v | ${mergeClause}' "$target" > "$target.tmp" && mv "$target.tmp" "$target"
+      ${jqBin} --slurpfile vw ${valueFile} '($vw[0]) as $v | ${mergeClause}' "$target" > "$target.tmp" && mv "$target.tmp" "$target" || {
+        echo "aiLib: jq merge of ${key} into $target failed" >&2
+        rm -f "$target.tmp"
+        exit 1
+      }
     else
       ${jqBin} -n --slurpfile vw ${valueFile} '($vw[0]) as $v | {} | ${mergeClause}' > "$target"
     fi
@@ -163,7 +223,11 @@ in {
         | ($live + $nix)
         | .hooks = (($lh | with_entries(select(.key as $k | ${keep} | index($k)))) + $nh)
         | .permissions = ($lp + $np)
-      ' "$target" ${valueFile} > "$target.tmp" && mv "$target.tmp" "$target"
+      ' "$target" ${valueFile} > "$target.tmp" && mv "$target.tmp" "$target" || {
+        echo "aiLib: jq merge into $target failed" >&2
+        rm -f "$target.tmp"
+        exit 1
+      }
     else
       [ -f "$target" ] && cp "$target" "$target.bak" && echo "aiLib: $target was not a JSON object, backed up to $target.bak and replaced with the Nix value" >&2
       ${jqBin} . ${valueFile} > "$target.tmp" && mv "$target.tmp" "$target"

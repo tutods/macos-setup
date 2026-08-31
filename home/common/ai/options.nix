@@ -43,11 +43,14 @@
     marketplaces = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = {};
-      example = {caveman = "JuliusBrussee/caveman";};
+      example = {caveman = "JuliusBrussee/caveman@df2ccd85c94ec3c8289cb62ac020d241ccfb0c60";};
       description = ''
-        Claude Code plugin marketplaces, as `<key> = "<owner>/<repo>"`. The key
-        is chosen here (not read from the repo) and used in `home.ai.plugins` as
-        `<plugin>@<key>`; renaming it orphans already-installed plugins.
+        Claude Code plugin marketplaces, as `<key> = "<owner>/<repo>[@<commit sha>]"`.
+        The key is chosen here (not read from the repo) and used in
+        `home.ai.plugins` as `<plugin>@<key>`; renaming it orphans
+        already-installed plugins. The optional `@<sha>` pins the marketplace to
+        a reviewed commit instead of HEAD; third-party marketplaces must be
+        pinned (their skills execute locally, this is the supply chain).
         `claude-plugins-official` is built in, do not list it.
       '';
     };
@@ -57,9 +60,11 @@
       default = [];
       internal = true;
       description = ''
-        Names of in-repo skills copied into ~/.claude/skills. Populated by
-        `lib/ai.nix:mkLocalSkills`; skills/default.nix reads it to report
-        directories in ~/.claude/skills that this repo doesn't own.
+        Names of skills copied into ~/.claude/skills, whether their source is
+        in-repo or fetched from an upstream repo at build time. Populated by
+        `lib/ai.nix:mkLocalSkills` and `mkFetchedSkills`; skills/default.nix
+        reads it to report directories in ~/.claude/skills that this repo
+        doesn't own.
       '';
     };
 

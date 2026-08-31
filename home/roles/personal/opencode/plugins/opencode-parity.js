@@ -15,7 +15,7 @@
 const DELEGATION_REMINDER = [
   "DELEGATION ACTIVE. Main thread orchestrates, it does not read/search/edit inline",
   "unless the work is one known file. 2+ independent units = multiple task calls in",
-  "ONE message. Recon -> explore. Multi-file edit -> dev-lifecycle. Diff review ->",
+  "ONE message. Recon -> general. Multi-file edit -> dev-lifecycle. Diff review ->",
   "code-reviewer. Vault -> vault-search. Not for user decisions, commits/PRs, or",
   "destructive ops.",
 ].join(" ")
@@ -40,7 +40,7 @@ export default async () => {
         const { execFile } = await import("node:child_process")
         const { promisify } = await import("node:util")
         const run = promisify(execFile)
-        const index = await run("$HOME/.claude/hooks/vault-context.sh".replace("$HOME", process.env.HOME ?? ""), { timeout: 25 })
+        const index = await run("$HOME/.claude/hooks/vault-context.sh".replace("$HOME", process.env.HOME ?? ""), { timeout: 25000 })
         if (index.stdout && index.stdout.trim()) {
           output.system.push(index.stdout.trim())
         }

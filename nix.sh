@@ -45,6 +45,10 @@ _BACKGROUND_PID=""
 _cleanup() {
   stop_spinner
   [[ -n "$_BACKGROUND_PID" ]] && kill "$_BACKGROUND_PID" 2>/dev/null || true
+  # A Ctrl-C inside _tui_select would otherwise leave echo off and autowrap
+  # disabled until the user runs `reset`.
+  stty sane 2>/dev/null || true
+  printf '\033[?25h\033[?7h'
   echo ""
   print_warning "Interrupted"
   exit 130
@@ -312,13 +316,20 @@ setup_private_git() {
   echo -e "     ${YELLOW}See docs/secrets.md for details.${NC}"
   echo ""
 
+  # Skip, never abort: under set -e a non-zero return here would kill the
+  # whole build+apply run, and non-interactive stdin makes read fail.
+  if [[ ! -t 0 ]]; then
+    print_warning "Non-interactive shell. Skipping private git config."
+    return 0
+  fi
+
   local name email
   read -rp "  Enter your git user.name: " name
   read -rp "  Enter your git user.email: " email
 
   if [[ -z "$name" || -z "$email" ]]; then
     print_error "Both name and email are required. Skipping private git config."
-    return 1
+    return 0
   fi
 
   if [[ "$target_user" == "${USER:-}" ]]; then
@@ -391,25 +402,66 @@ dry_run_config() {
   fi
 }
 
-# ── Home Manager backup sweep ─────────────────────────────────────────────────
-# home-manager aborts a switch if a *.backup it needs to write already exists.
-clear_hm_backups() {
-  local config="$1"
-  local target_user
-  target_user=$(get_target_user "$config")
+# ── Deploy doctor preview ─────────────────────────────────────────────────────
+# The deploy silently deletes unmanaged skill dirs, drops undeclared plugins
+# and hook events, and clears permissions.allow; preview that before applying.
+preview_deploy() {
+  local config="$1" step="$2"
 
-  if [[ "$target_user" != "${USER:-}" ]]; then
-    print_info "Skipping HM backup sweep for ${target_user}; clear *.backup under ~/.config and ~/.claude on that machine by hand"
+  print_step "$step Deploy doctor"
+  if [[ ! -x ./scripts/deploy-doctor.sh ]]; then
+    print_warning "scripts/deploy-doctor.sh missing; continuing without preview"
     return 0
   fi
 
-  local root f
-  for root in "$HOME/.config" "$HOME/.claude"; do
-    [[ -d "$root" ]] || continue
-    while IFS= read -r -d '' f; do
-      rm -f "$f" && print_info "Removed stale HM backup: $f" || true
-    done < <(find "$root" -name '*.backup' -type f -print0 2>/dev/null)
+  if ./scripts/deploy-doctor.sh "$config"; then
+    if [[ -t 0 ]]; then
+      local reply
+      read -rp "  Proceed with apply? [Y/n] " reply
+      if [[ "$reply" =~ ^[Nn] ]]; then
+        print_warning "Aborted before apply"
+        exit 0
+      fi
+    fi
+  else
+    print_warning "deploy-doctor could not run; continuing without preview"
+  fi
+  return 0
+}
+
+# ── Home Manager backup sweep ─────────────────────────────────────────────────
+# home-manager aborts a switch if a *.backup it needs to write already exists.
+# Backups are moved aside, never deleted: a *.backup can hold the only copy of
+# content HM collided with. Runs after sudo -v, so the split-account work
+# machine sweeps the target user's home via sudo instead of skipping.
+clear_hm_backups() {
+  local config="$1"
+  local target_user target_home
+  target_user=$(get_target_user "$config")
+  target_home="/Users/$target_user"
+  [[ "$target_user" == "${USER:-}" ]] && target_home="$HOME"
+
+  local as_user=()
+  [[ "$target_user" != "${USER:-}" ]] && as_user=(sudo -u "$target_user")
+
+  local stash
+  stash="$target_home/.local/state/hm-backup-stash/$(date +%Y%m%d-%H%M%S)"
+
+  local root f dest moved=0
+  for root in "$target_home/.config" "$target_home/.claude"; do
+    "${as_user[@]}" test -d "$root" 2>/dev/null || continue
+    while IFS= read -r f; do
+      [[ -n "$f" ]] || continue
+      dest="$stash${f#"$target_home"}"
+      "${as_user[@]}" mkdir -p "$(dirname "$dest")"
+      if "${as_user[@]}" mv "$f" "$dest" 2>/dev/null; then
+        moved=$((moved + 1))
+      else
+        print_warning "Could not stash HM backup: $f"
+      fi
+    done < <("${as_user[@]}" find "$root" -name '*.backup' -type f 2>/dev/null)
   done
+  [[ "$moved" -gt 0 ]] && print_info "Stashed $moved stale HM backup(s) under $stash (prune when confident)"
   return 0
 }
 
@@ -556,8 +608,9 @@ main() {
 
   else
     setup_private_git "$config"
-    build_config "$config" "$force" "[1/2]"
-    apply_config "$config" "$force" "[2/2]"
+    build_config "$config" "$force" "[1/3]"
+    preview_deploy "$config" "[2/3]"
+    apply_config "$config" "$force" "[3/3]"
     print_summary "$config" "build + apply" $(( SECONDS - total_start ))
     print_dim "Tip: run brew doctor if you encounter Homebrew issues."
     echo ""

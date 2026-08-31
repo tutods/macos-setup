@@ -36,7 +36,12 @@
 
   xdg.configFile."zed/keymap.json".source = ./keymap.json;
 
+  # Seed-once: Zed writes its own changes back to this file (see CLAUDE.md),
+  # so never overwrite an existing copy.
   home.activation.zedSeedSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    run install -m 0644 ${./settings.json} "${config.xdg.configHome}/zed/settings.json"
+    if [ ! -f "${config.xdg.configHome}/zed/settings.json" ]; then
+      run mkdir -p "${config.xdg.configHome}/zed"
+      run install -m 0644 ${./settings.json} "${config.xdg.configHome}/zed/settings.json"
+    fi
   '';
 }

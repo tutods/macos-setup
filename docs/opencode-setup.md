@@ -53,8 +53,9 @@ now declared in `config.nix`.
 
 `~/.agents/skills` (the `npx skills` tree) is deleted: nothing consumed it
 once opencode's external scan was disabled, Claude only used two symlinks into
-it, and both skills are now vendored (`orchestration`) or dropped
-(`find-skills`, whose whole job was promoting `npx skills add`). If it ever
+it, and both skills are now fetched from upstream at build time (`orchestration`,
+`orca-cli`; see `mkFetchedSkills` in [ai-setup.md](ai-setup.md)) or dropped (`find-skills`,
+whose whole job was promoting `npx skills add`). If it ever
 reappears, `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` already neutralizes it for
 opencode; `customSkillsReconcile` ignores symlinks for Claude.
 

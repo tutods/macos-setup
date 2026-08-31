@@ -61,7 +61,10 @@ set -gx GITHUB_TOKEN     "ghp_xxxxxxxxxxxxxxxxxxxx"
 
 ## Validation
 
-Home Manager warns on every deploy if required secret files are missing. The deploy still succeeds, warnings are informational only.
+Home Manager checks the secret files on every deploy (`checkSecrets` in `home/common/default.nix`):
+
+- Missing `~/.config/git/private` **fails the activation** before anything is written, with instructions on how to create it. Create the file (or let `nix.sh` prompt you) and re-run.
+- Missing `~/.config/fish/secrets.fish` only prints a warning; the deploy succeeds.
 
 ## Work laptop notes
 

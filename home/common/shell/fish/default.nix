@@ -43,8 +43,6 @@
 
       bind \ew backward-kill-line
 
-      set fzf_preview_dir_cmd eza --all --color=always
-
       fnm env --shell fish --corepack-enabled --resolve-engines | source
 
       # `wt switch` changes directory, so it needs a shell function. Declared

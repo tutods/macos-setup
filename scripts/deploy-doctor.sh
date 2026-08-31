@@ -9,8 +9,9 @@
 #      is disabled (dropped from settings.json).
 #   3. mergeJsonObject drops any settings.json hook event Nix does not
 #      declare AND is not in keepHookEvents (lib/ai.nix, settings.nix).
-#   4. permissions.allow is declared empty, so click-granted "don't ask again"
-#      rules are cleared.
+#   4. permissions.allow is fully Nix-owned and rewritten whole on every
+#      deploy, so any click-granted "don't ask again" rule beyond what's
+#      declared is cleared.
 #
 # Usage: ./scripts/deploy-doctor.sh [macbook|work]   (default: this machine's
 # config inferred from the hostname)
@@ -20,6 +21,13 @@
 set -uo pipefail
 
 cd "$(dirname "$0")/.." || exit 1
+
+# jq parses every list below; without it the skill section would report every
+# dir as "will delete" and the settings sections would print a bogus all-clear.
+command -v jq >/dev/null 2>&1 || {
+  echo "deploy-doctor: jq not found — aborting" >&2
+  exit 1
+}
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 print_warn() { echo -e "  ${YELLOW}⚠${NC}  $1"; }
@@ -41,11 +49,20 @@ if ! USER_NAME=$(nix --extra-experimental-features "nix-command flakes" eval --r
   exit 1
 fi
 
-HM=".#darwinConfigurations.$CONFIG.config.home-manager.users.$USER_NAME"
+# Quoted attr: usernames can contain dots (daniel.a.sousa), which would
+# otherwise parse as nested attribute path segments.
+HM=".#darwinConfigurations.$CONFIG.config.home-manager.users.\"$USER_NAME\""
 NIX=(nix --extra-experimental-features "nix-command flakes" eval --json)
 
+# On work, the deploy is run as admin.daniel.a.sousa (Homebrew owner) but
+# Home Manager configures daniel.a.sousa — $HOME alone would silently check
+# the wrong account's (nonexistent) ~/.claude, exactly the split-account case
+# this script exists to get right. Mirrors nix.sh's get_target_user pattern.
+TARGET_HOME="/Users/$USER_NAME"
+[ "$USER_NAME" = "${USER:-}" ] && TARGET_HOME="$HOME"
+
 echo ""
-echo -e "  ${BOLD}${CYAN}▸${NC} ${BOLD}Deploy doctor${NC} ${DIM}config=$CONFIG user=$USER_NAME${NC}"
+echo -e "  ${BOLD}${CYAN}▸${NC} ${BOLD}Deploy doctor${NC} ${DIM}config=$CONFIG user=$USER_NAME home=$TARGET_HOME${NC}"
 echo ""
 
 # ── 1. Skills the reconcile will delete ──────────────────────────────────────
@@ -58,7 +75,7 @@ fi
 declare -a declared_skills
 while IFS= read -r s; do declared_skills+=("$s"); done < <(printf '%s' "$skills_json" | jq -r '.[]')
 
-SKILLS_DIR="$HOME/.claude/skills"
+SKILLS_DIR="$TARGET_HOME/.claude/skills"
 deleted=0
 for path in "$SKILLS_DIR"/*; do
   [ -d "$path" ] || continue
@@ -83,8 +100,14 @@ fi
 declare -a declared_plugins
 while IFS= read -r p; do declared_plugins+=("$p"); done < <(printf '%s' "$plugins_json" | jq -r '.[]')
 
-SETTINGS="$HOME/.claude/settings.json"
+SETTINGS="$TARGET_HOME/.claude/settings.json"
 if [ -f "$SETTINGS" ]; then
+  # A corrupt settings.json would print green "nothing drops out" for every
+  # section below — a false all-clear from the tool meant to catch deletions.
+  jq empty "$SETTINGS" 2>/dev/null || {
+    echo "deploy-doctor: $SETTINGS is not valid JSON — aborting instead of showing a bogus all-clear" >&2
+    exit 1
+  }
   dropped=0
   while IFS= read -r name; do
     [ -z "$name" ] && continue

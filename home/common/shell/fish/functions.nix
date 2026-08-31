@@ -9,7 +9,11 @@
 
   goBranch = {
     body = ''
-      git checkout "$argv"; or return 1
+      if test (count $argv) -ne 1
+        echo "Usage: goBranch <branch>"
+        return 1
+      end
+      git checkout $argv[1]; or return 1
       git pull; or return 1
     '';
     description = "Switch to specified branch and pull changes";
@@ -17,12 +21,9 @@
 
   stashAndPull = {
     body = ''
-      git stash; or return 1
-      git pull; or return 1
-      git stash pop; or begin
-        echo "Stash pop had conflicts, resolve manually, then: git stash drop"
-        return 1
-      end
+      # --autostash only stashes when the tree is dirty, so a clean tree can
+      # never pop someone's pre-existing stash.
+      git pull --rebase --autostash; or return 1
     '';
     description = "Stash changes and pull latest";
   };
@@ -33,8 +34,8 @@
       read --local --prompt-str "Stage all changes and push? [y/N] " confirm
       if string match -qi 'y' -- "$confirm"
         git add -A
-        git commit -m "$argv"
-        git push
+        and git commit -m "$argv"
+        and git push
       end
     '';
     description = "Preview, stage all changes, commit with message and push";
@@ -92,8 +93,8 @@
       read --local --prompt-str "Everything looks correct? Stage and commit as '$argv'? [y/N] " confirm
       if string match -qi 'y' -- "$confirm"
         git add -A
-        git commit -m "$argv"
-        git push
+        and git commit -m "$argv"
+        and git push
       end
     '';
     description = "Visual review, then stage all changes, commit and push";
@@ -108,9 +109,9 @@
         return 0
       end
       printf "%s\n" $targets
-      read --local --prompt-str "Delete (count $targets) dirs? [y/N] " confirm
+      read --local --prompt-str "Delete $(count $targets) dirs? [y/N] " confirm
       if string match -qi 'y' -- "$confirm"
-        printf "%s\n" $targets | xargs rm -rf
+        rm -rf $targets
         echo "Done."
       end
     '';
@@ -142,6 +143,10 @@
 
   doppler_safe = {
     body = ''
+      if not command -q doppler
+        echo "doppler is not installed on this machine (macbook-only package)"
+        return 127
+      end
       if not git rev-parse --git-dir > /dev/null 2>&1
         echo "⚠️  Not a git repository. Guarding against secret injection into random folders."
         return 1

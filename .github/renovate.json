@@ -14,6 +14,7 @@
     "before 6am every weekday"
   ],
   "labels": ["🔄 dependencies", "🤖 automated"],
+  "ignorePaths": ["**/ai/skills/**"],
   "assignAutomerge": false,
   "dependencyDashboardAutoclose": true,
   "stopUpdatingLabel": "renovate:stop",
@@ -47,7 +48,7 @@
     },
     {
       "description": "✨ Automerge non-major Nix flake updates",
-      "matchDatasources": ["nix-flake"],
+      "matchManagers": ["nix"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
       "automergeType": "pr",
@@ -56,15 +57,15 @@
     },
     {
       "description": "⚠️ Require manual approval for major updates",
-      "matchDatasources": ["nix-flake"],
+      "matchManagers": ["nix"],
       "matchUpdateTypes": ["major"],
       "automerge": false,
       "labels": ["⚠️ major-update", "👀 requires-review", "❄️ nix"]
     },
     {
       "description": "📌 Separate nixpkgs updates for visibility",
-      "matchDatasources": ["nix-flake"],
-      "matchPackageNames": ["NixOS/nixpkgs"],
+      "matchManagers": ["nix"],
+      "matchDepNames": ["nixpkgs", "nixpkgs-unstable"],
       "groupName": "📦 nixpkgs",
       "additionalBranchPrefix": "nixpkgs-",
       "semanticCommitType": "build",
@@ -74,12 +75,8 @@
     },
     {
       "description": "🏠 Group home-manager, nix-darwin and nix-homebrew together",
-      "matchDatasources": ["nix-flake"],
-      "matchPackageNames": [
-        "nix-community/home-manager",
-        "nix-darwin/nix-darwin",
-        "zhaofengli/nix-homebrew"
-      ],
+      "matchManagers": ["nix"],
+      "matchDepNames": ["home-manager", "nix-darwin", "nix-homebrew"],
       "groupName": "🏠 nix system modules",
       "additionalBranchPrefix": "nix-modules-",
       "semanticCommitType": "chore",
