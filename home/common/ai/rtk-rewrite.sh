@@ -8,7 +8,6 @@
 set -uo pipefail
 
 RTK=$(command -v rtk 2>/dev/null || true)
-[ -x "$RTK" ] || RTK=/opt/homebrew/bin/rtk
 [ -x "$RTK" ] || exit 0
 
 exec "$RTK" hook claude

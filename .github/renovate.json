@@ -14,7 +14,7 @@
     "before 6am every weekday"
   ],
   "labels": ["🔄 dependencies", "🤖 automated"],
-  "ignorePaths": ["home/common/ai/skills/**"],
+  "ignorePaths": ["**/ai/skills/**"],
   "assignAutomerge": false,
   "dependencyDashboardAutoclose": true,
   "stopUpdatingLabel": "renovate:stop",

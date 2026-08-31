@@ -59,7 +59,7 @@ Run `nix search nixpkgs <name>` before adding a package. Prefer `pkgs` (stable);
 
 ## AI setup structure
 
-Everything AI lives under `home/common/ai/`, and every file in it writes into `~/.claude/`. Full reference: `docs/ai-setup.md`.
+Most AI setup lives under `home/common/ai/`, and every file in it writes into `~/.claude/`; opencode config is a separate tree at `home/roles/personal/opencode/` (see `docs/opencode-setup.md`). Full reference: `docs/ai-setup.md`.
 
 ```
 home/common/ai/
@@ -71,10 +71,10 @@ home/common/ai/
 ├── mcp.nix          → MCP servers, merged into ~/.claude.json
 ├── maintenance.nix  → weekly launchd pruning of old session transcripts
 ├── statusline.nix   → statusline script + config
-├── *.sh             → hook scripts (vault-context, block-ai-attribution, delegate-nudge, delegation-reminder, biome-fix, statusline)
+├── *.sh             → hook scripts (vault-context, block-ai-attribution, delegate-nudge, delegation-reminder, biome-fix, statusline, rtk-rewrite)
 ├── instructions/    → always-on instructions (→ ~/.claude/rules/workflow.md)
 ├── skills/
-│   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks)
+│   ├── default.nix  → copies local/ into ~/.claude/skills (real dirs, not symlinks), plus pinned upstream skills fetched at build time (mkFetchedSkills)
 │   └── local/       → in-repo skill sources
 ├── agents/
 │   ├── default.nix  → symlinks local/ into ~/.claude/agents (home.file)

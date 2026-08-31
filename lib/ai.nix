@@ -13,7 +13,7 @@
 # plain read-only input and get home.file store symlinks.
 {pkgs}: let
   jqBin = "${pkgs.jq}/bin/jq";
-in {
+in rec {
   mkServer = {
     cmd,
     args,
@@ -28,36 +28,38 @@ in {
     then base
     else base + "\n\n" + extra;
 
-  mkLocalSkills = {
+  # Shared by mkLocalSkills and mkFetchedSkills: both copy a named set of
+  # skill directories from some `src` into ~/.claude/skills at activation
+  # time, differing only in where `src` comes from and whether the reverse
+  # "every dir on disk must be declared" assertion applies (mkLocalSkills
+  # owns its whole `local/` dir and can assert that; mkFetchedSkills only
+  # owns a curated subset of someone else's repo, so it can't).
+  mkSkillCopy = {
     lib,
     label,
-    dir,
+    prefix,
+    src,
     names,
   }: {
     home.ai.customSkills = names;
 
     assertions =
-      (map (name: {
-          assertion = builtins.pathExists (dir + "/${name}/SKILL.md");
-          message = "mkLocalSkills (${label}): '${name}' is in names but ${toString dir}/${name}/SKILL.md is missing";
-        })
-        names)
-      ++ (lib.mapAttrsToList (entry: kind: {
-          assertion = kind != "directory" || builtins.elem entry names;
-          message = "mkLocalSkills (${label}): ${toString dir}/${entry} exists but is not in the names list";
-        })
-        (builtins.readDir dir));
+      map (name: {
+        assertion = builtins.pathExists (src + "/${name}/SKILL.md");
+        message = "${prefix} (${label}): '${name}' is in names but ${toString src}/${name}/SKILL.md is missing";
+      })
+      names;
 
     # After linkGeneration: Home Manager has torn down the previous generation's
     # symlinks by then, and copying earlier would have them removed. Before
     # customSkillsReconcile: that step deletes anything in ~/.claude/skills this
     # repo does not own, so every copy must land first.
-    home.activation."localSkills-${label}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
+    home.activation."${prefix}-${label}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
       dest="$HOME/.claude/skills"
       mkdir -p "$dest"
       ${lib.concatMapStringsSep "\n" (name: ''
           rm -rf "$dest/${name}"
-          cp -R "${dir}/${name}" "$dest/${name}"
+          cp -R "${src}/${name}" "$dest/${name}"
           # Source is a 0444 store path; without this the next deploy's rm -rf
           # cannot recurse in to replace the copy.
           chmod -R u+w "$dest/${name}"
@@ -66,6 +68,29 @@ in {
       echo "↣ Custom skills (${label}): ${toString (builtins.length names)} installed"
     '';
   };
+
+  mkLocalSkills = {
+    lib,
+    label,
+    dir,
+    names,
+  }: let
+    copy = mkSkillCopy {
+      inherit lib label names;
+      prefix = "localSkills";
+      src = dir;
+    };
+  in
+    copy
+    // {
+      assertions =
+        copy.assertions
+        ++ (lib.mapAttrsToList (entry: kind: {
+            assertion = kind != "directory" || builtins.elem entry names;
+            message = "mkLocalSkills (${label}): ${toString dir}/${entry} exists but is not in the names list";
+          })
+          (builtins.readDir dir));
+    };
 
   # Skills fetched from an external repo at build time instead of committed
   # into this repo, e.g. stablyai/orca's `orchestration`/`orca-cli` skills:
@@ -90,31 +115,11 @@ in {
       if subdir == ""
       then fetched
       else fetched + "/${subdir}";
-  in {
-    home.ai.customSkills = names;
-
-    assertions =
-      map (name: {
-        assertion = builtins.pathExists (src + "/${name}/SKILL.md");
-        message = "mkFetchedSkills (${label}): '${name}' not found under ${toString src} (owner/repo/rev/subdir may have moved)";
-      })
-      names;
-
-    # Same activation shape and DAG ordering as mkLocalSkills's copy step:
-    # after customSkillsReconcile has torn down the previous generation,
-    # before linkGeneration.
-    home.activation."fetchedSkills-${label}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
-      dest="$HOME/.claude/skills"
-      mkdir -p "$dest"
-      ${lib.concatMapStringsSep "\n" (name: ''
-          rm -rf "$dest/${name}"
-          cp -R "${src}/${name}" "$dest/${name}"
-          chmod -R u+w "$dest/${name}"
-        '')
-        names}
-      echo "↣ Fetched skills (${label}): ${toString (builtins.length names)} installed"
-    '';
-  };
+  in
+    mkSkillCopy {
+      inherit lib label names src;
+      prefix = "fetchedSkills";
+    };
 
   mkLocalAgents = {
     lib,

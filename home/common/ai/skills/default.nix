@@ -49,9 +49,10 @@
     })
   ];
 
-  # A skill name declared by more than one mkLocalSkills instance (common +
-  # roles) would deploy whichever localSkills-* copy happened to run last, an
-  # order the activation DAG leaves unspecified. Fail the build instead.
+  # A skill name declared by more than one mkLocalSkills/mkFetchedSkills
+  # instance (common + roles) would deploy whichever localSkills-*/
+  # fetchedSkills-* copy happened to run last, an order the activation DAG
+  # leaves unspecified. Fail the build instead.
   assertions = let
     skills = config.home.ai.customSkills;
     dupes = lib.unique (lib.filter (n: lib.count (x: x == n) skills > 1) skills);
@@ -65,7 +66,8 @@
   # Deletes any real directory in ~/.claude/skills this repo does not declare, so
   # a renamed or removed skill actually disappears instead of staying loaded.
   # Symlinks are left alone: they point at non-Nix tooling (e.g. ~/.agents/skills).
-  # Runs after every localSkills-* copy (entryBetween in lib/ai.nix:mkLocalSkills).
+  # Runs after every localSkills-*/fetchedSkills-* copy (entryBetween in
+  # lib/ai.nix:mkSkillCopy, shared by mkLocalSkills and mkFetchedSkills).
   home.activation.customSkillsReconcile = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
     dest="$HOME/.claude/skills"
     if [ -d "$dest" ]; then

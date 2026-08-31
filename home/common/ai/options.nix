@@ -60,9 +60,11 @@
       default = [];
       internal = true;
       description = ''
-        Names of in-repo skills copied into ~/.claude/skills. Populated by
-        `lib/ai.nix:mkLocalSkills`; skills/default.nix reads it to report
-        directories in ~/.claude/skills that this repo doesn't own.
+        Names of skills copied into ~/.claude/skills, whether their source is
+        in-repo or fetched from an upstream repo at build time. Populated by
+        `lib/ai.nix:mkLocalSkills` and `mkFetchedSkills`; skills/default.nix
+        reads it to report directories in ~/.claude/skills that this repo
+        doesn't own.
       '';
     };
 
