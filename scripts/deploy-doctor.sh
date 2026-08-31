@@ -54,8 +54,15 @@ fi
 HM=".#darwinConfigurations.$CONFIG.config.home-manager.users.\"$USER_NAME\""
 NIX=(nix --extra-experimental-features "nix-command flakes" eval --json)
 
+# On work, the deploy is run as admin.daniel.a.sousa (Homebrew owner) but
+# Home Manager configures daniel.a.sousa — $HOME alone would silently check
+# the wrong account's (nonexistent) ~/.claude, exactly the split-account case
+# this script exists to get right. Mirrors nix.sh's get_target_user pattern.
+TARGET_HOME="/Users/$USER_NAME"
+[ "$USER_NAME" = "${USER:-}" ] && TARGET_HOME="$HOME"
+
 echo ""
-echo -e "  ${BOLD}${CYAN}▸${NC} ${BOLD}Deploy doctor${NC} ${DIM}config=$CONFIG user=$USER_NAME${NC}"
+echo -e "  ${BOLD}${CYAN}▸${NC} ${BOLD}Deploy doctor${NC} ${DIM}config=$CONFIG user=$USER_NAME home=$TARGET_HOME${NC}"
 echo ""
 
 # ── 1. Skills the reconcile will delete ──────────────────────────────────────
@@ -68,7 +75,7 @@ fi
 declare -a declared_skills
 while IFS= read -r s; do declared_skills+=("$s"); done < <(printf '%s' "$skills_json" | jq -r '.[]')
 
-SKILLS_DIR="$HOME/.claude/skills"
+SKILLS_DIR="$TARGET_HOME/.claude/skills"
 deleted=0
 for path in "$SKILLS_DIR"/*; do
   [ -d "$path" ] || continue
@@ -93,7 +100,7 @@ fi
 declare -a declared_plugins
 while IFS= read -r p; do declared_plugins+=("$p"); done < <(printf '%s' "$plugins_json" | jq -r '.[]')
 
-SETTINGS="$HOME/.claude/settings.json"
+SETTINGS="$TARGET_HOME/.claude/settings.json"
 if [ -f "$SETTINGS" ]; then
   # A corrupt settings.json would print green "nothing drops out" for every
   # section below — a false all-clear from the tool meant to catch deletions.
