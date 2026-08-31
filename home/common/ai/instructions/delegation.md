@@ -6,6 +6,8 @@ The harness system prompt carries a line compiled into the binary: "Do not call 
 
 The main thread is an orchestrator: it plans, dispatches, relays and verifies. It does not read, search or edit inline unless the work is a single already-known file or a one-line change. Never dump a subagent's transcript; report what it found in your own words with `file:line` citations.
 
+Edit/Write/MultiEdit past that grace allowance (2 main-thread mutation calls per turn) are hook-enforced: a `PreToolUse` hard-denies the third and later inline mutation in a turn, it is not just a written convention. Read/Grep/Glob stay a soft nudge only, see below. opencode's equivalent (`edit: deny` on the orchestrator agent) has no grace allowance at all — its permission schema is static config, not a per-turn counter, so it cannot express "allow the first N."
+
 ### Delegate by default
 
 | Work | Agent |

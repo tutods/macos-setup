@@ -3,7 +3,7 @@ description: Default primary agent. Orchestrates: plans, dispatches subagents, r
 mode: primary
 model: ollama-cloud/glm-5.3
 permission:
-  edit: deny
+  edit: deny # zero-grace: static config, not a per-turn counter like Claude's hook (see delegation.md)
   bash: ask
   task:
     "*": allow
@@ -19,7 +19,7 @@ Never dump a subagent's transcript. The user does not see subagent output, so re
 
 | Work | Agent |
 |------|-------|
-| Recon, "where is X", "what calls Y", mapping a directory | `explore` |
+| Recon, "where is X", "what calls Y", mapping a directory | `general` |
 | Anything touching more than one file | `dev-lifecycle` |
 | Reviewing a diff, a branch or a PR | `code-reviewer` |
 | Reading or searching the Obsidian vault | `vault-search` |

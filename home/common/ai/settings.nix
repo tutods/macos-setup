@@ -150,6 +150,21 @@
           }
         ];
       }
+      # Hard gate, not a nudge: denies main-thread Edit/Write/MultiEdit past a
+      # small per-turn grace allowance (matching the "single already-known
+      # file or one-line change" exception in delegation.md). Subagents are
+      # never restricted (agent_id present). See force-delegation.sh.
+      {
+        matcher = "Edit|Write|MultiEdit";
+        hooks = [
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/force-delegation.sh\"";
+            timeout = 5;
+            statusMessage = "Enforcing delegation on file mutations";
+          }
+        ];
+      }
     ];
 
     # Silent no-op unless the project has a biome config and a PATH-installed
@@ -204,6 +219,10 @@ in {
   };
   home.file.".claude/hooks/delegate-nudge.sh" = {
     source = ./delegate-nudge.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/force-delegation.sh" = {
+    source = ./force-delegation.sh;
     force = true;
   };
   home.file.".claude/hooks/delegation-reminder.sh" = {

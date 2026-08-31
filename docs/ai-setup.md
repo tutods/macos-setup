@@ -64,6 +64,7 @@ fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
 | `PreToolUse` | Any `Bash` call | `rtk-rewrite.sh`, its own matcher group, wraps `rtk hook claude` to auto-rewrite commands for permission-free read-only ops (silent no-op when `rtk` is absent) |
 | `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the third inline `Read`/`Grep`/`Glob` in a turn, once per turn |
+| `PreToolUse` | `Edit`, `Write`, `MultiEdit` | `force-delegation.sh`, hard gate (not a nudge): denies main-thread file mutations past a 2-per-turn grace allowance (skips subagents via `agent_id`), forcing everything past that through a subagent |
 | `PostToolUse` | `Edit`, `Write`, `MultiEdit` | `biome check --write`, no-op unless the project has a biome config |
 
 ## MCP Servers
@@ -227,8 +228,9 @@ only acts when needed:
 
 | Step | Lives in | Condition |
 |------|----------|-----------|
-| `pipx install code-review-graph` | `home/common/ai/init.nix` | not in `pipx list` |
-| `localSkills-*` | `lib/ai.nix` (`mkLocalSkills`) | every switch: copies custom skills into `~/.claude/skills/` |
+| `pipx install code-review-graph` | `home/common/ai/init.nix` | pinned version not in `pipx list` |
+| `localSkills-*` | `lib/ai.nix` (`mkLocalSkills`) | every switch: copies in-repo custom skills into `~/.claude/skills/` |
+| `fetchedSkills-*` | `lib/ai.nix` (`mkFetchedSkills`) | every switch: copies pinned upstream skills into `~/.claude/skills/` |
 | `customSkillsReconcile` | `home/common/ai/skills/default.nix` | every switch: deletes non-symlink dirs in `~/.claude/skills/` this repo does not declare |
 
 ## Maintenance
