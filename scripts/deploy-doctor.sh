@@ -2,16 +2,20 @@
 # Deploy doctor: shows what the next deploy will DELETE or RESET in the Claude
 # Code state before `darwin-rebuild switch` runs, so nothing is eaten silently.
 #
-# A deploy is destructive in four places:
-#   1. customSkillsReconcile deletes any real dir in ~/.claude/skills the
-#      flake does not declare (symlinks are left alone).
-#   2. enabledPlugins is rewritten whole: every plugin not in home.ai.plugins
-#      is disabled (dropped from settings.json).
-#   3. mergeJsonObject drops any settings.json hook event Nix does not
-#      declare AND is not in keepHookEvents (lib/ai.nix, settings.nix).
-#   4. permissions.allow is fully Nix-owned and rewritten whole on every
-#      deploy, so any click-granted "don't ask again" rule beyond what's
-#      declared is cleared.
+# The destructive places, all previewed below except the last:
+#   - customSkillsReconcile deletes any real dir in ~/.claude/skills the
+#     flake does not declare (symlinks are left alone).
+#   - enabledPlugins is rewritten whole: every plugin not in home.ai.plugins
+#     is disabled (dropped from settings.json).
+#   - mergeJsonObject drops any settings.json hook event Nix does not
+#     declare AND is not in keepHookEvents (lib/ai.nix, settings.nix).
+#   - permissions.allow is fully Nix-owned and rewritten whole on every
+#     deploy, so any click-granted "don't ask again" rule beyond what's
+#     declared is cleared.
+#   - NOT previewed: home.activation.opencodePlugins empties
+#     ~/.config/opencode/plugin{,s} of everything but the two names it keeps
+#     (home/roles/personal/opencode/default.nix). Personal machine only, and
+#     the only one of these outside ~/.claude.
 #
 # Usage: ./scripts/deploy-doctor.sh [macbook|work]   (default: this machine's
 # config inferred from the hostname)

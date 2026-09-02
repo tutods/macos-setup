@@ -73,6 +73,23 @@ in {
       ".config/opencode/plugins/opencode-parity.js".source = ./plugins/opencode-parity.js;
     };
 
+  # opencode auto-loads both plugin dirs wholesale, dotfiles and symlinks
+  # included, so one stray entry (crg-plugin.ts, re-added by a Supacode tool,
+  # broken against the 1.18.21 plugin API) breaks every startup. home.file only
+  # manages what it writes, so nothing else prunes them. supacode-presence.js is
+  # the tolerated out-of-band exception listed in docs/opencode-setup.md.
+  # -mindepth 1 catches dotfiles, rm -rf handles directories and dead symlinks.
+  home.activation.opencodePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    for pluginDir in plugin plugins; do
+      dir="${config.home.homeDirectory}/.config/opencode/$pluginDir"
+      [ -d "$dir" ] || continue
+      $VERBOSE_ECHO "Pruning unmanaged opencode plugins in $dir"
+      run find "$dir" -mindepth 1 -maxdepth 1 \
+        ! -name opencode-parity.js ! -name supacode-presence.js \
+        -exec rm -rf {} +
+    done
+  '';
+
   # Both external skill scans (~/.claude/skills AND ~/.agents/skills) off:
   # the skill set becomes exactly what skills.paths re-adds, the Nix-deployed
   # repo skills, plus opencode's own ~/.config/opencode/skills (documented

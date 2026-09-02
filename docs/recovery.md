@@ -15,9 +15,9 @@ Run these in order on a fresh machine:
    `git clone https://github.com/tutods/macos-setup.git ~/.dotfiles`
 2. Navigate to the root:
    `cd ~/.dotfiles`
-3. Enable the repo's pre-commit checks (nix.sh also does this on first deploy,
-   but commits made before that would silently skip `nix fmt` and
-   `verify-plugins.sh`):
+3. Enable the repo's commit hooks (nix.sh also does this on first deploy,
+   but commits made before that would silently skip `nix fmt`,
+   `verify-plugins.sh` and the AI-attribution check):
    `git config core.hooksPath .hooks`
 
 ## 3. Deployment Sequence

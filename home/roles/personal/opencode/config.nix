@@ -24,6 +24,38 @@
     peerReview = "ollama-cloud/gpt-oss:120b";
   };
 
+  # Secret paths, mirroring home/common/ai/settings.nix permissions.deny. A glob
+  # here is a full-command anchored regex where `*` also matches `/`, so the
+  # leading `*` covers both `~/.ssh/x` and `/Users/<me>/.ssh/x`.
+  secretGlobs = [
+    "*.ssh/*"
+    "*.aws/*"
+    "*.config/gcloud/*"
+    "*.config/fish/secrets.fish*"
+    "*.config/git/private*"
+    "*.env*"
+    "*secrets/*"
+  ];
+
+  # The real backstop: opencode's built-in read defaults are `read:* allow` with
+  # only `*.env*` set to ask, so the read tool opens ~/.ssh/id_ed25519 with no
+  # prompt. Config rules are appended after the defaults and resolved with
+  # findLast, and "*" sorts before every deny, so the denies win.
+  readDenies = {"*" = "allow";} // lib.genAttrs secretGlobs (_: "deny");
+
+  # Command-prefixed rather than path-only: a bash rule resolves with findLast
+  # over the JSON key order (Nix sorts alphabetically), so a path-only
+  # "*.ssh/*" would lose to the later-sorting "git show*" allow, while a
+  # "cat …" rule can never co-match a "git …" command. Prefix-matched, not
+  # airtight, same caveat as settings.nix: `git diff; cat ~/.ssh/id_ed25519`
+  # matches the git allow, and xxd/od/strings/cp/python -c/-/bin/cat are not
+  # listed. This stops the casual path; readDenies is what actually holds.
+  secretDenies = lib.listToAttrs (
+    lib.concatMap (
+      reader: map (glob: lib.nameValuePair "${reader} ${glob}" "deny") secretGlobs
+    ) ["cat" "bat" "less" "head" "tail" "base64"]
+  );
+
   councilAgents = lib.mapAttrs' (persona: model:
     lib.nameValuePair "council-${persona}" {
       inherit model;
@@ -98,8 +130,8 @@
         # Primary orchestrator: the port of the Claude Delegation Contract.
         # edit is denied so file work MUST go through subagents; bash stays
         # ask (commits/gh are main-thread work by design, and permission
-        # prompts keep them supervised). The reminder text is re-injected
-        # every turn by plugins/opencode-parity.js.
+        # prompts keep them supervised). The contract text itself lives in
+        # the generated AGENTS.md, not in a per-turn injection.
         orchestrator = {
           mode = "primary";
           model = m.default;
@@ -119,7 +151,19 @@
         # change here is the only edit needed (change both files anyway, the
         # table documents the tiers).
         code-reviewer.model = m.default;
-        dev-lifecycle.model = m.best;
+        # The one agent that runs unsupervised through implement/commit/push,
+        # so it gets edit and bash without a prompt. Not a bare `bash = "allow"`:
+        # that becomes a single {resource:"*",effect:"allow"} rule appended last
+        # and outranks every deny under findLast, handing an unattended agent
+        # zero-prompt `cat ~/.ssh/id_ed25519`.
+        dev-lifecycle = {
+          model = m.best;
+          permission = {
+            edit = "allow";
+            bash = secretDenies // {"*" = "allow";};
+            read = readDenies;
+          };
+        };
         vault-lint.model = m.fast;
         vault-search.model = m.fast;
       }
@@ -145,18 +189,74 @@
 
     permission = {
       edit = "ask";
-      bash = {
-        "git status*" = "allow";
-        "git log*" = "allow";
-        "git diff*" = "allow";
-        "git show*" = "allow";
-        "*" = "ask";
-      };
+      bash =
+        secretDenies
+        // {
+          "git status*" = "allow";
+          "git log*" = "allow";
+          "git diff*" = "allow";
+          "git show*" = "allow";
+          "*" = "ask";
+        };
       webfetch = "ask";
       websearch = "ask";
+      read = readDenies;
+    };
+
+    # Claude's PostToolUse biome-fix.sh, as opencode's native on-edit formatter.
+    # The object form registers every built-in and then applies these overrides
+    # (Format init, opencode 1.18.21), so it is not an allowlist: biome stays on,
+    # carrying its own gate (biome.json/biome.jsonc up-tree AND @biomejs/biome
+    # resolvable), a silent no-op everywhere else. Do not override
+    # formatter.biome.command: supplying a command replaces that gate with an
+    # unconditional run. nixfmt and shfmt are off because they gate on the binary
+    # being on PATH alone, and this repo formats .nix with alejandra.
+    formatter = {
+      nixfmt.disabled = true;
+      shfmt.disabled = true;
     };
   };
+
+  # opencode 1.18.21 permission actions. The named list in the schema it ships
+  # (share/config.json, $defs/PermissionConfig) is a subset of what the runtime
+  # accepts: additionalProperties takes any key, and opencode's own default
+  # ruleset uses "*", plan_enter and plan_exit, which the schema does not name.
+  # An unknown key is silently inert at runtime, so this is the only thing that
+  # catches a typo. Agent markdown frontmatter is not covered.
+  permissionActions = [
+    "*"
+    "bash"
+    "doom_loop"
+    "edit"
+    "external_directory"
+    "glob"
+    "grep"
+    "list"
+    "lsp"
+    "plan_enter"
+    "plan_exit"
+    "question"
+    "read"
+    "skill"
+    "task"
+    "todowrite"
+    "webfetch"
+    "websearch"
+  ];
+
+  permissionBlocks =
+    {"permission" = cfg;}
+    // lib.mapAttrs' (name: agent: lib.nameValuePair "agent.${name}.permission" agent) cfg.agent;
+
+  unknownKeys = block: lib.subtractLists permissionActions (lib.attrNames (block.permission or {}));
 in {
+  assertions =
+    lib.mapAttrsToList (loc: block: {
+      assertion = unknownKeys block == [];
+      message = "opencode: ${loc} uses permission key(s) opencode does not define: ${toString (unknownKeys block)}. Valid: ${toString permissionActions}";
+    })
+    permissionBlocks;
+
   # Nix owns this file wholesale: opencode never writes opencode.json itself
   # (verified against 1.18.21, mtime only moves on manual edits). If a future
   # version starts self-writing, switch to aiLib.mergeJsonObject like

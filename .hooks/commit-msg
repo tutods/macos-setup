@@ -1,0 +1,22 @@
+#!/bin/sh
+# Reject AI attribution and co-author trailers in the commit message. Same
+# patterns as home/common/ai/block-ai-attribution.sh, moved down to the git
+# layer so it covers every harness (Claude, opencode, a plain terminal) instead
+# of one PreToolUse guard.
+#
+# Message only, never the staged diff: this repo's own sources contain those
+# patterns as data (block-ai-attribution.sh), and scanning the diff would make
+# them uncommittable. `git commit -v` needs no special handling, git truncates
+# at the scissors line before this hook runs; the `grep -v` is only so a
+# trailer left commented-out in the editor is not treated as present.
+set -eu
+
+if grep -v '^#' "$1" |
+  grep -iEq 'co-authored-by:|🤖|generated with claude code|claude\.com/claude-code|automated cross-pr review|review by claude code'; then
+  echo "" >&2
+  echo "  commit-msg: co-author trailer or AI attribution in the message." >&2
+  echo "  Remove it (Co-Authored-By:, the robot emoji, 'Generated with Claude Code'," >&2
+  echo "  a claude.com/claude-code link, a 'review by Claude Code' line) and recommit." >&2
+  echo "" >&2
+  exit 1
+fi

@@ -90,7 +90,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 ```bash
 git clone https://github.com/tutods/macos-setup.git ~/.dotfiles
 cd ~/.dotfiles
-git config core.hooksPath .hooks   # pre-commit checks; nix.sh also sets this on first deploy
+git config core.hooksPath .hooks   # pre-commit + commit-msg checks; nix.sh also sets this on first deploy
 ```
 
 **3. Apply**

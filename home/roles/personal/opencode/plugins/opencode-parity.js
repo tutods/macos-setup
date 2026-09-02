@@ -1,47 +1,28 @@
-// opencode-parity: ports the Claude Code hook surface to opencode plugins.
+// opencode-parity: one Claude Code hook that has no opencode config key.
 // Plain JS, no imports (the supacode-presence pattern): this must load even
 // when node_modules/@opencode-ai/plugin is missing or version-skewed. The
-// Plugin shape is duck-typed, and every hook is optional, so a future API
-// change degrades to a logged warning instead of a broken startup.
+// Plugin shape is duck-typed and the hook is optional, so a future API change
+// degrades to a logged warning instead of a broken startup.
 //
-//  - chat.message                            ~ Claude UserPromptSubmit:
-//    appends the delegation reminder to every user message.
 //  - experimental.chat.system.transform      ~ Claude SessionStart:
 //    appends the Obsidian vault title index to the system prompt.
 //
 // If this plugin fails to load, check ~/.local/share/opencode/log/opencode.log
 // (the old crg-plugin.ts died there on an API skew: "app.on is not a function").
 
-const DELEGATION_REMINDER = [
-  "DELEGATION ACTIVE. Main thread orchestrates, it does not read/search/edit inline",
-  "unless the work is one known file. 2+ independent units = multiple task calls in",
-  "ONE message. Recon -> general. Multi-file edit -> dev-lifecycle. Diff review ->",
-  "code-reviewer. Vault -> vault-search. Not for user decisions, commits/PRs, or",
-  "destructive ops.",
-].join(" ")
-
 export default async () => {
   return {
-    "chat.message": async (input, output) => {
-      try {
-        if (!output || !Array.isArray(output.parts)) return
-        // opencode >=1.18 rejects a bare {type,text} part on save (needs
-        // id/sessionID/messageID, and EventV2 wants a string sessionID).
-        // Append to the last existing text part, which already carries them.
-        const last = [...output.parts].reverse().find((p) => p && p.type === "text" && typeof p.text === "string")
-        if (last) last.text += "\n\n" + DELEGATION_REMINDER
-      } catch (e) {
-        console.error("opencode-parity chat.message:", e?.message ?? e)
-      }
-    },
-
     "experimental.chat.system.transform": async (input, output) => {
       try {
         if (!output || !Array.isArray(output.system)) return
         const { execFile } = await import("node:child_process")
         const { promisify } = await import("node:util")
         const run = promisify(execFile)
-        const index = await run("$HOME/.claude/hooks/vault-context.sh".replace("$HOME", process.env.HOME ?? ""), { timeout: 25000 })
+        // The hook reads Claude's SessionStart JSON off stdin; execFile leaves
+        // that pipe open, so close it or its `cat` blocks until the timeout.
+        const proc = run("$HOME/.claude/hooks/vault-context.sh".replace("$HOME", process.env.HOME ?? ""), { timeout: 25000 })
+        proc.child.stdin?.end()
+        const index = await proc
         if (index.stdout && index.stdout.trim()) {
           output.system.push(index.stdout.trim())
         }
