@@ -449,17 +449,17 @@ clear_hm_backups() {
 
   local root f dest moved=0
   for root in "$target_home/.config" "$target_home/.claude"; do
-    "${as_user[@]}" test -d "$root" 2>/dev/null || continue
+    "${as_user[@]+"${as_user[@]}"}" test -d "$root" 2>/dev/null || continue
     while IFS= read -r f; do
       [[ -n "$f" ]] || continue
       dest="$stash${f#"$target_home"}"
-      "${as_user[@]}" mkdir -p "$(dirname "$dest")"
-      if "${as_user[@]}" mv "$f" "$dest" 2>/dev/null; then
+      "${as_user[@]+"${as_user[@]}"}" mkdir -p "$(dirname "$dest")"
+      if "${as_user[@]+"${as_user[@]}"}" mv "$f" "$dest" 2>/dev/null; then
         moved=$((moved + 1))
       else
         print_warning "Could not stash HM backup: $f"
       fi
-    done < <("${as_user[@]}" find "$root" -name '*.backup' -type f 2>/dev/null)
+    done < <("${as_user[@]+"${as_user[@]}"}" find "$root" -name '*.backup' -type f 2>/dev/null)
   done
   [[ "$moved" -gt 0 ]] && print_info "Stashed $moved stale HM backup(s) under $stash (prune when confident)"
   return 0
