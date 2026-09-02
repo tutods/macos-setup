@@ -25,10 +25,11 @@ export default async () => {
     "chat.message": async (input, output) => {
       try {
         if (!output || !Array.isArray(output.parts)) return
-        output.parts.push({
-          type: "text",
-          text: DELEGATION_REMINDER,
-        })
+        // opencode >=1.18 rejects a bare {type,text} part on save (needs
+        // id/sessionID/messageID, and EventV2 wants a string sessionID).
+        // Append to the last existing text part, which already carries them.
+        const last = [...output.parts].reverse().find((p) => p && p.type === "text" && typeof p.text === "string")
+        if (last) last.text += "\n\n" + DELEGATION_REMINDER
       } catch (e) {
         console.error("opencode-parity chat.message:", e?.message ?? e)
       }
