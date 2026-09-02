@@ -1,6 +1,6 @@
 ---
 description: Five-advisor multi-model council on a question: fan-out, anonymised peer review, chairman synthesis.
-agent: orchestrator
+agent: council-chair
 ---
 
 # LLM Council

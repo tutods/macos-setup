@@ -150,6 +150,20 @@ else
   print_ok "no live settings.json yet"
 fi
 
+# ── 5. opencode provider auth (personal machine only) ────────────────────────
+# ~/.local/share/opencode/auth.json is written interactively by `opencode`
+# /connect and is deliberately never in Nix. The deployed opencode.json points
+# at Ollama Cloud models; with no ollama-cloud entry every model call fails
+# with nothing tying it back to "you never ran /connect".
+if [ "$CONFIG" = "macbook" ]; then
+  OPENCODE_AUTH="$TARGET_HOME/.local/share/opencode/auth.json"
+  if [ -f "$OPENCODE_AUTH" ] && jq -e '.["ollama-cloud"]' "$OPENCODE_AUTH" >/dev/null 2>&1; then
+    print_ok "opencode ollama-cloud auth is set up"
+  else
+    print_warn "opencode auth not set up — run ${BOLD}opencode${NC} then ${BOLD}/connect${NC} and pick the Ollama Cloud provider"
+  fi
+fi
+
 echo ""
 echo -e "  ${DIM}Preview only — nothing was changed. Re-run after editing the flake if${NC}"
 echo -e "  ${DIM}anything above is unexpected; a deleted skill/plugin needs to be declared${NC}"

@@ -79,14 +79,24 @@ in {
   # manages what it writes, so nothing else prunes them. supacode-presence.js is
   # the tolerated out-of-band exception listed in docs/opencode-setup.md.
   # -mindepth 1 catches dotfiles, rm -rf handles directories and dead symlinks.
+  # The npm cruft (package.json pinning a stale @opencode-ai/plugin, its
+  # lockfiles, node_modules) is left by an old bun/npm bootstrap; nothing in
+  # this config imports from it (opencode-parity.js is import-free by design),
+  # so it goes too rather than sit skewed against the running binary.
   home.activation.opencodePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    ocDir="${config.home.homeDirectory}/.config/opencode"
     for pluginDir in plugin plugins; do
-      dir="${config.home.homeDirectory}/.config/opencode/$pluginDir"
+      dir="$ocDir/$pluginDir"
       [ -d "$dir" ] || continue
       $VERBOSE_ECHO "Pruning unmanaged opencode plugins in $dir"
       run find "$dir" -mindepth 1 -maxdepth 1 \
         ! -name opencode-parity.js ! -name supacode-presence.js \
         -exec rm -rf {} +
+    done
+    for cruft in package.json package-lock.json bun.lock node_modules; do
+      [ -e "$ocDir/$cruft" ] || continue
+      $VERBOSE_ECHO "Pruning opencode npm cruft: $cruft"
+      run rm -rf "$ocDir/$cruft"
     done
   '';
 

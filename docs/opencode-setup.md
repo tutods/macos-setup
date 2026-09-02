@@ -19,9 +19,12 @@ sources with Claude wherever the two harnesses agree.
 | Vault context | `SessionStart` hook | `experimental.chat.system.transform` in the plugin |
 | Statusline | `statusline.sh` | no equivalent, dropped |
 | Plugins/marketplaces | `home.ai.plugins` | no marketplace mechanism, dropped |
-| Format on edit | `biome-fix.sh` on `PostToolUse` | `formatter` in `config.nix`, opencode's built-in formatters with `nixfmt` and `shfmt` switched off |
+| Format on edit | `biome-fix.sh` on `PostToolUse` | `formatter` in `config.nix`, opencode's built-in formatters with every `$PATH`-only-gated one switched off |
 | Secret deny-list | `permissions.deny` in `home/common/ai/settings.nix` | `permission.read` and `permission.bash` deny globs in `config.nix`, generated from the same paths |
 | Co-author / AI attribution block | `block-ai-attribution.sh` on `PreToolUse` | `.hooks/commit-msg`, one layer below both harnesses; commit messages only, `gh` PR and review bodies are not guarded on the opencode side |
+| Additional directories | `permissions.additionalDirectories = ["~/Obsidian"]` | `~/Obsidian` in the `filesystem` MCP server args, alongside `~/.dotfiles` and `~/Developer` |
+| Council entry point | Workflow tool | `/council` command bound to the `council-chair` primary agent (coordination only: `edit`/`bash` denied, `task` allowed), not the general `orchestrator` |
+| Delegation depth | one level (subagents cannot spawn) | `subagent_depth = 1` in `config.nix`, matching the cap; `/council` fans its seats out directly from the chair |
 
 Models come from Ollama Cloud (`provider/model` ids, API key in
 `~/.local/share/opencode/auth.json`, never in Nix). The tier table
@@ -48,7 +51,9 @@ listed here so a future cleanup finds them.
 - `~/.config/opencode/skills/{graphify,supacode-cli,supacode-deeplinks}` — installed by their own tools, still scanned via opencode's default skills dir.
 - `~/.local/share/opencode/auth.json` — provider keys, secrets never enter Nix.
 
-Everything else in `~/.config/opencode/plugins/` is deleted on every deploy by `home.activation.opencodePlugins` in `default.nix`, which keeps only the Nix-managed `opencode-parity.js` and the `supacode-presence.js` exception above. That directory is auto-loaded wholesale, so a stray file is not inert: `crg-plugin.ts` (broken against the 1.18.21 plugin API, `app.on is not a function`, and duplicating the `code-review-graph` MCP server now declared in `config.nix`) kept coming back from a Supacode tool and crashed startup each time. The activation script is the thing that keeps it gone.
+Everything else in `~/.config/opencode/plugin{,s}/` is deleted on every deploy by `home.activation.opencodePlugins` in `default.nix`, which keeps only the Nix-managed `opencode-parity.js` and the `supacode-presence.js` exception above. That directory is auto-loaded wholesale, so a stray file is not inert: `crg-plugin.ts` (broken against the 1.18.21 plugin API, `app.on is not a function`, and duplicating the `code-review-graph` MCP server now declared in `config.nix`) kept coming back from a Supacode tool and crashed startup each time. The activation script is the thing that keeps it gone.
+
+The same activation step also deletes `~/.config/opencode/{package.json,package-lock.json,bun.lock,node_modules}` if they reappear. An old bun/npm bootstrap left them pinning a stale `@opencode-ai/plugin` against the running binary; nothing in this config imports from that tree (`opencode-parity.js` is import-free by design), so it is removed rather than left to drift.
 
 ## Deliberately not ported
 
@@ -58,7 +63,7 @@ Everything else in `~/.config/opencode/plugins/` is deleted on every deploy by `
 
 `biome-fix.sh` is replaced by the `formatter` block in `config.nix`. opencode ships a built-in biome formatter that runs `biome format --write $FILE` on an edited file, gated on finding `biome.json`/`biome.jsonc` up-tree and resolving `@biomejs/biome` in the project, so it stays silent everywhere else. It formats but does not apply lint fixes, the one behavioural difference from Claude's `biome check --write`. Overriding `formatter.biome.command` to get `check` back would replace that gate with an unconditional run, so it stays as-is.
 
-The gates are not uniform across the built-ins, which is why the config is an object rather than `true`. Most resolve a project config file up-tree the way biome does, but several (`nixfmt`, `shfmt`, `gofmt`, `rustfmt`) gate only on the binary being on `PATH`. `nixfmt` and `shfmt` are switched off explicitly: this repo formats `.nix` with alejandra via `nix fmt`, so a `nixfmt` that ever landed on `PATH` would silently reformat with the wrong tool and fail CI. The object form registers every built-in and then applies the overrides, so switching two off leaves the rest, biome included, enabled.
+The gates are not uniform across the built-ins, which is why the config is an object rather than `true`. Config-file-gated formatters (biome via `biome.json`, prettier via a `package.json` dep, oxfmt, ruff, pint, ocamlformat, clang-format) stay on: they no-op until a project opts in. Every formatter whose only gate is `which <bin>` on `PATH` is switched off, because it would otherwise reformat a file here with conventions this repo never opted into (this repo formats `.nix` with alejandra, not `nixfmt`). The disabled set was read off opencode 1.18.21's built-in registry: `air`, `cljfmt`, `dart`, `dfmt`, `gleam`, `gofmt`, `htmlbeautifier`, `ktlint`, `latexindent`, `mix`, `nixfmt`, `ormolu`, `rubocop`, `rustfmt`, `shfmt`, `standardrb`, `terraform`, `zig`. `uv` is `PATH`-only too but left on, because opencode drops `ruff` whenever `uv` is disabled. The object form registers every built-in and then applies the overrides, so the rest, biome included, stay enabled.
 
 ## The npx skills tree
 
@@ -75,10 +80,11 @@ opencode; `customSkillsReconcile` ignores symlinks for Claude.
 After `./nix.sh macbook`:
 
 1. `opencode` starts with no plugin errors in `~/.local/share/opencode/log/opencode.log`
-2. Zero `duplicate skill name` warnings in the log (external scans off)
-3. `/agents` shows the ported fleet; `@`-autocomplete shows only non-hidden agents
-4. `/council <question>` convenes the five seats in one message
-5. Skills list equals the repo-deployed set plus the three tool-installed exceptions
+2. On a fresh machine, run `opencode` and `/connect` the Ollama Cloud provider, or every model call fails; `./scripts/deploy-doctor.sh macbook` warns when the `ollama-cloud` entry is missing from `auth.json`
+3. Zero `duplicate skill name` warnings in the log (external scans off)
+4. `/agents` shows the ported fleet; `@`-autocomplete shows only non-hidden agents
+5. `/council <question>` convenes the five seats in one message
+6. Skills list equals the repo-deployed set plus the three tool-installed exceptions
 
 Escape hatches: `OPENCODE_DISABLE_PROJECT_CONFIG=1` skips a broken project
 config; `OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json"}'`
