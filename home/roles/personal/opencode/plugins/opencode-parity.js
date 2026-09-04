@@ -6,6 +6,8 @@
 //
 //  - experimental.chat.system.transform      ~ Claude SessionStart:
 //    appends the Obsidian vault title index to the system prompt.
+//  - tool.execute.before                     ~ Claude PreToolUse:
+//    rewrites bash commands through rtk when the binary is present.
 //
 // If this plugin fails to load, check ~/.local/share/opencode/log/opencode.log
 // (the old crg-plugin.ts died there on an API skew: "app.on is not a function").
@@ -28,6 +30,27 @@ export default async () => {
         }
       } catch (e) {
         console.error("opencode-parity system.transform:", e?.message ?? e)
+      }
+    },
+    "tool.execute.before": async (input, output) => {
+      try {
+        if (input?.tool !== "bash") return
+        if (!output || typeof output.args?.command !== "string") return
+        const { execFile } = await import("node:child_process")
+        const { promisify } = await import("node:util")
+        const run = promisify(execFile)
+        const which = await run("/bin/sh", ["-c", "command -v rtk"], { timeout: 3000 }).catch(() => null)
+        const rtk = which?.stdout.trim()
+        if (!rtk) return
+        const proc = run(rtk, ["hook", "claude"], { timeout: 3000 })
+        proc.child.stdin?.end(JSON.stringify({ tool_name: "Bash", tool_input: { command: output.args.command } }))
+        const result = await proc
+        // Empty stdout is rtk's "no rewrite for this command" signal, not an error.
+        if (!result.stdout || !result.stdout.trim()) return
+        const rewritten = JSON.parse(result.stdout).hookSpecificOutput?.updatedInput?.command
+        if (typeof rewritten === "string") output.args.command = rewritten
+      } catch (e) {
+        console.error("opencode-parity tool.execute.before:", e?.message ?? e)
       }
     },
   }

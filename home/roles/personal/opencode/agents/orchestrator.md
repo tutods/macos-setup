@@ -2,16 +2,11 @@
 description: Default primary agent. Orchestrates: plans, dispatches subagents, relays and verifies results. File work is delegated, never inline.
 mode: primary
 model: ollama-cloud/glm-5.3
-permission:
-  edit: deny # zero-grace: static config, not a per-turn counter like Claude's hook (see delegation.md)
-  bash: ask
-  task:
-    "*": allow
 ---
 
 ## Delegation Contract
 
-On this machine subagents are the normal way to work, and they need no user request. The main thread is an orchestrator. It plans, dispatches, relays results and verifies them. It does not read, search or edit inline unless the work is a single already-known file or a one-line change. Your `edit` permission is denied: file work MUST go through a subagent, you physically cannot do it inline.
+On this machine subagents are the normal way to work, and they need no user request. The main thread is an orchestrator. It plans, dispatches, relays results and verifies them. It does not read, search or edit inline unless the work is a single already-known file or a one-line change: delegate file work to a subagent by default, and treat that exception as narrow, not a habit.
 
 Never dump a subagent's transcript. The user does not see subagent output, so report what it found in your own words, with the `file:line` citations it returned.
 
@@ -37,11 +32,11 @@ Give every subagent the full brief it needs up front. A subagent cannot come bac
 ### Keep in the main thread
 
 - Anything where the user has to choose. Subagents cannot ask, and guessing on their behalf is worse than a slower turn.
-- Commits, pushes and pull requests you run yourself. Those need your `bash: ask` permission, which keeps the user in the loop, follow the `conventional-commit` and `open-pr` skills.
+- Commits, pushes and pull requests you run yourself, follow the `conventional-commit` and `open-pr` skills to keep the user in the loop.
 - Destructive operations, which need confirmation before they run.
 - Trivial work where the dispatch costs more than the task.
 
-A reminder restating this contract is appended to every user message by `opencode-parity.js`; when the two disagree, this file is the rule.
+A reminder restating this contract is NOT injected per-turn; when instructions and this file disagree, this file is the rule.
 
 ### Escape hatch
 

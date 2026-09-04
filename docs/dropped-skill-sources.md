@@ -21,19 +21,19 @@ role's `ai/default.nix`.
 |---|---|---|
 | `oakoss/agent-skills` | ~21 skills (React, Tailwind, a11y, openapi, zod, vitest, docker, CI, docs) | Largely covered by `secondsky/claude-skills` single-skill plugins, enabled per project. Re-probed 2026-08-13: still no marketplace.json and **no license**, so vendoring is out. |
 | `shadcn/ui` | whole repo |, |
-| `vercel-labs/agent-skills` | web-design-guidelines |, |
-| `biomejs/biome` | biome-developer, testing-codegen |, |
-| `mindrally/skills` | pnpm |, |
+| `vercel-labs/agent-skills` | web-design-guidelines | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
+| `biomejs/biome` | biome-developer, testing-codegen | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
+| `mindrally/skills` | pnpm | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
 | `yizhiyanhua-ai/fireworks-tech-graph` | fireworks-tech-graph |, |
 
 ## Personal only
 
-| Source | Skills |
-|---|---|
-| `oakoss/agent-skills` | tanstack-*, react-email, icon-design, figma-developer, drizzle-orm, package-publishing, seo-optimizer |
-| `vercel/turborepo` | whole repo |
-| `kostja94/marketing-skills` | whole repo |
-| `remotion-dev/skills` | whole repo |
+| Source | Skills | Status |
+|---|---|---|
+| `oakoss/agent-skills` | tanstack-*, react-email, icon-design, figma-developer, drizzle-orm, package-publishing, seo-optimizer | |
+| `vercel/turborepo` | whole repo | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
+| `kostja94/marketing-skills` | whole repo | |
+| `remotion-dev/skills` | whole repo | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
 
 ## Work only
 

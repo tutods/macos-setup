@@ -11,8 +11,8 @@ sources with Claude wherever the two harnesses agree.
 | Mechanism | Claude | opencode |
 |-----------|--------|----------|
 | Always-on instructions | `~/.claude/rules/workflow.md`, concatenated from `home/common/ai/instructions/` | `~/.config/opencode/AGENTS.md`, generated from the same `shared-instructions.md` + `model-quality.md` + `learned-rules.md`, plus `opencode-delegation.md` and `opencode-models.md` |
-| Delegation contract | `instructions/delegation.md` + `UserPromptSubmit` hook | `agents/orchestrator.md` (the default primary, `edit: deny`) + the same contract in the generated `AGENTS.md` |
-| Skills | `~/.claude/skills/` (deployed copies) | same directory, re-added via `skills.paths` after `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` kills both external scans |
+| Delegation contract | `instructions/delegation.md` + `UserPromptSubmit` hook | `agents/orchestrator.md` (the default primary, full-auto permissions same as every other agent) + the same contract in the generated `AGENTS.md`, convention only, not enforced by any permission |
+| Skills | `~/.claude/skills/` (deployed copies) | `~/.claude/skills` plus `~/.agents/skills` (the `npx skills add` tree, see below), both listed in `skills.paths` after `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` kills both external scans |
 | Subagents | `~/.claude/agents/*.md` | `~/.config/opencode/agents/*.md` (ported: orchestrator, code-reviewer, dev-lifecycle, vault-lint, vault-search) |
 | Council | Workflow tool, `llm-council.js` | `/council` command + hidden model-seat agents (no workflow engine exists) |
 | MCP servers | merged into `~/.claude.json` | declared in `opencode.json` (Nix owns the file wholesale) |
@@ -20,7 +20,9 @@ sources with Claude wherever the two harnesses agree.
 | Statusline | `statusline.sh` | no equivalent, dropped |
 | Plugins/marketplaces | `home.ai.plugins` | no marketplace mechanism, dropped |
 | Format on edit | `biome-fix.sh` on `PostToolUse` | `formatter` in `config.nix`, opencode's built-in formatters with every `$PATH`-only-gated one switched off |
+| Bash auto-rewrite | `rtk-rewrite` on `PreToolUse:Bash` | `opencode-parity.js`'s `tool.execute.before`, pipes the command through `rtk hook claude` (rtk has no `opencode` hook subcommand, and the old `rtk rewrite` subcommand is gone) and swaps in the rewrite when stdout is non-empty |
 | Secret deny-list | `permissions.deny` in `home/common/ai/settings.nix` | `permission.read` and `permission.bash` deny globs in `config.nix`, generated from the same paths |
+| Permission defaults | curated per-tool allow/ask/deny in `settings.nix`, most bash commands prompt | full-auto: top-level permission sets `edit`/`webfetch`/`websearch = "allow"` and `bash` allow-all; `orchestrator`'s own block repeats the same `edit`/`bash`/`read` shape (it inherits `webfetch`/`websearch` from the top level), held back only by the secret-path denies above |
 | Co-author / AI attribution block | `block-ai-attribution.sh` on `PreToolUse` | `.hooks/commit-msg`, one layer below both harnesses; commit messages only, `gh` PR and review bodies are not guarded on the opencode side |
 | Additional directories | `permissions.additionalDirectories = ["~/Obsidian"]` | `~/Obsidian` in the `filesystem` MCP server args, alongside `~/.dotfiles` and `~/Developer` |
 | Council entry point | Workflow tool | `/council` command bound to the `council-chair` primary agent (coordination only: `edit`/`bash` denied, `task` allowed), not the general `orchestrator` |
@@ -37,6 +39,7 @@ Models come from Ollama Cloud (`provider/model` ids, API key in
 |------|------|
 | `home/roles/personal/opencode/default.nix` | composition, AGENTS.md generation, agent/command/plugin deploys |
 | `home/roles/personal/opencode/config.nix` | `opencode.json` (models, agents, permissions, MCP, skills.paths) |
+| `home/roles/personal/opencode/skills.nix` | installs the `npx skills add` sources with no Claude marketplace.json into `~/.agents/skills`, opencode only |
 | `home/roles/personal/opencode/agents/` | orchestrator + 4 ported subagents |
 | `home/roles/personal/opencode/commands/council.md` | the `/council` fan-out |
 | `home/roles/personal/opencode/plugins/opencode-parity.js` | vault index in the system prompt, the one Claude hook with no opencode config key |
@@ -57,7 +60,7 @@ The same activation step also deletes `~/.config/opencode/{package.json,package-
 
 ## Deliberately not ported
 
-`delegate-nudge`, `force-delegation` and `rtk-rewrite` are Claude-only. All three are per-turn counters over a hook stream opencode has no equivalent for, and they exist to reconstruct a boundary opencode already enforces statically: the `orchestrator` agent carries `edit: deny`, so inline file work is impossible rather than merely discouraged. The per-turn delegation reminder that used to live in `opencode-parity.js` went the same way, for the same reason.
+`delegate-nudge` and `force-delegation` are Claude-only: per-turn counters over a hook stream opencode has no equivalent for. They used to reconstruct a boundary opencode enforced statically, the `orchestrator` agent's `edit: deny`. That permission is gone: every opencode agent, orchestrator included, now runs full-auto (see Permission defaults above), so there is no static enforcement left to reconstruct. The delegation boundary on opencode is convention now, stated in the generated `AGENTS.md` and nowhere else, not a permission the harness holds it to. The per-turn delegation reminder that used to live in `opencode-parity.js` stays gone, for the same reason it always did: no hook stream to count turns over.
 
 `block-ai-attribution.sh` moved down a layer instead of being ported: `.hooks/commit-msg` in this repo rejects co-author trailers and AI attribution in the message, which covers Claude, opencode and a plain terminal with no harness API involved. Two deliberate limits. It sees commit messages only, so the `gh pr create|edit|comment|review` and `gh api` bodies the Claude hook also guards are unguarded when opencode drives them. And its regex mirrors `block-ai-attribution.sh` exactly, so it does not catch a `claude.ai/code/session_*` link, which is a session reference rather than an attribution.
 
@@ -67,13 +70,13 @@ The gates are not uniform across the built-ins, which is why the config is an ob
 
 ## The npx skills tree
 
-`~/.agents/skills` (the `npx skills` tree) is deleted: nothing consumed it
-once opencode's external scan was disabled, Claude only used two symlinks into
-it, and both skills are now fetched from upstream at build time (`orchestration`,
-`orca-cli`; see `mkFetchedSkills` in [ai-setup.md](ai-setup.md)) or dropped (`find-skills`,
-whose whole job was promoting `npx skills add`). If it ever
-reappears, `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` already neutralizes it for
-opencode; `customSkillsReconcile` ignores symlinks for Claude.
+`~/.agents/skills` (the `npx skills` tree) is deliberately in use again, opencode only. `skills.nix` installs into it, and `config.nix`'s `skills.paths` lists it alongside `~/.claude/skills` so opencode loads both; Claude never reads this directory. The two skills Claude used to symlink out of it are unaffected, both are fetched from upstream at build time now (`orchestration`, `orca-cli`; see `mkFetchedSkills` in [ai-setup.md](ai-setup.md)) or dropped (`find-skills`, whose whole job was promoting `npx skills add`).
+
+The sources installed are the ones in [dropped-skill-sources.md](dropped-skill-sources.md) with no `.claude-plugin/marketplace.json`, so they can never become a Claude Code plugin: `vercel-labs/agent-skills`, `biomejs/biome`, `mindrally/skills`, `vercel/turborepo`, `remotion-dev/skills`. `home.activation.opencodeSkillsInstall` runs `npx -y skills@latest add <src> -g -a opencode -s '*' -y --copy` for each, gated by a `command -v npx` check (skips with a warning if missing) and a manifest-hash stamp at `~/.agents/.skill-sources-hash`, so an unchanged source list skips the install loop entirely on redeploy.
+
+`home.activation.opencodeSkillsReconcile` runs after install and diffs `~/.agents/skills` against `.skill-lock.json`'s per-skill `source` field (one source can produce several skill directories, so this matches on that field rather than the source list directly). Any directory the current sources don't own gets listed. `home.ai.opencodeSkillsPrune` still defaults to `false` in `skills.nix`, which only prints the stale list and the exact `rm -rf` command to run by hand, but `home/roles/personal/opencode/default.nix` sets it to `true` for the personal role, so on this machine the reconcile step deletes those directories on every deploy instead of only printing them.
+
+At the time this mechanism was added, the tree already held 291 stale skill directories dated July/August, none of them backed by a declared source, left over from before `skills.nix` existed. They surfaced in the reconcile step's stale-directory list until the personal role's prune flag deleted them; `docs/agents-skills-pre-prune.tsv` records the path and source of every directory as it stood right before that deletion, so the pruned set stays recoverable.
 
 ## Verification
 
@@ -85,6 +88,7 @@ After `./nix.sh macbook`:
 4. `/agents` shows the ported fleet; `@`-autocomplete shows only non-hidden agents
 5. `/council <question>` convenes the five seats in one message
 6. Skills list equals the repo-deployed set plus the three tool-installed exceptions
+7. `~/.agents/skills` holds a directory for each source declared in `skills.nix` (cross-check `~/.agents/.skill-lock.json`); since the personal role sets `opencodeSkillsPrune = true`, unmanaged directories are deleted on deploy rather than only listed, and the reconcile step's pruned-directory print names exactly what it removed
 
 Escape hatches: `OPENCODE_DISABLE_PROJECT_CONFIG=1` skips a broken project
 config; `OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json"}'`

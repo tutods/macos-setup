@@ -50,7 +50,9 @@
     + "\n\n"
     + readFile ../ai/instructions.md;
 in {
-  imports = [./config.nix];
+  imports = [./config.nix ./skills.nix];
+
+  home.ai.opencodeSkillsPrune = true;
 
   assertions = agentAssertions;
 

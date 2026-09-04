@@ -4,6 +4,20 @@
   lib,
   ...
 }: let
+  # Same paths as the Bash(cat ...) denies below, in rtk's reader-subcommand
+  # forms: rtk-rewrite.sh turns `cat ~/.ssh/id_ed25519` into
+  # `rtk read ~/.ssh/id_ed25519` before any allow/deny rule sees it, so the
+  # cat form alone stops nothing once rtk is on PATH.
+  rtkSecretDenies = lib.concatMap (
+    sub:
+      map (path: "Bash(rtk ${sub} ${path})") [
+        "~/.ssh/*"
+        "~/.aws/*"
+        "~/.config/fish/secrets.fish*"
+        "~/.config/git/private*"
+        "~/.config/gcloud/*"
+      ]
+  ) ["read" "ls" "tree" "grep" "rg" "json" "env" "find" "smart" "wc" "diff" "log"];
   settings = {
     theme = "dark-daltonized";
     model = "opusplan";
@@ -34,28 +48,30 @@
       refreshInterval = 30;
     };
 
-    permissions.deny = [
-      "Read(./.env)"
-      "Read(./.env.*)"
-      "Read(./secrets/**)"
-      "Read(~/.config/fish/secrets.fish)"
-      "Read(~/.ssh/**)"
-      "Read(~/.aws/**)"
-      "Read(~/.config/gcloud/**)"
-      "Read(~/.config/git/private)"
-      "Read(**/.env)"
-      "Read(**/.env.*)"
-      # Defense in depth: the Read() rules above gate only the Read tool, so
-      # without these a `cat ~/.ssh/id_ed25519` is one reflexive approval away.
-      # Prefix-matched, not airtight — the point is stopping the casual path.
-      "Bash(cat ~/.ssh/*)"
-      "Bash(cat ~/.aws/*)"
-      "Bash(cat ~/.config/fish/secrets.fish*)"
-      "Bash(cat ~/.config/git/private*)"
-      "Bash(cat ~/.config/gcloud/*)"
-      "Bash(base64 ~/.ssh/*)"
-      "Bash(base64 ~/.aws/*)"
-    ];
+    permissions.deny =
+      [
+        "Read(./.env)"
+        "Read(./.env.*)"
+        "Read(./secrets/**)"
+        "Read(~/.config/fish/secrets.fish)"
+        "Read(~/.ssh/**)"
+        "Read(~/.aws/**)"
+        "Read(~/.config/gcloud/**)"
+        "Read(~/.config/git/private)"
+        "Read(**/.env)"
+        "Read(**/.env.*)"
+        # Defense in depth: the Read() rules above gate only the Read tool, so
+        # without these a `cat ~/.ssh/id_ed25519` is one reflexive approval away.
+        # Prefix-matched, not airtight — the point is stopping the casual path.
+        "Bash(cat ~/.ssh/*)"
+        "Bash(cat ~/.aws/*)"
+        "Bash(cat ~/.config/fish/secrets.fish*)"
+        "Bash(cat ~/.config/git/private*)"
+        "Bash(cat ~/.config/gcloud/*)"
+        "Bash(base64 ~/.ssh/*)"
+        "Bash(base64 ~/.aws/*)"
+      ]
+      ++ rtkSecretDenies;
     permissions.additionalDirectories = ["~/Obsidian"];
     # Classifier-guarded default: reads, in-project edits and read-only Bash run
     # without a prompt; network, destructive Bash and out-of-project writes still
