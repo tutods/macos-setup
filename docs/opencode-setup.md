@@ -26,7 +26,7 @@ sources with Claude wherever the two harnesses agree.
 | Co-author / AI attribution block | `block-ai-attribution.sh` on `PreToolUse` | `.hooks/commit-msg`, one layer below both harnesses; commit messages only, `gh` PR and review bodies are not guarded on the opencode side |
 | Additional directories | `permissions.additionalDirectories = ["~/Obsidian"]` | `~/Obsidian` in the `filesystem` MCP server args, alongside `~/.dotfiles` and `~/Developer` |
 | Council entry point | Workflow tool | `/council` command bound to the `council-chair` primary agent (coordination only: `edit`/`bash` denied, `task` allowed), not the general `orchestrator` |
-| Delegation depth | one level (subagents cannot spawn) | `subagent_depth = 1` in `config.nix`, matching the cap; `/council` fans its seats out directly from the chair |
+- **Delegation depth**: `subagent_depth = 2` in `config.nix` allows orchestrator $\rightarrow$ subagent $\rightarrow$ subagent. `/council` fans its seats out directly from the chair.
 
 Models come from Ollama Cloud (`provider/model` ids, API key in
 `~/.local/share/opencode/auth.json`, never in Nix). The tier table

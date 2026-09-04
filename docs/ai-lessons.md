@@ -18,6 +18,10 @@ Specific incidents worth remembering but too narrow for standing rules. Each ent
 
 - **Repo scripts (`nix.sh` etc.) are zero-dependency bash**: no `gum`, no external TUI helpers; a bootstrap script can't assume its own dependencies exist yet (gum TUI experiment was reverted on request).
 - **Git remotes stay SSH**: don't "fix" them to HTTPS during audits; SSH is the intended auth path.
+- **Full-auto posture**: Every agent, orchestrator included, runs full-auto (`edit`/`bash` allow-all). The delegation boundary is convention only, stated in the generated `AGENTS.md`, not a permission the harness holds it to.
+- **Hardened config**: `config.nix` now includes per-server MCP timeouts, explicit `external_directory` allows for vault/developer paths, and `compaction.auto = true`.
+- **New commands**: `/deploy`, `/doctor`, and `/nixcheck` are deployed as managed commands in `.config/opencode/commands/`.
+- **LSP and nixd**: `lsp = true` in `config.nix`, and `nixd` is added to system packages for better Nix support.
 
 ## Projects
 
