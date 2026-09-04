@@ -44,12 +44,18 @@
   readDenies = {"*" = "allow";} // lib.genAttrs secretGlobs (_: "deny");
 
   # Command-prefixed rather than path-only: a bash rule resolves with findLast
-  # over the JSON key order (Nix sorts alphabetically), so a path-only
-  # "*.ssh/*" would lose to the later-sorting "git show*" allow, while a
-  # "cat …" rule can never co-match a "git …" command. Prefix-matched, not
-  # airtight, same caveat as settings.nix: `git diff; cat ~/.ssh/id_ed25519`
-  # matches the git allow, and xxd/od/strings/cp/python -c/-/bin/cat are not
-  # listed. This stops the casual path; readDenies is what actually holds.
+  # over the JSON key order (Nix sorts alphabetically), and a listed
+  # reader+glob pair (e.g. "cat *.ssh/*") out-sorts the catch-all
+  # "*" = "allow", so a listed reader is reliably denied. Prefix-matched, not
+  # airtight: the match is against the command's literal text, so anything
+  # that doesn't literally start with a listed reader falls through to the
+  # catch-all allow. `git diff; cat ~/.ssh/id_ed25519` doesn't start with a
+  # listed reader and is allowed. Quoting defeats the glob too: `cat
+  # ~/."ssh"/id_rsa` rewrites to `rtk read ~/."ssh"/id_rsa`, whose literal
+  # text has no `.ssh/` substring. A symlink hop does the same: `ln -s
+  # ~/.ssh/id_rsa /tmp/x && cat /tmp/x` becomes `rtk read /tmp/x`.
+  # xxd/od/strings/cp/python -c are also unlisted. This stops the casual
+  # path; readDenies is what actually holds.
   # rtk readers are two words ("rtk read", not "rtk"), since the plugin's
   # rewrite hook turns `cat ~/.ssh/id_ed25519` into `rtk read ~/.ssh/id_ed25519`
   # and a bare "rtk" prefix would blanket-deny every rtk subcommand, not just
@@ -86,6 +92,7 @@
       hidden = true;
       temperature = 0.4;
       description = "Council advisor seat. Invoked only by the council command or the orchestrator, never directly.";
+      permission.task."*" = "deny";
     })
   m.seats;
 
@@ -178,6 +185,7 @@
         # change here is the only edit needed (change both files anyway, the
         # table documents the tiers).
         code-reviewer.model = m.default;
+        code-reviewer.permission.task."*" = "deny";
         # The one agent that runs unsupervised through implement/commit/push,
         # so it gets edit and bash without a prompt. Not a bare `bash = "allow"`:
         # that becomes a single {resource:"*",effect:"allow"} rule appended last
@@ -193,7 +201,9 @@
           steps = 150;
         };
         vault-lint.model = m.fast;
+        vault-lint.permission.task."*" = "deny";
         vault-search.model = m.fast;
+        vault-search.permission.task."*" = "deny";
       }
       // councilAgents
       // {
@@ -220,6 +230,7 @@
           hidden = true;
           temperature = 0.2;
           description = "Blind peer reviewer for the council. Sees anonymised responses only, never advisor identities.";
+          permission.task."*" = "deny";
         };
       };
 
