@@ -113,20 +113,18 @@
     share = "disabled";
     snapshot = false;
     logLevel = "WARN";
+    compaction.auto = true;
     disabled_providers = ["azure" "vertex" "bedrock"];
 
     mcp = {
       filesystem = {
         type = "local";
-        # Obsidian mirrors Claude's permissions.additionalDirectories
-        # (home/common/ai/settings.nix): vault access granted, not incidental.
         command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" "${config.home.homeDirectory}/.dotfiles" "${config.home.homeDirectory}/Developer" "${config.home.homeDirectory}/Obsidian"];
         enabled = true;
+        timeout = 30000;
       };
       github = {
         type = "local";
-        # The \${...} is escaped Nix interpolation: the shell command must
-        # contain the literal ${GITHUB_TOKEN:-} for the shell to expand.
         command = ["sh" "-c" "GITHUB_PERSONAL_ACCESS_TOKEN=\"\${GITHUB_TOKEN:-}\" npx -y @modelcontextprotocol/server-github"];
         enabled = true;
       };
@@ -139,19 +137,18 @@
         type = "local";
         command = ["sh" "-c" "doppler run -- npx -y @modelcontextprotocol/server-postgres"];
         enabled = true;
+        timeout = 15000;
       };
       shadcn = {
         type = "local";
         command = ["npx" "-y" "shadcn@latest" "mcp"];
         enabled = true;
       };
-      # Claude parity: same server as home/common/ai/mcp.nix declares for
-      # Claude. Per-repo `code-review-graph build` is still required before
-      # the graph answers anything.
       code-review-graph = {
         type = "local";
         command = ["${config.home.homeDirectory}/.local/bin/code-review-graph" "serve"];
         enabled = true;
+        timeout = 30000;
       };
     };
 
@@ -192,6 +189,7 @@
             bash = secretDenies // {"*" = "allow";};
             read = readDenies;
           };
+          steps = 150;
         };
         vault-lint.model = m.fast;
         vault-search.model = m.fast;
@@ -230,6 +228,11 @@
       websearch = "allow";
       bash = secretDenies // {"*" = "allow";};
       read = readDenies;
+      external_directory = [
+        "${config.home.homeDirectory}/Obsidian/**"
+        "${config.home.homeDirectory}/.dotfiles/**"
+        "${config.home.homeDirectory}/Developer/**"
+      ];
     };
 
     # Claude's PostToolUse biome-fix.sh, as opencode's native on-edit formatter.
