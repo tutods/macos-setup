@@ -67,49 +67,50 @@ in {
   # (the tool's own install manifest), not the source list directly: one
   # source can produce several skill directories under different names.
   config.home.activation.opencodeSkillsReconcile = lib.hm.dag.entryAfter ["opencodeSkillsInstall"] ''
-        skillsDir="${config.home.homeDirectory}/.agents/skills"
-        lockFile="${config.home.homeDirectory}/.agents/.skill-lock.json"
+    skillsDir="${config.home.homeDirectory}/.agents/skills"
+    lockFile="${config.home.homeDirectory}/.agents/.skill-lock.json"
 
-        if [ -d "$skillsDir" ]; then
-          owned=""
-          if [ -f "$lockFile" ]; then
-            owned=$(${jqBin} -r --slurpfile srcs ${sourcesJson} \
-              '.skills // {} | to_entries[] | select(.value.source as $s | $srcs[0] | index($s)) | .key' \
-              "$lockFile" 2>/dev/null || true)
-          fi
+    if [ -d "$skillsDir" ]; then
+      ownedFile=$(mktemp)
+      unownedFile=$(mktemp)
+      if [ -f "$lockFile" ]; then
+        ${jqBin} -r --slurpfile srcs ${sourcesJson} \
+          '.skills // {} | to_entries[] | select(.value.source as $s | $srcs[0] | index($s)) | .key' \
+          "$lockFile" > "$ownedFile" 2>/dev/null || true
+      fi
 
-          # Newline-delimited throughout: a directory name containing a space would
-          # otherwise word-split into two rm targets, one of which can collide with
-          # a legitimately owned name.
-          unowned=""
-          for path in "$skillsDir"/*; do
-            [ -d "$path" ] || continue
-            name=''${path##*/}
-            if ! printf '%s\n' "$owned" | grep -qxF "$name"; then
-              unowned="$unowned$name
-    "
-            fi
-          done
+      # One name per line via files, never a space-joined string: a directory
+      # name containing a space would word-split into two rm targets, one of
+      # which can collide with a legitimately owned name.
+      for path in "$skillsDir"/*; do
+        [ -d "$path" ] || continue
+        name=''${path##*/}
+        grep -qxF "$name" "$ownedFile" 2>/dev/null || printf '%s\n' "$name" >> "$unownedFile"
+      done
 
-          if [ -n "$unowned" ] && [ -z "$owned" ]; then
-            echo "  ⚠ opencode skills: no declared skill resolved from $lockFile, refusing to prune"
-          elif [ -n "$unowned" ]; then
-            if [ "${lib.boolToString config.home.ai.opencodeSkillsPrune}" = "true" ]; then
-              printf '%s' "$unowned" | while IFS= read -r name; do
-                [ -n "$name" ] || continue
-                run rm -rf "$skillsDir/$name"
-              done
-              printf "\n  ⚠  Pruned unmanaged opencode skills from %s:\n%s\n" "$skillsDir" "$unowned"
-            else
-              printf "\n  ⚠  Unmanaged directories under %s not from a declared source:\n%s" "$skillsDir" "$unowned"
-              printf "     Set home.ai.opencodeSkillsPrune = true to delete them, or run:\n     rm -rf"
-              printf '%s' "$unowned" | while IFS= read -r name; do
-                [ -n "$name" ] || continue
-                printf ' "%s/%s"' "$skillsDir" "$name"
-              done
-              printf "\n\n"
-            fi
-          fi
+      if [ -s "$unownedFile" ] && [ ! -s "$ownedFile" ]; then
+        echo "  ⚠ opencode skills: no declared skill resolved from $lockFile, refusing to prune"
+      elif [ -s "$unownedFile" ]; then
+        if [ "${lib.boolToString config.home.ai.opencodeSkillsPrune}" = "true" ]; then
+          while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            run rm -rf "$skillsDir/$name"
+          done < "$unownedFile"
+          printf "\n  ⚠  Pruned unmanaged opencode skills from %s:\n" "$skillsDir"
+          sed 's/^/       /' "$unownedFile"
+          printf "\n"
+        else
+          printf "\n  ⚠  Unmanaged directories under %s not from a declared source:\n" "$skillsDir"
+          sed 's/^/       /' "$unownedFile"
+          printf "     Set home.ai.opencodeSkillsPrune = true to delete them, or run:\n     rm -rf"
+          while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            printf ' "%s/%s"' "$skillsDir" "$name"
+          done < "$unownedFile"
+          printf "\n\n"
         fi
+      fi
+      rm -f "$ownedFile" "$unownedFile"
+    fi
   '';
 }

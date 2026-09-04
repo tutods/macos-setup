@@ -71,6 +71,9 @@ in {
       # edits are lost on the next deploy; change the repo.
       ".config/opencode/AGENTS.md".text = agentsMd;
       ".config/opencode/commands/council.md".source = ./commands/council.md;
+      ".config/opencode/commands/deploy.md".source = ./commands/deploy.md;
+      ".config/opencode/commands/doctor.md".source = ./commands/doctor.md;
+      ".config/opencode/commands/nixcheck.md".source = ./commands/nixcheck.md;
       # Plain JS, no imports needed at build time. Read-only input, symlink safe.
       ".config/opencode/plugins/opencode-parity.js".source = ./plugins/opencode-parity.js;
     };

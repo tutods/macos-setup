@@ -110,6 +110,7 @@
     skills.paths = ["~/.claude/skills" "~/.agents/skills"];
 
     autoupdate = false;
+    lsp = true;
     share = "disabled";
     snapshot = false;
     logLevel = "WARN";
