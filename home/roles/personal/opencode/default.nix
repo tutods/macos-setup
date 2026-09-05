@@ -14,7 +14,7 @@
   # script (verify-references.sh is gone, replaced by assertions upstream):
   # every name here must exist as agents/<name>.md, and every agents/*.md
   # must be in this list. nix flake check fails the build otherwise.
-  agentNames = ["orchestrator" "code-reviewer" "dev-lifecycle" "vault-lint" "vault-search"];
+  agentNames = ["orchestrator" "code-reviewer" "dev-lifecycle" "vault-lint" "vault-search" "nix-architect"];
 
   agentAssertions =
     (map (name: {
@@ -74,6 +74,7 @@ in {
       ".config/opencode/commands/deploy.md".source = ./commands/deploy.md;
       ".config/opencode/commands/doctor.md".source = ./commands/doctor.md;
       ".config/opencode/commands/nixcheck.md".source = ./commands/nixcheck.md;
+      ".config/opencode/commands/verify-setup.md".source = ./commands/verify-setup.md;
       # Plain JS, no imports needed at build time. Read-only input, symlink safe.
       ".config/opencode/plugins/opencode-parity.js".source = ./plugins/opencode-parity.js;
     };
