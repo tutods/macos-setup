@@ -4,7 +4,7 @@
 [![Nix Flake](https://img.shields.io/badge/nix-flake-5277C3?logo=nixos&logoColor=white)](https://nixos.wiki/wiki/Flakes)
 [![Platform](https://img.shields.io/badge/platform-aarch64--darwin-000000?logo=apple&logoColor=white)](https://github.com/nix-darwin/nix-darwin)
 
-Two Apple Silicon Macs, one personal, one work, described entirely in Nix. One command rebuilds either machine from scratch: system defaults, packages, Homebrew casks, App Store apps, shell, editors, and the whole Claude Code setup.
+Two Apple Silicon Macs, one personal, one work, described entirely in Nix. One command rebuilds either machine from scratch: system defaults, packages, Homebrew casks, App Store apps, shell, editors, and the whole Claude Code and opencode setup.
 
 Built on [Nix flakes](https://nixos.wiki/wiki/Flakes), [nix-darwin](https://github.com/nix-darwin/nix-darwin), [Home Manager](https://github.com/nix-community/home-manager) and [nix-homebrew](https://github.com/zhaofengli/nix-homebrew).
 
@@ -56,7 +56,7 @@ Innermost wins: a host overrides a module, and a role overrides common.
 
 **Editors**, VS Code and Zed, extensions included. Configs the app itself rewrites are seeded as copies rather than read-only store symlinks, so the app can still save.
 
-**AI**: the distinctive part. Claude Code is configured end to end from Nix: always-on instructions, on-demand skills, plugin marketplaces, and MCP servers. See [ai-setup.md](docs/ai-setup.md).
+**AI**: the distinctive part. Claude Code is configured end to end from Nix: always-on instructions, on-demand skills, plugin marketplaces, and MCP servers. See [ai-setup.md](docs/ai-setup.md). The personal machine also runs [opencode](https://opencode.ai) as a second harness, sharing the same instruction sources and skills, with its own agent fleet and a plugin-to-skill bridge. See [opencode-setup.md](docs/opencode-setup.md).
 
 ## AI setup at a glance
 
@@ -69,10 +69,11 @@ Everything Claude Code reads is generated from this repo, so both machines stay 
 | External skills | plugin marketplaces, declared in Nix | installed by Claude Code on next launch |
 | MCP servers | `home/common/ai/mcp.nix` | `~/.claude.json` (`mcpServers`, merged) |
 | Settings, hooks, statusline | `home/common/ai/settings.nix` | `~/.claude/settings.json` (merged) |
+| opencode, personal only | `home/roles/personal/opencode/` | `~/.config/opencode/` (agents, commands, plugins, config, AGENTS.md) |
 
 Rules are scoped to where they are actually true: always-true rules are instructions, stack-specific ones are skills that load on demand, and repo-specific ones live in that repo's own `CLAUDE.md`.
 
-Plugins fail silently, a typo'd name is written to `settings.json`, nothing installs, and nothing is logged. `scripts/verify-plugins.sh` resolves every declared plugin against its marketplace and runs in CI.
+Plugins fail silently, a typo'd name is written to `settings.json`, nothing installs, and nothing is logged. `scripts/verify-plugins.sh` resolves every declared plugin against its marketplace and runs in CI. opencode's equivalent checks live in `scripts/verify-opencode.sh`, or `/verify-setup` inside an opencode session: binaries, MCP servers, provider auth, managed files, the plugin-to-skill bridge and post-deploy log health in one command.
 
 ## First-time setup
 
@@ -125,6 +126,8 @@ Details in [private-git-config.md](docs/private-git-config.md).
 nix fmt                        # format all Nix files
 nix flake check                # validate the flake
 ./scripts/verify-plugins.sh    # check every Claude plugin resolves
+./scripts/deploy-doctor.sh macbook  # preview what the next deploy deletes
+./scripts/verify-opencode.sh   # check the opencode setup end to end
 ```
 
 Run `nix fmt` before committing, a pre-commit hook enforces it.
@@ -157,7 +160,7 @@ Run `nix fmt` before committing, a pre-commit hook enforces it.
 │   └── roles/
 │       ├── personal/           Personal-only packages, plugins, skills, opencode
 │       └── work/               Work-only: acli, PR review skills
-├── scripts/                    verify-plugins · darwin/ helpers
+├── scripts/                    verify-plugins · verify-opencode · deploy-doctor · darwin/ helpers
 └── docs/                       Guides and reference
 ```
 
@@ -186,6 +189,7 @@ Check a package exists in stable first: `nix search nixpkgs <name>`.
 | [architecture.md](docs/architecture.md) | Module composition and how a config is assembled |
 | [nix-conventions.md](docs/nix-conventions.md) | Conventions for working in this repo |
 | [ai-setup.md](docs/ai-setup.md) | Claude Code: instructions, skills, plugins, MCP |
+| [opencode-setup.md](docs/opencode-setup.md) | opencode: the second harness, personal machine only |
 | [dropped-skill-sources.md](docs/dropped-skill-sources.md) | Skill sources that can't ship as plugins |
 | [ai-lessons.md](docs/ai-lessons.md) | Gotchas hit once and worth not repeating |
 | [adding-host-or-user.md](docs/adding-host-or-user.md) | Adding a machine or a user |
