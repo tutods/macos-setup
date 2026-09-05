@@ -1,25 +1,41 @@
-# macOS Setup
+<div align="center">
+
+# 🍎 macOS Setup
 
 [![Flake Checker](https://github.com/tutods/macos-setup/actions/workflows/flake-checker.yaml/badge.svg)](https://github.com/tutods/macos-setup/actions/workflows/flake-checker.yaml)
 [![Nix Flake](https://img.shields.io/badge/nix-flake-5277C3?logo=nixos&logoColor=white)](https://nixos.wiki/wiki/Flakes)
 [![Platform](https://img.shields.io/badge/platform-aarch64--darwin-000000?logo=apple&logoColor=white)](https://github.com/nix-darwin/nix-darwin)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Two Apple Silicon Macs, one personal, one work, described entirely in Nix. One command rebuilds either machine from scratch: system defaults, packages, Homebrew casks, App Store apps, shell, editors, and the whole Claude Code and opencode setup.
+**Two Apple Silicon Macs, one personal, one work, described entirely in Nix.**
 
-Built on [Nix flakes](https://nixos.wiki/wiki/Flakes), [nix-darwin](https://github.com/nix-darwin/nix-darwin), [Home Manager](https://github.com/nix-community/home-manager) and [nix-homebrew](https://github.com/zhaofengli/nix-homebrew).
+One command rebuilds either machine from scratch — system defaults, packages,
+Homebrew casks, App Store apps, shell, editors, and the whole AI harness setup
+(Claude Code + opencode).
 
 ```bash
 ./nix.sh macbook
 ```
 
+Built on [Nix flakes](https://nixos.wiki/wiki/Flakes) ·
+[nix-darwin](https://github.com/nix-darwin/nix-darwin) ·
+[Home Manager](https://github.com/nix-community/home-manager) ·
+[nix-homebrew](https://github.com/zhaofengli/nix-homebrew)
+
+</div>
+
+---
+
 ## Machines
 
-| Config | Hostname | User | Homebrew owner | Notes |
-|--------|----------|------|----------------|-------|
-| `macbook` | `tutods-macbook` | `tutods` | `tutods` | Personal, Doppler, Terraform, extra casks and fonts |
-| `work` | `daniel.a.sousa` | `daniel.a.sousa` | `admin.daniel.a.sousa` | Corporate DNS left untouched; Atlassian `acli` tap |
+| | `macbook` | `work` |
+|---|---|---|
+| **User** | `tutods` | `daniel.a.sousa` |
+| **Homebrew owner** | `tutods` | `admin.daniel.a.sousa` |
+| **Notes** | Personal: Doppler, Terraform, extra casks and fonts, opencode | Corporate DNS untouched; Atlassian `acli` tap |
 
-Both are `aarch64-darwin`. Adding a third is a directory copy and one line in `flake.nix`, see [adding-host-or-user.md](docs/adding-host-or-user.md).
+Both are `aarch64-darwin`. Adding a third is a directory copy and one line in
+`flake.nix` → [adding-host-or-user.md](docs/adding-host-or-user.md).
 
 ## How a machine is assembled
 
@@ -44,23 +60,22 @@ flowchart TD
     NHB --> OUT
 ```
 
-Innermost wins: a host overrides a module, and a role overrides common.
+> **Innermost wins** — a host overrides a module, a role overrides common.
 
 ## What's in here
 
-**System**: macOS defaults, Touch ID for `sudo`, firewall, dock layout per machine, automatic weekly garbage collection.
-
-**Packages**: nixpkgs for CLI and dev tools, Homebrew for GUI apps, `mas` for App Store apps. All three are declarative; nothing needs a post-install script.
-
-**Shell**, Fish as the default shell, with abbreviations, aliases and functions in Nix, plus an oh-my-posh prompt. Ghostty as the terminal.
-
-**Editors**, VS Code and Zed, extensions included. Configs the app itself rewrites are seeded as copies rather than read-only store symlinks, so the app can still save.
-
-**AI**: the distinctive part. Claude Code is configured end to end from Nix: always-on instructions, on-demand skills, plugin marketplaces, and MCP servers. See [ai-setup.md](docs/ai-setup.md). The personal machine also runs [opencode](https://opencode.ai) as a second harness, sharing the same instruction sources and skills, with its own agent fleet and a plugin-to-skill bridge. See [opencode-setup.md](docs/opencode-setup.md).
+| | |
+|---|---|
+| 🖥️ **System** | macOS defaults, Touch ID for `sudo`, firewall, per-machine dock layout, weekly garbage collection |
+| 📦 **Packages** | nixpkgs for CLI/dev tools, Homebrew for GUI apps, `mas` for App Store — all declarative, no post-install scripts |
+| 🐚 **Shell** | Fish (abbreviations, aliases, functions in Nix) + oh-my-posh prompt, Ghostty terminal |
+| ✏️ **Editors** | VS Code and Zed with extensions; app-rewritten configs are seeded as copies so the app can still save |
+| 🤖 **AI** | The distinctive part — see below |
 
 ## AI setup at a glance
 
-Everything Claude Code reads is generated from this repo, so both machines stay identical and nothing is configured by hand in a UI.
+Everything both harnesses read is generated from this repo. Nothing is
+configured by hand in a UI.
 
 | Layer | Source | Lands in |
 |-------|--------|----------|
@@ -69,70 +84,71 @@ Everything Claude Code reads is generated from this repo, so both machines stay 
 | External skills | plugin marketplaces, declared in Nix | installed by Claude Code on next launch |
 | MCP servers | `home/common/ai/mcp.nix` | `~/.claude.json` (`mcpServers`, merged) |
 | Settings, hooks, statusline | `home/common/ai/settings.nix` | `~/.claude/settings.json` (merged) |
-| opencode, personal only | `home/roles/personal/opencode/` | `~/.config/opencode/` (agents, commands, plugins, config, AGENTS.md) |
+| opencode (personal only) | `home/roles/personal/opencode/` | `~/.config/opencode/` (config, agents, commands, plugins, AGENTS.md) |
 
-Rules are scoped to where they are actually true: always-true rules are instructions, stack-specific ones are skills that load on demand, and repo-specific ones live in that repo's own `CLAUDE.md`.
+**Claude Code** end to end from Nix: instructions, skills, marketplaces, MCP,
+hooks → [ai-setup.md](docs/ai-setup.md)
 
-Plugins fail silently, a typo'd name is written to `settings.json`, nothing installs, and nothing is logged. `scripts/verify-plugins.sh` resolves every declared plugin against its marketplace and runs in CI. opencode's equivalent checks live in `scripts/verify-opencode.sh`, or `/verify-setup` inside an opencode session: binaries, MCP servers, provider auth, managed files, the plugin-to-skill bridge and post-deploy log health in one command.
+**opencode**, the personal machine's second harness: shares the same
+instruction sources and skills, runs its own agent fleet and slash commands,
+and reads Claude's plugin-installed skills through a deploy-time bridge →
+[opencode-setup.md](docs/opencode-setup.md)
+
+Rules are scoped to where they are actually true: always-true rules are
+instructions, stack-specific ones are skills that load on demand, repo-specific
+ones live in that repo's own `CLAUDE.md`.
+
+> ⚠️ Both harnesses' plugins fail silently — a typo'd name writes to the config,
+> installs nothing, logs nothing. `scripts/verify-plugins.sh` (CI-enforced) and
+> `scripts/verify-opencode.sh` catch that, plus `scripts/deploy-doctor.sh`
+> previews everything a deploy would delete.
 
 ## First-time setup
 
-**1. Prerequisites**
-
 ```bash
+# 1. Prerequisites
 xcode-select --install                         # Command Line Tools
-# Nix via the Determinate installer (same one CI and docs/recovery.md use;
-# flakes enabled by default):
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-```
+                                               # Nix via the Determinate installer (flakes on by default)
 
-**2. Clone**
-
-```bash
+# 2. Clone
 git clone https://github.com/tutods/macos-setup.git ~/.dotfiles
 cd ~/.dotfiles
-git config core.hooksPath .hooks   # pre-commit + commit-msg checks; nix.sh also sets this on first deploy
-```
+git config core.hooksPath .hooks               # pre-commit + commit-msg checks
 
-**3. Apply**
-
-```bash
+# 3. Apply
 ./nix.sh macbook   # personal
-./nix.sh work      # work
-```
+./nix.sh work      # work                      # run as admin.daniel.a.sousa (owns Homebrew)
 
-Builds and applies via `darwin-rebuild switch`. Fish becomes the default shell; App Store apps and editor extensions install automatically.
-
-> On the work laptop, run `./nix.sh work` as `admin.daniel.a.sousa`, that user owns Homebrew. Home Manager still configures `daniel.a.sousa` independently.
-
-**4. Private git identity**
-
-Name and email are deliberately not in this repo:
-
-```bash
+# 4. Private git identity (deliberately not in the repo)
 mkdir -p ~/.config/git
 git config --file ~/.config/git/private user.name  "Your Name"
 git config --file ~/.config/git/private user.email "your@email.com"
 ```
 
-Details in [private-git-config.md](docs/private-git-config.md).
+Details: [private-git-config.md](docs/private-git-config.md) · recovery from
+nothing: [recovery.md](docs/recovery.md)
 
 ## Daily usage
 
 ```bash
-./nix.sh macbook               # rebuild and apply
-./nix.sh macbook --build-only  # build only, no sudo, catches errors
-./nix.sh macbook --force       # force rebuild
-nix fmt                        # format all Nix files
-nix flake check                # validate the flake
-./scripts/verify-plugins.sh    # check every Claude plugin resolves
-./scripts/deploy-doctor.sh macbook  # preview what the next deploy deletes
-./scripts/verify-opencode.sh   # check the opencode setup end to end
+./nix.sh macbook                    # rebuild and apply
+./nix.sh macbook --build-only       # build only, no sudo, catches errors
+./nix.sh macbook --force            # force rebuild
+nix fmt                             # format all Nix files (pre-commit enforces)
+nix flake check                     # validate the flake
 ```
 
-Run `nix fmt` before committing, a pre-commit hook enforces it.
+| Verification script | When |
+|---------------------|------|
+| `./scripts/verify-plugins.sh` | after touching Claude plugins / marketplaces (runs in CI) |
+| `./scripts/verify-opencode.sh` | after touching the opencode setup (or `/verify-setup` in-session) |
+| `./scripts/deploy-doctor.sh macbook` | before applying — previews what the next deploy deletes |
 
 ## Structure
+
+<details>
+<summary><b>Repository layout</b> (click to expand)</summary>
 
 ```
 .
@@ -164,7 +180,10 @@ Run `nix fmt` before committing, a pre-commit hook enforces it.
 └── docs/                       Guides and reference
 ```
 
-## Adding things
+</details>
+
+<details>
+<summary><b>Adding things</b> (click to expand)</summary>
 
 | What | Where |
 |------|-------|
@@ -179,26 +198,29 @@ Run `nix fmt` before committing, a pre-commit hook enforces it.
 | User program | `home/common/` |
 | Claude skill | `home/common/ai/skills/local/` + the `names` list |
 | Claude plugin | `home/common/ai/plugins.nix` or a role's `ai/default.nix` |
+| opencode agent / command | `home/roles/personal/opencode/{agents,commands}/` |
 
 Check a package exists in stable first: `nix search nixpkgs <name>`.
 
+</details>
+
 ## Docs
 
-| Guide | About |
-|-------|-------|
-| [architecture.md](docs/architecture.md) | Module composition and how a config is assembled |
-| [nix-conventions.md](docs/nix-conventions.md) | Conventions for working in this repo |
-| [ai-setup.md](docs/ai-setup.md) | Claude Code: instructions, skills, plugins, MCP |
-| [opencode-setup.md](docs/opencode-setup.md) | opencode: the second harness, personal machine only |
-| [dropped-skill-sources.md](docs/dropped-skill-sources.md) | Skill sources that can't ship as plugins |
-| [ai-lessons.md](docs/ai-lessons.md) | Gotchas hit once and worth not repeating |
-| [adding-host-or-user.md](docs/adding-host-or-user.md) | Adding a machine or a user |
-| [secrets.md](docs/secrets.md) | Where secrets live, never in this repo |
-| [private-git-config.md](docs/private-git-config.md) | Machine-local git identity |
-| [work-setup.md](docs/work-setup.md) | Work environment, Jira, corporate specifics |
-| [recovery.md](docs/recovery.md) | Rebuilding from nothing |
-| [fix-fish-killed.md](docs/fix-fish-killed.md) | Fish killed after an update |
-| [obs-screen-sharing.md](docs/obs-screen-sharing.md) | OBS screen-sharing permissions |
+| | Guide | About |
+|---|-------|-------|
+| 🏗️ | [architecture.md](docs/architecture.md) | Module composition and how a config is assembled |
+| 📐 | [nix-conventions.md](docs/nix-conventions.md) | Conventions for working in this repo |
+| 🤖 | [ai-setup.md](docs/ai-setup.md) | Claude Code: instructions, skills, plugins, MCP |
+| ⚡ | [opencode-setup.md](docs/opencode-setup.md) | opencode: the second harness, personal machine only |
+| 📦 | [dropped-skill-sources.md](docs/dropped-skill-sources.md) | Skill sources that can't ship as plugins |
+| 🎓 | [ai-lessons.md](docs/ai-lessons.md) | Gotchas hit once and worth not repeating |
+| ➕ | [adding-host-or-user.md](docs/adding-host-or-user.md) | Adding a machine or a user |
+| 🔐 | [secrets.md](docs/secrets.md) | Where secrets live, never in this repo |
+| 🔑 | [private-git-config.md](docs/private-git-config.md) | Machine-local git identity |
+| 💼 | [work-setup.md](docs/work-setup.md) | Work environment, Jira, corporate specifics |
+| 🚑 | [recovery.md](docs/recovery.md) | Rebuilding from nothing |
+| 🐟 | [fix-fish-killed.md](docs/fix-fish-killed.md) | Fish killed after an update |
+| 🎥 | [obs-screen-sharing.md](docs/obs-screen-sharing.md) | OBS screen-sharing permissions |
 
 ## Maintenance
 
@@ -210,8 +232,15 @@ brew doctor                         # if Homebrew misbehaves after a rebuild
 find ~ -name "*.backup" -mtime +7   # stale Home Manager backups
 ```
 
-CI validates the flake and builds both Darwin configurations on every push and pull request, plus daily. [Renovate](.github/renovate.json) auto-merges minor and patch updates for `nixpkgs`, `home-manager`, `nix-darwin` and `nix-homebrew`; majors need review.
+CI validates the flake and builds both Darwin configurations on every push and
+pull request, plus daily. [Renovate](.github/renovate.json) auto-merges minor
+and patch updates for `nixpkgs`, `home-manager`, `nix-darwin` and
+`nix-homebrew`; majors need review.
+
+<div align="center">
 
 ## License
 
 [MIT](LICENSE)
+
+</div>

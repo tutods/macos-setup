@@ -85,6 +85,31 @@ duplicate-skill warning. `scripts/verify-opencode.sh` counts those warnings
 only from the last deploy's timestamp onwards, so old-log noise does not mask
 the live state.
 
+## Agents and commands
+
+Same two-direction deploy contract as Claude's agents (a build-time assertion
+in `default.nix` fails `nix flake check` when a file and its name list drift
+apart), but opencode-native:
+
+| Agent | Model tier | Role |
+|-------|-----------|------|
+| `orchestrator` (default primary) | default | Plans, dispatches subagents, relays and verifies. File work is delegated, never inline |
+| `code-reviewer` | default | Reviews a diff, branch or PR in one isolated context |
+| `dev-lifecycle` | best | Full lifecycle in one context: recon, plan, implement, test, commit, push, draft PR. `steps = 150` for long runs |
+| `vault-lint` / `vault-search` | fast | Obsidian vault health check / content lookup, both read-only with `task`/`webfetch`/`websearch`/`skill` denied so they can never fan out |
+| `nix-architect` | best | Authority on this flake: package placement, module hierarchy, verification loop (`nix fmt` → `nix flake check` → `/deploy`) |
+| `council-*` seats + peer review | one model family each | Hidden subagents, only invoked by `/council` |
+
+Slash commands, deployed as managed files in `~/.config/opencode/commands/`:
+
+| Command | Runs |
+|---------|------|
+| `/council` | The five-advisor multi-model council on a question |
+| `/deploy` | `./nix.sh macbook` |
+| `/doctor` | `./scripts/deploy-doctor.sh macbook` — preview what the next deploy deletes |
+| `/nixcheck` | `nix fmt && nix flake check` |
+| `/verify-setup` | `./scripts/verify-opencode.sh` — the full verification suite below |
+
 ## Deliberately not ported
 
 `delegate-nudge` and `force-delegation` are Claude-only: per-turn counters over a hook stream opencode has no equivalent for. They used to reconstruct a boundary opencode enforced statically, the `orchestrator` agent's `edit: deny`. That permission is gone: every opencode agent, orchestrator included, now runs full-auto (see Permission defaults above), so there is no static enforcement left to reconstruct. The delegation boundary on opencode is convention now, stated in the generated `AGENTS.md` and nowhere else, not a permission the harness holds it to. The per-turn delegation reminder that used to live in `opencode-parity.js` stays gone, for the same reason it always did: no hook stream to count turns over.
