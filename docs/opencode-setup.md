@@ -77,7 +77,12 @@ exactly the repetition to avoid. Two mechanisms close that gap:
    session starts, the plugin reads `.claude/settings.json` and
    `.claude/settings.local.json` in the project and registers any `skills`
    entries into the session, so a project that declares skills for Claude gets
-   them in opencode without any extra config.
+   them in opencode without any extra config. **Status: unverified against
+   opencode's live plugin API** — the `session.start` hook name and the
+   `output.skills` mutation shape are plausible but not confirmed for 1.18.x.
+   It fails safe (logged warning at worst); confirm after the next deploy by
+   opening a project with a `.claude/settings.local.json` skills block and
+   checking whether the skill appears, then update this note.
 
 Known collision source: `skills.paths` also loads `~/.claude/skills`, so a name
 that exists both as a standalone skill there and inside a plugin yields a
