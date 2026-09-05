@@ -76,7 +76,7 @@
     # Classifier-guarded default: reads, in-project edits and read-only Bash run
     # without a prompt; network, destructive Bash and out-of-project writes still
     # ask. The deny list above stays absolute in every mode.
-    permissions.defaultMode = "full-auto";
+    permissions.defaultMode = "auto";
     # Declared entries persist across deploys; any click-granted allows not
     # declared here are cleared on every deploy.
     permissions.allow = [

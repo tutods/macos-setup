@@ -49,13 +49,7 @@ sanctioned. `permissions.allow` is declared so that declared entries persist; an
 a plugin through the Claude Code UI**; `enabledPlugins` is Nix-owned and the next
 deploy drops it.
 
-`permissions.defaultMode` is `full-auto`: reads, edits and bash run without a
-prompt, held back only by the deny list (secret paths stay absolute in every
-mode). This matches opencode's posture — both harnesses treat the machine as
-trusted, and the delegation boundary is convention enforced by hooks
-(`force-delegation`, `delegate-nudge`), not by permission prompts. The RTK
-rewrites of read-only commands stay declared in `permissions.allow` so the
-rewrite hook does not turn them into prompts.
+`permissions.defaultMode` is `auto`, the classifier-guarded mode: reads, in-project edits and read-only bash run without a prompt, while network access, destructive bash and out-of-project writes would otherwise ask. In practice they do not, because `permissions.allow` also declares `Bash(*)`, `Edit(*)`, `Write(*)` and `MultiEdit(*)`, so the mode is the floor and the deny list is the real boundary (secret paths stay absolute in every mode). Both harnesses treat the machine as trusted, and the delegation boundary is convention enforced by hooks (`force-delegation`, `delegate-nudge`), not by permission prompts. The RTK rewrites of read-only commands stay declared in `permissions.allow` so the rewrite hook does not turn them into prompts.
 
 `autoMemoryEnabled` is off, so the harness remembers nothing on its own. The
 Obsidian vault is the durable memory, written by the `obsidian-vault` skill and
