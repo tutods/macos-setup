@@ -214,6 +214,14 @@
   # AI token tools
   ccusage = "npx ccusage@latest";
 
+  # code-review-graph, per-repo and opt-in: the MCP server answers nothing in a
+  # repo with no graph. `build` only writes .code-review-graph/; the scattering
+  # command is `install`, which registers hooks and generated skills across
+  # every AI CLI it knows about, and is never run here.
+  crgb = "code-review-graph build";
+  crgu = "code-review-graph update";
+  crgs = "code-review-graph status";
+
   # Homebrew abbreviations
   bi = "brew install";
   bci = "brew install --cask";

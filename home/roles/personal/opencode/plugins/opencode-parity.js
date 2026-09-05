@@ -13,22 +13,31 @@
 // (the old crg-plugin.ts died there on an API skew: "app.on is not a function").
 
 export default async () => {
+  // chat.system.transform fires per LLM request, not once per session, and
+  // vault-context.sh walks the whole vault with find + rg. Memoised to the
+  // process so the walk costs one turn, not every turn.
+  let vaultIndex
+
+  const hookPath = (name) => `${process.env.HOME ?? ""}/.claude/hooks/${name}`
+
   return {
     "experimental.chat.system.transform": async (input, output) => {
       try {
         if (!output || !Array.isArray(output.system)) return
-        const { execFile } = await import("node:child_process")
-        const { promisify } = await import("node:util")
-        const run = promisify(execFile)
-        // The hook reads Claude's SessionStart JSON off stdin; execFile leaves
-        // that pipe open, so close it or its `cat` blocks until the timeout.
-        const proc = run("$HOME/.claude/hooks/vault-context.sh".replace("$HOME", process.env.HOME ?? ""), { timeout: 25000 })
-        proc.child.stdin?.end()
-        const index = await proc
-        if (index.stdout && index.stdout.trim()) {
-          output.system.push(index.stdout.trim())
+        if (vaultIndex === undefined) {
+          const { execFile } = await import("node:child_process")
+          const { promisify } = await import("node:util")
+          const run = promisify(execFile)
+          // The hook reads Claude's SessionStart JSON off stdin; execFile leaves
+          // that pipe open, so close it or its `cat` blocks until the timeout.
+          const proc = run(hookPath("vault-context.sh"), { timeout: 25000 })
+          proc.child.stdin?.end()
+          const index = await proc
+          vaultIndex = index.stdout?.trim() || ""
         }
+        if (vaultIndex) output.system.push(vaultIndex)
       } catch (e) {
+        vaultIndex = ""
         console.error("opencode-parity system.transform:", e?.message ?? e)
       }
     },
@@ -54,6 +63,15 @@ export default async () => {
       }
     },
     "session.start": async (input, output) => {
+      // Same script Claude runs on SessionStart: builds the code-review-graph
+      // for this repo when it has none, so its MCP tools stop answering "No
+      // graph found ... run build first". Backgrounds itself, so no await.
+      try {
+        const { execFile } = await import("node:child_process")
+        execFile(hookPath("crg-autobuild.sh"), { timeout: 10000 }, () => {})
+      } catch (e) {
+        console.error("opencode-parity crg-autobuild:", e?.message ?? e)
+      }
       try {
         const { readFile } = await import("node:fs/promises")
         const { join } = await import("node:path")

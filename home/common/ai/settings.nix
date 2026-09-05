@@ -94,10 +94,6 @@
       "Bash(rtk read:*)"
       "Bash(rtk deps:*)"
       "Bash(rtk gain:*)"
-      "Bash(*)"
-      "Edit(*)"
-      "Write(*)"
-      "MultiEdit(*)"
     ];
 
     # ./vault-context.sh owns the folder list. Titles only, never bodies.
@@ -109,6 +105,12 @@
             command = "\"$HOME/.claude/hooks/vault-context.sh\"";
             timeout = 30;
             statusMessage = "Injecting Obsidian vault context";
+          }
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/crg-autobuild.sh\"";
+            timeout = 10;
+            statusMessage = "Refreshing code-review-graph";
           }
         ];
       }
@@ -259,6 +261,10 @@ in {
   };
   home.file.".claude/hooks/rtk-rewrite.sh" = {
     source = ./rtk-rewrite.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/crg-autobuild.sh" = {
+    source = ./crg-autobuild.sh;
     force = true;
   };
 
