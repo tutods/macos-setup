@@ -58,6 +58,33 @@ Everything else in `~/.config/opencode/plugin{,s}/` is deleted on every deploy b
 
 The same activation step also deletes `~/.config/opencode/{package.json,package-lock.json,bun.lock,node_modules}` if they reappear. An old bun/npm bootstrap left them pinning a stale `@opencode-ai/plugin` against the running binary; nothing in this config imports from that tree (`opencode-parity.js` is import-free by design), so it is removed rather than left to drift.
 
+## The plugin-to-skill bridge
+
+Claude Code installs skills inside plugins (marketplace installs live under
+`~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/skills/<name>/`), and
+typing the same skill names twice — once for Claude, once for opencode — was
+exactly the repetition to avoid. Two mechanisms close that gap:
+
+1. **Global bridge** (`home.activation.opencodePlugins` in `default.nix`): every
+   deploy walks the plugin cache, finds each `skills/` directory, and symlinks
+   every skill dir into `~/.config/opencode/skills/` (`ln -sfn`, last plugin
+   wins when two plugins ship the same skill name — `frontend-design` exists in
+   three caches). opencode's default skills scan picks them up from there. A
+   plugin updated by Claude Code keeps the same symlink valid because the link
+   points at the versioned cache path; a re-install that bumps the version
+   refreshes the link on the next deploy.
+2. **Project-local discovery** (`opencode-parity.js`, `session.start`): when a
+   session starts, the plugin reads `.claude/settings.json` and
+   `.claude/settings.local.json` in the project and registers any `skills`
+   entries into the session, so a project that declares skills for Claude gets
+   them in opencode without any extra config.
+
+Known collision source: `skills.paths` also loads `~/.claude/skills`, so a name
+that exists both as a standalone skill there and inside a plugin yields a
+duplicate-skill warning. `scripts/verify-opencode.sh` counts those warnings
+only from the last deploy's timestamp onwards, so old-log noise does not mask
+the live state.
+
 ## Deliberately not ported
 
 `delegate-nudge` and `force-delegation` are Claude-only: per-turn counters over a hook stream opencode has no equivalent for. They used to reconstruct a boundary opencode enforced statically, the `orchestrator` agent's `edit: deny`. That permission is gone: every opencode agent, orchestrator included, now runs full-auto (see Permission defaults above), so there is no static enforcement left to reconstruct. The delegation boundary on opencode is convention now, stated in the generated `AGENTS.md` and nowhere else, not a permission the harness holds it to. The per-turn delegation reminder that used to live in `opencode-parity.js` stays gone, for the same reason it always did: no hook stream to count turns over.
@@ -82,6 +109,10 @@ At the time this mechanism was added, the tree already held 291 stale skill dire
 
 After `./nix.sh macbook`:
 
+0. `./scripts/verify-opencode.sh` (or `/verify-setup` inside opencode): one
+   command for the whole checklist below — binaries, MCP servers, provider
+   auth, managed files, plugin-bridge symlinks, and post-deploy log health.
+   Read-only; warnings don't fail, failures do.
 1. `opencode` starts with no plugin errors in `~/.local/share/opencode/log/opencode.log`
 2. On a fresh machine, run `opencode` and `/connect` the Ollama Cloud provider, or every model call fails; `./scripts/deploy-doctor.sh macbook` warns when the `ollama-cloud` entry is missing from `auth.json`
 3. Zero `duplicate skill name` warnings in the log (external scans off)
