@@ -53,5 +53,26 @@ export default async () => {
         console.error("opencode-parity tool.execute.before:", e?.message ?? e)
       }
     },
+    "session.start": async (input, output) => {
+      try {
+        const { readFile } = await import("node:fs/promises")
+        const { join } = await import("node:path")
+        const { cwd } = await import("node:process")
+        const paths = [join(cwd(), ".claude/settings.json"), join(cwd(), ".claude/settings.local.json")]
+        for (const path of paths) {
+          try {
+            const content = await readFile(path, "utf8")
+            const settings = JSON.parse(content)
+            if (settings?.skills) {
+              for (const [name, skillPath] of Object.entries(settings.skills)) {
+                if (output?.skills) output.skills[name] = skillPath
+              }
+            }
+          } catch {}
+        }
+      } catch (e) {
+        console.error("opencode-parity session.start:", e?.message ?? e)
+      }
+    },
   }
 }

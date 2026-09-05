@@ -90,6 +90,20 @@ in {
   # so it goes too rather than sit skewed against the running binary.
   home.activation.opencodePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
     ocDir="${config.home.homeDirectory}/.config/opencode"
+    # Bridge Claude Plugins to opencode Skills
+    claudePluginDir="${config.home.homeDirectory}/.claude/plugins"
+    if [ -d "$claudePluginDir" ]; then
+      $VERBOSE_ECHO "Bridging Claude plugins to opencode skills"
+      run find "$claudePluginDir" -type d -name "skills" -exec sh -c '
+        for skill in "$1"/*; do
+          if [ -d "$skill" ]; then
+            skillName=$(basename "$skill")
+            ln -sfn "$skill" "$2/skills/$skillName"
+          fi
+        done
+      ' _ {} "$ocDir" \;
+    fi
+
     for pluginDir in plugin plugins; do
       dir="$ocDir/$pluginDir"
       [ -d "$dir" ] || continue
