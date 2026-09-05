@@ -39,26 +39,9 @@ Both are `aarch64-darwin`. Adding a third is a directory copy and one line in
 
 ## How a machine is assembled
 
-```mermaid
-flowchart TD
-    F["flake.nix<br/><code>mkDarwin</code>"] --> C["modules/common.nix<br/>Nix settings, GC, timezone"]
-    F --> D["modules/darwin/<br/>macOS defaults, security, homebrew"]
-    F --> HM[home-manager]
-    F --> NHB[nix-homebrew]
-    F --> H["hosts/darwin/&lt;name&gt;/<br/>dock, casks, host packages"]
-
-    H --> MH["<code>mkHost</code><br/>username · hostname · brewUser"]
-    MH --> MU["<code>mkUser</code><br/>binds user to a role"]
-    MU --> HC["home/common/<br/>ai · cli · editors · shell · terminal"]
-    MU --> HR["home/roles/&lt;role&gt;/<br/>personal or work"]
-
-    HC --> OUT([darwin-rebuild switch])
-    HR --> OUT
-    C --> OUT
-    D --> OUT
-    HM --> OUT
-    NHB --> OUT
-```
+<p align="center">
+  <img src="docs/assets/assembly.svg" alt="How a machine is assembled: flake.nix composes system modules, host config and user roles into darwin-rebuild switch" width="780">
+</p>
 
 > **Innermost wins** — a host overrides a module, a role overrides common.
 
@@ -66,11 +49,11 @@ flowchart TD
 
 | | |
 |---|---|
-| 🖥️ **System** | macOS defaults, Touch ID for `sudo`, firewall, per-machine dock layout, weekly garbage collection |
-| 📦 **Packages** | nixpkgs for CLI/dev tools, Homebrew for GUI apps, `mas` for App Store — all declarative, no post-install scripts |
-| 🐚 **Shell** | Fish (abbreviations, aliases, functions in Nix) + oh-my-posh prompt, Ghostty terminal |
-| ✏️ **Editors** | VS Code and Zed with extensions; app-rewritten configs are seeded as copies so the app can still save |
-| 🤖 **AI** | The distinctive part — see below |
+| **System** | macOS defaults, Touch ID for `sudo`, firewall, per-machine dock layout, weekly garbage collection |
+| **Packages** | nixpkgs for CLI/dev tools, Homebrew for GUI apps, `mas` for App Store — all declarative, no post-install scripts |
+| **Shell** | Fish (abbreviations, aliases, functions in Nix) + oh-my-posh prompt, Ghostty terminal |
+| **Editors** | VS Code and Zed with extensions; app-rewritten configs are seeded as copies so the app can still save |
+| **AI** | The distinctive part — see below |
 
 ## AI setup at a glance
 

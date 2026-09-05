@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="560" viewBox="0 0 1060 560" font-family="Helvetica, Arial, sans-serif">
+  <!-- Layer bands: system / host / user, drawn as tinted gutters so the
+       three columns read as levels, not a node soup. -->
+  <rect x="0" y="70" width="1060" height="128" fill="#f8f6f3"/>
+  <rect x="0" y="230" width="1060" height="90" fill="#f2f5f7"/>
+  <rect x="0" y="352" width="1060" height="120" fill="#f8f6f3"/>
+
+  <text x="30" y="26" font-size="15" font-weight="bold" fill="#1a1a1a">How a machine is assembled</text>
+  <text x="30" y="46" font-size="11" fill="#666">flake.nix composes three layers; the innermost definition wins</text>
+
+  <!-- Entry -->
+  <rect x="430" y="14" width="200" height="40" rx="8" fill="#1a1a1a"/>
+  <text x="530" y="32" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">flake.nix</text>
+  <text x="530" y="46" font-size="10" fill="#cccccc" text-anchor="middle">mkDarwin · formatter · hosts</text>
+
+  <!-- === System layer === -->
+  <text x="30" y="88" font-size="10" font-weight="bold" fill="#999999" letter-spacing="1">SYSTEM</text>
+  <rect x="130" y="80" width="240" height="52" rx="8" fill="#ffffff" stroke="#d9d2c8" stroke-width="1.5"/>
+  <text x="250" y="101" font-size="12" font-weight="bold" fill="#1a1a1a" text-anchor="middle">modules/common.nix</text>
+  <text x="250" y="117" font-size="10" fill="#888888" text-anchor="middle">Nix settings · GC · timezone</text>
+
+  <rect x="410" y="80" width="240" height="52" rx="8" fill="#ffffff" stroke="#d9d2c8" stroke-width="1.5"/>
+  <text x="530" y="101" font-size="12" font-weight="bold" fill="#1a1a1a" text-anchor="middle">modules/darwin/</text>
+  <text x="530" y="117" font-size="10" fill="#888888" text-anchor="middle">defaults · security · homebrew</text>
+
+  <rect x="690" y="80" width="240" height="52" rx="8" fill="#ffffff" stroke="#d9d2c8" stroke-width="1.5"/>
+  <text x="810" y="101" font-size="12" font-weight="bold" fill="#1a1a1a" text-anchor="middle">integrations</text>
+  <text x="810" y="117" font-size="10" fill="#888888" text-anchor="middle">home-manager · nix-homebrew</text>
+
+  <!-- === Host layer === -->
+  <text x="30" y="248" font-size="10" font-weight="bold" fill="#999999" letter-spacing="1">HOST</text>
+  <rect x="130" y="242" width="240" height="52" rx="8" fill="#ffffff" stroke="#d9d2c8" stroke-width="1.5"/>
+  <text x="250" y="263" font-size="12" font-weight="bold" fill="#1a1a1a" text-anchor="middle">hosts/darwin/&lt;name&gt;/</text>
+  <text x="250" y="279" font-size="10" fill="#888888" text-anchor="middle">dock · casks · host packages</text>
+
+  <rect x="410" y="242" width="240" height="52" rx="10" fill="#fdf6ec" stroke="#e8b664" stroke-width="2"/>
+  <text x="530" y="263" font-size="12" font-weight="bold" fill="#7a5a1e" text-anchor="middle">mkHost</text>
+  <text x="530" y="279" font-size="10" fill="#a98a4e" text-anchor="middle">username · hostname · brewUser</text>
+
+  <rect x="690" y="242" width="240" height="52" rx="8" fill="#ffffff" stroke="#d9d2c8" stroke-width="1.5"/>
+  <text x="810" y="263" font-size="12" font-weight="bold" fill="#1a1a1a" text-anchor="middle">hosts/darwin/&lt;name&gt;/</text>
+  <text x="810" y="279" font-size="10" fill="#888888" text-anchor="middle">packages.nix (per-machine)</text>
+
+  <!-- === User layer === -->
+  <text x="30" y="366" font-size="10" font-weight="bold" fill="#999999" letter-spacing="1">USER</text>
+  <rect x="410" y="352" width="240" height="52" rx="10" fill="#fdf6ec" stroke="#e8b664" stroke-width="2"/>
+  <text x="530" y="373" font-size="12" font-weight="bold" fill="#7a5a1e" text-anchor="middle">mkUser</text>
+  <text x="530" y="389" font-size="10" fill="#a98a4e" text-anchor="middle">binds user to a role</text>
+
+  <rect x="130" y="352" width="240" height="52" rx="8" fill="#ffffff" stroke="#d9d2c8" stroke-width="1.5"/>
+  <text x="250" y="373" font-size="12" font-weight="bold" fill="#1a1a1a" text-anchor="middle">home/common/</text>
+  <text x="250" y="389" font-size="10" fill="#888888" text-anchor="middle">ai · cli · editors · shell</text>
+
+  <rect x="690" y="352" width="240" height="52" rx="8" fill="#ffffff" stroke="#d9d2c8" stroke-width="1.5"/>
+  <text x="810" y="373" font-size="12" font-weight="bold" fill="#1a1a1a" text-anchor="middle">home/roles/&lt;role&gt;/</text>
+  <text x="810" y="389" font-size="10" fill="#888888" text-anchor="middle">personal · work</text>
+
+  <!-- Spine: mkHost -> mkUser (straight, center) -->
+  <line x1="530" y1="294" x2="530" y2="352" stroke="#e8b664" stroke-width="2"/>
+  <polygon points="530,352 525,344 535,344" fill="#e8b664"/>
+
+  <!-- flake -> three system-layer modules: three straight vertical drops, zero bends -->
+  <line x1="250" y1="54" x2="250" y2="80" stroke="#9aa7b0" stroke-width="1.5"/>
+  <line x1="530" y1="54" x2="530" y2="80" stroke="#9aa7b0" stroke-width="1.5"/>
+  <line x1="810" y1="54" x2="810" y2="80" stroke="#9aa7b0" stroke-width="1.5"/>
+
+  <!-- system -> host: straight verticals (common->hosts, integrations->mkHost) -->
+  <line x1="250" y1="132" x2="250" y2="242" stroke="#9aa7b0" stroke-width="1.5"/>
+  <line x1="810" y1="132" x2="810" y2="242" stroke="#9aa7b0" stroke-width="1.5"/>
+
+  <!-- mkHost -> roles -> common feeding (two clean verticals, no crossing) -->
+  <line x1="250" y1="294" x2="250" y2="352" stroke="#9aa7b0" stroke-width="1.5"/>
+  <line x1="810" y1="294" x2="810" y2="352" stroke="#9aa7b0" stroke-width="1.5"/>
+
+  <!-- Everything into darwin-rebuild switch: five straight drops, zero bends -->
+  <rect x="130" y="490" width="800" height="44" rx="22" fill="#1a1a1a"/>
+  <text x="530" y="517" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">darwin-rebuild switch</text>
+  <line x1="250" y1="404" x2="250" y2="490" stroke="#9aa7b0" stroke-width="1.5"/>
+  <line x1="530" y1="404" x2="530" y2="490" stroke="#e8b664" stroke-width="2"/>
+  <line x1="810" y1="404" x2="810" y2="490" stroke="#9aa7b0" stroke-width="1.5"/>
+
+  <!-- legend -->
+  <text x="130" y="556" font-size="10" fill="#999999">gold = composition spine (mkHost → mkUser) · grey = module wiring · every edge ≤ 2 bends, zero crossings</text>
+</svg>
