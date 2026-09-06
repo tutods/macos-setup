@@ -1,3 +1,3 @@
 {
-  imports = [./ai ./opencode];
+  imports = [./ai ./opencode ./packages.nix];
 }

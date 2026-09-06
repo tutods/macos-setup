@@ -41,7 +41,7 @@ final_space = true
     type = 'git'
     style = 'plain'
     foreground = 'p:lavender'
-    template= "<#ffffff>on</> {{ .HEAD }} {{ if .Working.Changed }}{{ .Working.String }} {{ end }}{{ if gt .Behind 0 }}{{end}}{{ if gt .Behind 0 }}\u2193{{end}}{{ if gt .Ahead 0 }}\u2191{{end}} "
+    template= "<#ffffff>on</> {{ .HEAD }} {{ if .Working.Changed }}{{ .Working.String }} {{ end }}{{ if gt .Behind 0 }}\u2193{{end}}{{ if gt .Ahead 0 }}\u2191{{end}} "
 
     [blocks.segments.properties]
       branch_icon = "\ue725 "

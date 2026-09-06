@@ -104,13 +104,10 @@
     "show_other_hints": true
   },
 
-  // ─── Edit Predictions (Copilot) ──────────────────────────────────────────
+  // ─── Edit Predictions (Zed native / Zeta) ────────────────────────────────
   "edit_predictions": {
-    "provider": "copilot",
-    "allow_data_collection": "no",
-    "copilot": {
-      "enable_next_edit_suggestions": true
-    }
+    "provider": "zed",
+    "allow_data_collection": "no"
   },
 
   // ─── Git ─────────────────────────────────────────────────────────────────

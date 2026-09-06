@@ -1,15 +1,29 @@
 {
+  config,
+  lib,
   pkgs,
   pkgsUnstable,
   ...
 }: {
+  # Seed-once: VS Code writes both files itself ("Add to dictionary", the theme
+  # picker, the Keyboard Shortcuts UI), and a read-only store symlink breaks
+  # those saves (see CLAUDE.md), so never overwrite an existing copy.
+  home.activation.vscodeSeedConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    VSCODE_USER_DIR="${config.home.homeDirectory}/Library/Application Support/Code/User"
+    if [ ! -f "$VSCODE_USER_DIR/settings.json" ]; then
+      run mkdir -p "$VSCODE_USER_DIR"
+      run install -m 0644 ${./settings.json} "$VSCODE_USER_DIR/settings.json"
+    fi
+    if [ ! -f "$VSCODE_USER_DIR/keybindings.json" ]; then
+      run mkdir -p "$VSCODE_USER_DIR"
+      run install -m 0644 ${./keybindings.json} "$VSCODE_USER_DIR/keybindings.json"
+    fi
+  '';
+
   programs.vscode = {
     enable = true;
 
     profiles.default = {
-      userSettings = pkgs.lib.importJSON ./settings.json;
-      keybindings = pkgs.lib.importJSON ./keybindings.json;
-
       # Fully declarative extension management:
       # - stable nixpkgs extensions
       # - extra extensions available only in nixpkgs-unstable

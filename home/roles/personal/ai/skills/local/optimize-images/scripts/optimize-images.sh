@@ -16,6 +16,12 @@ set -euo pipefail
 MAX_DIM="${MAX_DIM:-1500}"
 QUALITY="${QUALITY:-82}"
 
+# Single reusable temp file (renamed to .png so magick infers the format);
+# cleaned up even if a conversion step fails mid-loop.
+tmp=""
+cleanup() { [[ -n "$tmp" ]] && rm -f "$tmp"; }
+trap cleanup EXIT
+
 if [[ $# -eq 0 ]]; then
   echo "Usage: $(basename "$0") <image|dir> [image|dir ...]" >&2
   exit 1
@@ -61,7 +67,9 @@ for src in "${files[@]}"; do
   fi
 
   dest="${src%.*}.webp"
-  tmp="$(mktemp -t optimize-images).png"
+  tmp="$(mktemp -t optimize-images)"
+  mv "$tmp" "$tmp.png"
+  tmp="$tmp.png"
 
   magick "$src" -resize "${MAX_DIM}x${MAX_DIM}>" -strip "$tmp"
   cwebp -q "$QUALITY" -m 6 -metadata none "$tmp" -o "$dest" >/dev/null 2>&1

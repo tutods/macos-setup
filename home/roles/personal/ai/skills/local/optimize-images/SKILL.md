@@ -19,15 +19,15 @@ Both tools are already installed via nix (`imagemagick`, `libwebp`).
 The script is `scripts/optimize-images.sh` inside this skill's directory, `~/.claude/skills/optimize-images/scripts/optimize-images.sh` once deployed. It handles one file, a list, a glob, or a directory:
 
 ```bash
-sh ~/.claude/skills/optimize-images/scripts/optimize-images.sh photo.jpg
-sh ~/.claude/skills/optimize-images/scripts/optimize-images.sh img1.png img2.jpg
-sh ~/.claude/skills/optimize-images/scripts/optimize-images.sh ./raw-assets/
+bash ~/.claude/skills/optimize-images/scripts/optimize-images.sh photo.jpg
+bash ~/.claude/skills/optimize-images/scripts/optimize-images.sh img1.png img2.jpg
+bash ~/.claude/skills/optimize-images/scripts/optimize-images.sh ./raw-assets/
 ```
 
 A directory argument picks up jpg/jpeg/png/tif/tiff/bmp inside it. Two env-var overrides: `MAX_DIM` (longest-side cap in px, default `1500`) and `QUALITY` (cwebp quality 0–100, default `82`).
 
 ```bash
-MAX_DIM=2000 QUALITY=90 sh .../optimize-images.sh hero.png
+MAX_DIM=2000 QUALITY=90 bash .../optimize-images.sh hero.png
 ```
 
 ## Notes / limits

@@ -6,6 +6,9 @@
 {
   programs.delta = {
     enable = true;
+    # The standalone delta module defaults this to false; without it git gets
+    # no core.pager / interactive.diffFilter / [delta] section at all.
+    enableGitIntegration = true;
     options = {
       navigate = true;
       side-by-side = true;

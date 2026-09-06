@@ -1,8 +1,13 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
+  # settings.json configures alejandra as Zed's external Nix formatter with
+  # format_on_save, so the binary must exist on PATH for every user.
+  home.packages = [pkgs.alejandra];
+
   # Extensions (install manually via Cmd+Shift+X, Nix cannot manage Zed extensions yet):
   #
   # Languages & Syntax
@@ -34,14 +39,17 @@
   #   catppuccin-icons   https://zed.dev/extensions/catppuccin-icons
   #   charmed-icons      https://zed.dev/extensions/charmed-icons
 
-  xdg.configFile."zed/keymap.json".source = ./keymap.json;
-
-  # Seed-once: Zed writes its own changes back to this file (see CLAUDE.md),
+  # Seed-once: Zed writes its own changes back to these files (see CLAUDE.md),
+  # settings.json via the settings UI and keymap.json via the keymap editor,
   # so never overwrite an existing copy.
   home.activation.zedSeedSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     if [ ! -f "${config.xdg.configHome}/zed/settings.json" ]; then
       run mkdir -p "${config.xdg.configHome}/zed"
       run install -m 0644 ${./settings.json} "${config.xdg.configHome}/zed/settings.json"
+    fi
+    if [ ! -f "${config.xdg.configHome}/zed/keymap.json" ]; then
+      run mkdir -p "${config.xdg.configHome}/zed"
+      run install -m 0644 ${./keymap.json} "${config.xdg.configHome}/zed/keymap.json"
     fi
   '';
 }

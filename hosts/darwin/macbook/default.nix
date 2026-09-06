@@ -10,7 +10,6 @@ in {
     ./dock.nix
     ./homebrew
     ./networking.nix
-    ./packages.nix
     (mkHost {
       username = "tutods";
       hostname = "tutods-macbook";
