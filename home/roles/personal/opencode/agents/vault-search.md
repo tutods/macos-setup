@@ -2,10 +2,9 @@
 description: >
   Read-only search over the Obsidian vault at $HOME/Obsidian, finds notes by
   keyword or filename, resolves backlinks, and returns matched paths with the
-  relevant excerpt. Never writes. Use for vault lookups the vault index
-  doesn't already cover: Prompts/ searches (absent from the session index
-  entirely), a folder outside the index's fixed list, backlink lookups, or a
-  targeted "look something up in Obsidian" request mid-session.
+  relevant excerpt. Never writes. Use for any vault lookup: finding what
+  exists on a topic, Prompts/ searches, backlink lookups, or a targeted
+  "look something up in Obsidian" request mid-session.
   Not for logging lessons/decisions or creating/updating notes, those need
   conversation context and stay in the main session.
 mode: subagent

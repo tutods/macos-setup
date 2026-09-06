@@ -2,7 +2,7 @@
 description: >
   Read-only health check over the Obsidian vault at $HOME/Obsidian, reports
   dead wikilinks, orphan notes, missing/empty frontmatter, empty notes,
-  filename drift, and type folders the vault index does not list.
+  filename drift, and type folders missing from the declared vault scope.
   Never writes: returns a findings report the main session acts on. Use when
   asked to check/lint/audit vault health, or after a batch of renames or
   note moves. Not for fixing what it finds (that's the main session) and not
@@ -13,13 +13,17 @@ temperature: 0
 permission:
   edit: deny
   bash:
+    # Frontmatter permission maps resolve with findLast over YAML insertion
+    # order, so "*" must stay the FIRST key: listed last it matches every
+    # command, denies the allows above it, and a last-match "*"+deny makes
+    # opencode remove the bash tool from the agent entirely.
+    "*": deny
     "rg *": allow
     "find *": allow
     "wc *": allow
     "sort *": allow
     "comm *": allow
     "cat *": allow
-    "*": deny
   task: deny
   webfetch: deny
   websearch: deny
@@ -37,8 +41,7 @@ The `obsidian-vault` skill has this vault's folder layout and frontmatter contra
 3. **Frontmatter gaps**: notes with no leading `---` block, or with a required field (per the skill's contract) missing or present-but-empty. Flag these first: an empty value makes a note invisible in `Vault.base` views filtered or grouped on that field.
 4. **Empty/stub notes**: zero-byte files, or files that are frontmatter with no body content.
 5. **Filename drift**: filenames not in Title Case, or with an unexpected extension inside a type folder.
-6. **Index coverage**: read `~/.claude/hooks/vault-context.sh` for the folder list it walks. Flag any top-level type folder in the vault that is missing from that list, because its notes never appear in the session index, except `Prompts/`, which is an intentional exclusion (it gets a pointer line, not a title listing), not a drift finding.
-7. **Index budget**: from the same read of `vault-context.sh`, compute the index size and compare it against the `CLAUDE_VAULT_BUDGET` budget. List which folders would be dropped at the current budget (truncation is folder-aware, it never cuts mid-folder). Warn when the index is within 20% of the cap or over it.
+6. **Scope coverage**: the machine's declared vault scope is the `CLAUDE_VAULT_FOLDERS` env value in `~/.claude/settings.json`, read it with `rg '"CLAUDE_VAULT_FOLDERS"' ~/.claude/settings.json`. Flag any top-level type folder in the vault that is missing from that list, because it sits outside the declared scope, except `Prompts/`, which is an intentional exclusion (a static reference library), not a drift finding. The fix lands in the dotfiles repo's `home.ai.vaultFolders` option (declared in `home/common/ai/options.nix`, set per role), not in the deployed files.
 
 ## Report format
 

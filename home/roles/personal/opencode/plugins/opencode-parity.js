@@ -4,47 +4,61 @@
 // Plugin shape is duck-typed and the hook is optional, so a future API change
 // degrades to a logged warning instead of a broken startup.
 //
-//  - experimental.chat.system.transform      ~ Claude SessionStart:
-//    appends the Obsidian vault title index to the system prompt.
 //  - tool.execute.before                     ~ Claude PreToolUse:
-//    rewrites bash commands through rtk when the binary is present.
+//    runs bash commands through the same block-ai-attribution.sh Claude uses
+//    (deny → throw, so opencode blocks the call; every failure path allows),
+//    then rewrites them through rtk when the binary is present.
+//  - event (filtered on session.created)     ~ Claude SessionStart:
+//    backgrounds crg-autobuild.sh. There is no "session.start" hook in the
+//    plugin API (an earlier version registered one; it never fired).
+//  - config                                  ~ project-local skill bridge:
+//    registers .claude/settings.json skills entries into skills.paths.
 //
 // If this plugin fails to load, check ~/.local/share/opencode/log/opencode.log
 // (the old crg-plugin.ts died there on an API skew: "app.on is not a function").
 
 export default async () => {
-  // chat.system.transform fires per LLM request, not once per session, and
-  // vault-context.sh walks the whole vault with find + rg. Memoised to the
-  // process so the walk costs one turn, not every turn.
-  let vaultIndex
-
   const hookPath = (name) => `${process.env.HOME ?? ""}/.claude/hooks/${name}`
 
   return {
-    "experimental.chat.system.transform": async (input, output) => {
-      try {
-        if (!output || !Array.isArray(output.system)) return
-        if (vaultIndex === undefined) {
+    "tool.execute.before": async (input, output) => {
+      if (input?.tool !== "bash") return
+      if (!output || typeof output.args?.command !== "string") return
+
+      // ~ Claude PreToolUse block-ai-attribution.sh: the SAME deployed script
+      // (home/common/ai/settings.nix's home.file entry), fed the same
+      // PreToolUse JSON on stdin. The script owns every regex — which
+      // commands are candidates (git commit / gh pr / gh api) and what counts
+      // as attribution — nothing is duplicated here; the crude git/gh
+      // substring test only skips the spawn for commands the script would
+      // ignore anyway. Deny contract: on a hit the script prints
+      // {"hookSpecificOutput":{"permissionDecision":"deny",
+      // "permissionDecisionReason":...}} and exits 0; empty stdout is allow.
+      // Fail open: script missing/unreadable/error/bad JSON → allow.
+      let denyReason
+      if (/\b(git|gh)\b/.test(output.args.command)) {
+        try {
           const { execFile } = await import("node:child_process")
           const { promisify } = await import("node:util")
           const run = promisify(execFile)
-          // The hook reads Claude's SessionStart JSON off stdin; execFile leaves
-          // that pipe open, so close it or its `cat` blocks until the timeout.
-          const proc = run(hookPath("vault-context.sh"), { timeout: 25000 })
-          proc.child.stdin?.end()
-          const index = await proc
-          vaultIndex = index.stdout?.trim() || ""
+          const proc = run(hookPath("block-ai-attribution.sh"), { timeout: 10000 })
+          proc.child.stdin?.end(JSON.stringify({ tool_name: "Bash", tool_input: { command: output.args.command } }))
+          const result = await proc
+          if (result.stdout && result.stdout.trim()) {
+            const decision = JSON.parse(result.stdout).hookSpecificOutput
+            if (decision?.permissionDecision === "deny") {
+              denyReason = decision.permissionDecisionReason || "Blocked by block-ai-attribution.sh"
+            }
+          }
+        } catch (e) {
+          console.error("opencode-parity attribution guard:", e?.message ?? e)
         }
-        if (vaultIndex) output.system.push(vaultIndex)
-      } catch (e) {
-        vaultIndex = ""
-        console.error("opencode-parity system.transform:", e?.message ?? e)
       }
-    },
-    "tool.execute.before": async (input, output) => {
+      // Thrown outside the try/catch above: the catch is the fail-open path
+      // for script failures and must never swallow the deny itself.
+      if (denyReason) throw new Error(denyReason)
+
       try {
-        if (input?.tool !== "bash") return
-        if (!output || typeof output.args?.command !== "string") return
         const { execFile } = await import("node:child_process")
         const { promisify } = await import("node:util")
         const run = promisify(execFile)
@@ -62,34 +76,50 @@ export default async () => {
         console.error("opencode-parity tool.execute.before:", e?.message ?? e)
       }
     },
-    "session.start": async (input, output) => {
+    // ~ Claude SessionStart. There is no "session.start" plugin hook (an
+    // earlier version registered one and both payloads were silently dead);
+    // the real API is the generic `event` hook, filtered on session.created.
+    event: async ({ event }) => {
+      if (event?.type !== "session.created") return
       // Same script Claude runs on SessionStart: builds the code-review-graph
       // for this repo when it has none, so its MCP tools stop answering "No
-      // graph found ... run build first". Backgrounds itself, so no await.
+      // graph found ... run build first". Backgrounds itself (and takes its
+      // own lock, so concurrent sessions and sub-sessions are safe), no await.
       try {
         const { execFile } = await import("node:child_process")
         execFile(hookPath("crg-autobuild.sh"), { timeout: 10000 }, () => {})
       } catch (e) {
         console.error("opencode-parity crg-autobuild:", e?.message ?? e)
       }
+    },
+    // Project-local skill bridge, ~ Claude reading a project's settings. The
+    // `event` hook gets no mutable output, so this rides the `config` hook,
+    // which receives the loaded Config to mutate in place: each skills entry
+    // from the project's .claude/settings.json[.local] is appended to
+    // skills.paths. Entries point at a single skill dir (SKILL.md at its
+    // root); the skills.paths scan glob is "**/SKILL.md", which matches at
+    // depth zero, so a direct skill-dir path registers that one skill.
+    config: async (config) => {
       try {
+        if (!config || typeof config !== "object") return
         const { readFile } = await import("node:fs/promises")
         const { join } = await import("node:path")
         const { cwd } = await import("node:process")
-        const paths = [join(cwd(), ".claude/settings.json"), join(cwd(), ".claude/settings.local.json")]
-        for (const path of paths) {
+        const files = [join(cwd(), ".claude/settings.json"), join(cwd(), ".claude/settings.local.json")]
+        for (const file of files) {
           try {
-            const content = await readFile(path, "utf8")
-            const settings = JSON.parse(content)
-            if (settings?.skills) {
-              for (const [name, skillPath] of Object.entries(settings.skills)) {
-                if (output?.skills) output.skills[name] = skillPath
-              }
+            const settings = JSON.parse(await readFile(file, "utf8"))
+            if (!settings?.skills || typeof settings.skills !== "object") continue
+            config.skills ??= {}
+            config.skills.paths ??= []
+            for (const skillPath of Object.values(settings.skills)) {
+              if (typeof skillPath !== "string") continue
+              if (!config.skills.paths.includes(skillPath)) config.skills.paths.push(skillPath)
             }
           } catch {}
         }
       } catch (e) {
-        console.error("opencode-parity session.start:", e?.message ?? e)
+        console.error("opencode-parity config skills bridge:", e?.message ?? e)
       }
     },
   }

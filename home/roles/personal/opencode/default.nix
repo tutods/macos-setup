@@ -16,6 +16,17 @@
   # must be in this list. nix flake check fails the build otherwise.
   agentNames = ["orchestrator" "code-reviewer" "dev-lifecycle" "vault-lint" "vault-search" "nix-architect"];
 
+  # The plugin files this module deploys, plus the tolerated out-of-band
+  # exceptions (docs/opencode-setup.md). Both the home.file entries and the
+  # destructive prune in home.activation.opencodePlugins are DERIVED from
+  # these lists, so a plugin added to the deploy can never be deleted by the
+  # prune out of sync.
+  managedPlugins = ["opencode-parity.js"];
+  toleratedPlugins = ["supacode-presence.js"];
+  keptPluginFindArgs =
+    lib.concatMapStringsSep " " (n: "! -name ${lib.escapeShellArg n}")
+    (managedPlugins ++ toleratedPlugins);
+
   agentAssertions =
     (map (name: {
         assertion = builtins.pathExists (./agents + "/${name}.md");
@@ -50,7 +61,7 @@
     + "\n\n"
     + readFile ../ai/instructions.md;
 in {
-  imports = [./config.nix ./skills.nix];
+  imports = [./config.nix ./skills.nix ./maintenance.nix];
 
   home.ai.opencodeSkillsPrune = true;
 
@@ -75,48 +86,76 @@ in {
       ".config/opencode/commands/doctor.md".source = ./commands/doctor.md;
       ".config/opencode/commands/nixcheck.md".source = ./commands/nixcheck.md;
       ".config/opencode/commands/verify-setup.md".source = ./commands/verify-setup.md;
-      # Plain JS, no imports needed at build time. Read-only input, symlink safe.
-      ".config/opencode/plugins/opencode-parity.js".source = ./plugins/opencode-parity.js;
-    };
+    }
+    # Plain JS, no imports needed at build time. Read-only inputs, symlinks
+    # safe. Deployed from managedPlugins so the activation prune below keeps
+    # exactly this set (plus toleratedPlugins) by construction.
+    // builtins.foldl' (acc: name:
+      acc
+      // {
+        ".config/opencode/plugins/${name}".source = ./plugins + "/${name}";
+      })
+    {}
+    managedPlugins;
 
   # opencode auto-loads both plugin dirs wholesale, dotfiles and symlinks
   # included, so one stray entry (crg-plugin.ts, re-added by a Supacode tool,
   # broken against the 1.18.21 plugin API) breaks every startup. home.file only
-  # manages what it writes, so nothing else prunes them. supacode-presence.js is
-  # the tolerated out-of-band exception listed in docs/opencode-setup.md.
+  # manages what it writes, so nothing else prunes them. The keep-list is
+  # derived from managedPlugins ++ toleratedPlugins at the top of this file,
+  # the same lists the home.file deploy uses, so the two can't drift.
   # -mindepth 1 catches dotfiles, rm -rf handles directories and dead symlinks.
-  # The npm cruft (package.json pinning a stale @opencode-ai/plugin, its
-  # lockfiles, node_modules) is left by an old bun/npm bootstrap; nothing in
-  # this config imports from it (opencode-parity.js is import-free by design),
-  # so it goes too rather than sit skewed against the running binary.
+  # package.json/node_modules in $ocDir are deliberately NOT pruned: current
+  # opencode background-installs @opencode-ai/plugin into the config dir on
+  # every startup and re-creates them, so deleting them is a fight the deploy
+  # loses (and briefly breaks any plugin that does import from it).
   home.activation.opencodePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
     ocDir="${config.home.homeDirectory}/.config/opencode"
-    # Bridge Claude Plugins to opencode Skills
+    # Bridge Claude plugin skills to opencode skills. Scoped to the plugin
+    # CACHE (installed plugins) only: ~/.claude/plugins also holds full
+    # marketplace repo clones under marketplaces/<name>/, whose skills belong
+    # to plugins never installed.
     claudePluginDir="${config.home.homeDirectory}/.claude/plugins"
-    if [ -d "$claudePluginDir" ]; then
+    claudePluginCache="$claudePluginDir/cache"
+    run mkdir -p "$ocDir/skills"
+    if [ -d "$claudePluginCache" ]; then
       $VERBOSE_ECHO "Bridging Claude plugins to opencode skills"
-      run find "$claudePluginDir" -type d -name "skills" -exec sh -c '
+      run find "$claudePluginCache" -type d -name "skills" -exec sh -c '
         for skill in "$1"/*; do
           if [ -d "$skill" ]; then
             skillName=$(basename "$skill")
-            ln -sfn "$skill" "$2/skills/$skillName"
+            dest="$2/skills/$skillName"
+            # A real (non-symlink) dir there is tool-installed, not ours:
+            # BSD ln -sfn onto a real dir drops a junk nested symlink
+            # INSIDE it instead of replacing it, so leave it alone.
+            if [ -d "$dest" ] && [ ! -L "$dest" ]; then
+              continue
+            fi
+            ln -sfn "$skill" "$dest"
           fi
         done
       ' _ {} "$ocDir" \;
     fi
+    # Prune stale bridge links: a symlink into ~/.claude/plugins whose target
+    # is gone means the plugin was uninstalled or its cached version moved.
+    for link in "$ocDir/skills"/*; do
+      [ -L "$link" ] || continue
+      case "$(readlink "$link")" in
+        "$claudePluginDir"/*)
+          [ -e "$link" ] || run rm -f "$link"
+          ;;
+      esac
+    done
 
     for pluginDir in plugin plugins; do
       dir="$ocDir/$pluginDir"
       [ -d "$dir" ] || continue
       $VERBOSE_ECHO "Pruning unmanaged opencode plugins in $dir"
+      # Keep-list derived from managedPlugins ++ toleratedPlugins above; add
+      # plugins there, never inline here.
       run find "$dir" -mindepth 1 -maxdepth 1 \
-        ! -name opencode-parity.js ! -name supacode-presence.js \
+        ${keptPluginFindArgs} \
         -exec rm -rf {} +
-    done
-    for cruft in package.json package-lock.json bun.lock node_modules; do
-      [ -e "$ocDir/$cruft" ] || continue
-      $VERBOSE_ECHO "Pruning opencode npm cruft: $cruft"
-      run rm -rf "$ocDir/$cruft"
     done
   '';
 
@@ -126,4 +165,9 @@ in {
   # exceptions in docs/opencode-setup.md). Without this, every session logs
   # hundreds of duplicate-skill warnings from the old npx tree.
   home.sessionVariables.OPENCODE_DISABLE_EXTERNAL_SKILLS = "1";
+
+  # The env var is the only thing that sets the log level: the logLevel key
+  # in opencode.json is schema-valid but never read (only OPENCODE_LOG_LEVEL
+  # or --log-level work).
+  home.sessionVariables.OPENCODE_LOG_LEVEL = "WARN";
 }

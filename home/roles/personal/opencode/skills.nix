@@ -10,7 +10,12 @@
 }: let
   inherit (config.home.ai) opencodeSkillsSources;
 
-  manifestHash = builtins.hashString "sha256" (lib.concatStringsSep "\n" opencodeSkillsSources);
+  # Pinned so a `skills` CLI release can't change install behaviour mid-deploy.
+  # Latest confirmed via `npm view skills version` (2026-09-06); bump
+  # deliberately. Part of the manifest hash, so bumping it re-runs the install.
+  skillsToolVersion = "1.5.23";
+
+  manifestHash = builtins.hashString "sha256" (lib.concatStringsSep "\n" (opencodeSkillsSources ++ [skillsToolVersion]));
   sourcesJson = pkgs.writeText "opencode-skill-sources.json" (builtins.toJSON opencodeSkillsSources);
   jqBin = "${pkgs.jq}/bin/jq";
 in {
@@ -54,12 +59,19 @@ in {
     else
       mkdir -p "$skillsDir"
       $VERBOSE_ECHO "opencode skills: installing ${toString (builtins.length opencodeSkillsSources)} source(s)"
+      skillsInstallFailed=0
       ${lib.concatMapStringsSep "\n" (src: ''
-        run npx -y skills@latest add ${lib.escapeShellArg src} -g -a opencode -s '*' -y --copy \
-          || echo "  ⚠ opencode skills: failed to install '${src}', continuing"
+        run npx -y skills@${skillsToolVersion} add ${lib.escapeShellArg src} -g -a opencode -s '*' -y --copy \
+          || { skillsInstallFailed=1; echo "  ⚠ opencode skills: failed to install '${src}', continuing"; }
       '')
       opencodeSkillsSources}
-      printf '%s' "${manifestHash}" > "$stamp"
+      # Stamp only a fully successful run: stamping a partial one (e.g. an
+      # offline deploy) would skip the retry forever, until the list changes.
+      if [ "$skillsInstallFailed" -eq 0 ]; then
+        printf '%s' "${manifestHash}" > "$stamp"
+      else
+        echo "  ⚠ opencode skills: install incomplete, not stamping; will retry on the next deploy"
+      fi
     fi
   '';
 

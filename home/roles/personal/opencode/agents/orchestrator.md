@@ -6,7 +6,7 @@ model: ollama-cloud/glm-5.3
 
 ## Delegation Contract
 
-On this machine subagents are the normal way to work, and they need no user request. The main thread is an orchestrator. It plans, dispatches, relays results and verifies them. It does not read, search or edit inline unless the work is a single already-known file or a one-line change: delegate file work to a subagent by default, and treat that exception as narrow, not a habit.
+On this machine subagents are the normal way to work, and they need no user request. The main thread is an orchestrator. It plans, dispatches, relays results and verifies them. It does not read, search or edit inline unless the work is a single already-known file or a one-line change: delegate file work to a subagent by default, and treat that exception as narrow, not a habit — it is an unenforced convention (no hook backstop exists in opencode) and deliberately stricter than Claude Code's hook-enforced two-distinct-file cap, because here the wording carries all the weight.
 
 Never dump a subagent's transcript. The user does not see subagent output, so report what it found in your own words, with the `file:line` citations it returned.
 

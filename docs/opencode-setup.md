@@ -1,7 +1,7 @@
 # opencode Setup
 
 opencode is the second terminal AI harness, **personal machine only** (installed
-via `hosts/darwin/macbook/packages.nix`, configured via `home/roles/personal/opencode/`).
+via `home/roles/personal/packages.nix`, configured via `home/roles/personal/opencode/`).
 The work machine has neither the binary nor the module. Everything Claude reads is
 generated from this repo; opencode follows the same rule, sharing instruction
 sources with Claude wherever the two harnesses agree.
@@ -12,18 +12,21 @@ sources with Claude wherever the two harnesses agree.
 |-----------|--------|----------|
 | Always-on instructions | `~/.claude/rules/workflow.md`, concatenated from `home/common/ai/instructions/` | `~/.config/opencode/AGENTS.md`, generated from the same `shared-instructions.md` + `model-quality.md` + `learned-rules.md`, plus `opencode-delegation.md` and `opencode-models.md` |
 | Delegation contract | `instructions/delegation.md` + `UserPromptSubmit` hook | `agents/orchestrator.md` (the default primary) + the same contract in the generated `AGENTS.md`, convention only, not enforced by any permission |
-| Skills | `~/.claude/skills/` (deployed copies) | `~/.claude/skills` plus `~/.agents/skills` (the `npx skills add` tree, see below), both listed in `skills.paths` after `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` kills both external scans |
-| Subagents | `~/.claude/agents/*.md` | `~/.config/opencode/agents/*.md` (ported: orchestrator, code-reviewer, dev-lifecycle, vault-lint, vault-search) |
+| Inline-edit allowance | 2 distinct files per turn, hook-enforced (`force-delegation.sh` hard-denies the spread) | "a single already-known file", deliberately stricter wording: there is no hook backstop in opencode, so the wording carries the weight enforcement provides on the Claude side |
+| Skills | `~/.claude/skills/` (deployed copies) | `~/.claude/skills` plus `~/.agents/skills` (the `npx skills add` tree, see below) plus a project-relative `.claude/skills` entry, all listed in `skills.paths`. `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` kills the external scans, including project-local `.claude/skills`/`.agents/skills` discovery (same branch in `skill/index.ts`); the relative entry restores project-local parity, resolving against the session directory |
+| Subagents | `~/.claude/agents/*.md` | `~/.config/opencode/agents/*.md` (orchestrator, code-reviewer, dev-lifecycle, vault-lint, vault-search, nix-architect) |
 | Council | Workflow tool, `llm-council.js` | `/council` command + hidden model-seat agents (no workflow engine exists) |
-| MCP servers | merged into `~/.claude.json` | declared in `opencode.json` (Nix owns the file wholesale) |
-| Vault context | `SessionStart` hook, fires once per session | `experimental.chat.system.transform` in the plugin, fires per LLM request rather than once per session; `opencode-parity.js` caches the vault walk in a closure variable so it still costs one `find`/`rg` walk per process, not per turn |
+| MCP servers | merged into `~/.claude.json` | declared in `opencode.json` (Nix owns the file wholesale), with explicit per-server timeouts. `postgres` is deliberately opencode-only: it is personal-stack-specific and doppler-wrapped, and porting it to Claude Code would fail quietly at startup whenever doppler or its env is absent |
+| Compaction | `autoCompactEnabled = true`, model-tuned default window | `compaction.auto = true` in `config.nix` |
+| LSP | none | `lsp = true` in `config.nix`; `nixd` (via `home/roles/personal/packages.nix`) provides Nix language support |
+| Vault context | none: no automatic injection, `vault-search` on demand | same, the plugin's system-prompt vault index was removed together with Claude's `vault-context.sh` hook |
 | Statusline | `statusline.sh` | no equivalent, dropped |
 | Plugins/marketplaces | `home.ai.plugins` | no marketplace mechanism, dropped |
 | Format on edit | `biome-fix.sh` on `PostToolUse` | `formatter` in `config.nix`, opencode's built-in formatters with every `$PATH`-only-gated one switched off |
 | Bash auto-rewrite | `rtk-rewrite` on `PreToolUse:Bash` | `opencode-parity.js`'s `tool.execute.before`, pipes the command through `rtk hook claude` (rtk has no `opencode` hook subcommand, and the old `rtk rewrite` subcommand is gone) and swaps in the rewrite when stdout is non-empty |
 | Secret deny-list | `permissions.deny` in `home/common/ai/settings.nix` | `permission.read` and `permission.bash` deny globs in `config.nix`, generated from the same paths |
 | Permission defaults | classifier-gated `auto` mode: a call the classifier judges safe runs unprompted, anything else asks, deny list absolute | open by default (`edit`/`webfetch`/`websearch` allow, `bash` allow-all via `bashRules`), but `bashRules` now layers a destructive-command ask/deny set on top of the secret denies, see below; every non-hidden subagent's own block repeats the same `edit`/`bash`/`read` shape |
-| Co-author / AI attribution block | `block-ai-attribution.sh` on `PreToolUse` | `.hooks/commit-msg`, one layer below both harnesses; commit messages only, `gh` PR and review bodies are not guarded on the opencode side |
+| Co-author / AI attribution block | `block-ai-attribution.sh` on `PreToolUse` | the SAME deployed script, invoked from `opencode-parity.js`'s `tool.execute.before`: candidate bash commands (`git commit` / `gh pr` / `gh api`, the script's own filter) are piped in as PreToolUse JSON and a deny decision becomes a thrown error that blocks the call; fails open when the script is missing or errors. `.hooks/commit-msg` remains one layer below both harnesses as the commit-message backstop |
 | Additional directories | `permissions.additionalDirectories = ["~/Obsidian"]` | `~/Obsidian` in the `filesystem` MCP server args, alongside `~/.dotfiles` and `~/Developer`; `permission.external_directory` separately asks by default and allows only the Obsidian/.dotfiles/Developer trees, see below |
 | Council entry point | Workflow tool | `/council` command bound to the `council-chair` primary agent (coordination only: `edit`/`bash` denied, `task` allowed), not the general `orchestrator` |
 - **Delegation depth**: `subagent_depth = 1` in `config.nix`, orchestrator to one subagent and no deeper. Every non-hidden subagent (`code-reviewer`, `dev-lifecycle`, `vault-lint`, `vault-search`, the council seats and peer-reviewer) carries `permission.task."*" = "deny"`, so a second dispatch level had nothing left that could use it. `/council` fans its seats out directly from the chair, itself a primary agent, so it still fits in one level.
@@ -38,8 +41,12 @@ The two harnesses no longer share one permission posture, on purpose. Claude run
 
 Models come from Ollama Cloud (`provider/model` ids, API key in
 `~/.local/share/opencode/auth.json`, never in Nix). The tier table
-(fast/default/best) and the six council seats are in
-`instructions/opencode-models.md`, machine-readable in `config.nix`, change both together.
+(fast/default/best) and the council seats are in
+`instructions/opencode-models.md`, machine-readable in `config.nix`. Per-agent
+models for the markdown-backed agents live in the agent frontmatter, which is
+the single source of truth: opencode merges markdown over `opencode.json`
+(markdown wins), so `config.nix` sets models only for the config-only council
+agents. A tier change edits the frontmatter and the table together.
 
 ## Files
 
@@ -48,10 +55,11 @@ Models come from Ollama Cloud (`provider/model` ids, API key in
 | `home/roles/personal/opencode/default.nix` | composition, AGENTS.md generation, agent/command/plugin deploys |
 | `home/roles/personal/opencode/config.nix` | `opencode.json` (models, agents, permissions, MCP, skills.paths) |
 | `home/roles/personal/opencode/skills.nix` | installs the `npx skills add` sources with no Claude marketplace.json into `~/.agents/skills`, opencode only |
-| `home/roles/personal/opencode/agents/` | orchestrator + 4 ported subagents |
+| `home/roles/personal/opencode/agents/` | orchestrator + 5 subagents (see the table below) |
 | `home/roles/personal/opencode/commands/council.md` | the `/council` fan-out |
-| `home/roles/personal/opencode/plugins/opencode-parity.js` | vault index in the system prompt, the one Claude hook with no opencode config key |
+| `home/roles/personal/opencode/plugins/opencode-parity.js` | the Claude hooks with no opencode config key: the `block-ai-attribution.sh` guard on bash commits/PRs, rtk bash rewrite, crg-autobuild on `session.created`, project-settings skill bridge via the `config` hook |
 | `home/roles/personal/opencode/instructions/` | opencode-specific deltas folded into AGENTS.md |
+| `home/roles/personal/opencode/maintenance.nix` | weekly launchd prune of `~/.local/share/opencode/{log,storage}` entries older than 30 days (`auth.json` is outside both trees and untouched) |
 
 ## Documented exceptions (out-of-band content)
 
@@ -64,7 +72,7 @@ listed here so a future cleanup finds them.
 
 Everything else in `~/.config/opencode/plugin{,s}/` is deleted on every deploy by `home.activation.opencodePlugins` in `default.nix`, which keeps only the Nix-managed `opencode-parity.js` and the `supacode-presence.js` exception above. That directory is auto-loaded wholesale, so a stray file is not inert: `crg-plugin.ts` (broken against the 1.18.21 plugin API, `app.on is not a function`, and duplicating the `code-review-graph` MCP server now declared in `config.nix`) kept coming back from a Supacode tool and crashed startup each time. The activation script is the thing that keeps it gone.
 
-The same activation step also deletes `~/.config/opencode/{package.json,package-lock.json,bun.lock,node_modules}` if they reappear. An old bun/npm bootstrap left them pinning a stale `@opencode-ai/plugin` against the running binary; nothing in this config imports from that tree (`opencode-parity.js` is import-free by design), so it is removed rather than left to drift.
+`~/.config/opencode/{package.json,node_modules,...}` used to be deleted by the same activation step as leftovers of an old bun/npm bootstrap, but current opencode background-installs `@opencode-ai/plugin` into the config dir and re-creates them on every startup, so the prune was a fight the deploy always lost and it is gone. They are expected to exist; `opencode-parity.js` still imports nothing from them by design.
 
 ## The plugin-to-skill bridge
 
@@ -74,23 +82,37 @@ typing the same skill names twice — once for Claude, once for opencode — was
 exactly the repetition to avoid. Two mechanisms close that gap:
 
 1. **Global bridge** (`home.activation.opencodePlugins` in `default.nix`): every
-   deploy walks the plugin cache, finds each `skills/` directory, and symlinks
-   every skill dir into `~/.config/opencode/skills/` (`ln -sfn`, last plugin
-   wins when two plugins ship the same skill name — `frontend-design` exists in
-   three caches). opencode's default skills scan picks them up from there. A
-   plugin updated by Claude Code keeps the same symlink valid because the link
-   points at the versioned cache path; a re-install that bumps the version
-   refreshes the link on the next deploy.
-2. **Project-local discovery** (`opencode-parity.js`, `session.start`): when a
-   session starts, the plugin reads `.claude/settings.json` and
-   `.claude/settings.local.json` in the project and registers any `skills`
-   entries into the session, so a project that declares skills for Claude gets
-   them in opencode without any extra config. **Status: unverified against
-   opencode's live plugin API** — the `session.start` hook name and the
-   `output.skills` mutation shape are plausible but not confirmed for 1.18.x.
-   It fails safe (logged warning at worst); confirm after the next deploy by
-   opening a project with a `.claude/settings.local.json` skills block and
-   checking whether the skill appears, then update this note.
+   deploy walks `~/.claude/plugins/cache` only (never `marketplaces/`, those are
+   full repo clones whose skills belong to plugins that may never have been
+   installed), finds each `skills/` directory, and symlinks every skill dir
+   into `~/.config/opencode/skills/` (`ln -sfn`, last plugin wins when two
+   plugins ship the same skill name — `frontend-design` exists in three
+   caches). A destination that is a real directory (tool-installed) is skipped,
+   BSD `ln -sfn` onto a real dir would nest a junk symlink inside it. The same
+   step creates the skills dir if missing and prunes any stale bridge symlink
+   (one pointing into `~/.claude/plugins` whose target is gone). opencode's
+   default skills scan picks the links up from there. A plugin updated by
+   Claude Code keeps the same symlink valid because the link points at the
+   versioned cache path; a re-install that bumps the version refreshes the
+   link on the next deploy.
+2. **Project-local discovery** (`opencode-parity.js`, `config` hook): the
+   plugin reads `.claude/settings.json` and `.claude/settings.local.json` in
+   the project and appends any `skills` entry paths to `skills.paths`, so a
+   project that declares skills for Claude gets them in opencode without any
+   extra config. History: this originally registered a `session.start` hook,
+   which does not exist in opencode's plugin API (valid hooks are `event`,
+   `config`, `chat.*`, `tool.execute.*`, `permission.ask`, `experimental.*`),
+   so both this bridge and the crg-autobuild trigger were silently dead — no
+   warning logged, the hook simply never fired. crg-autobuild now rides the
+   `event` hook filtered on `session.created`; this bridge rides `config`,
+   the one hook that can mutate the loaded config. Separately, the relative
+   `.claude/skills` entry in `skills.paths` (config.nix) restores plain
+   project-local skill-directory discovery, which
+   `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` also disables.
+
+The bridge carries skills only, a known limit rather than a bug: agents and
+commands a Claude plugin ships are not bridged, so a plugin's subagents and
+slash commands exist only on the Claude side.
 
 Known collision source: `skills.paths` also loads `~/.claude/skills`, so a name
 that exists both as a standalone skill there and inside a plugin yields a
@@ -127,7 +149,7 @@ Slash commands, deployed as managed files in `~/.config/opencode/commands/`:
 
 `delegate-nudge` and `force-delegation` are Claude-only: per-turn counters over a hook stream opencode has no equivalent for. They used to reconstruct a boundary opencode enforced statically, the `orchestrator` agent's `edit: deny`. That permission is gone: `orchestrator` allows `edit` and `bash` like every other opencode agent (see Permission defaults above), so there is no static enforcement left to reconstruct. opencode's permission schema also has no per-turn counter to express Claude's grace-allowance-then-hard-deny shape, only a static allow/ask/deny per key, so even a reintroduced `edit: deny` on `orchestrator` could not express "allow the first two". The delegation boundary on opencode is convention now, stated in the generated `AGENTS.md` and nowhere else, not a permission the harness holds it to. The per-turn delegation reminder that used to live in `opencode-parity.js` stays gone, for the same reason it always did: no hook stream to count turns over.
 
-`block-ai-attribution.sh` moved down a layer instead of being ported: `.hooks/commit-msg` in this repo rejects co-author trailers and AI attribution in the message, which covers Claude, opencode and a plain terminal with no harness API involved. Two deliberate limits. It sees commit messages only, so the `gh pr create|edit|comment|review` and `gh api` bodies the Claude hook also guards are unguarded when opencode drives them. And its regex mirrors `block-ai-attribution.sh` exactly, so it does not catch a `claude.ai/code/session_*` link, which is a session reference rather than an attribution.
+`block-ai-attribution.sh` is now invoked directly: `opencode-parity.js`'s `tool.execute.before` pipes candidate bash commands into the deployed `~/.claude/hooks/block-ai-attribution.sh` with the same PreToolUse JSON payload Claude sends, and throws the script's deny reason so opencode blocks the call (fail open on any script failure). The script owns all the regexes, so `gh pr create|edit|comment|review` and `gh api` bodies are guarded on the opencode side too, not just commits. Below both harnesses, `.hooks/commit-msg` in this repo still rejects co-author trailers and AI attribution in commit messages, covering a plain terminal with no harness API involved; its regex mirrors `block-ai-attribution.sh` exactly, so neither catches a `claude.ai/code/session_*` link, which is a session reference rather than an attribution.
 
 `biome-fix.sh` is replaced by the `formatter` block in `config.nix`. opencode ships a built-in biome formatter that runs `biome format --write $FILE` on an edited file, gated on finding `biome.json`/`biome.jsonc` up-tree and resolving `@biomejs/biome` in the project, so it stays silent everywhere else. It formats but does not apply lint fixes, the one behavioural difference from Claude's `biome check --write`. Overriding `formatter.biome.command` to get `check` back would replace that gate with an unconditional run, so it stays as-is.
 
@@ -137,7 +159,7 @@ The gates are not uniform across the built-ins, which is why the config is an ob
 
 `~/.agents/skills` (the `npx skills` tree) is deliberately in use again, opencode only. `skills.nix` installs into it, and `config.nix`'s `skills.paths` lists it alongside `~/.claude/skills` so opencode loads both; Claude never reads this directory. The two skills Claude used to symlink out of it are unaffected, both are fetched from upstream at build time now (`orchestration`, `orca-cli`; see `mkFetchedSkills` in [ai-setup.md](ai-setup.md)) or dropped (`find-skills`, whose whole job was promoting `npx skills add`).
 
-The sources installed are the ones in [dropped-skill-sources.md](dropped-skill-sources.md) with no `.claude-plugin/marketplace.json`, so they can never become a Claude Code plugin: `vercel-labs/agent-skills`, `biomejs/biome`, `mindrally/skills`, `vercel/turborepo`, `remotion-dev/skills`. `home.activation.opencodeSkillsInstall` runs `npx -y skills@latest add <src> -g -a opencode -s '*' -y --copy` for each, gated by a `command -v npx` check (skips with a warning if missing) and a manifest-hash stamp at `~/.agents/.skill-sources-hash`, so an unchanged source list skips the install loop entirely on redeploy.
+The sources installed are the ones in [dropped-skill-sources.md](dropped-skill-sources.md) with no `.claude-plugin/marketplace.json`, so they can never become a Claude Code plugin: `vercel-labs/agent-skills`, `biomejs/biome`, `mindrally/skills`, `vercel/turborepo`, `remotion-dev/skills`. `home.activation.opencodeSkillsInstall` runs `npx -y skills@<pinned> add <src> -g -a opencode -s '*' -y --copy` for each (the version is pinned in `skills.nix`, currently 1.5.23, and folded into the manifest hash so a bump re-runs the install), gated by a `command -v npx` check (skips with a warning if missing) and a manifest-hash stamp at `~/.agents/.skill-sources-hash`, so an unchanged source list skips the install loop entirely on redeploy. The stamp is written only when every source installed successfully; a partial run (an offline deploy) stays unstamped and retries next deploy.
 
 `home.activation.opencodeSkillsReconcile` runs after install and diffs `~/.agents/skills` against `.skill-lock.json`'s per-skill `source` field (one source can produce several skill directories, so this matches on that field rather than the source list directly). Any directory the current sources don't own gets listed. `home.ai.opencodeSkillsPrune` still defaults to `false` in `skills.nix`, which only prints the stale list and the exact `rm -rf` command to run by hand, but `home/roles/personal/opencode/default.nix` sets it to `true` for the personal role, so on this machine the reconcile step deletes those directories on every deploy instead of only printing them.
 
