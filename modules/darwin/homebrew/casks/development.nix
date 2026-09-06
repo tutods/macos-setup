@@ -8,7 +8,6 @@
     # true` on the entry, which this nix-darwin module's `casks` option can't
     # express.
     "ghostty"
-    "copilot-cli"
     "google-gemini"
   ];
 }

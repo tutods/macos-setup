@@ -75,10 +75,6 @@
         askForPasswordDelay = 0;
       };
 
-      universalaccess = {
-        closeViewZoomFollowsFocus = true;
-      };
-
       SoftwareUpdate = {
         AutomaticallyInstallMacOSUpdates = true;
       };
@@ -88,36 +84,26 @@
           DSDontWriteNetworkStores = true;
           DSDontWriteUSBStores = true;
         };
-        "com.apple.finder" = {
-          FXPreferredSortOrder = "name";
-          FXArrangeMeBy = "name";
-          sortColumn = "name";
-          sortDirection = "ascending";
-        };
         "com.apple.AdLib" = {
           allowApplePersonalizedAdvertising = false;
         };
+      };
+
+      # softwareupdated reads these from the system domain (/Library/Preferences),
+      # not the user domain.
+      CustomSystemPreferences = {
         "com.apple.SoftwareUpdate" = {
           AutomaticCheckEnabled = true;
           ScheduleFrequency = 1;
           AutomaticDownload = 1;
           CriticalUpdateInstall = 1;
         };
-        "com.apple.BluetoothAudioAgent" = {
-          "Apple Bitpool Min (editable)" = 40;
-        };
-        "com.apple.frameworks.diskimages" = {
-          auto-open-ro-root = true;
-          auto-open-rw-root = true;
-        };
-        "com.apple.NetworkBrowser" = {
-          BrowseAllInterfaces = true;
-        };
       };
     };
 
     activationScripts.postActivation.text = ''
-      sudo pmset -a hibernatemode 0
+      # Deliberate trade-off: hibernatemode 0 means a fully drained battery loses session state.
+      pmset -a hibernatemode 0
     '';
   };
 }

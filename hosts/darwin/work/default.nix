@@ -10,7 +10,9 @@ in {
   imports = [
     ./dock.nix
     ./homebrew
-    # Note: networking.nix NOT imported, corporate DNS must resolve internal domains
+    # Note: no networking.nix here, DNS/search/knownNetworkServices are
+    # macbook-only so deploys never touch the corporate/VPN DNS this machine
+    # needs to resolve internal domains.
     (mkHost {
       username = "daniel.a.sousa";
       hostname = "daniel.a.sousa";

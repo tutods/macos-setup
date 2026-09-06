@@ -2,7 +2,6 @@
   imports = [
     ./security.nix
     ./settings.nix
-    ./networking.nix
     ./homebrew
   ];
 
