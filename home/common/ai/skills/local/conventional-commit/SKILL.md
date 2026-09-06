@@ -1,6 +1,6 @@
 ---
 name: conventional-commit
-description: Generates a conventional commit message from staged changes or a described diff. Produces type, optional scope, subject, body (if needed), and breaking-change footer. The single source for the commit-type table, open-pr defers here for message generation. Trigger with "generate commit", "create commit message", "write commit for me", or "what should my commit say".
+description: Generates a conventional commit message from staged changes or a described diff. Produces type, optional scope, subject, body (if needed), and breaking-change footer. The single source for the commit-type table and default branch naming, open-pr defers here for message generation. Trigger with "generate commit", "create commit message", "write commit for me", or "what should my commit say".
 ---
 
 # Conventional Commit Generator
@@ -76,3 +76,9 @@ Closes #<issue> (only if applicable)
 - No "This commit does X"
 
 Output only the code block. No explanation unless the user asks.
+
+---
+
+## Branch naming
+
+When a branch name is needed (open-pr's branch step, or the user asks): `<type>/<kebab-case-summary>`, the same type table as above, e.g. `feat/user-auth`, `fix/token-expiry`. Short and specific, no trailing ticket words. Role instructions in `~/.claude/rules/workflow.md` override this; the work machine's rule inserts the Jira key (`feat/MP-1234-user-auth`).

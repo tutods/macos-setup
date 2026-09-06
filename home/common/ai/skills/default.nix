@@ -28,7 +28,6 @@
         "api-conventions"
         "testing-conventions"
         "dependency-hygiene"
-        "content-creation"
         "seo-audit"
         "harness-engineer"
       ];

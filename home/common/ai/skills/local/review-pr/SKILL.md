@@ -5,13 +5,13 @@ description: Review an existing pull request and optionally post the findings to
 
 # Review Pull Request
 
-Generate a code review of a PR diff and, if the user wants, post it to GitHub. Split out of `open-pr`, which names this skill once a PR is open.
+Review an existing PR and, if the user wants, post the findings to GitHub. Split out of `open-pr`, which names this skill once a PR is open. The `code-reviewer` agent produces the findings, this skill owns formatting and posting them. (The `code-review` plugin skill is a third entry point that runs its own review end-to-end; this skill is the house path when the findings should land on GitHub in the formats below.)
 
 ## Step 1: Generate the review
 
-1. Read the PR diff: `gh pr diff <pr-number>`
-2. Produce findings: bugs, logic errors, security concerns, missing tests, style issues, improvement suggestions. For each finding capture: `id` (`F1`, `F2`, ...), `title`, `severity` (blocker / major / minor / nit), `file`, `line` (if applicable), `description`, `suggestion` (concrete fix or diff).
-3. **Comment hygiene is a blocking review item, not a nit.** Violations of the zero-comment rule in `~/.claude/rules/workflow.md` are `major` findings, and the suggestion is always to delete the comment (moving anything worth keeping into the PR body).
+1. Dispatch the `code-reviewer` agent with the PR number; it reads the diff (`gh pr diff`), the surrounding code, and returns a severity-ranked report. Never produce the findings inline, review runs in the agent per the delegation contract.
+2. Normalize the agent's report into findings, each with: `id` (`F1`, `F2`, ...), `title`, `severity` (blocker / major / minor / nit), `file`, `line` (if applicable), `description`, `suggestion` (concrete fix or diff).
+3. **Comment hygiene is a blocking review item, not a nit.** The agent already reports zero-comment-rule violations (`~/.claude/rules/workflow.md`) as `major`; keep them `major` here, and the suggestion is always to delete the comment (moving anything worth keeping into the PR body).
 
 ## Step 2: Post to GitHub?
 
@@ -21,7 +21,7 @@ Ask **"Post review to GitHub?"** (no, just show it / yes, post it). On no, displ
 
 Ask **"How should the review be posted?"** with three options: an inline review with an overall comment (line-specific comments on the diff plus a summary), a single comment containing all findings, or one top-level comment per finding.
 
-**No AI attribution in posted comments.** The `block-ai-attribution` hook denies review bodies that credit an AI model, never add "Reviewed by <model>" or similar; posted text carries no model credit.
+**No AI attribution in posted comments.** The `block-ai-attribution` hook denies review bodies that credit an AI model, never add "Reviewed by <model>" or similar; posted text carries no model credit. Interactive reviews like this one speak as the user; the unattended `deep-review-prs` loop is the deliberate exception, its `_Model: <id>_` footer is provenance for reviews nobody watched being written.
 
 ## Step 4: Post the review
 
@@ -52,17 +52,21 @@ Notes on the template:
 
 **Posting commands:**
 
-**Inline review with overall comment**: overall as the review body, one inline comment per finding on the diff line:
+**Inline review with overall comment**: overall as the review body, one inline comment per finding on the diff line. The `comments` field is a JSON array, so the request must be sent as a JSON body via `--input` (`--field comments=...` would send the array as a string and the API rejects it with a 422):
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/<pr-number>/reviews \
-  --method POST \
-  --field event=COMMENT \
-  --field 'body=<overall-comment>' \
-  --field 'comments=<json-array>'
+gh api repos/{owner}/{repo}/pulls/<pr-number>/reviews --method POST --input - <<'EOF'
+{
+  "event": "COMMENT",
+  "body": "<overall-comment>",
+  "comments": [
+    { "path": "<file>", "line": <n>, "side": "RIGHT", "body": "<comment>" }
+  ]
+}
+EOF
 ```
 
-Each inline comment object: `{ "path": "<file>", "line": <n>, "body": "<comment>" }`.
+Each inline comment object: `{ "path": "<file>", "line": <n>, "side": "RIGHT", "body": "<comment>" }`.
 
 **Single comment with all findings:**
 
@@ -78,26 +82,40 @@ gh pr comment <pr-number> --body "<finding-1>"
 gh pr comment <pr-number> --body "<finding-2>"
 ```
 
-Capture the comment ID from the response of each `gh pr comment` / `gh api` call. You'll need it for reactions (Step 5).
+Capture the comment IDs, you'll need them for reactions (Step 5), and where each one comes from differs by format:
+
+- **Top-level comments** (`gh pr comment`): the command prints the comment URL; the numeric ID is the trailing `#issuecomment-<id>` fragment.
+- **Inline review comments**: the review-creation response contains the review's `id` but not per-comment IDs. Fetch them afterwards, filtered to that review:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/<pr-number>/comments \
+  --jq '.[] | select(.pull_request_review_id == <review-id>) | {id, path, line}'
+```
 
 ## Step 5: Reactions (optional)
 
 After posting, ask **"Add your reaction to each posted comment?"** (yes / no).
 Reactions are the user's own signal, they never filter or remove findings.
 
-On yes, walk the posted comments in order and ask for each: 👍 Agree, 👎 Disagree, 👀 Not sure, or Skip. Then apply it with:
+On yes, walk the posted comments in order and ask for each: 👍 Agree, 👎 Disagree, 👀 Not sure, or Skip. The endpoint depends on the comment kind: top-level PR comments (`gh pr comment`) are issue comments, inline review comments live under `pulls/comments`:
 
 ```bash
+# top-level comment posted with `gh pr comment`
 gh api repos/{owner}/{repo}/issues/comments/<comment-id>/reactions \
   --method POST \
   --field 'content=+1'    # or "-1" or "eyes"
+
+# inline review comment (ID from the pulls/<pr-number>/comments fetch in Step 4)
+gh api repos/{owner}/{repo}/pulls/comments/<comment-id>/reactions \
+  --method POST \
+  --field 'content=+1'
 ```
 
 Reaction content values: `+1` (👍), `-1` (👎), `eyes` (👀).
 
 ## Writing style for findings
 
-Apply the "Writing for Humans" rules from the always-on instructions (`~/.claude/rules/workflow.md`), they cover tone, filler openers, and AI-tells. Review-specific additions:
+Apply the "Writing" rules from the always-on instructions (`~/.claude/rules/workflow.md`), they cover tone, filler openers, and AI-tells. Review-specific additions:
 
 - **Name the problem first, then the fix.** Don't bury the issue in preamble.
 - **Severity language:** plain words in prose (`bug`, `breaks`, `leaks`, `racy`, `dead code`, `duplicated`), corporate severity labels belong only in the `**Severity:**` field.

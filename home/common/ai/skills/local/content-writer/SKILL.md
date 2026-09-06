@@ -1,6 +1,6 @@
 ---
 name: content-writer
-description: Use when writing blog posts, about pages, landing pages, FAQ sections, or social media posts. Trigger with "write content", "blog post", "about us", "landing page", "escreve conteúdo", "artigo", "página sobre nós". Writes in PT-PT (European Portuguese) by default. Produces human-like AI-undetectable content with outline-first workflow, mandatory web research, and always-on SEO metadata output.
+description: Use when writing blog posts, about pages, landing pages, FAQ sections, social media posts, email newsletters, press releases, or case studies. Trigger with "write content", "blog post", "about us", "landing page", "newsletter", "press release", "case study", "escreve conteúdo", "artigo", "página sobre nós". Writes in PT-PT (European Portuguese) by default. Produces human-like AI-undetectable content with outline-first workflow, mandatory web research, and always-on SEO metadata output.
 ---
 
 # Content Writer: Human-First Content Creation
@@ -13,7 +13,7 @@ Write content that reads as 100% human-written. No AI patterns, no cliché phras
 
 Before doing anything else, collect all of the following. Ask in one message:
 
-1. **Content type**: blog post / about page (person or company) / landing page / FAQ section / social media post (specify platform)
+1. **Content type**: blog post / about page (person or company) / landing page / FAQ section / social media post (specify platform) / email newsletter / press release / case study
 2. **Topic / theme**: what is this piece about?
 3. **Language**: default is **PT-PT (European Portuguese)**; ask only if you suspect another language is needed
 4. **Tone / voice**: pick one:

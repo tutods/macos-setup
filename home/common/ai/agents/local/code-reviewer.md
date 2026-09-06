@@ -4,10 +4,13 @@ description: >
   Reviews a diff, branch, or PR in one isolated context and returns a
   severity-ranked findings report. Read-only: it never edits, commits, or
   posts, the parent session decides what to do with the findings (fix them,
-  or post via the review-pr skill). Use for "review this diff", "review my
-  branch before I open the PR", or as the review gate after dev-lifecycle.
-  MUST BE USED as the review gate before any commit or PR, and PROACTIVELY
-  whenever a working diff exists and hasn't been reviewed yet.
+  or post via the review-pr skill). The standard route for every review
+  except one: the unattended deep-review-prs work loop runs its own
+  multi-dimension fan-out with adversarial verification instead. Everything
+  else routes here — direct requests ("review this diff", "review my
+  branch", "review PR #123"), the gate the open-pr skill dispatches before
+  creating a PR, the review-pr skill on an existing PR, and dev-lifecycle
+  after implementation.
 tools: Read, Grep, Glob, Bash, Skill, TodoWrite
 model: sonnet
 effort: high

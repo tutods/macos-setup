@@ -53,7 +53,8 @@ git diff -U0 | rg '^\+\s*(//|#|/\*|\*|--|<!--|""")'
 
    Also check for `'''` docstrings in Python. Delete every hit that breaks the zero-comment rule in `~/.claude/rules/workflow.md`, **before** staging, and move anything worth keeping into the commit message or the PR body. Skip the false positives: shebangs, string literals, nix attribute paths, YAML document separators, and comments that only appear in the diff because a neighbouring line changed. When unsure, delete.
 5. **Generate the commit message** with the `conventional-commit` skill.
-6. **Generate the PR title** from `git diff HEAD...origin/<default-branch>`: a short imperative summary, 60 characters or fewer. Format it `type(<TICKET>): summary` when a ticket was found, otherwise `type(scope): summary`.
+6. **Review gate**, only when Open PR was not `No`: dispatch the `code-reviewer` agent on the branch diff (commits ahead of the base plus the working changes). Fix blocker and major findings before staging; minors and nits go to the user in the report, not silently applied. One dispatch, not a loop, re-review only if the fixes were substantial.
+7. **Generate the PR title** from `git diff HEAD...origin/<default-branch>`: a short imperative summary, 60 characters or fewer. Format it `type(<TICKET>): summary` when a ticket was found, otherwise `type(scope): summary`.
 
 ## Step 4: Batch two
 
@@ -93,7 +94,7 @@ gh pr create \
 - Add `--reviewer "<r1,r2>"` when reviewers were named.
 - If the push fails because upstream moved, report it and stop. Never force-push.
 
-**PR body**: 1 or 2 sentences summarising the diff. When the repo has `.github/pull_request_template.md`, fill it in section by section and keep its emoji headers, tables and formatting exactly.
+**PR body**: 1 or 2 sentences summarising the diff, plus one line noting the pre-PR review gate ran and blockers were fixed. Keep that line model-free ("Pre-PR review gate: passed", never "reviewed by <model>"), the `block-ai-attribution` hook rejects model credits. Interactive flows like this one speak as the user; only the unattended `deep-review-prs` loop deliberately carries a model footer, as provenance for machine reviews. When the repo has `.github/pull_request_template.md`, fill it in section by section and keep its emoji headers, tables and formatting exactly.
 
 ## Step 6: Report
 
@@ -106,4 +107,4 @@ Print the PR URL:
 <url>
 ```
 
-Then say the review is available on request, naming the `review-pr` skill. Do not ask. The user just watched the PR appear and can decide without a prompt.
+Then say a posted review is available on request, naming the `review-pr` skill: the pre-PR gate already reviewed the diff, `review-pr` re-runs the `code-reviewer` agent on the PR itself and posts the findings to GitHub. Do not ask. The user just watched the PR appear and can decide without a prompt.

@@ -16,7 +16,7 @@ Each machine has its own vault and they are strictly separate: the work vault ho
 
 ## Layout
 
-The SessionStart hook injects a fixed folder list every session, and that list is authoritative, a new type folder needs adding there too, or its notes are invisible at session start.
+The machine's in-scope folder list is owned by the `home.ai.vaultFolders` option in the dotfiles repo (`home/common/ai/options.nix`, set per role), which lands as the `CLAUDE_VAULT_FOLDERS` env var in `~/.claude/settings.json`; a new type folder needs adding to that option too, or `vault-lint` flags it as outside the declared scope.
 
 - Type folders at vault root. Both vaults have `Lessons/`, `Decisions/`, `Process/`, `Conventions/`, and `Notes/` (catch-all). The personal vault adds `Projects/` (own products, infra, tooling), `Clients/` (paid engagements, scope and handoff state only, **never** contact details, billing figures, or company-owned code), and `Prompts/` (a prompt library). Create a new folder only for a genuinely new recurring type.
 - Subfolder a type folder by area only once it has outgrown flat browsing. In the personal vault that's `Lessons/` (by tech area) and `Prompts/` (by category). Everywhere else `area` frontmatter covers filtering.
@@ -68,9 +68,7 @@ Search and links are plain text, use the vault subagents, not the Obsidian app.
 
 ### Read first
 
-The SessionStart hook has already listed every note title, so you know what exists without searching. It never injects bodies.
-
-Read a note by dispatching the `vault-search` subagent, which is a read-only lookup on `haiku` and cheaper than spending main-session tokens on `rg` output. Do this whenever a listed title looks relevant, and for a whole-vault content search when the title index is not enough. Never grep the vault inline.
+Nothing is injected at session start: the vault is discovered on demand. Find and read notes by dispatching the `vault-search` subagent, which is a read-only lookup on `haiku` and cheaper than spending main-session tokens on `rg` output. Do this before assuming a note does or doesn't exist. Never grep the vault inline.
 
 ### Find notes or backlinks
 
@@ -78,7 +76,7 @@ Dispatch to `vault-search`: by filename, by content, by `Prompts/` topic, or "fi
 
 ### Check vault health
 
-Dispatch to the `vault-lint` subagent for dead wikilinks, orphan notes, missing or empty frontmatter, empty notes, filename drift, and type folders the SessionStart hook does not list. It only reports; apply any fix in the main session.
+Dispatch to the `vault-lint` subagent for dead wikilinks, orphan notes, missing or empty frontmatter, empty notes, filename drift, and type folders missing from the declared vault scope (`home.ai.vaultFolders`). It only reports; apply any fix in the main session.
 
 ### Create a note
 
@@ -93,7 +91,7 @@ Read it first, then edit in place, don't append a dated log entry unless the not
 
 ### Log a lesson
 
-Triggered by a corrected mistake, not by request. Grep `Lessons/` for the topic first and update an existing note instead of duplicating it.
+Triggered by a corrected mistake, not by request. Dispatch `vault-search` on the topic in `Lessons/` first and update an existing note instead of duplicating it.
 
 ```markdown
 ---
@@ -115,7 +113,7 @@ created: <YYYY-MM-DD>
 
 ### Log a decision or convention
 
-Triggered by an approved architecture/tech choice (`Decisions/`) or a stated standing rule for how work happens (`Conventions/`), not by request. Grep the target folder first and update an existing note rather than duplicating it. Skip if the choice was reverted in the same session, or is a one-off with no standing pattern.
+Triggered by an approved architecture/tech choice (`Decisions/`) or a stated standing rule for how work happens (`Conventions/`), not by request. Dispatch `vault-search` on the target folder first and update an existing note rather than duplicating it. Skip if the choice was reverted in the same session, or is a one-off with no standing pattern.
 
 ### Update a project/client note
 

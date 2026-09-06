@@ -19,29 +19,40 @@ if (!question) {
   throw new Error('Pass the question as args: Workflow({scriptPath: ..., args: "<question>"})')
 }
 
+// Each advisor runs on a different model where it helps the lens: perspective
+// diversity compounds with model diversity (identical models given different
+// personas still share blind spots). The chairman inherits the session model
+// (usually the strongest available); first-principles inherits too so at
+// least one advisor matches the chairman's depth. `model: undefined` =
+// inherit.
 const ADVISORS = [
   {
     key: 'contrarian',
+    model: 'opus',
     persona:
       'THE CONTRARIAN. Your only job is to find what will fail. Where does this break? What is the asker not seeing? What is the most likely failure mode? Be blunt.',
   },
   {
     key: 'first-principles',
+    model: undefined,
     persona:
       'THE FIRST PRINCIPLES THINKER. Strip away every assumption baked into the question. Rebuild the problem from scratch. What is actually being asked underneath the framing? Often the question itself is wrong.',
   },
   {
     key: 'expansionist',
+    model: 'opus',
     persona:
       "THE EXPANSIONIST. Find the upside the asker is missing. What is the bigger version of this? What opportunity is hiding inside the question they haven't seen yet?",
   },
   {
     key: 'outsider',
+    model: 'sonnet',
     persona:
       'THE OUTSIDER. You have zero context about this industry, role, or situation. Respond as a smart generalist seeing this for the first time. What looks weird from the outside? What are insiders taking for granted?',
   },
   {
     key: 'executor',
+    model: 'haiku',
     persona:
       'THE EXECUTOR. You only care about Monday morning. Skip the theory. What is the single concrete action to take first? What is the smallest version of this that can ship this week?',
   },
@@ -59,7 +70,7 @@ THE QUESTION:
 ${question}
 
 Answer in under 300 words. Your final text is returned as raw data, no greeting, no meta-commentary, just the answer.`,
-      { label: `advisor:${a.key}`, phase: 'Advisors' }
+      { label: `advisor:${a.key}${a.model ? `@${a.model}` : ''}`, phase: 'Advisors', model: a.model }
     )
   )
 )

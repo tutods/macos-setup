@@ -42,7 +42,7 @@ Removing patterns is half the job. Sterile, voiceless writing is just as obvious
 
 7. **AI vocabulary.** Additionally, crucial, delve, enduring, enhance, fostering, garner, interplay, intricate, landscape (abstract), pivotal, showcase, tapestry (abstract), testament, underscore, vibrant. Replace with plain words.
 8. **Fancy ways to say "is".** "serves as", "stands as", "boasts", "features". Just say "is" or "has".
-9. **"Not just X, but Y."** State the point directly instead.
+9. **"Not just X, but Y."** Also its split form: "It's not X. It's Y." State the point directly instead.
 10. **Rule of three.** Forcing ideas into groups of three. Use the natural number.
 11. **Synonym cycling.** Protagonist, main character, central figure, hero all in one paragraph. Pick one, repeat it.
 12. **False ranges.** "from X to Y" where X and Y aren't on a meaningful scale. List topics directly.
@@ -80,3 +80,12 @@ Removing patterns is half the job. Sterile, voiceless writing is just as obvious
 29. **Active voice.** Prefer it. Catch "is/are/was/were + past participle" and name the actor: "queries are validated" becomes "the compiler validates queries", "the file is parsed by the loader" becomes "the loader parses the file". Passive is fine only when the actor is unknown or genuinely doesn't matter.
 30. **Cut adverbs, or use a stronger verb.** "runs quickly" becomes "is fast" or the number. "significantly improves" becomes the measured delta. An adverb propping up a weak verb means the verb is wrong.
 31. **Prefer the plain word.** "utilize" becomes "use", "leverage" becomes "use", "facilitate" becomes "help", "numerous" becomes "many", "in the event that" becomes "if". The fancier synonym is rarely clearer.
+
+### Rhetorical theatrics
+
+Extended locally beyond the vendored upstream (source: the "no-AI-slop" pattern list at creatoreconomy.so).
+
+32. **Throat-clearing openers.** "Here's the thing", "Let me be clear", "Real talk", "To be honest". Delete the wind-up and start with the point.
+33. **Faux-insight setups.** "What nobody tells you", "The part everyone misses", "Most people get this wrong". If the insight is real, it survives being stated plainly; the setup only signals that it might not be.
+34. **Colon reveals.** "The best part: it learns." A dramatic pause dressed as punctuation. Write the sentence: "It learns from every run."
+35. **Dramatic fragments.** "That's it. That's the whole thing.", "Read that again." Cut them; the preceding sentence either carries the weight or it doesn't.

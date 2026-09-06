@@ -39,7 +39,7 @@ Search `.ts` and `.tsx` files (exclude `node_modules`, `dist`, `.next`, `build`)
 | Non-null assertion | `!.` or `!;` | MAJOR |
 | Double cast escape | `as unknown as` | MAJOR |
 | Loose object spread | `{ ...obj }` where `obj: any` | MAJOR |
-| `@ts-expect-error` without comment | `@ts-expect-error(?! .*\w)` | MINOR |
+| `@ts-expect-error` without comment | `rg --pcre2 '@ts-expect-error(?! .*\w)'` (lookahead needs `--pcre2`; without it: `rg '@ts-expect-error' \| rg -v '@ts-expect-error .*\w'`) | MINOR |
 
 For each match: record file, line number, the offending code snippet.
 
