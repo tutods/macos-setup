@@ -43,15 +43,17 @@ BAR=""
 [ "$FILLED" -gt 0 ] && printf -v F "%${FILLED}s" && BAR="${F// /█}"
 [ "$EMPTY" -gt 0 ] && printf -v E "%${EMPTY}s" && BAR="${BAR}${E// /░}"
 
+# git info is anchored to the displayed dir with -C, not the process cwd,
+# so line 1's folder and its branch/dirty counts can never disagree.
 GIT=""
-if git rev-parse --git-dir >/dev/null 2>&1; then
-  BRANCH=$(git branch --show-current 2>/dev/null)
+if [ -n "$DIR" ] && git -C "$DIR" rev-parse --git-dir >/dev/null 2>&1; then
+  BRANCH=$(git -C "$DIR" branch --show-current 2>/dev/null)
   if [ -z "$BRANCH" ]; then
-    BRANCH=$(git rev-parse --short HEAD 2>/dev/null || echo "detached")
+    BRANCH=$(git -C "$DIR" rev-parse --short HEAD 2>/dev/null || echo "detached")
   fi
-  STAGED=$(git diff --cached --numstat 2>/dev/null | wc -l | tr -d ' ')
-  MODIFIED=$(git diff --numstat 2>/dev/null | wc -l | tr -d ' ')
-  UNTRACKED=$(git ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ')
+  STAGED=$(git -C "$DIR" diff --cached --numstat 2>/dev/null | wc -l | tr -d ' ')
+  MODIFIED=$(git -C "$DIR" diff --numstat 2>/dev/null | wc -l | tr -d ' ')
+  UNTRACKED=$(git -C "$DIR" ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ')
   GIT=" ${DIM}on${RESET} 🌿 ${BRANCH}"
   [ "${STAGED:-0}" -gt 0 ] && GIT="${GIT} ${GREEN}+${STAGED}${RESET}"
   [ "${MODIFIED:-0}" -gt 0 ] && GIT="${GIT} ${YELLOW}~${MODIFIED}${RESET}"

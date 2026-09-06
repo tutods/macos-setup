@@ -10,10 +10,12 @@
       type = lib.types.listOf lib.types.str;
       default = ["Conventions" "Lessons" "Decisions" "Process" "Projects" "Clients" "Notes"];
       description = ''
-        Vault folders the SessionStart hook indexes into context. Scope this
-        per role: the work machine must not have personal-context folders
-        (freelance clients, personal projects) injected into every session.
-        The vault stays readable either way, this only scopes the injection.
+        Vault folders in scope for this machine, exported as the
+        CLAUDE_VAULT_FOLDERS env var in settings.json; the vault-lint agent
+        audits folder coverage against it. Scope this per role: the work
+        machine must not declare personal-context folders (freelance clients,
+        personal projects). The vault stays readable either way, this only
+        declares the scope.
       '';
     };
 

@@ -10,7 +10,7 @@ When the user asks to commit, use the **`open-pr` skill** (stage, message, commi
 
 ## Vault
 
-Every session opens with a titles-only index of the vault's core folders. Consult it before searching for anything, and do not grep the vault inline: lookups go through the `vault-search` agent. The `obsidian-vault` skill owns the rest, including the four proactive write triggers: a corrected mistake, an approved decision, a stated standing rule, a completed deploy or handoff. Load it when one of those fires. Behavioural rules about the agent belong in `learned-rules.md`, not the vault: one fact, one home.
+Nothing about the vault is injected automatically; discover it on demand, and do not grep the vault inline: lookups go through the `vault-search` agent. The `obsidian-vault` skill owns the rest, including the four proactive write triggers: a corrected mistake, an approved decision, a stated standing rule, a completed deploy or handoff. Load it when one of those fires. Behavioural rules about the agent belong in `learned-rules.md`, not the vault: one fact, one home.
 
 ## Code & Comments
 

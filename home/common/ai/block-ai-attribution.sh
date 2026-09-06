@@ -18,14 +18,24 @@ fi
 
 content=$cmd
 
-files=$(printf '%s' "$cmd" | grep -oE '(--body-file|--input|--file|-F)(=|[[:space:]]+)[^[:space:]]+' | sed -E 's/^(--body-file|--input|--file|-F)(=|[[:space:]]+)//')
-for f in $files; do
+# Two file-reference shapes: a flag whose value is the path (--body-file x.md,
+# --input x.md), and gh's @-expansion where the path hides inside a field value
+# (-F body=@x.md, --field body=@x.md).
+files=$(printf '%s' "$cmd" | grep -oE '(--body-file|--input|--file|--field|-F)(=|[[:space:]]+)[^[:space:]]+' | sed -E 's/^(--body-file|--input|--file|--field|-F)(=|[[:space:]]+)//')
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
   f=$(printf '%s' "$f" | sed -E "s/^[\"']//; s/[\"']$//")
+  case "$f" in
+    *=@*) f=${f#*=@} ;;
+    *=*) continue ;;
+  esac
   if [ -f "$f" ]; then
     content="$content
 $(cat "$f" 2>/dev/null)"
   fi
-done
+done <<EOF
+$files
+EOF
 
 if printf '%s' "$content" | grep -iEq 'co-authored-by:|🤖|generated with claude code|claude\.com/claude-code|automated cross-pr review|review by claude code'; then
   cat <<'JSON'

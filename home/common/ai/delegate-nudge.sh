@@ -3,8 +3,9 @@
 # the main thread and, once past a threshold, injects a reminder that recon
 # belongs in a subagent. Never denies.
 #
-# Subagents fire the same PreToolUse hooks, so a non-empty agent_id (set only
-# inside a subagent) is the discriminator: bail immediately when present.
+# Turn-boundary logic (subagent bail via agent_id, prompt_id turn key,
+# counter dir, 2h GC) is shared with force-delegation.sh via lib/turn-key.sh
+# so the two never define "a turn" differently.
 #
 # No `set -e`: every path must degrade to exit 0, so a parse failure here can
 # never block an unrelated tool call.
@@ -12,20 +13,21 @@ set -uo pipefail
 
 threshold=3
 
+lib="$(dirname "$0")/lib/turn-key.sh"
+[ -r "$lib" ] || exit 0
+. "$lib"
+
 input=$(cat)
 
-agent_id=$(printf '%s' "$input" | jq -r '.agent_id // empty' 2>/dev/null)
-[ -n "$agent_id" ] && exit 0
+# Parse stdin once; if jq fails, both stay empty and turn_counter bails.
+{
+  IFS= read -r agent_id
+  IFS= read -r turn
+} <<EOF
+$(printf '%s' "$input" | jq -r '.agent_id // "", .prompt_id // ""' 2>/dev/null)
+EOF
 
-turn=$(printf '%s' "$input" | jq -r '.prompt_id // .session_id // empty' 2>/dev/null)
-[ -z "$turn" ] && exit 0
-
-dir="${TMPDIR:-/tmp}/claude-delegate-nudge"
-mkdir -p "$dir" 2>/dev/null || exit 0
-find "$dir" -mindepth 1 -maxdepth 1 -mmin +120 -exec rm -rf {} + 2>/dev/null
-
-safe_turn=$(printf '%s' "$turn" | tr -c 'A-Za-z0-9._-' '_')
-counter="$dir/$safe_turn"
+turn_counter claude-delegate-nudge "$agent_id" "$turn" || exit 0
 
 # One byte per call. append is atomic for a write this small, so parallel recon
 # calls in one message each land their own byte instead of racing a

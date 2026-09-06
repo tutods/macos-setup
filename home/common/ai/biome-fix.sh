@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PostToolUse (Edit|Write|MultiEdit): biome-fix just the edited file.
+# PostToolUse (Edit|Write): biome-fix just the edited file.
 #
 # Only a PATH-installed biome is ever executed. The old inline hook fell back
 # to ./node_modules/.bin/biome, which hands a cloned repo arbitrary code

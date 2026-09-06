@@ -16,7 +16,8 @@
     # so an unpinned install would run whatever was published last. Bump the
     # pin deliberately (`pipx upgrade` never runs on its own).
     echo "↣ pipx packages"
-    export PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH"
+    # doCheck = false: same override (and rationale) as modules/packages/development.nix
+    export PATH="${pkgs.pipx.overridePythonAttrs (_: {doCheck = false;})}/bin:$HOME/.local/bin:$PATH"
     if ! pipx list 2>/dev/null | grep -q 'code-review-graph 2.3.8'; then
       pipx install --force code-review-graph==2.3.8 \
         || echo "  ⚠ pipx install code-review-graph failed; the code-review-graph MCP server (mcp.nix) will be broken until it succeeds"

@@ -17,7 +17,7 @@ Standing rules mined from past corrections; each exists because the same mistake
 - **A revert is complete**: files, dependencies and tools added for the change all go, and later work that built on the reverted code is re-verified.
 - **No loops**: the same command failing twice means stop, change approach or ask, never re-run unchanged hoping for a different result.
 - **A config change isn't done while an old contradicting block survives**: find and remove or flip the rule that blocks the new behavior, don't add a new one beside it.
-- **Check official docs for a fast-moving library before implementing, unprompted**: training memory lags releases; this machine's stack skill and `ts-conventions` name which libraries this bites on.
+- **Check official docs for a fast-moving library before implementing, unprompted**: training memory lags releases; the stack skills flag a known case (Better Auth, in the personal stack), but the rule applies to any library that ships faster than training data.
 - **A PR isn't delivered with conflicts on it**: after opening, updating, or the base moving, resolve immediately and confirm mergeable.
 - **Never name a new thing for a problem an existing name already covers**: search for the value first, delete a duplicate before adding a name, and repeat a literal at three call sites rather than add a fourth name nobody will find.
 

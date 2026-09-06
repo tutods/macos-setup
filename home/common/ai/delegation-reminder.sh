@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # UserPromptSubmit hook: re-state the Delegation Contract, but only once the
 # session has been compacted. Before compaction the full contract sits in the
 # context (rules file), so re-injecting it every turn is a per-prompt tax with
