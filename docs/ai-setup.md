@@ -53,7 +53,11 @@ deploy drops it.
 
 `autoMemoryEnabled` is off, so the harness remembers nothing on its own. The
 Obsidian vault is the durable memory, written by the `obsidian-vault` skill and
-read by the `vault-search` agent.
+read by the `vault-search` agent. Nothing injects vault content at session
+start (the old `vault-context.sh` title index cost ~3k tokens per session and
+was redundant next to `vault-search`); `home.ai.vaultFolders` still declares
+the role-scoped folder set, exported as `CLAUDE_VAULT_FOLDERS` in
+`settings.json` for `vault-lint`'s scope-coverage check.
 `autoCompactEnabled` is true with no context-window override set, so compaction
 fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 
@@ -61,14 +65,13 @@ fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 
 | Hook | Trigger | Action |
 |------|---------|--------|
-| `SessionStart` | Every session | `vault-context.sh`, lists Obsidian note titles so the agent knows what exists. Prompts/ is excluded (a pointer line with a note count stands in), and truncation is folder-aware, it never cuts mid-folder. Bodies come from `vault-search` on demand. The folder list is role-scoped via `home.ai.vaultFolders`: the work machine indexes only generic folders (Conventions, Decisions, Lessons, Process, Notes), so freelance-client and personal-project titles never enter a work session |
-| `SessionStart` | Every session | `crg-autobuild.sh`, resolves the git toplevel, exits silently with no repo or no `code-review-graph` binary, takes an atomic `mkdir` lock so two sessions in one repo can't both start a parse, then backgrounds a `build` (no graph yet) or `update` (graph exists) under `nice -n 10`, logging to `.code-review-graph/autobuild.log`. Solves the MCP server's "No graph found, run `code-review-graph build` first" error in any repo never built before, which is every new repo. Never blocks the session. opencode runs the same script from the plugin's `session.start`. Manual path: `crgb`/`crgu`/`crgs` fish abbreviations for build/update/status |
+| `SessionStart` | Every session | `crg-autobuild.sh`, resolves the git toplevel, exits silently with no repo or no `code-review-graph` binary, skips entirely when a content stamp (HEAD + `git status --porcelain`, hashed) matches the last successful run — most sessions open on an unchanged tree — otherwise takes an atomic `mkdir` lock so two sessions in one repo can't both start a parse, then backgrounds a `build` (no graph yet) or `update` (graph exists) under `nice -n 10`, logging to `.code-review-graph/autobuild.log` and re-stamping on success. Solves the MCP server's "No graph found, run `code-review-graph build` first" error in any repo never built before, which is every new repo. Never blocks the session. opencode runs the same script from the plugin's `event` hook, filtered on `session.created` (the plugin API has no `session.start` hook). Manual path: `crgb`/`crgu`/`crgs` fish abbreviations for build/update/status |
 | `UserPromptSubmit` | Every prompt after compaction | `delegation-reminder.sh` re-states the Delegation Contract once the session transcript contains a compaction boundary; before that the full contract is already in context and the hook is silent |
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
 | `PreToolUse` | Any `Bash` call | `rtk-rewrite.sh`, its own matcher group, wraps `rtk hook claude` to auto-rewrite commands for permission-free read-only ops (silent no-op when `rtk` is absent) |
 | `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the third inline `Read`/`Grep`/`Glob` in a turn, once per turn |
-| `PreToolUse` | `Edit`, `Write`, `MultiEdit` | `force-delegation.sh`, hard gate (not a nudge): denies main-thread file mutations past a 2-per-turn grace allowance (skips subagents via `agent_id`), forcing everything past that through a subagent |
-| `PostToolUse` | `Edit`, `Write`, `MultiEdit` | `biome check --write`, no-op unless the project has a biome config |
+| `PreToolUse` | `Edit`, `Write` | `force-delegation.sh`, hard gate (not a nudge): allows main-thread mutations to at most 2 distinct files per turn (repeat edits to those files are unlimited) and denies any mutation that would spread to a further file (skips subagents via `agent_id`), forcing multi-file work through a subagent. Turn-boundary logic (agent_id bail, `prompt_id` turn key — no key means allow, never a session-wide fallback — counter dir, 2h GC) is shared with `delegate-nudge.sh` via `hooks/lib/turn-key.sh` |
+| `PostToolUse` | `Edit`, `Write` | `biome check --write`, no-op unless the project has a biome config |
 
 ## MCP Servers
 
@@ -115,15 +118,25 @@ locally, and the pin is what stops someone else's next commit from running
 here unreviewed. Get the sha with `git ls-remote https://github.com/<owner>/<repo> HEAD`,
 review the repo at that commit, and bump pins deliberately the same way.
 `verify-plugins.sh` validates each plugin against its pinned commit.
+First-party exception: employer-owned private marketplaces (the work role's
+`ai-workbench`) are deliberately unpinned — tracking the team's HEAD is the
+point, and the trust model is first-party, the same org whose repos and
+credentials already live on that machine. The `@sha` rule stays absolute for
+third-party repos. Build-time enforcement matches that split: an unpinned
+entry is valid, but a malformed pin is not — a pin after the last `@` that is
+not a full 40-char lowercase commit sha fails eval outright (a `throw` in
+`home/common/ai/settings.nix`) with instructions for fetching the real sha,
+because Claude Code would silently accept a branch or tag there as a moving
+ref, defeating the pin.
 
 **Every marketplace is a supply-chain trust**: plugins run code and register
 skills in every session, and the verification scripts check names, not
 behavior. Before adding one, check whether a skill you actually invoked in the
 last 30 days needs it (transcripts under `~/.claude/projects/`), and prefer
 moving stack- or domain-specific plugins to the project that uses them. The
-2026-08 cut dropped marketplaces that no transcript invocation had touched:
-social-media-skills, ui-ux-pro-max, claude-code-workflows,
-anthropic-agent-skills, claude-code-skills.
+2026-08 cut dropped the marketplaces no transcript invocation had touched
+(social-media-skills, claude-code-workflows, anthropic-agent-skills) and kept
+`ui-ux-pro-max-skill` and `claude-code-skills`, which still carry used plugins.
 
 **Machine-wide plugins are generic only**: workflow, writing, debugging,
 authoring. Stack- and domain-specific plugins (framework packs, SEO, design
@@ -154,6 +167,14 @@ Code installs nothing, and nothing is logged. Always run:
 ./scripts/verify-plugins.sh          # every plugin resolves, + the skill count each drags in
 ./scripts/verify-plugins.sh --quiet  # what CI and the pre-commit hook run
 ```
+
+When a marketplace repo refuses the script's anonymous clone (a private repo,
+e.g. the work role's `ai-workbench`), it falls back to the marketplace Claude
+Code already installed locally, checking the plugin name against
+`~/.claude/plugins/marketplaces/<mkt>/.claude-plugin/marketplace.json` — and
+scans every `/Users/*` home for that file, since on the work machine the deploy
+runs as the admin account while Claude Code runs as the user. No clone and no
+local install is a failure, not a skip.
 
 ### Custom: in-repo sources
 

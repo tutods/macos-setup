@@ -58,8 +58,10 @@ Three layers manage software, each has a distinct scope:
 | `media.nix` | Image/video processing (imagemagick, ffmpeg, jpegoptim, optipng) |
 | `fonts.nix` | System fonts (JetBrains Mono, Fira Code, Montserrat, etc.) |
 
-VSCode is managed by Home Manager only (not here). Host-specific system
-packages (e.g. doppler, macbook only) live in `hosts/darwin/<name>/packages.nix`.
+VSCode is managed by Home Manager only (not here). Machine-specific tools
+(e.g. doppler and opencode, personal only) are role user packages in
+`home/roles/personal/packages.nix`, not system packages; there is no per-host
+`packages.nix` anymore.
 
 ### 2. Homebrew (`modules/darwin/homebrew/` + `hosts/darwin/<name>/homebrew/`)
 GUI apps and casks that aren't in nixpkgs or work better through Homebrew. Split into:
@@ -89,7 +91,7 @@ home/
 │   │   └── ghostty/     # Config + Catppuccin Mocha theme (via file symlink)
 │   ├── cli/
 │   │   ├── bat.nix
-│   │   ├── gh.nix       # GitHub CLI + copilot extension
+│   │   ├── gh.nix       # GitHub CLI
 │   │   ├── git.nix      # Shared git config + delta diff viewer, identity from ~/.config/git/private
 │   │   └── htop.nix
 │   └── shell/

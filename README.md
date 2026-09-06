@@ -117,7 +117,7 @@ nothing: [recovery.md](docs/recovery.md)
 ```bash
 ./nix.sh macbook                    # rebuild and apply
 ./nix.sh macbook --build-only       # build only, no sudo, catches errors
-./nix.sh macbook --force            # force rebuild
+./nix.sh macbook --force            # rebuild even if cached, skip doctor prompt
 nix fmt                             # format all Nix files (pre-commit enforces)
 nix flake check                     # validate the flake
 ```
@@ -175,9 +175,9 @@ nix flake check                     # validate the flake
 | Media tool | `modules/packages/media.nix` |
 | Font | `modules/packages/fonts.nix` |
 | Homebrew cask, all machines | `modules/darwin/homebrew/casks/` |
-| Homebrew cask, one machine | `hosts/darwin/<name>/homebrew/casks/` |
+| Homebrew cask, one machine | `hosts/darwin/<name>/homebrew/` — `macbook` splits by category in `casks/`, `work` keeps its few casks flat in `homebrew/default.nix` |
 | App Store app | `modules/darwin/homebrew/mas.nix` or the host's own `mas.nix` |
-| System package, one machine | `hosts/darwin/<name>/packages.nix` |
+| Package, one machine | `home/roles/personal/packages.nix` (role user packages; the work role has none) |
 | User program | `home/common/` |
 | Claude skill | `home/common/ai/skills/local/` + the `names` list |
 | Claude plugin | `home/common/ai/plugins.nix` or a role's `ai/default.nix` |
@@ -215,8 +215,8 @@ brew doctor                         # if Homebrew misbehaves after a rebuild
 find ~ -name "*.backup" -mtime +7   # stale Home Manager backups
 ```
 
-CI validates the flake and builds both Darwin configurations on every push and
-pull request, plus daily. [Renovate](.github/renovate.json) auto-merges minor
+CI validates the flake and builds both Darwin configurations on every push to
+main and every pull request, plus daily. [Renovate](.github/renovate.json) auto-merges minor
 and patch updates for `nixpkgs`, `home-manager`, `nix-darwin` and
 `nix-homebrew`; majors need review.
 

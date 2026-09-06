@@ -31,9 +31,13 @@ replaces the old `verify-references.sh`; its doc backtick-path check (repo paths
 cited in Markdown that no longer exist) was dropped as low value.
 
 `verify-plugins.sh` is the one check `nix flake check` cannot do: it clones the
-marketplace repos to confirm each declared plugin resolves remotely. Plugins fail
-silently, so a typo'd name is never surfaced otherwise. The pre-commit hook runs
-`nix fmt` always and `verify-plugins.sh` when a plugin source file is staged.
+marketplace repos to confirm each declared plugin resolves remotely, falling
+back to the local Claude Code install of a marketplace (any `/Users/*` home)
+when the repo is private and refuses the anonymous clone. Plugins fail
+silently, so a typo'd name is never surfaced otherwise. The pre-commit hook
+format-checks the staged content (the index blobs, not the worktree) of any
+staged `.nix` files and fails with per-file re-stage guidance when they are
+unformatted, and runs `verify-plugins.sh` when a plugin source file is staged.
 
 ## Commands
 
@@ -47,6 +51,14 @@ Run from the repo root (where `flake.nix` lives).
 ./nix.sh macbook --force      # force rebuild
 nix-collect-garbage -d        # garbage collect old generations
 ```
+
+`deploy-doctor.sh` previews six things a deploy would change destructively:
+unmanaged skill dirs, undeclared plugins, foreign hook events, cleared
+`permissions.allow` rules, the opencode skills reconcile under
+`~/.agents/skills`, and the Homebrew `cleanup = "uninstall"` pass. `nix.sh`
+runs it automatically before every apply and gates on its exit code: 0
+proceeds, 2 (destructive changes predicted) requires interactive confirmation
+or `--force`, 3 (cannot certify) always aborts.
 
 ## Key Directories
 
@@ -89,8 +101,9 @@ protection's required checks (both `Build Darwin Configs` jobs included), so a
 lock update that fails to build cannot merge. `main` requires linear history
 and no force pushes; job names in required checks must match the workflow's
 `name:` fields exactly, keep them in sync when renaming a job. A failing
-scheduled/push run opens a tracking issue and closes it once green, except
-billing-class failures, which stop jobs before they start and only reach you
+scheduled/push run surfaces only in `gh run list` and GitHub's
+failure-notification emails, except billing-class failures, which stop jobs
+before they start and only reach you
 via GitHub's account emails — check `gh run list` when CI has been quiet.
 
 @docs/nix-conventions.md

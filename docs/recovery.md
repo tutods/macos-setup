@@ -38,4 +38,4 @@ Run the deployment script for the specific machine:
 
 ## 5. Troubleshooting
 - **Flake Errors**: If you see "no such file or directory" for `flake.nix`, ensure you are in the repo root.
-- **Permissions**: Use `./nix.sh <config> --force` if a previous failed run left the system in an inconsistent state.
+- **Failed runs**: Just re-run `./nix.sh <config>`, the deploy is idempotent. `--force` does not repair state: it only re-runs the top-level build derivation (`nix build --rebuild`) and skips the deploy-doctor confirmation.

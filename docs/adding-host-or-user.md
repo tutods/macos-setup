@@ -57,13 +57,10 @@ If the new user needs overrides beyond the shared `home/common/` config, create 
 
 `user` is the account `./nix.sh new-machine` deploys to; `hostPath` points at the host directory from step 1.
 
-### 5. Deploy
+### 5. Set up private git identity on the machine
 
-```bash
-./nix.sh new-machine
-```
-
-### 6. Set up private git identity on the machine
+Do this before the first deploy: the `checkSecrets` activation step aborts while
+`~/.config/git/private` is missing.
 
 ```bash
 mkdir -p ~/.config/git
@@ -72,6 +69,12 @@ cat > ~/.config/git/private << 'EOF'
     name  = Your Name
     email = your@email.com
 EOF
+```
+
+### 6. Deploy
+
+```bash
+./nix.sh new-machine
 ```
 
 ---
