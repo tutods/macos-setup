@@ -93,7 +93,8 @@ classify() {
     [.steps[]
      | select(.name | test("^(Set up job|Complete job|Post )") | not)
      | select(.conclusion != "success" and .conclusion != "skipped")]
-    | last | "\(.conclusion)\t\(.name)" // "none\tnone"' <<<"$detail")"
+    | (last // {conclusion: "none", name: "none"})
+    | "\(.conclusion)\t\(.name)"' <<<"$detail")"
 
   if [[ "${main_step%%$'\t'*}" == "cancelled" ]]; then
     printf 'infra|step "%s" cancelled while job failed (runner killed)\n' "${main_step#*$'\t'}"

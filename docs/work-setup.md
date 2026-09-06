@@ -9,7 +9,7 @@ Reference for the `work` host (`daniel.a.sousa`). Covers everything that differs
 - **Admin vs normal user**: Homebrew is owned by `admin.daniel.a.sousa`. Run `./nix.sh work` as that admin account. Post-apply hooks execute as `daniel.a.sousa`.
 - **No Doppler**: Secrets go in `~/.config/fish/secrets.fish` or company tooling. No `doppler` CLI on work machine.
 - **Secrets file location**: `~/.config/fish/secrets.fish`, create as `daniel.a.sousa`, chmod 600.
-- **Vault scope**: The Obsidian vault syncs here via its private git repo, but the `SessionStart` index is scoped by `home.ai.vaultFolders` to generic folders only, personal-client and personal-project titles never enter a work session. The folders are still on disk; only the automatic injection is scoped. Do not write work content into `Clients/` or `Projects/`, it lands in the personal repo.
+- **Vault scope**: The Obsidian vault syncs here via its private git repo. Nothing injects vault content into sessions; lookups go through `vault-search` on demand. `home.ai.vaultFolders` declares the work-relevant folders (generic only, no `Clients/` or `Projects/`) for `vault-lint`'s scope-coverage check; the folders are still on disk regardless. Do not write work content into `Clients/` or `Projects/`, it lands in the personal repo.
 
 ---
 
@@ -24,7 +24,7 @@ git config --file ~/.config/git/private user.name "Daniel Sousa"
 git config --file ~/.config/git/private user.email "daniel.a.sousa@<company>.com"
 ```
 
-Branch naming convention: `feat/PROJ-123-description` (Jira-linked).
+Branch naming: see `home/roles/work/ai/instructions.md`, the only home of that rule.
 
 Company repos live on Bitbucket or GitHub. Check remote with `git remote -v`.
 
@@ -53,10 +53,21 @@ gcloud config list                        # show current config
 
 | Tool | Purpose |
 |------|---------|
-| `acli` | Atlassian CLI, `acli issue list`, `acli project list` |
+| `acli` | Atlassian CLI, `acli jira workitem search --jql "..."`, `acli jira project list` |
 | `gcloud` | GCP operations |
+| `ai-workbench` | Mindera's private Claude Code plugin marketplace (`Mindera-People/ai-workbench`), declared in `home/roles/work/ai/default.nix` (`mp-ai-workbench`, `mp-fe-design`) |
 
 VPN must be connected before accessing internal services.
+
+`ai-workbench` is a private GitHub repo: the logged-in GitHub account needs
+Mindera-People access before Claude Code can install the marketplace, and
+`./scripts/verify-plugins.sh` needs either that repo access or an existing
+local install (`~/.claude/plugins/marketplaces/ai-workbench/`, any `/Users/*`
+home) to verify against; with neither, it fails rather than skips.
+
+`mp-conventions.md` and `mp-fields.md` are slated to move into
+`Mindera-People/ai-workbench` (pending the owner pushing them there); until
+then they live in the `acli` skill (`home/roles/work/ai/skills/local/acli/references/`).
 
 ---
 
@@ -75,10 +86,10 @@ or an API token in this file.
 
 ## Fresh work machine checklist
 
-1. Run `./nix.sh work` as `admin.daniel.a.sousa`
-2. Set git identity (see above)
-3. Create `~/.config/fish/secrets.fish` with `GITHUB_TOKEN`
-4. Run `./nix.sh work` again (or restart shell) so secrets load
+1. Set git identity (see above), activation aborts while `~/.config/git/private` is missing
+2. Create `~/.config/fish/secrets.fish` with `GITHUB_TOKEN`
+3. Run `./nix.sh work` as `admin.daniel.a.sousa`
+4. Restart the shell so secrets load
 5. `gcloud auth login && gcloud auth application-default login`
 6. Connect VPN before accessing internal services
 7. Verify MCP: `claude mcp list` (should show `code-review-graph`)

@@ -30,7 +30,7 @@ Non-negotiable, this runs unattended.
 - **One review per `<pr>:<sha>`.** Never post twice for the same head SHA. A new push (new SHA) gets a fresh review of the new diff.
 - Review event is always `COMMENT`, never `APPROVE`, never `REQUEST_CHANGES`.
 - Max 15 inline comments per review, most severe first; overflow goes into the review body as a list.
-- Posted text must not contain the phrases the `block-ai-attribution` hook rejects: no robot emoji, no "review by Claude Code", no "generated with Claude Code", no co-author trailers, no claude.com/claude-code links. The model id footer (`_Model: <id>_`) is required and passes the hook, keep it exactly in that form.
+- Posted text must not contain the phrases the `block-ai-attribution` hook rejects: no robot emoji, no "review by Claude Code", no "generated with Claude Code", no co-author trailers, no claude.com/claude-code links. The model id footer (`_Model: <id>_`) is required and passes the hook, keep it exactly in that form. The footer exists because this loop posts unattended to a work repo: it is provenance, so the team can judge and track machine reviews — the deliberate exception to the interactive skills' no-model-credit rule (`review-pr`, `open-pr`), which speak as the user.
 
 ## Step 1: Enumerate
 

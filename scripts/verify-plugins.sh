@@ -30,7 +30,9 @@ command -v jq >/dev/null || { echo "verify-plugins: jq not found" >&2; exit 2; }
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-# Role files are scanned too, they declare no plugins today, but may again.
+# Role files are scanned too: the work role declares the private ai-workbench
+# marketplace and its plugins (which is also why the local-install fallback in
+# the fetch failure path below exists).
 SOURCES=(
   home/common/ai/plugins.nix
   home/roles/personal/ai/default.nix
@@ -113,19 +115,50 @@ while read -r entry; do
   [ "$spec" != "$repo" ] && sha="${spec##*@}"
 
   dir=$(fetch "$repo") || {
-    echo "FAIL  $entry -> could not fetch $repo" >&2
+    # Private marketplaces (e.g. an employer's org repo) refuse the anonymous
+    # clone this script uses. If Claude Code already installed the marketplace
+    # locally, verify the plugin name against that copy instead of failing:
+    # it is the same marketplace.json the deploy will resolve from.
+    # The repo may live in a different account than the one Claude Code runs
+    # in (admin vs user on the work machine), so look for the install in every
+    # local home, current one first.
+    local_mkt=""
+    for cand in "$HOME/.claude/plugins/marketplaces/$mkt/.claude-plugin/marketplace.json" \
+      /Users/*/.claude/plugins/marketplaces/"$mkt"/.claude-plugin/marketplace.json; do
+      [ -r "$cand" ] && local_mkt="$cand" && break
+    done
+    if [ -n "$local_mkt" ]; then
+      if jq -e --arg p "$plugin" '.plugins[] | select(.name == $p)' "$local_mkt" >/dev/null; then
+        echo "  $entry  (private marketplace, verified against local install)"
+      else
+        echo "FAIL  $entry -> '$plugin' is not a plugin in the local install of $mkt" >&2
+        fail=$((fail + 1))
+      fi
+      continue
+    fi
+    echo "FAIL  $entry -> could not fetch $repo (private? no local install at ~/.claude/plugins/marketplaces/$mkt to fall back on)" >&2
     fail=$((fail + 1)); continue
   }
 
   ref="HEAD"
   if [ -n "$sha" ]; then
-    if git -C "$dir" cat-file -e "$sha^{commit}" 2>/dev/null \
-      || git -C "$dir" fetch -q --depth 1 origin "$sha" 2>/dev/null; then
-      ref="$sha"
-    else
-      echo "FAIL  $entry -> pinned sha $sha does not exist in $repo" >&2
-      fail=$((fail + 1)); continue
+    if ! git -C "$dir" cat-file -e "$sha^{commit}" 2>/dev/null; then
+      # A failed fetch is not proof the pin is bad: a transient network error
+      # must not send anyone off to re-pin a valid commit. Only an explicit
+      # "not found" from the remote (or a fetch that succeeds yet still leaves
+      # the sha missing locally) means the sha really does not exist.
+      if fetch_err=$(git -C "$dir" fetch -q --depth 1 origin "$sha" 2>&1); then
+        : # fetched; the cat-file below is the verdict
+      elif ! grep -qiE 'not our ref|unadvertised object|couldn.t find remote ref|bad object' <<< "$fetch_err"; then
+        echo "FAIL  $entry -> fetching pinned sha $sha from $repo failed (network/transient error, retry): $(head -n 1 <<< "$fetch_err")" >&2
+        fail=$((fail + 1)); continue
+      fi
+      if ! git -C "$dir" cat-file -e "$sha^{commit}" 2>/dev/null; then
+        echo "FAIL  $entry -> pinned sha $sha does not exist in $repo" >&2
+        fail=$((fail + 1)); continue
+      fi
     fi
+    ref="$sha"
   fi
 
   mj="$dir/mj-$ref.json"
