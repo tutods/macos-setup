@@ -15,6 +15,12 @@
 #   - opencodeSkillsReconcile deletes any dir under ~/.agents/skills whose
 #     .skill-lock.json source is not one of skills.nix's declared sources,
 #     when home.ai.opencodeSkillsPrune is true (personal machine only).
+#   - homebrew.onActivation (cleanup = "uninstall" + --force-cleanup) runs
+#     `brew bundle --cleanup --force-cleanup`, force-uninstalling every brew
+#     formula/cask/tap not in the generated Brewfile, no prompt
+#     (modules/darwin/homebrew/default.nix). Previewed via a `brew bundle
+#     cleanup` dry run against the pending config's Brewfile — but only when
+#     the target config is this machine's: brew's live state is per-machine.
 #   - NOT previewed: home.activation.opencodePlugins empties
 #     ~/.config/opencode/plugin{,s} of everything but the two names it keeps
 #     (home/roles/personal/opencode/default.nix). Personal machine only, and
@@ -23,42 +29,55 @@
 # Usage: ./scripts/deploy-doctor.sh [macbook|work]   (default: this machine's
 # config inferred from the hostname)
 #
-# Exit 0 on a clean preview. Exits 1 only when it cannot run at all (bad
-# config, failed flake eval), never as a deploy gate. Deps: nix, jq.
+# Exit codes (nix.sh gates the apply on these):
+#   0  clean preview — nothing destructive predicted
+#   2  destructive changes predicted (deletions/drops listed above exit)
+#   3  cannot certify — bad config, failed flake eval, missing jq, corrupt
+#      settings.json; the caller must abort rather than apply blind
+# Deps: nix, jq. brew is optional: without it (fresh machine) the brew
+# cleanup preview is skipped with a note, everything else still runs.
 set -uo pipefail
 
-cd "$(dirname "$0")/.." || exit 1
+cd "$(dirname "$0")/.." || exit 3
 
 # jq parses every list below; without it the skill section would report every
 # dir as "will delete" and the settings sections would print a bogus all-clear.
 command -v jq >/dev/null 2>&1 || {
   echo "deploy-doctor: jq not found — aborting" >&2
-  exit 1
+  exit 3
 }
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 print_warn() { echo -e "  ${YELLOW}⚠${NC}  $1"; }
 print_ok()   { echo -e "  ${GREEN}✔${NC}  $1"; }
-print_del()  { echo -e "  ${RED}✖ will delete${NC} $1"; }
+# Every predicted deletion goes through print_del, which also feeds the final
+# exit code (0 clean / 2 destructive). The print_del loops below run in the
+# current shell (`< <(...)`, not pipes), so the counter survives them.
+DESTRUCTIVE=0
+print_del()  { echo -e "  ${RED}✖ will delete${NC} $1"; DESTRUCTIVE=$((DESTRUCTIVE+1)); }
 
 # ── Config and user for this machine ──────────────────────────────────────────
-CONFIG="${1:-}"
-if [ -z "$CONFIG" ]; then
-  case "$(scutil --get ComputerName 2>/dev/null || hostname)" in
-    *MacBook*|*macbook*) CONFIG="macbook" ;;
-    *) CONFIG="work" ;;
-  esac
-fi
+# LOCAL_CONFIG is the config this machine's hostname maps to. It is the
+# default target, and it gates the brew cleanup preview below: brew's live
+# state only exists here, so previewing it for the *other* host would lie.
+case "$(scutil --get ComputerName 2>/dev/null || hostname)" in
+  *MacBook*|*macbook*) LOCAL_CONFIG="macbook" ;;
+  *) LOCAL_CONFIG="work" ;;
+esac
+CONFIG="${1:-$LOCAL_CONFIG}"
 
 if ! USER_NAME=$(nix --extra-experimental-features "nix-command flakes" eval --raw \
       --file ./hosts.nix --apply "h: h.\"$CONFIG\".user" 2>/dev/null) || [ -z "$USER_NAME" ]; then
   echo "deploy-doctor: unknown config '$CONFIG' or hosts.nix eval failed (expected macbook|work)" >&2
-  exit 1
+  exit 3
 fi
 
 # Quoted attr: usernames can contain dots (daniel.a.sousa), which would
-# otherwise parse as nested attribute path segments.
-HM=".#darwinConfigurations.$CONFIG.config.home-manager.users.\"$USER_NAME\""
+# otherwise parse as nested attribute path segments. The eval selects the
+# darwin config root (not the HM user) because the brew preview needs the
+# darwin-level homebrew.brewfile too; HM names the user subtree in messages.
+DARWIN=".#darwinConfigurations.$CONFIG.config"
+HM="$DARWIN.home-manager.users.\"$USER_NAME\""
 NIX=(nix --extra-experimental-features "nix-command flakes" eval --json)
 
 # On work, the deploy is run as admin.daniel.a.sousa (Homebrew owner) but
@@ -72,13 +91,30 @@ echo ""
 echo -e "  ${BOLD}${CYAN}▸${NC} ${BOLD}Deploy doctor${NC} ${DIM}config=$CONFIG user=$USER_NAME home=$TARGET_HOME${NC}"
 echo ""
 
-# ── 1. Skills the reconcile will delete ──────────────────────────────────────
-# An empty result here would report every skill dir as "will delete", so a
+# ── Flake eval, once for everything ──────────────────────────────────────────
+# One full-flake eval selects every attr this script needs; the per-attr evals
+# it replaces each re-evaluated nixpkgs + nix-darwin + the whole HM tree. The
+# opencode attrs exist only on macbook, so they fall back to null via `or`.
+# An empty/failed result would report every skill dir as "will delete", so a
 # failed eval must abort rather than proceed with an empty allowlist.
-if ! skills_json=$("${NIX[@]}" "$HM.home.ai.customSkills" 2>/dev/null) || [ -z "$skills_json" ]; then
-  echo "deploy-doctor: could not eval $HM.home.ai.customSkills — aborting instead of showing a bogus delete list" >&2
-  exit 1
+if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
+  cfg: let hm = cfg.home-manager.users.\"$USER_NAME\"; in {
+    customSkills = hm.home.ai.customSkills;
+    plugins = hm.home.ai.plugins;
+    opencodeSkillsPrune = hm.home.ai.opencodeSkillsPrune or null;
+    opencodeSkillsSources = hm.home.ai.opencodeSkillsSources or null;
+    brewfile = cfg.homebrew.brewfile or null;
+  }" 2>/dev/null) || [ -z "$doctor_json" ]; then
+  echo "deploy-doctor: could not eval $HM (customSkills/plugins/opencode attrs) — aborting instead of showing a bogus delete list" >&2
+  exit 3
 fi
+skills_json=$(printf '%s' "$doctor_json" | jq -c '.customSkills')
+plugins_json=$(printf '%s' "$doctor_json" | jq -c '.plugins')
+prune_flag=$(printf '%s' "$doctor_json" | jq -r '.opencodeSkillsPrune')
+sources_json=$(printf '%s' "$doctor_json" | jq -c '.opencodeSkillsSources')
+brewfile=$(printf '%s' "$doctor_json" | jq -r '.brewfile // empty')
+
+# ── 1. Skills the reconcile will delete ──────────────────────────────────────
 declare -a declared_skills
 while IFS= read -r s; do declared_skills+=("$s"); done < <(printf '%s' "$skills_json" | jq -r '.[]')
 
@@ -99,11 +135,6 @@ done
 [ ! -d "$SKILLS_DIR" ] && print_ok "$SKILLS_DIR does not exist yet"
 
 # ── 2. Plugins a deploy will disable ─────────────────────────────────────────
-# Same failure mode as skills: an empty list marks every plugin for drop.
-if ! plugins_json=$("${NIX[@]}" "$HM.home.ai.plugins" 2>/dev/null) || [ -z "$plugins_json" ]; then
-  echo "deploy-doctor: could not eval $HM.home.ai.plugins — aborting instead of showing a bogus drop list" >&2
-  exit 1
-fi
 declare -a declared_plugins
 while IFS= read -r p; do declared_plugins+=("$p"); done < <(printf '%s' "$plugins_json" | jq -r '.[]')
 
@@ -113,7 +144,7 @@ if [ -f "$SETTINGS" ]; then
   # section below — a false all-clear from the tool meant to catch deletions.
   jq empty "$SETTINGS" 2>/dev/null || {
     echo "deploy-doctor: $SETTINGS is not valid JSON — aborting instead of showing a bogus all-clear" >&2
-    exit 1
+    exit 3
   }
   dropped=0
   while IFS= read -r name; do
@@ -157,13 +188,11 @@ fi
 # This duplicates the module's own .skill-lock.json + jq lookup instead of
 # sharing code with it.
 if [ "$CONFIG" = "macbook" ]; then
-  if ! prune_flag=$("${NIX[@]}" "$HM.home.ai.opencodeSkillsPrune" 2>/dev/null) || [ -z "$prune_flag" ]; then
-    echo "deploy-doctor: could not eval $HM.home.ai.opencodeSkillsPrune — aborting instead of showing a bogus prune preview" >&2
-    exit 1
-  fi
-  if ! sources_json=$("${NIX[@]}" "$HM.home.ai.opencodeSkillsSources" 2>/dev/null) || [ -z "$sources_json" ]; then
-    echo "deploy-doctor: could not eval $HM.home.ai.opencodeSkillsSources — aborting instead of showing a bogus prune preview" >&2
-    exit 1
+  # Both attrs came from the combined eval above; on macbook they must exist —
+  # a null here means the options vanished from the flake, not "nothing to do".
+  if [ "$prune_flag" = "null" ] || [ "$sources_json" = "null" ]; then
+    echo "deploy-doctor: $HM.home.ai.opencodeSkillsPrune/Sources missing on macbook — aborting instead of showing a bogus prune preview" >&2
+    exit 3
   fi
 
   OC_SKILLS_DIR="$TARGET_HOME/.agents/skills"
@@ -215,7 +244,52 @@ if [ "$CONFIG" = "macbook" ]; then
   fi
 fi
 
-# ── 6. opencode provider auth (personal machine only) ────────────────────────
+# ── 6. brew formulae/casks/taps the cleanup will uninstall ───────────────────
+# The deploy runs `brew bundle --cleanup --force-cleanup` against the Brewfile
+# nix-darwin generates, uninstalling everything unlisted without prompting.
+# Preview: write the pending config's Brewfile (config.homebrew.brewfile, the
+# exact text the deploy will use) to a temp file and run `brew bundle cleanup`
+# WITHOUT --force — a dry run that lists what would be uninstalled and removes
+# nothing (exit 0 when clean, exit 1 + "Would uninstall/untap" lines when not).
+if [ "$CONFIG" != "$LOCAL_CONFIG" ]; then
+  print_warn "brew cleanup preview skipped ${DIM}(config $CONFIG is not this machine; brew's live state is per-machine — run the doctor there)${NC}"
+elif ! command -v brew >/dev/null 2>&1; then
+  print_warn "brew cleanup preview skipped ${DIM}(brew not installed yet)${NC}"
+elif [ -z "$brewfile" ]; then
+  echo "deploy-doctor: $DARWIN.homebrew.brewfile is empty/missing — aborting instead of previewing brew cleanup against a bogus Brewfile" >&2
+  exit 3
+else
+  pending_brewfile=$(mktemp "${TMPDIR:-/tmp}/deploy-doctor-brewfile.XXXXXX") || {
+    echo "deploy-doctor: mktemp failed — cannot preview brew cleanup" >&2
+    exit 3
+  }
+  trap 'rm -f "$pending_brewfile"' EXIT
+  printf '%s\n' "$brewfile" >"$pending_brewfile"
+  cleanup_out=$(HOMEBREW_NO_AUTO_UPDATE=1 brew bundle cleanup --file="$pending_brewfile" 2>&1)
+  cleanup_rc=$?
+  if [ "$cleanup_rc" -eq 0 ]; then
+    print_ok "brew: everything installed is in the pending Brewfile, cleanup uninstalls nothing"
+  elif printf '%s\n' "$cleanup_out" | grep -q '^Would '; then
+    while IFS=$'\t' read -r kind name; do
+      [ -z "$name" ] && continue
+      print_del "brew $kind $name  ${DIM}(not in the pending Brewfile — cleanup uninstalls it, no prompt)${NC}"
+    done < <(printf '%s\n' "$cleanup_out" | awk '
+      /^Would uninstall formulae:/     { kind = "formula"; next }
+      /^Would uninstall casks:/        { kind = "cask";    next }
+      /^Would untap:/                  { kind = "tap";     next }
+      /^Would /                        { kind = "item";    next }
+      /^Run `brew bundle cleanup/      { kind = "";        next }
+      kind != "" && NF > 0             { print kind "\t" $1 }')
+  else
+    # Neither a clean pass nor a would-remove list: brew itself failed
+    # (broken tap, bad Brewfile line, ...). Certifying anything would be a lie.
+    echo "deploy-doctor: brew bundle cleanup dry run failed (exit $cleanup_rc) — cannot certify brew cleanup:" >&2
+    printf '%s\n' "$cleanup_out" | sed 's/^/    /' >&2
+    exit 3
+  fi
+fi
+
+# ── 7. opencode provider auth (personal machine only) ────────────────────────
 # ~/.local/share/opencode/auth.json is written interactively by `opencode`
 # /connect and is deliberately never in Nix. The deployed opencode.json points
 # at Ollama Cloud models; with no ollama-cloud entry every model call fails
@@ -232,6 +306,11 @@ fi
 echo ""
 echo -e "  ${DIM}Preview only — nothing was changed. Re-run after editing the flake if${NC}"
 echo -e "  ${DIM}anything above is unexpected; a deleted skill/plugin needs to be declared${NC}"
-echo -e "  ${DIM}in the flake (home.ai.customSkills / home.ai.plugins) to survive.${NC}"
+echo -e "  ${DIM}in the flake (home.ai.customSkills / home.ai.plugins) to survive, and a${NC}"
+echo -e "  ${DIM}brew formula/cask must be in homebrew.brews/casks (or the host's homebrew/).${NC}"
 echo ""
+
+# Exit protocol (see header): 2 tells the caller a deploy would destroy the
+# items listed above; 0 certifies a clean preview.
+[ "$DESTRUCTIVE" -gt 0 ] && exit 2
 exit 0

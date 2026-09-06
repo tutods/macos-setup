@@ -41,7 +41,9 @@ if ! grep -qx "$target_shell" /etc/shells 2>/dev/null; then
   echo "$target_shell" >> /etc/shells
 fi
 
-current=$(dscl . -read "/Users/${username}" UserShell 2>/dev/null | awk '{print $2}')
+# Guarded: under set -eo pipefail a dscl hiccup would otherwise abort the whole
+# activation. An empty $current is already handled below.
+current=$(dscl . -read "/Users/${username}" UserShell 2>/dev/null | awk '{print $2}') || current=""
 if [ "$current" != "$target_shell" ]; then
   echo "Setting default shell for ${username} from ${current:-default} to $target_shell"
   dscl . -create "/Users/${username}" UserShell "$target_shell"

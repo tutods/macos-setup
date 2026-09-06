@@ -1,28 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Gate only the staged .nix files: formatting the whole tree and diffing
-# everything made any unrelated unstaged edit abort every commit, which
-# trains --no-verify habits (and that skips the plugin check too).
+# Gate only the staged .nix files, and check their STAGED content (the index
+# blobs), never the worktree copies. Worktree-based checks fail both ways:
+# a staged-then-deleted file escapes the gate entirely, and `git add -p`
+# partial staging flags commits whose staged half is perfectly formatted,
+# with "re-stage" guidance that sweeps deliberately-unstaged WIP hunks in.
 staged_nix=()
 while IFS= read -r f; do
-  [ -f "$f" ] && staged_nix+=("$f")
+  staged_nix+=("$f")
 done < <(git diff --cached --name-only --diff-filter=ACMR -- '*.nix')
 
 if [ "${#staged_nix[@]}" -gt 0 ]; then
-  nix --extra-experimental-features 'nix-command flakes' fmt -- "${staged_nix[@]}"
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
 
-  # Fail if the formatter changed a staged file (re-stage and recommit)
-  if ! git diff --quiet -- "${staged_nix[@]}"; then
+  # Two copies of each staged blob: format one, diff against the other.
+  # Formatting temp copies and comparing is formatter-agnostic and never
+  # mutates the worktree or the index.
+  for f in "${staged_nix[@]}"; do
+    mkdir -p "$tmp/staged/$(dirname "$f")" "$tmp/fmt/$(dirname "$f")"
+    git show ":$f" > "$tmp/staged/$f"
+    cp "$tmp/staged/$f" "$tmp/fmt/$f"
+  done
+
+  # The flake formatter (alejandra) recurses the directory in place. A
+  # nonzero exit here (e.g. a .nix parse error) rightly fails the commit.
+  nix --extra-experimental-features 'nix-command flakes' fmt -- "$tmp/fmt"
+
+  unformatted=()
+  for f in "${staged_nix[@]}"; do
+    cmp -s "$tmp/staged/$f" "$tmp/fmt/$f" || unformatted+=("$f")
+  done
+
+  if [ "${#unformatted[@]}" -gt 0 ]; then
     echo ""
-    echo "  nix fmt made changes. Review, re-stage, and recommit:"
-    git diff --stat -- "${staged_nix[@]}" | sed 's/^/  /'
+    echo "  staged .nix content is not formatted. Fix and re-stage:"
+    for f in "${unformatted[@]}"; do
+      echo "    nix fmt $f && git add $f"
+    done
     echo ""
     exit 1
   fi
 fi
 
 # Plugins fail silently, so a bad name has to be caught before it lands.
-if git diff --cached --name-only | grep -qE '(plugins\.nix|roles/[^/]+/ai/default\.nix)$'; then
+# One snapshot, matched as a variable: `git diff | grep -q` under pipefail
+# can fail via SIGPIPE (grep -q exits at the first match) even when a
+# plugin source file IS staged, silently skipping the check.
+staged_all=$(git diff --cached --name-only)
+if printf '%s\n' "$staged_all" | grep -qE '(plugins\.nix|roles/[^/]+/ai/default\.nix)$'; then
   ./scripts/verify-plugins.sh --quiet
 fi

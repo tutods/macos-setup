@@ -22,7 +22,7 @@ claudePlugins="$home/.claude/plugins"
 logDir="$home/.local/share/opencode/log"
 fail=0
 warn() { printf '  warn: %s\n' "$1"; }
-fail_() { printf '  FAIL: %s\n' "$1"; fail=1; }
+fail_() { printf '  FAIL: %s\n' "$1"; fail=$((fail + 1)); }
 ok() { printf '  ok: %s\n' "$1"; }
 
 section() { printf '\n== %s ==\n' "$1"; }
@@ -58,10 +58,10 @@ elif jq -e . "$cfg" >/dev/null 2>&1; then
       fail_ "mcp.$server missing or disabled"
     fi
   done
-  if jq -e '.subagent_depth == 2' "$cfg" >/dev/null 2>&1; then
-    ok "subagent_depth = 2"
+  if jq -e '.subagent_depth == 1' "$cfg" >/dev/null 2>&1; then
+    ok "subagent_depth = 1"
   else
-    warn "subagent_depth != 2 (expected from config.nix)"
+    warn "subagent_depth != 1 (expected from config.nix)"
   fi
   if jq -e '.lsp == true' "$cfg" >/dev/null 2>&1; then
     ok "lsp enabled"
@@ -110,11 +110,12 @@ fi
 section "plugin bridge (claude plugins -> opencode skills)"
 skillsDir="$ocDir/skills"
 if [ -d "$claudePlugins/cache" ]; then
-  # Same walk the activation script does: any skills/ dir under the plugin
-  # cache, one symlink per skill dir inside it. Names repeat across plugins
-  # (frontend-design ships in three of them), so report per unique name.
+  # Same walk home.activation.opencodePlugins does: skills/ dirs under the
+  # plugin CACHE only (never marketplaces/, those are full repo clones of
+  # plugins that may not be installed), one symlink per skill dir inside it.
+  # Names repeat across plugins (frontend-design ships in three of them), so
+  # report per unique name.
   bridged=0
-  dangling=0
   unbridged=""
   seen=" "
   for skillsSrc in $(find "$claudePlugins/cache" -type d -name skills 2>/dev/null); do
@@ -124,15 +125,12 @@ if [ -d "$claudePlugins/cache" ]; then
       case "$seen" in *" $name "*) continue ;; esac
       seen="$seen$name "
       target="$skillsDir/$name"
-      if [ -L "$target" ]; then
-        if [ -e "$target" ]; then
-          bridged=$((bridged + 1))
-        else
-          dangling=$((dangling + 1))
-          fail_ "dangling bridge symlink: $target -> $(readlink "$target")"
-        fi
+      if [ -L "$target" ] && [ -e "$target" ]; then
+        bridged=$((bridged + 1))
+      elif [ -L "$target" ]; then
+        : # dangling; the stale-link sweep below reports it once
       elif [ -e "$target" ]; then
-        warn "$target is a real dir, not a bridge symlink (tool-installed or stale)"
+        warn "$target is a real dir, not a bridge symlink (tool-installed; the bridge skips it)"
       else
         unbridged="$unbridged $name"
       fi
@@ -147,6 +145,16 @@ if [ -d "$claudePlugins/cache" ]; then
 else
   warn "no $claudePlugins/cache; nothing to bridge"
 fi
+# Same stale-link rule the deploy's prune applies: a symlink into
+# ~/.claude/plugins whose target is gone should have been removed on deploy.
+for link in "$skillsDir"/*; do
+  [ -L "$link" ] || continue
+  case "$(readlink "$link")" in
+    "$claudePlugins"/*)
+      [ -e "$link" ] || fail_ "stale bridge symlink not pruned (deploy removes these): $link -> $(readlink "$link")"
+      ;;
+  esac
+done
 
 section "opencode log"
 logFile="$(ls -t "$logDir"/opencode.log 2>/dev/null | head -1 || true)"
@@ -186,7 +194,8 @@ fi
 printf '\n'
 if [ "$fail" -eq 0 ]; then
   echo "verify-opencode: all checks passed"
+  exit 0
 else
   echo "verify-opencode: $fail check(s) failed"
+  exit 1
 fi
-exit "$fail"

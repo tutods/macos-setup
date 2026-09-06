@@ -19,12 +19,17 @@ installed=$(/opt/homebrew/bin/mas list 2>/dev/null || true)
 
 failures=()
 
-while IFS=$'\t' read -r app_id name; do
+# `|| [ -n "$app_id" ]` keeps a final TSV line that lacks a trailing newline.
+while IFS=$'\t' read -r app_id name || [ -n "$app_id" ]; do
   [ -z "$app_id" ] && continue
-  if printf '%s\n' "$installed" | grep -q "^${app_id} "; then
-    echo "  ✓ ${name} already installed"
-    continue
-  fi
+  # Pure-shell match (no pipe, so no SIGPIPE under pipefail): the id must sit
+  # at the start of a line, followed by a space, mirroring `grep "^id "`.
+  case "$installed" in
+    "${app_id} "* | *$'\n'"${app_id} "*)
+      echo "  ✓ ${name} already installed"
+      continue
+      ;;
+  esac
   echo "  ↣ Installing ${name}"
   if HOME="/Users/${username}" /opt/homebrew/bin/mas install "${app_id}" </dev/null; then
     echo "  ✓ ${name}"
