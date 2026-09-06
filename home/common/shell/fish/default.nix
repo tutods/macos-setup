@@ -41,6 +41,15 @@
         set -eU fish_user_paths
       end
 
+      # fish 4.3 moved fish_key_bindings from universal to global scope and
+      # drops a conf.d/fish_frozen_key_bindings.fish to erase the old universal
+      # on every startup. Only one fish version exists here (nixpkgs pins it),
+      # so the erase can happen here instead and that file can be deleted; we
+      # never set fish_key_bindings, the default bindings are what we want.
+      if set -qU fish_key_bindings
+        set -eU fish_key_bindings
+      end
+
       bind \ew backward-kill-line
 
       fnm env --shell fish --corepack-enabled --resolve-engines | source
