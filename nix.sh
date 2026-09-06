@@ -28,7 +28,18 @@ _spinner_loop() {
   done
 }
 
-start_spinner() { _spinner_loop "$1" & SPINNER_PID=$!; }
+# Non-TTY stdout (CI, piped output) gets a plain progress line per distinct
+# message instead of spinner/ANSI control codes.
+_SPINNER_LAST_MSG=""
+
+start_spinner() {
+  if [[ -t 1 ]]; then
+    _spinner_loop "$1" & SPINNER_PID=$!
+  elif [[ "$1" != "$_SPINNER_LAST_MSG" ]]; then
+    echo "  ...  $1"
+    _SPINNER_LAST_MSG="$1"
+  fi
+}
 
 stop_spinner() {
   [[ -z "$SPINNER_PID" ]] && return
@@ -45,10 +56,14 @@ _BACKGROUND_PID=""
 _cleanup() {
   stop_spinner
   [[ -n "$_BACKGROUND_PID" ]] && kill "$_BACKGROUND_PID" 2>/dev/null || true
+  # The run_cmd temp log would otherwise leak on every Ctrl-C.
+  [[ -n "${_CMD_LOG:-}" ]] && rm -f "$_CMD_LOG" 2>/dev/null || true
   # A Ctrl-C inside _tui_select would otherwise leave echo off and autowrap
   # disabled until the user runs `reset`.
   stty sane 2>/dev/null || true
-  printf '\033[?25h\033[?7h'
+  if [[ -t 1 ]]; then
+    printf '\033[?25h\033[?7h'
+  fi
   echo ""
   print_warning "Interrupted"
   exit 130
@@ -143,7 +158,7 @@ print_banner() {
 
 # ── Available configs ─────────────────────────────────────────────────────────
 # keep in sync with the nix-darwin input in flake.nix
-NIX_DARWIN_REF="nix-darwin/nix-darwin-25.11"
+NIX_DARWIN_REF="nix-darwin/nix-darwin-26.05"
 
 # Host list and host→user map come from hosts.nix.
 _HOSTS_RAW=""
@@ -267,7 +282,7 @@ show_usage() {
   echo -e "  ${BOLD}Options${NC}"
   echo "    --build-only      Build without applying"
   echo "    --dry-run         Preview what would change (no apply)"
-  echo "    --force           Force rebuild even if no changes"
+  echo "    --force           Rebuild even if cached; skip the deploy-doctor confirmation"
   echo "    --log <file>      Save full command output to file"
   echo "    --help, -h        Show this help message"
   echo ""
@@ -279,7 +294,6 @@ show_usage() {
   echo "    $0 macbook --log out.log  Save full log"
   echo "    $0 work --force           Force rebuild"
   print_divider
-  exit 0
 }
 
 # ── Checks ────────────────────────────────────────────────────────────────────
@@ -404,9 +418,14 @@ dry_run_config() {
 
 # ── Deploy doctor preview ─────────────────────────────────────────────────────
 # The deploy silently deletes unmanaged skill dirs, drops undeclared plugins
-# and hook events, and clears permissions.allow; preview that before applying.
+# and hook events, clears permissions.allow, reconciles the opencode skills
+# tree, and lets Homebrew's cleanup uninstall anything off-Brewfile; the
+# doctor previews all six before applying.
+# Doctor exit protocol (scripts/deploy-doctor.sh): 0 = clean preview, 2 =
+# destructive changes predicted, 3 = cannot certify. Anything the doctor
+# refuses to certify (or a crash) aborts — applying blind was the old bug.
 preview_deploy() {
-  local config="$1" step="$2"
+  local config="$1" force="$2" step="$3"
 
   print_step "$step Deploy doctor"
   if [[ ! -x ./scripts/deploy-doctor.sh ]]; then
@@ -414,18 +433,38 @@ preview_deploy() {
     return 0
   fi
 
-  if ./scripts/deploy-doctor.sh "$config"; then
-    if [[ -t 0 ]]; then
-      local reply
-      read -rp "  Proceed with apply? [Y/n] " reply
-      if [[ "$reply" =~ ^[Nn] ]]; then
-        print_warning "Aborted before apply"
-        exit 0
+  local doctor_status=0
+  ./scripts/deploy-doctor.sh "$config" || doctor_status=$?
+
+  case "$doctor_status" in
+    0)
+      print_dim "Clean preview — nothing destructive predicted"
+      ;;
+    2)
+      if [[ "$force" == "true" ]]; then
+        print_warning "Destructive changes predicted; proceeding anyway (--force)"
+      elif [[ -t 0 ]]; then
+        local reply
+        read -rp "  Destructive changes predicted above. Proceed with apply? [y/N] " reply
+        if [[ ! "$reply" =~ ^[Yy] ]]; then
+          print_warning "Aborted before apply"
+          exit 0
+        fi
+      else
+        print_error "Deploy doctor predicts destructive changes and this run is non-interactive"
+        print_dim "Re-run interactively to confirm, or pass --force to bypass."
+        exit 1
       fi
-    fi
-  else
-    print_warning "deploy-doctor could not run; continuing without preview"
-  fi
+      ;;
+    3)
+      print_error "Deploy doctor could not certify this deploy (see its message above); aborting"
+      exit 1
+      ;;
+    *)
+      print_error "Deploy doctor failed unexpectedly (exit $doctor_status); aborting instead of applying blind"
+      exit 1
+      ;;
+  esac
   return 0
 }
 
@@ -453,7 +492,13 @@ clear_hm_backups() {
     while IFS= read -r f; do
       [[ -n "$f" ]] || continue
       dest="$stash${f#"$target_home"}"
-      "${as_user[@]+"${as_user[@]}"}" mkdir -p "$(dirname "$dest")"
+      # Guarded like the mv below: under set -e an unguarded mkdir failure
+      # (e.g. a root-owned ~/.local/state) would abort the whole deploy
+      # between build and apply. Skip this backup instead.
+      if ! "${as_user[@]+"${as_user[@]}"}" mkdir -p "$(dirname "$dest")" 2>/dev/null; then
+        print_warning "Could not create stash dir for HM backup, leaving in place: $f"
+        continue
+      fi
       if "${as_user[@]+"${as_user[@]}"}" mv "$f" "$dest" 2>/dev/null; then
         moved=$((moved + 1))
       else
@@ -467,13 +512,15 @@ clear_hm_backups() {
 
 # ── Apply ─────────────────────────────────────────────────────────────────────
 apply_config() {
-  local config="$1" force="$2" step="$3"
+  local config="$1" step="$2"
 
   print_step "$step Applying"
   print_dim "Config: $config"
 
+  # --force plays no role here: darwin-rebuild rejects unknown options like
+  # --rebuild. Force semantics live in the build phase (nix build --rebuild)
+  # and in preview_deploy (bypass the doctor confirmation).
   local switch_cmd=(switch --flake ".#$config")
-  [[ "$force" == "true" ]] && switch_cmd+=(--rebuild)
 
   local rebuild_cmd
   if command -v darwin-rebuild &>/dev/null; then
@@ -534,7 +581,7 @@ main() {
     config="$SELECTED_CONFIG"
   else
     case "$1" in
-      --help|-h) show_usage ;;
+      --help|-h) show_usage; exit 0 ;;
     esac
 
     if validate_config "$1"; then
@@ -558,13 +605,18 @@ main() {
         LOG_FILE="$1"
         printf "# nix.sh log, %s\n\n" "$(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
         ;;
-      --help|-h) show_usage ;;
+      --help|-h) show_usage; exit 0 ;;
+      -*)
+        print_error "Unknown option: $1"
+        show_usage
+        exit 1
+        ;;
       *)
         if [[ -z "$config" ]] && validate_config "$1"; then
           config="$1"
         else
-          print_error "Unknown option: $1"
-          show_usage
+          print_error "Unknown configuration: '$1' (valid: ${AVAILABLE_CONFIGS// /, })"
+          exit 1
         fi
         ;;
     esac
@@ -592,6 +644,9 @@ main() {
   [[ "$dry_run" == "true" ]]    && print_dim "Mode: dry run (preview only)"
   [[ "$force" == "true" ]]      && print_dim "Mode: force rebuild"
   [[ -n "$LOG_FILE" ]]          && print_dim "Log:  $LOG_FILE"
+  if [[ "$dry_run" == "true" && ("$build_only" == "true" || "$force" == "true") ]]; then
+    print_warning "--dry-run takes precedence: --build-only/--force are ignored"
+  fi
   print_divider
 
   local total_start=$SECONDS
@@ -609,8 +664,8 @@ main() {
   else
     setup_private_git "$config"
     build_config "$config" "$force" "[1/3]"
-    preview_deploy "$config" "[2/3]"
-    apply_config "$config" "$force" "[3/3]"
+    preview_deploy "$config" "$force" "[2/3]"
+    apply_config "$config" "[3/3]"
     print_summary "$config" "build + apply" $(( SECONDS - total_start ))
     print_dim "Tip: run brew doctor if you encounter Homebrew issues."
     echo ""
