@@ -5,7 +5,8 @@
     ":dependencyDashboard",
     ":semanticCommits",
     ":renovatePrefix",
-    "security:openssf-scorecard"
+    "security:openssf-scorecard",
+    "helpers:pinGitHubActionDigests"
   ],
   "timezone": "Europe/Lisbon",
   "schedule": [
@@ -19,7 +20,6 @@
   "dependencyDashboardAutoclose": true,
   "stopUpdatingLabel": "renovate:stop",
   "minimumReleaseAge": "3 days",
-  "assignees": ["renovate[bot]"],
   "osvVulnerabilityAlerts": true,
   "fetchChangeLogs": "pr",
   "rollbackPrs": true,
@@ -47,9 +47,15 @@
       "labels": ["🛠️ tooling", "❄️ nix"]
     },
     {
-      "description": "✨ Automerge non-major Nix flake updates",
+      "description": "✨ Automerge non-major Nix flake updates and lock file maintenance",
       "matchManagers": ["nix"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest",
+        "lockFileMaintenance"
+      ],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true,

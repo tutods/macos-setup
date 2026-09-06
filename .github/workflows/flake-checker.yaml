@@ -1,6 +1,9 @@
 # https://github.com/wimpysworld/nix-config/blob/main/.github/workflows/flake-checker.yml
 name: Flake ❄️ Checker ✅
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -36,9 +39,10 @@ jobs:
       - name: Check Nix formatting
         run: nix --extra-experimental-features 'nix-command flakes' fmt -- --check .
 
+  # Only reads flake.lock, so no macOS runner needed.
   flake-checker:
     name: Flake Checker
-    runs-on: macos-26
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: DeterminateSystems/nix-installer-action@v22
