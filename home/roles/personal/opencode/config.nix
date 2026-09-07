@@ -40,6 +40,15 @@
   # prompt. Config rules are appended after the defaults and resolved with
   # findLast, and "*" sorts before every deny, so the denies win.
   readDenies = {"*" = "allow";} // lib.genAttrs secretGlobs (_: "deny");
+  # NOTE (2026-09-07, empirically verified on opencode 1.18.25): per-tool
+  # permission glob attrsets for MCP tools do NOT enforce —
+  # `permission.filesystem_read_file = {"*":"allow" "*.env*":"deny"}` is
+  # schema-accepted and silently ignored (a test read of test.env through
+  # filesystem_read_file succeeded); a plain string "deny" only removes the
+  # single tool, and the model reaches the same file through a sibling MCP
+  # read tool. So a filesystem MCP server cannot carry the secret-path
+  # backstop, and it must not be enabled. Built-in read + edit + readDenies
+  # are the supported path.
 
   # Command-prefixed rather than path-only: a bash rule resolves with findLast
   # over the JSON key order (Nix sorts alphabetically), and a listed
@@ -164,12 +173,6 @@
     disabled_providers = ["azure" "vertex" "bedrock"];
 
     mcp = {
-      filesystem = {
-        type = "local";
-        command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" "${config.home.homeDirectory}/.dotfiles" "${config.home.homeDirectory}/Developer" "${config.home.homeDirectory}/Obsidian"];
-        enabled = true;
-        timeout = 30000;
-      };
       github = {
         type = "local";
         command = ["sh" "-c" "GITHUB_PERSONAL_ACCESS_TOKEN=\"\${GITHUB_TOKEN:-}\" npx -y @modelcontextprotocol/server-github"];
@@ -281,6 +284,12 @@
       websearch = "allow";
       bash = bashRules;
       read = readDenies;
+      # NOTE: no filesystem MCP server (see the MCP-tools caveat at the
+      # readDenies comment above): its per-tool permission glob rules don't
+      # enforce, so it can't carry the secret-path backstop. Built-in read +
+      # edit cover the same ground with working deny rules. This also removes
+      # the unattended-dispatch stall: MCP tools with no permission rule
+      # default to "ask", which an Orca-injected worker can never answer.
       # PermissionRuleConfig, not a path list: opencode rejects the whole file
       # with "Expected PermissionRuleConfig, got [...]" and prints it on every
       # startup. The assertion below only checks key names, which is why an
