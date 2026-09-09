@@ -33,22 +33,78 @@
   # home/common/ai/settings.nix renders its Bash() prefix rules from. A glob
   # here is a full-command anchored regex where `*` also matches `/`, so the
   # leading `*` covers both `~/.ssh/x` and `/Users/<me>/.ssh/x`.
-  secretGlobs = aiLib.secretOpencodeGlobs;
+  secretGlobs =
+    aiLib.secretOpencodeGlobs
+    # opencode-only addition: provider auth written by /connect lands in
+    # ~/.local/share/opencode/auth.json. It is not in the shared families,
+    # and the tool-output external_directory allow below would otherwise
+    # leave it one allowed tree away from an unprompted read (read defaults
+    # allow). Same anchored-glob shape: the leading * spans /Users/<me>/.
+    ++ ["*local/share/opencode/auth.json*"];
 
   # The real backstop: opencode's built-in read defaults are `read:* allow` with
   # only `*.env*` set to ask, so the read tool opens ~/.ssh/id_ed25519 with no
   # prompt. Config rules are appended after the defaults and resolved with
   # findLast, and "*" sorts before every deny, so the denies win.
   readDenies = {"*" = "allow";} // lib.genAttrs secretGlobs (_: "deny");
-  # NOTE (2026-09-07, empirically verified on opencode 1.18.25): per-tool
-  # permission glob attrsets for MCP tools do NOT enforce —
-  # `permission.filesystem_read_file = {"*":"allow" "*.env*":"deny"}` is
-  # schema-accepted and silently ignored (a test read of test.env through
-  # filesystem_read_file succeeded); a plain string "deny" only removes the
-  # single tool, and the model reaches the same file through a sibling MCP
-  # read tool. So a filesystem MCP server cannot carry the secret-path
-  # backstop, and it must not be enabled. Built-in read + edit + readDenies
-  # are the supported path.
+  # NOTE (2026-09-08, corrected against opencode 1.18.25 source): MCP tools
+  # ask with `permission: <full-tool-name>` (sanitize(server) + "_" +
+  # sanitize(tool), e.g. github_create_issue) and `patterns: ["*"]` — the
+  # literal string (session/tools.ts). So an attrset of glob-values can
+  # never match an MCP ask: each glob is matched against the request
+  # pattern "*", and only the "*" → allow entry matches —
+  # `{"*":"allow" "*.env*":"deny"}` silently allowed everything, which is
+  # the "MCP permission rules do not enforce" earlier note in
+  # ai-lessons.md (corrected there too). Plain per-tool-name string rules
+  # and `<server>_*` keys DO work (see mcpToolAllows). Standing
+  # conclusion unchanged: a filesystem MCP server still cannot carry a
+  # per-path secret backstop, because per-argument patterns are dead —
+  # built-in read + edit + readDenies remain the supported path.
+
+  # Key-level allow rules for MCP tools. MCP tool calls ask under their full
+  # name (sanitize(server) + "_" + sanitize(tool), e.g. github_create_issue)
+  # with request pattern "*" (session/tools.ts), so key-level string rules
+  # are the only shape that can answer them: an attrset's glob values match
+  # against the literal request pattern "*" and never fire per-argument.
+  # With no rule every MCP call defaults to "ask" — the old unattended
+  # dispatch stall. Servers are declared here in reviewed Nix, so their
+  # tools run allowed. A selective deny stays order-safe like bashRules:
+  # "github_*" (ASCII 42) out-sorts any longer key, so a future
+  # "github_merge_pull_request" = "deny" would win under findLast. Keys use
+  # the RAW server name; all five sanitize() to themselves ([a-zA-Z0-9_-]
+  # untouched), and a name needing sanitize would produce a key that never
+  # matches and falls back to ask — safe failure, never silent-allow.
+  mcpToolAllows = lib.mapAttrs' (name: _: lib.nameValuePair "${name}_*" "allow") mcpServers;
+
+  mcpServers = {
+    github = {
+      type = "local";
+      command = ["sh" "-c" "GITHUB_PERSONAL_ACCESS_TOKEN=\"\${GITHUB_TOKEN:-}\" npx -y @modelcontextprotocol/server-github"];
+      enabled = true;
+    };
+    playwright = {
+      type = "local";
+      command = ["npx" "-y" "@playwright/mcp" "--isolated" "--headless"];
+      enabled = true;
+    };
+    postgres = {
+      type = "local";
+      command = ["sh" "-c" "doppler run -- npx -y @modelcontextprotocol/server-postgres"];
+      enabled = true;
+      timeout = 15000;
+    };
+    shadcn = {
+      type = "local";
+      command = ["npx" "-y" "shadcn@latest" "mcp"];
+      enabled = true;
+    };
+    code-review-graph = {
+      type = "local";
+      command = ["${config.home.homeDirectory}/.local/bin/code-review-graph" "serve"];
+      enabled = true;
+      timeout = 30000;
+    };
+  };
 
   # Command-prefixed rather than path-only: a bash rule resolves with findLast
   # over the JSON key order (Nix sorts alphabetically), and a listed
@@ -172,35 +228,7 @@
     compaction.auto = true;
     disabled_providers = ["azure" "vertex" "bedrock"];
 
-    mcp = {
-      github = {
-        type = "local";
-        command = ["sh" "-c" "GITHUB_PERSONAL_ACCESS_TOKEN=\"\${GITHUB_TOKEN:-}\" npx -y @modelcontextprotocol/server-github"];
-        enabled = true;
-      };
-      playwright = {
-        type = "local";
-        command = ["npx" "-y" "@playwright/mcp" "--isolated" "--headless"];
-        enabled = true;
-      };
-      postgres = {
-        type = "local";
-        command = ["sh" "-c" "doppler run -- npx -y @modelcontextprotocol/server-postgres"];
-        enabled = true;
-        timeout = 15000;
-      };
-      shadcn = {
-        type = "local";
-        command = ["npx" "-y" "shadcn@latest" "mcp"];
-        enabled = true;
-      };
-      code-review-graph = {
-        type = "local";
-        command = ["${config.home.homeDirectory}/.local/bin/code-review-graph" "serve"];
-        enabled = true;
-        timeout = 30000;
-      };
-    };
+    mcp = mcpServers;
 
     agent =
       {
