@@ -52,12 +52,19 @@
 
       bind \ew backward-kill-line
 
-      fnm env --shell fish --corepack-enabled --resolve-engines | source
+      # Guarded: on a fresh deploy the new generation's PATH is not active in
+      # the shell that re-sources this, and worktrunk (brew) activates after
+      # the fish rebuild, so both binaries can be transiently absent.
+      if command -q fnm
+        fnm env --shell fish --corepack-enabled --resolve-engines | source
+      end
 
       # `wt switch` changes directory, so it needs a shell function. Declared
       # here rather than via `wt config shell install`, which rewrites
       # ~/.config/fish/conf.d/wt.fish and fights this file.
-      wt config shell init fish | source
+      if command -q wt
+        wt config shell init fish | source
+      end
     '';
   };
 }

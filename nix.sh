@@ -523,12 +523,14 @@ apply_config() {
   local switch_cmd=(switch --flake ".#$config")
 
   local rebuild_cmd
+  # -H so root's HOME is /var/root, not the caller's /Users/<user>. Without it
+  # darwin-rebuild warns "$HOME is not owned by you, falling back to ... /var/root".
   if command -v darwin-rebuild &>/dev/null; then
     print_dim "Using local darwin-rebuild"
-    rebuild_cmd=(sudo darwin-rebuild "${switch_cmd[@]}")
+    rebuild_cmd=(sudo -H darwin-rebuild "${switch_cmd[@]}")
   else
     print_dim "Using remote darwin-rebuild"
-    rebuild_cmd=(sudo nix --extra-experimental-features 'nix-command flakes' run "${NIX_DARWIN_REF}#darwin-rebuild" -- "${switch_cmd[@]}")
+    rebuild_cmd=(sudo -H nix --extra-experimental-features 'nix-command flakes' run "${NIX_DARWIN_REF}#darwin-rebuild" -- "${switch_cmd[@]}")
   fi
 
   echo ""
