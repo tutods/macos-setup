@@ -62,9 +62,11 @@
     }
   ];
 
-  # Deletes any real directory in ~/.claude/skills this repo does not declare, so
-  # a renamed or removed skill actually disappears instead of staying loaded.
-  # Symlinks are left alone: they point at non-Nix tooling (e.g. ~/.agents/skills).
+  # Deletes any undeclared entry in ~/.claude/skills, directory or symlink, so a
+  # renamed or removed skill actually disappears instead of staying loaded.
+  # Nix-managed skills are always real copied directories, so a symlink there
+  # is foreign by construction (most often an `npx skills`-style install
+  # pointing at ~/.agents/skills).
   # Runs after every localSkills-*/fetchedSkills-* copy (entryBetween in
   # lib/ai.nix:mkSkillCopy, shared by mkLocalSkills and mkFetchedSkills).
   home.activation.customSkillsReconcile = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
@@ -74,8 +76,7 @@
       removed=""
 
       for path in "$dest"/*; do
-        [ -d "$path" ] || continue
-        [ -L "$path" ] && continue
+        [ -L "$path" ] || [ -d "$path" ] || continue
         name=$(basename "$path")
         case "$managed" in
           *" $name "*) ;;

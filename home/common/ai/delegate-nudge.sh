@@ -11,7 +11,7 @@
 # never block an unrelated tool call.
 set -uo pipefail
 
-threshold=3
+threshold=6
 
 lib="$(dirname "$0")/lib/turn-key.sh"
 [ -r "$lib" ] || exit 0
@@ -43,7 +43,7 @@ case "$count" in '' | *[!0-9]*) count=0 ;; esac
 mkdir "$counter.fired" 2>/dev/null || exit 0
 
 cat <<'JSON'
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"Delegation Contract: that is the third inline Read/Grep/Glob this turn on the main thread. Recon goes to Explore or caveman:cavecrew-investigator, multi-file edits to general-purpose, diff/PR review to code-reviewer, vault lookups to vault-search, each with an explicit model. If more searching is coming, dispatch a subagent instead of continuing inline."}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"Delegation Contract: that is the sixth inline Read/Grep/Glob this turn on the main thread. Recon goes to Explore or caveman:cavecrew-investigator, multi-file edits to general-purpose, diff/PR review to code-reviewer, vault lookups to vault-search, each with an explicit model. If more searching is coming, dispatch a subagent instead of continuing inline."}}
 JSON
 
 exit 0

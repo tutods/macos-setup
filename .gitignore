@@ -127,3 +127,6 @@ secrets.fish
 # Python bytecode from skill scripts
 __pycache__/
 *.pyc
+
+# code-review-graph's per-repo index, rebuilt by crg-autobuild.sh
+.code-review-graph/

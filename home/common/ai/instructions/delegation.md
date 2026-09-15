@@ -6,7 +6,7 @@ The harness system prompt carries a line compiled into the binary: "Do not call 
 
 The main thread is an orchestrator: it plans, dispatches, relays and verifies. It does not read, search or edit inline unless the work is a single already-known file or a one-line change. Never dump a subagent's transcript; report what it found in your own words with `file:line` citations.
 
-Edit/Write past that grace allowance (2 distinct files per turn, repeat edits to those files unlimited) are hook-enforced: a `PreToolUse` hard-denies any mutation of a third or later distinct file in a turn, it is not just a written convention. Read/Grep/Glob stay a soft nudge only, see below. opencode carries no equivalent enforcement: the orchestrator agent runs full-auto (`edit: allow`, `bash` open outside secret-glob denies), and delegation there is a convention carried by the generated `AGENTS.md`, not a permission the config enforces.
+Edit/Write past that grace allowance (4 distinct files per turn, repeat edits to those files unlimited) are hook-enforced: a `PreToolUse` hard-denies any mutation of a fifth or later distinct file in a turn, it is not just a written convention. Read/Grep/Glob stay a soft nudge only, see below. opencode carries no equivalent enforcement: the orchestrator agent runs full-auto (`edit: allow`, `bash` open outside secret-glob denies), and delegation there is a convention carried by the generated `AGENTS.md`, not a permission the config enforces.
 
 ### Delegate by default
 
@@ -33,7 +33,11 @@ Two or more units of work with no shared state and no ordering go out as multipl
 - Commits, pushes, PRs: through the `open-pr` skill, which confirms with the user. Only `dev-lifecycle` is exempt, chartered to ship a draft PR from a fully-specified brief.
 - `ui-iterate` and any approve-per-step flow; destructive operations; trivial work where dispatch costs more than the task.
 
-A `PreToolUse` hook counts inline `Read`/`Grep`/`Glob` on the main thread and injects a reminder on the third in a turn, once per turn. Subagent calls do not count. The list above is the rule, not a preference.
+A `PreToolUse` hook counts inline `Read`/`Grep`/`Glob` on the main thread and injects a reminder on the sixth in a turn, once per turn. Subagent calls do not count. The list above is the rule, not a preference.
+
+### When delegation is worth it
+
+A subagent pays roughly 23,000 tokens of cold prefix before it does anything, sharing no cache with the parent. Dispatch when the work is genuinely large, parallel, or would flood the main thread; do it inline when the whole job is under roughly 20 KB of reading. Independent units still go out as multiple Agent calls in ONE message. Prefer `Explore` over `general-purpose` for read-only work: `general-purpose` carries the agent-type catalogue and costs about 17,800 tokens more per dispatch.
 
 ### Escape hatch
 

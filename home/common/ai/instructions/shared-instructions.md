@@ -34,4 +34,4 @@ AI text gives itself away through stock vocabulary and too-tidy structure; cut b
 - Commit: "this will", not "this can help to". "We recommend X", not "you might consider exploring X". Cut throat-clearing.
 - Vary sentence length and paragraph openings; redundant pairings ("safe and secure") reduce to one word.
 
-The `unslop` skill goes deeper (rule of three, negative parallelism, the full banned list) with a self-check pass; load it for any prose a human reads as writing. `content-writer` handles structured PT-PT content, `humanizer` rewrites existing text.
+The `unslop` skill goes deeper (rule of three, negative parallelism, the full banned list) with a self-check pass; load it for any prose a human reads as writing. `content-writer` handles structured PT-PT content; `unslop`'s self-check pass covers rewriting existing text too.

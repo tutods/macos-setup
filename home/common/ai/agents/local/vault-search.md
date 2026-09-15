@@ -11,6 +11,7 @@ description: >
   vault lookup, rather than grepping the vault inline.
 tools: Read, Grep, Glob
 model: haiku
+omitClaudeMd: true
 effort: low
 ---
 

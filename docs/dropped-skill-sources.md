@@ -51,8 +51,9 @@ role's `ai/default.nix`.
   NestJS work actually happens, not machine-wide.
 - **`github` MCP server**: a nixpkgs `github-mcp-server` record with toolsets
   pinned to `context,repos,issues,pull_requests,actions` (dropping `users` and
-  `copilot`). Never wired in: `github@claude-plugins-official` covers it and
-  this machine has no `GITHUB_TOKEN`. The pinned-toolset arg was:
+  `copilot`). Never wired in: this machine has no `GITHUB_TOKEN`, and the
+  `github@claude-plugins-official` plugin that once covered it was dropped
+  since no invoked skill needed it. The pinned-toolset arg was:
   `github-mcp-server stdio --toolsets context,repos,issues,pull_requests,actions`,
   with `GITHUB_PERSONAL_ACCESS_TOKEN` mapped from `GITHUB_TOKEN` at spawn.
 - **`find-skills`** (`oakoss/agent-skills`), installs with `pnpm dlx skills

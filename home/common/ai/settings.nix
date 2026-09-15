@@ -46,6 +46,17 @@
     # anymore; this env var is the deployed source of truth the vault-lint
     # agent reads for its scope-coverage check.
     env.CLAUDE_VAULT_FOLDERS = lib.concatStringsSep " " config.home.ai.vaultFolders;
+    # Ranks below a per-call `model` and an agent's `model:`, so silence means
+    # sonnet instead of the parent. No _FORCE: it would override the haiku
+    # agents' own choice and drag them up a tier.
+    env.CLAUDE_CODE_SUBAGENT_MODEL = "sonnet";
+    # A goal left waiting on background tasks triggers a check-in, and each one
+    # is a full-context turn. Background work already notifies on completion.
+    env.CLAUDE_CODE_GOAL_CHECKIN_MINUTES = "0";
+    # ponytail's SubagentStart hook injects its full ruleset into every subagent
+    # unless this regex (unanchored, case-insensitive, on agent_type) narrows it
+    # to the agents that actually write code.
+    env.PONYTAIL_SUBAGENT_MATCHER = "general-purpose|builder|dev-lifecycle|implementer|test-author|test-amender";
 
     # https://code.claude.com/docs/en/statusline
     statusLine = {
@@ -92,19 +103,58 @@
     # declared here are cleared on every deploy.
     permissions.allow = [
       # RTK rewrites of read-only commands, declared so the PreToolUse rewrite
-      # does not turn every status/log/diff into a permission prompt. RTK only
-      # rewrites when the ORIGINAL command matched an allow rule, so this list
-      # stays the authority; deny rules still win regardless.
+      # does not turn every status/log/diff into a permission prompt. The
+      # rewrite itself is unconditional inside the rtk binary and happens before
+      # any rule is consulted (same reason rtkSecretDenies exists), so this list
+      # decides only which REWRITTEN forms skip the prompt, never what gets
+      # rewritten. Mirror a command here only when its plain form is already
+      # allowed: an entry grants the rtk spelling exactly what the bare
+      # spelling has, no more. Deny rules still win regardless.
+      #
+      # Deliberately not a blanket `Bash(rtk:*)`. Because every command is
+      # rewritten, a blanket rule would hand silent approval to the rewritten
+      # form of destructive commands too, which is precisely the prompt worth
+      # keeping. Verbose-but-safe commands only; anything that writes, pushes,
+      # installs or deletes stays out and keeps asking.
       "Bash(rtk git status:*)"
       "Bash(rtk git log:*)"
       "Bash(rtk git diff:*)"
       "Bash(rtk git show:*)"
+      "Bash(rtk git blame:*)"
       "Bash(rtk ls:*)"
       "Bash(rtk find:*)"
       "Bash(rtk grep:*)"
       "Bash(rtk read:*)"
       "Bash(rtk deps:*)"
       "Bash(rtk gain:*)"
+      # Read-only forge queries. `gh pr diff` is the best per-call saver in the
+      # rtk history and was prompting on every use. `gh api` stays out: it is a
+      # write surface, and block-ai-attribution.sh guards it.
+      "Bash(rtk gh pr diff:*)"
+      "Bash(rtk gh pr view:*)"
+      "Bash(rtk gh pr list:*)"
+      "Bash(rtk gh pr checks:*)"
+      "Bash(rtk gh run list:*)"
+      "Bash(rtk gh run view:*)"
+      "Bash(rtk gh issue view:*)"
+      "Bash(rtk gh issue list:*)"
+      # The read-only half of the dev loop, where a TS monorepo produces the
+      # noisiest output rtk compresses. Script runners are named per script so
+      # `pnpm install` and friends are not swept in.
+      "Bash(rtk test:*)"
+      "Bash(rtk vitest:*)"
+      "Bash(rtk jest:*)"
+      "Bash(rtk lint:*)"
+      "Bash(rtk tsc:*)"
+      "Bash(rtk biome:*)"
+      "Bash(rtk prettier:*)"
+      "Bash(rtk playwright:*)"
+      "Bash(rtk pnpm test:*)"
+      "Bash(rtk pnpm lint:*)"
+      "Bash(rtk pnpm typecheck:*)"
+      "Bash(rtk pnpm build:*)"
+      "Bash(rtk docker ps:*)"
+      "Bash(rtk kubectl get:*)"
     ];
 
     hooks.SessionStart = [

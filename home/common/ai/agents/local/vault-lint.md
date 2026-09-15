@@ -12,6 +12,7 @@ description: >
   audit request.
 tools: Read, Grep, Glob, Bash, Skill
 model: haiku
+omitClaudeMd: true
 effort: low
 skills:
   - obsidian-vault

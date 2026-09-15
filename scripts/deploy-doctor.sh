@@ -3,8 +3,8 @@
 # Code state before `darwin-rebuild switch` runs, so nothing is eaten silently.
 #
 # The destructive places, all previewed below except the last:
-#   - customSkillsReconcile deletes any real dir in ~/.claude/skills the
-#     flake does not declare (symlinks are left alone).
+#   - customSkillsReconcile deletes any undeclared entry in ~/.claude/skills,
+#     directory or symlink.
 #   - enabledPlugins is rewritten whole: every plugin not in home.ai.plugins
 #     is disabled (dropped from settings.json).
 #   - mergeJsonObject drops any settings.json hook event Nix does not
@@ -121,8 +121,7 @@ while IFS= read -r s; do declared_skills+=("$s"); done < <(printf '%s' "$skills_
 SKILLS_DIR="$TARGET_HOME/.claude/skills"
 deleted=0
 for path in "$SKILLS_DIR"/*; do
-  [ -d "$path" ] || continue
-  [ -L "$path" ] && continue    # symlinks point at non-Nix tooling, kept
+  [ -L "$path" ] || [ -d "$path" ] || continue
   name=$(basename "$path")
   keep=0
   for s in "${declared_skills[@]-}"; do [ "$name" = "$s" ] && { keep=1; break; }; done

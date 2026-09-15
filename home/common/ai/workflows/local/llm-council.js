@@ -21,10 +21,7 @@ if (!question) {
 
 // Each advisor runs on a different model where it helps the lens: perspective
 // diversity compounds with model diversity (identical models given different
-// personas still share blind spots). The chairman inherits the session model
-// (usually the strongest available); first-principles inherits too so at
-// least one advisor matches the chairman's depth. `model: undefined` =
-// inherit.
+// personas still share blind spots). `model: undefined` = inherit.
 const ADVISORS = [
   {
     key: 'contrarian',
@@ -34,7 +31,7 @@ const ADVISORS = [
   },
   {
     key: 'first-principles',
-    model: undefined,
+    model: 'opus',
     persona:
       'THE FIRST PRINCIPLES THINKER. Strip away every assumption baked into the question. Rebuild the problem from scratch. What is actually being asked underneath the framing? Often the question itself is wrong.',
   },
@@ -125,7 +122,7 @@ ${responses.map((r) => `${r.advisor.toUpperCase()}:\n${r.text}`).join('\n\n')}
 
 PEER REVIEW:
 ${review}`,
-  { label: 'chairman', phase: 'Chairman' }
+  { label: 'chairman', phase: 'Chairman', model: 'opus' }
 )
 
 return { question, advisors: responses, review, recommendation }

@@ -58,6 +58,7 @@ start (the old `vault-context.sh` title index cost ~3k tokens per session and
 was redundant next to `vault-search`); `home.ai.vaultFolders` still declares
 the role-scoped folder set, exported as `CLAUDE_VAULT_FOLDERS` in
 `settings.json` for `vault-lint`'s scope-coverage check.
+Auto-memory stays off because it would add a fixed per-session injection and a second unversioned rules source alongside `~/.claude/rules/`.
 `autoCompactEnabled` is true with no context-window override set, so compaction
 fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 
@@ -65,12 +66,13 @@ fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 
 | Hook | Trigger | Action |
 |------|---------|--------|
-| `SessionStart` | Every session | `crg-autobuild.sh`, resolves the git toplevel, exits silently with no repo or no `code-review-graph` binary, skips entirely when a content stamp (HEAD + `git status --porcelain`, hashed) matches the last successful run — most sessions open on an unchanged tree — otherwise takes an atomic `mkdir` lock so two sessions in one repo can't both start a parse, then backgrounds a `build` (no graph yet) or `update` (graph exists) under `nice -n 10`, logging to `.code-review-graph/autobuild.log` and re-stamping on success. Solves the MCP server's "No graph found, run `code-review-graph build` first" error in any repo never built before, which is every new repo. Never blocks the session. opencode runs the same script from the plugin's `event` hook, filtered on `session.created` (the plugin API has no `session.start` hook). Manual path: `crgb`/`crgu`/`crgs` fish abbreviations for build/update/status |
-| `UserPromptSubmit` | Every prompt after compaction | `delegation-reminder.sh` re-states the Delegation Contract once the session transcript contains a compaction boundary; before that the full contract is already in context and the hook is silent |
+| `SessionStart` | Every session | `crg-autobuild.sh`, resolves the git toplevel, exits at once with no repo, no `code-review-graph` binary, or no `.code-review-graph/graph.db` yet (opt a repo in by running `code-review-graph build` once, or the `crgb` abbreviation); once a graph exists it skips when a content stamp (HEAD + `git status --porcelain`, hashed) matches the last successful run — most sessions open on an unchanged tree — otherwise takes an atomic `mkdir` lock so two sessions in one repo can't both start a parse, then backgrounds an `update` under `nice -n 10`, logging to `.code-review-graph/autobuild.log` and re-stamping on success. Never blocks the session. opencode runs the same script from the plugin's `event` hook, filtered on `session.created` (the plugin API has no `session.start` hook). Manual path: `crgb`/`crgu`/`crgs` fish abbreviations for build/update/status |
+| `SessionStart`, `PreCompact` | Compaction, and every session start | `compaction-sentinel.sh` latches a per-session sentinel file so the per-prompt reminder below is a single `[ -f ]` test instead of a transcript scan. `PreCompact` latches unconditionally; `SessionStart` latches only when the transcript already carries a `compact_boundary`, so a resumed or forked session keeps the reminder alive under its new id. `PreCompact` and not `PostCompact`: `PostCompact` is in `keepHookEvents` for Orca's own entry, and the deploy merge lets the Nix value win |
+| `UserPromptSubmit` | Every prompt after compaction | `delegation-reminder.sh` re-states the Delegation Contract once the sentinel above exists; before that the full contract is already in context and the hook is silent. Forks nothing: the session id is parsed with bash builtins and the payload is a single `printf` |
 | `PreToolUse` | Any `Bash` call | `block-ai-attribution.sh`, rejects AI attribution in commits/PRs/reviews |
 | `PreToolUse` | Any `Bash` call | `rtk-rewrite.sh`, its own matcher group, wraps `rtk hook claude` to auto-rewrite commands for permission-free read-only ops (silent no-op when `rtk` is absent) |
-| `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the third inline `Read`/`Grep`/`Glob` in a turn, once per turn |
-| `PreToolUse` | `Edit`, `Write` | `force-delegation.sh`, hard gate (not a nudge): allows main-thread mutations to at most 2 distinct files per turn (repeat edits to those files are unlimited) and denies any mutation that would spread to a further file (skips subagents via `agent_id`), forcing multi-file work through a subagent. Turn-boundary logic (agent_id bail, `prompt_id` turn key — no key means allow, never a session-wide fallback — counter dir, 2h GC) is shared with `delegate-nudge.sh` via `hooks/lib/turn-key.sh` |
+| `PreToolUse` | `Read`, `Grep`, `Glob` | `delegate-nudge.sh`, counts inline recon calls per turn on the main thread (skips subagents via `agent_id`) and injects a delegation reminder on the sixth inline `Read`/`Grep`/`Glob` in a turn, once per turn |
+| `PreToolUse` | `Edit`, `Write` | `force-delegation.sh`, hard gate (not a nudge): allows main-thread mutations to at most 4 distinct files per turn (repeat edits to those files are unlimited) and denies any mutation that would spread to a further file (skips subagents via `agent_id`), forcing multi-file work through a subagent. Turn-boundary logic (agent_id bail, `prompt_id` turn key — no key means allow, never a session-wide fallback — counter dir, 2h GC) is shared with `delegate-nudge.sh` via `hooks/lib/turn-key.sh` |
 | `PostToolUse` | `Edit`, `Write` | `biome check --write`, no-op unless the project has a biome config |
 
 ## MCP Servers
@@ -135,8 +137,7 @@ behavior. Before adding one, check whether a skill you actually invoked in the
 last 30 days needs it (transcripts under `~/.claude/projects/`), and prefer
 moving stack- or domain-specific plugins to the project that uses them. The
 2026-08 cut dropped the marketplaces no transcript invocation had touched
-(social-media-skills, claude-code-workflows, anthropic-agent-skills) and kept
-`ui-ux-pro-max-skill` and `claude-code-skills`, which still carry used plugins.
+(social-media-skills, claude-code-workflows, anthropic-agent-skills).
 
 **Machine-wide plugins are generic only**: workflow, writing, debugging,
 authoring. Stack- and domain-specific plugins (framework packs, SEO, design
@@ -192,8 +193,8 @@ lost; change the repo source.
 
 After the copies, `customSkillsReconcile` deletes any real directory in
 `~/.claude/skills/` this repo does not declare, so a renamed or removed skill
-actually disappears instead of staying loaded. Symlinks are left alone, they
-point at non-Nix tooling such as `~/.agents/skills/`.
+actually disappears instead of staying loaded.
+A symlink under `~/.claude/skills/` is removed too when it does not match a declared name: no Nix-managed skill is ever a symlink there, they are real copied directories, so any symlink found is foreign, most often an `npx skills`-style install pointing at `~/.agents/skills/`.
 
 **Exception: fetched, not committed.** `orchestration` and `orca-cli` come from
 `stablyai/orca` and are not vendored into this repo — the same reason

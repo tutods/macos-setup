@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# SessionStart hook: makes the code-review-graph MCP server answer without a
-# manual step. Its tools fail with "No graph found at .../graph.db. Run
-# `code-review-graph build` first" in any repo that was never built, which is
-# every new repo.
+# SessionStart hook: refreshes an existing code-review-graph database so the
+# MCP server has up-to-date answers. It never builds a fresh graph: a repo
+# opts in by running `code-review-graph build` once, this hook only updates
+# what already exists.
 #
 # Deliberately NOT `code-review-graph install`: that subcommand registers hooks
 # and generated instruction files across every AI CLI it knows about (Gemini,
 # Cursor, Windsurf, Cline, Kilo, Antigravity, Kimi), and this machine runs
-# Claude Code and opencode only. `build` and `update` touch nothing outside the
-# repo's own .code-review-graph/ directory, which is gitignored in cli/git.nix.
+# Claude Code and opencode only. `update` touches nothing outside the repo's
+# own .code-review-graph/ directory, which is gitignored in cli/git.nix.
 #
-# Always backgrounded: a first build on a large repo takes minutes, and a
+# Always backgrounded: an update on a large repo can take a while, and a
 # SessionStart hook that blocks is a session that will not start.
 
 set -euo pipefail
@@ -21,6 +21,7 @@ repo=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 [ -n "$repo" ] || exit 0
 
 db="$repo/.code-review-graph/graph.db"
+[ -f "$db" ] || exit 0
 log="$repo/.code-review-graph/autobuild.log"
 lock="$repo/.code-review-graph/.autobuild.lock"
 
@@ -53,16 +54,10 @@ if ! mkdir "$lock" 2>/dev/null; then
   exit 0
 fi
 
-if [ -f "$db" ]; then
-  action=update
-else
-  action=build
-fi
-
 # nice, because this races the user's own builds and tests for the same cores.
 (
   trap 'rmdir "$lock" 2>/dev/null || true' EXIT
-  if nice -n 10 code-review-graph "$action" -q --repo "$repo" >"$log" 2>&1; then
+  if nice -n 10 code-review-graph update -q --repo "$repo" >"$log" 2>&1; then
     printf '%s\n' "$state" >"$stamp"
   fi
 ) &
