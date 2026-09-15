@@ -118,11 +118,46 @@
           }
         ];
       }
+      # Latches the compaction sentinel when a resumed or forked session
+      # inherits an already-compacted transcript, so the reminder below keeps
+      # firing under the new session id. Own group so removing it never
+      # touches the crg hook. See compaction-sentinel.sh.
+      {
+        hooks = [
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/compaction-sentinel.sh\"";
+            timeout = 15;
+            statusMessage = "Checking for a compaction boundary";
+          }
+        ];
+      }
+    ];
+
+    # Latches the compaction sentinel before the boundary lands, so the first
+    # post-compaction prompt already sees it. PreCompact and not PostCompact:
+    # PostCompact is in keepHookEvents below (Orca appends its own entry) and
+    # the deploy merge lets the Nix value win, so declaring it here would drop
+    # Orca's hook.
+    hooks.PreCompact = [
+      {
+        hooks = [
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/compaction-sentinel.sh\"";
+            timeout = 10;
+            statusMessage = "Latching the compaction sentinel";
+          }
+        ];
+      }
     ];
 
     # Re-states the Delegation Contract once the session has been compacted
     # (the rules file alone drifts then); before that boundary the full
-    # contract is already in context and the hook stays silent. See
+    # contract is already in context and the hook stays silent. It reads that
+    # verdict off the sentinel compaction-sentinel.sh latches, so the check is
+    # one `[ -f ]` and forks nothing; the transcript scan it used to do here
+    # every prompt blew this timeout on the work laptop. See
     # delegation-reminder.sh.
     hooks.UserPromptSubmit = [
       {
@@ -280,6 +315,12 @@ in {
   };
   home.file.".claude/hooks/delegation-reminder.sh" = {
     source = ./delegation-reminder.sh;
+    force = true;
+  };
+  # Companion to delegation-reminder.sh: wired to PreCompact and SessionStart,
+  # it latches the sentinel that hook tests.
+  home.file.".claude/hooks/compaction-sentinel.sh" = {
+    source = ./compaction-sentinel.sh;
     force = true;
   };
   home.file.".claude/hooks/biome-fix.sh" = {

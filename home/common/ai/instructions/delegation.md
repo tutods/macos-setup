@@ -39,4 +39,4 @@ A `PreToolUse` hook counts inline `Read`/`Grep`/`Glob` on the main thread and in
 
 "Do it yourself", "no agents" or "inline" from the user suspends this section for that turn. Plan mode does not: it narrows which agents are used (`Explore` for recon, `Plan` for design), but recon and design still go to subagents.
 
-The `UserPromptSubmit` hook re-injects a compressed restatement of this contract on every turn, but only once the session has been compacted: until then the full contract above is already in context. The hook is `home/common/ai/delegation-reminder.sh`; an edit to this contract needs that script updated too.
+The `UserPromptSubmit` hook re-injects a compressed restatement of this contract on every turn, but only once the session has been compacted: until then the full contract above is already in context. Whether that boundary has been crossed is latched into a sentinel file by `home/common/ai/compaction-sentinel.sh` (`PreCompact` and `SessionStart`), so the per-prompt hook only tests for the file. The hook is `home/common/ai/delegation-reminder.sh`; an edit to this contract needs that script updated too.

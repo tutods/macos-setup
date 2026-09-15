@@ -20,6 +20,7 @@ Standing rules mined from past corrections; each exists because the same mistake
 - **Check official docs for a fast-moving library before implementing, unprompted**: training memory lags releases; the stack skills flag a known case (Better Auth, in the personal stack), but the rule applies to any library that ships faster than training data.
 - **A PR isn't delivered with conflicts on it**: after opening, updating, or the base moving, resolve immediately and confirm mergeable.
 - **Never name a new thing for a problem an existing name already covers**: search for the value first, delete a duplicate before adding a name, and repeat a literal at three call sites rather than add a fourth name nobody will find.
+- **Approve is not merge, even mid-review-flow**: a request to approve a PR (or skip waiting on a reviewer agent and approve) authorizes only the approval, never the merge. Ask or wait for explicit go-ahead before merging, don't treat "approve" as implying "and merge."
 
 ### Docs style
 

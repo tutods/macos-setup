@@ -5,24 +5,36 @@
 # no benefit. Compaction drops it; from the first prompt after that boundary
 # this hook restores a compressed restatement every turn.
 #
-# The boundary marker ("subtype":"compact_boundary") stays in the transcript
-# file forever, so one grep answers "has this session ever been compacted".
-# grep -q short-circuits on the first match; the 5s hook timeout covers the
-# no-match scan of a very large transcript.
+# "Has this session been compacted" is answered by a sentinel file that
+# compaction-sentinel.sh latches from PreCompact and SessionStart: one
+# `[ -f ]` test, no transcript scan. This hook used to grep the whole
+# transcript on every prompt instead, on the assumption that 5s covers a
+# no-match scan. It does not on the work laptop, whose EDR (Cortex XDR) scans
+# every exec and every file read: measured cat=0.9s, jq=1.1s, grep=2.4s on a
+# 130MB transcript, so the hook timed out on most turns and the reminder was
+# discarded exactly when it was needed. Nothing here forks a process now:
+# stdin is read and parsed with bash builtins, and the output is a printf.
 #
 # No `set -e`: every failure path must degrade to silence (exit 0), a broken
 # reminder can never block a prompt.
 set -uo pipefail
 
-input=$(cat)
+input=
+IFS= read -r -d '' input || :
 
-transcript=$(printf '%s' "$input" | jq -r '.transcript_path // empty' 2>/dev/null)
-[ -n "$transcript" ] && [ -f "$transcript" ] || exit 0
+sid_re='"session_id"[[:space:]]*:[[:space:]]*"([^"]+)"'
+sid=
+[[ $input =~ $sid_re ]] && sid=${BASH_REMATCH[1]}
+# The value becomes a path segment, so reject anything that is not a bare id.
+case "$sid" in
+  '' | *[!A-Za-z0-9._-]*) exit 0 ;;
+esac
 
-grep -q '"subtype":"compact_boundary"' "$transcript" 2>/dev/null || exit 0
+[ -f "${TMPDIR:-/tmp}/claude-compacted/$sid" ] || exit 0
 
-cat <<'JSON'
-{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"DELEGATION ACTIVE (restored after compaction): main thread orchestrates; no inline read/search/edit unless it is one known file. 2+ independent units = multiple Agent calls in ONE message. Recon -> Explore. Multi-file edit -> general-purpose. Diff review -> code-reviewer. Vault -> vault-search. Pass `model` on every dispatch. Not for user decisions, commits/PRs, or destructive ops."}}
-JSON
+# Single quotes are the point: the payload's `model` backticks are literal
+# JSON text, not a command substitution.
+# shellcheck disable=SC2016
+printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"DELEGATION ACTIVE (restored after compaction): main thread orchestrates; no inline read/search/edit unless it is one known file. 2+ independent units = multiple Agent calls in ONE message. Recon -> Explore. Multi-file edit -> general-purpose. Diff review -> code-reviewer. Vault -> vault-search. Pass `model` on every dispatch. Not for user decisions, commits/PRs, or destructive ops."}}'
 
 exit 0
