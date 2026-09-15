@@ -3,7 +3,7 @@
     (mkDock {
       groups = [
         [
-          "/Applications/Firefox.app"
+          "/Applications/Brave Browser.app"
           "/Applications/Safari.app"
           "/Applications/Slack.app"
           "/System/Applications/Mail.app"

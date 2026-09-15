@@ -1,6 +1,7 @@
 {...}: {
   homebrew = {
     casks = [
+      "brave-browser"
       "gcloud-cli"
       "slack"
     ];
