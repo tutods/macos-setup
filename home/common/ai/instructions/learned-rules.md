@@ -26,6 +26,7 @@ Standing rules mined from past corrections; each exists because the same mistake
 
 - **No counts or ranges in docs that go stale**: describe the set, not its size ("architecture decision records, numbered", not "ADRs 0001–0014").
 - **Never hard-wrap prose in Markdown a human reads in a renderer**: one line per paragraph, however long; a hard break renders as a visible line break. Instruction, skill and agent files are not exempt.
+- **A decision document is bullets under a page, not an essay**: when a person reads it to rule (amendment notes, option papers, anything ending in a recommendation), give the conflict in one sentence, the quoted passage, one line per option with its cost, and a two-sentence recommendation. The reasoning stays in the session or the PR that produced it.
 
 Stack-specific style rules are **not** here; they live in the `ts-conventions`, `react-conventions` and `api-conventions` skills so they cost nothing in a Nix or content session. Load the matching skill before writing code.
 
