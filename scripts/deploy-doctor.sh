@@ -104,6 +104,7 @@ if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
     opencodeSkillsPrune = hm.home.ai.opencodeSkillsPrune or null;
     opencodeSkillsSources = hm.home.ai.opencodeSkillsSources or null;
     brewfile = cfg.homebrew.brewfile or null;
+    brewOwner = cfg.homebrew.user or null;
   }" 2>/dev/null) || [ -z "$doctor_json" ]; then
   echo "deploy-doctor: could not eval $HM (customSkills/plugins/opencode attrs) — aborting instead of showing a bogus delete list" >&2
   exit 3
@@ -113,6 +114,7 @@ plugins_json=$(printf '%s' "$doctor_json" | jq -c '.plugins')
 prune_flag=$(printf '%s' "$doctor_json" | jq -r '.opencodeSkillsPrune')
 sources_json=$(printf '%s' "$doctor_json" | jq -c '.opencodeSkillsSources')
 brewfile=$(printf '%s' "$doctor_json" | jq -r '.brewfile // empty')
+brew_owner=$(printf '%s' "$doctor_json" | jq -r '.brewOwner // empty')
 
 # ── 1. Skills the reconcile will delete ──────────────────────────────────────
 declare -a declared_skills
@@ -264,7 +266,11 @@ else
   }
   trap 'rm -f "$pending_brewfile"' EXIT
   printf '%s\n' "$brewfile" >"$pending_brewfile"
-  cleanup_out=$(HOMEBREW_NO_AUTO_UPDATE=1 brew bundle cleanup --file="$pending_brewfile" 2>&1)
+  # brew resolves its trust file from $HOME, so the dry run must run as brew_owner
+  # (-H) whenever that differs from the invoking user, mirroring nix.sh's as_user.
+  brew_as_user=()
+  [ -n "$brew_owner" ] && [ "$brew_owner" != "${USER:-}" ] && brew_as_user=(sudo -u "$brew_owner" -H)
+  cleanup_out=$("${brew_as_user[@]+"${brew_as_user[@]}"}" env HOMEBREW_NO_AUTO_UPDATE=1 brew bundle cleanup --file="$pending_brewfile" 2>&1)
   cleanup_rc=$?
   if [ "$cleanup_rc" -eq 0 ]; then
     print_ok "brew: everything installed is in the pending Brewfile, cleanup uninstalls nothing"
