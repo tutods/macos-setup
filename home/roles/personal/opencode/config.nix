@@ -76,16 +76,16 @@
   # matches and falls back to ask — safe failure, never silent-allow.
   mcpToolAllows = lib.mapAttrs' (name: _: lib.nameValuePair "${name}_*" "allow") mcpServers;
 
+  # No github MCP server: gh CLI already covers every GitHub op through bash
+  # (open-pr/review-pr skills shell out to it), so the MCP wrapper was a
+  # redundant npx cold-start plus a second, inconsistently-sourced credential
+  # path (inline GITHUB_TOKEN vs postgres's doppler run below).
   mcpServers = {
-    github = {
-      type = "local";
-      command = ["sh" "-c" "GITHUB_PERSONAL_ACCESS_TOKEN=\"\${GITHUB_TOKEN:-}\" npx -y @modelcontextprotocol/server-github"];
-      enabled = true;
-    };
     playwright = {
       type = "local";
       command = ["npx" "-y" "@playwright/mcp" "--isolated" "--headless"];
       enabled = true;
+      timeout = 20000;
     };
     postgres = {
       type = "local";
@@ -97,6 +97,7 @@
       type = "local";
       command = ["npx" "-y" "shadcn@latest" "mcp"];
       enabled = true;
+      timeout = 15000;
     };
     code-review-graph = {
       type = "local";
