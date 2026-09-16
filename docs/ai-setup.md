@@ -196,16 +196,12 @@ After the copies, `customSkillsReconcile` deletes any real directory in
 actually disappears instead of staying loaded.
 A symlink under `~/.claude/skills/` is removed too when it does not match a declared name: no Nix-managed skill is ever a symlink there, they are real copied directories, so any symlink found is foreign, most often an `npx skills`-style install pointing at `~/.agents/skills/`.
 
-**Exception: fetched, not committed.** `orchestration` and `orca-cli` come from
-`stablyai/orca` and are not vendored into this repo — the same reason
-marketplaces are pinned rather than committed applies. Declared via
-`lib/ai.nix:mkFetchedSkills` (same "common" import list in
-`home/common/ai/skills/default.nix`), which fetches a pinned rev + hash with
-`fetchFromGitHub` and copies the named skill directories into
-`~/.claude/skills/` at build time, so a fresh machine still gets them from
-`./nix.sh` with no skill content in this repo's git history. Bump the pin the
-same way as a marketplace: `git ls-remote https://github.com/stablyai/orca HEAD`,
-review the diff, update rev + hash together.
+`orchestration` and `orca-cli` (from `stablyai/orca`) are deliberately not
+managed here: Orca's own updater treats a Nix-copied directory as
+modified/duplicate and skips it. Install and update them through Orca
+directly; see `docs/dropped-skill-sources.md`. Because they're then unmanaged,
+`customSkillsReconcile` deletes them on the next deploy unless you reinstall
+after each `./nix.sh` run.
 
 ## Agents
 
@@ -255,7 +251,6 @@ only acts when needed:
 |------|----------|-----------|
 | `pipx install code-review-graph` | `home/common/ai/init.nix` | pinned version not in `pipx list` |
 | `localSkills-*` | `lib/ai.nix` (`mkLocalSkills`) | every switch: copies in-repo custom skills into `~/.claude/skills/` |
-| `fetchedSkills-*` | `lib/ai.nix` (`mkFetchedSkills`) | every switch: copies pinned upstream skills into `~/.claude/skills/` |
 | `customSkillsReconcile` | `home/common/ai/skills/default.nix` | every switch: deletes non-symlink dirs in `~/.claude/skills/` this repo does not declare |
 
 ## Maintenance

@@ -61,3 +61,4 @@ role's `ai/default.nix`.
   `scripts/verify-plugins.sh`. Re-add only if it gains a discovery-only mode.
 - **`resciencelab/opc-skills`**: upstream writes `skillPath` at `SKILL.md`
   instead of the directory, breaking `claude /doctor`.
+- **`orchestration` / `orca-cli`** (`stablyai/orca`, fetched via `mkFetchedSkills`): Orca's own skill updater treats a Nix-copied directory as modified or a duplicate and refuses to update it, so these are no longer Nix-managed. Install and update them directly through Orca; `customSkillsReconcile` will delete the unmanaged copy on the next `./nix.sh` deploy, so reinstall via Orca after each deploy if needed.

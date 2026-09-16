@@ -32,26 +32,11 @@
         "harness-engineer"
       ];
     })
-    # Fetched, not committed: the user does not want orca's skill content
-    # living in this repo's git history. To bump the pin: run
-    # `git ls-remote https://github.com/stablyai/orca HEAD`, review the diff
-    # upstream, then update rev + hash together.
-    (aiLib.mkFetchedSkills {
-      inherit lib;
-      label = "orca";
-      owner = "stablyai";
-      repo = "orca";
-      rev = "976e05c0c81cff2b4ed038b9d847834ad7c8ba7b";
-      hash = "sha256-k2oV/OmwrGdc8DLEDnM5lg4lRs5J4w0kRoW/j+nzsGA=";
-      subdir = "skills";
-      names = ["orchestration" "orca-cli"];
-    })
   ];
 
-  # A skill name declared by more than one mkLocalSkills/mkFetchedSkills
-  # instance (common + roles) would deploy whichever localSkills-*/
-  # fetchedSkills-* copy happened to run last, an order the activation DAG
-  # leaves unspecified. Fail the build instead.
+  # A skill name declared by more than one mkLocalSkills instance (common +
+  # roles) would deploy whichever localSkills-* copy happened to run last, an
+  # order the activation DAG leaves unspecified. Fail the build instead.
   assertions = let
     skills = config.home.ai.customSkills;
     dupes = lib.unique (lib.filter (n: lib.count (x: x == n) skills > 1) skills);
@@ -67,8 +52,8 @@
   # Nix-managed skills are always real copied directories, so a symlink there
   # is foreign by construction (most often an `npx skills`-style install
   # pointing at ~/.agents/skills).
-  # Runs after every localSkills-*/fetchedSkills-* copy (entryBetween in
-  # lib/ai.nix:mkSkillCopy, shared by mkLocalSkills and mkFetchedSkills).
+  # Runs after every localSkills-* copy (entryBetween in
+  # lib/ai.nix:mkSkillCopy).
   home.activation.customSkillsReconcile = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
     dest="$HOME/.claude/skills"
     if [ -d "$dest" ]; then

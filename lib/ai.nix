@@ -7,10 +7,8 @@
 # historically treated a skill dir as writable and a 0444 store symlink broke
 # that. Nothing writes there now, but the copy is kept: it is cheap and the
 # reconcile logic depends on real dirs. mkLocalSkills copies the declared set and
-# customSkillsReconcile deletes any non-symlink dir it does not own.
-# mkFetchedSkills does the same copy, but its source is a pinned fetchFromGitHub
-# tree instead of a directory committed in this repo. Agents and workflows are
-# plain read-only input and get home.file store symlinks.
+# customSkillsReconcile deletes any non-symlink dir it does not own. Agents and
+# workflows are plain read-only input and get home.file store symlinks.
 {pkgs}: let
   jqBin = "${pkgs.jq}/bin/jq";
 in rec {
@@ -108,12 +106,10 @@ in rec {
     then base
     else base + "\n\n" + extra;
 
-  # Shared by mkLocalSkills and mkFetchedSkills: both copy a named set of
-  # skill directories from some `src` into ~/.claude/skills at activation
-  # time, differing only in where `src` comes from and whether the reverse
-  # "every dir on disk must be declared" assertion applies (mkLocalSkills
-  # owns its whole `local/` dir and can assert that; mkFetchedSkills only
-  # owns a curated subset of someone else's repo, so it can't).
+  # Copies a named set of skill directories from some `src` into
+  # ~/.claude/skills at activation time. Used by mkLocalSkills, which owns
+  # its whole `local/` dir and adds the reverse "every dir on disk must be
+  # declared" assertion on top.
   mkSkillCopy = {
     lib,
     label,
@@ -172,35 +168,6 @@ in rec {
             message = "mkLocalSkills (${label}): ${toString dir}/${entry} exists but is not in the names list";
           })
           (builtins.readDir dir));
-    };
-
-  # Skills fetched from an external repo at build time instead of committed
-  # into this repo, e.g. stablyai/orca's `orchestration`/`orca-cli` skills:
-  # the user wants them reproducibly installed by ./nix.sh on any machine
-  # without their content living in this repo's git history. Pinned by
-  # rev + hash exactly like a plugin marketplace — bump deliberately after
-  # reviewing the diff, never track a moving ref. Unlike mkLocalSkills, this
-  # never asserts the fetched tree matches `names` exactly: it's a curated
-  # subset of someone else's repo, not a directory this repo owns.
-  mkFetchedSkills = {
-    lib,
-    label,
-    owner,
-    repo,
-    rev,
-    hash,
-    subdir ? "",
-    names,
-  }: let
-    fetched = pkgs.fetchFromGitHub {inherit owner repo rev hash;};
-    src =
-      if subdir == ""
-      then fetched
-      else fetched + "/${subdir}";
-  in
-    mkSkillCopy {
-      inherit lib label names src;
-      prefix = "fetchedSkills";
     };
 
   mkLocalAgents = {
