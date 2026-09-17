@@ -8,7 +8,12 @@
 
   xdg.configFile."fish/completions/fnm.fish".source = ./fnm-completions.fish;
 
-  home.sessionPath = ["$HOME/.local/bin"];
+  # fnm's default alias is a stable symlink (unlike its per-shell multishell
+  # dir below, torn down when that shell exits), so anything spawned outside
+  # an fnm-initialized shell — Claude Code plugin hooks included — still
+  # finds `node`. Listed after `.local/bin` so an active project version from
+  # `fnm env`/`fnm use` in interactiveShellInit still shadows it.
+  home.sessionPath = ["$HOME/.local/bin" "$HOME/.local/share/fnm/aliases/default/bin"];
 
   programs.fish = {
     enable = true;
