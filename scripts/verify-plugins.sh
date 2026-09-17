@@ -30,14 +30,21 @@ command -v jq >/dev/null || { echo "verify-plugins: jq not found" >&2; exit 2; }
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-# Role files are scanned too: the work role declares the private ai-workbench
-# marketplace and its plugins (which is also why the local-install fallback in
-# the fetch failure path below exists).
-SOURCES=(
-  home/common/ai/plugins.nix
-  home/roles/personal/ai/default.nix
-  home/roles/work/ai/default.nix
-)
+# Role files are scanned too, but only the one matching this machine when run
+# locally: the work role's private ai-workbench marketplace (which is also why
+# the local-install fallback in the fetch failure path below exists) only has
+# an access path from the work laptop, so scanning it from the personal
+# machine can never succeed. CI has no host identity of its own, so it keeps
+# checking every role for full typo coverage.
+SOURCES=(home/common/ai/plugins.nix)
+if [ -n "${CI:-}" ]; then
+  SOURCES+=(home/roles/personal/ai/default.nix home/roles/work/ai/default.nix)
+else
+  case "$(scutil --get ComputerName 2>/dev/null || hostname)" in
+    *MacBook*|*macbook*) SOURCES+=(home/roles/personal/ai/default.nix) ;;
+    *) SOURCES+=(home/roles/work/ai/default.nix) ;;
+  esac
+fi
 
 # Collect `<key> = "<owner>/<repo>";` inside home.ai.marketplaces blocks, and
 # "<plugin>@<key>" inside home.ai.plugins blocks. Comment lines are skipped.

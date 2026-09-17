@@ -63,7 +63,10 @@ VPN must be connected before accessing internal services.
 Mindera-People access before Claude Code can install the marketplace, and
 `./scripts/verify-plugins.sh` needs either that repo access or an existing
 local install (`~/.claude/plugins/marketplaces/ai-workbench/`, any `/Users/*`
-home) to verify against; with neither, it fails rather than skips.
+home) to verify against; with neither, it fails rather than skips. Run
+locally (not in CI), the script only scans the role matching the current
+machine's hostname, so this check never runs at all from the personal
+MacBook, which can satisfy neither condition.
 
 `mp-conventions.md` and `mp-fields.md` are slated to move into
 `Mindera-People/ai-workbench` (pending the owner pushing them there); until
