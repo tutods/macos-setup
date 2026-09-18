@@ -4,7 +4,12 @@
   pkgs,
   pkgsUnstable,
   ...
-}: {
+}: let
+  # Temporary override: nixpkgs-unstable's opencode 1.18.30 crashes on every
+  # prompt. See opencode-pinned.nix. Restore pkgsUnstable.opencode below once
+  # nixpkgs ships > 1.18.30.
+  opencodePinned = pkgsUnstable.callPackage ./opencode-pinned.nix {};
+in {
   home.packages =
     (with pkgs; [
       doppler
@@ -18,6 +23,6 @@
     ])
     ++ [
       # fast-moving AI CLI, stable lags too far — same rationale as claude-code
-      pkgsUnstable.opencode
+      opencodePinned
     ];
 }
