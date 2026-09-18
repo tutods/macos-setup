@@ -4,12 +4,7 @@
   config,
   lib,
   ...
-}: let
-  # Installed and updated by Orca's own updater directly, never Nix-managed
-  # (docs/dropped-skill-sources.md): reconcile must leave these alone rather
-  # than delete them as unmanaged on every deploy.
-  externallyManagedSkills = ["orca-cli" "orchestration"];
-in {
+}: {
   imports = [
     (aiLib.mkLocalSkills {
       inherit lib;
@@ -62,7 +57,7 @@ in {
   home.activation.customSkillsReconcile = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
     dest="$HOME/.claude/skills"
     if [ -d "$dest" ]; then
-      managed=" ${lib.concatStringsSep " " (config.home.ai.customSkills ++ externallyManagedSkills)} "
+      managed=" ${lib.concatStringsSep " " (config.home.ai.customSkills ++ config.home.ai.externallyManagedSkills)} "
       removed=""
 
       for path in "$dest"/*; do

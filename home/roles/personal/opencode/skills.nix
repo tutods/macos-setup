@@ -8,7 +8,7 @@
   pkgs,
   ...
 }: let
-  inherit (config.home.ai) opencodeSkillsSources;
+  inherit (config.home.ai) opencodeSkillsSources opencodeSkillsExternalSources;
 
   # Pinned so a `skills` CLI release can't change install behaviour mid-deploy.
   # Latest confirmed via `npm view skills version` (2026-09-06); bump
@@ -16,7 +16,7 @@
   skillsToolVersion = "1.5.23";
 
   manifestHash = builtins.hashString "sha256" (lib.concatStringsSep "\n" (opencodeSkillsSources ++ [skillsToolVersion]));
-  sourcesJson = pkgs.writeText "opencode-skill-sources.json" (builtins.toJSON opencodeSkillsSources);
+  sourcesJson = pkgs.writeText "opencode-skill-sources.json" (builtins.toJSON (opencodeSkillsSources ++ opencodeSkillsExternalSources));
   jqBin = "${pkgs.jq}/bin/jq";
 in {
   options.home.ai.opencodeSkillsSources = lib.mkOption {
@@ -33,6 +33,20 @@ in {
       as `<owner>/<repo>`. Exposed as an option (not a `let`-bound local) so
       deploy-doctor.sh can `nix eval` the same list opencodeSkillsInstall
       and opencodeSkillsReconcile use, instead of scraping this file's text.
+    '';
+  };
+
+  options.home.ai.opencodeSkillsExternalSources = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = ["stablyai/orca"];
+    description = ''
+      Lock-file sources whose installed skills in ~/.agents/skills are NOT
+      installed by this flake but must survive `opencodeSkillsReconcile`
+      pruning (e.g. Orca's own updater installs them). Merged into the
+      owned-set alongside opencodeSkillsSources; deploy-doctor.sh `nix eval`s
+      this too, same as it does for opencodeSkillsSources. Not added to
+      opencodeSkillsSources itself, which also drives the `npx skills add`
+      install runs — see docs/dropped-skill-sources.md.
     '';
   };
 

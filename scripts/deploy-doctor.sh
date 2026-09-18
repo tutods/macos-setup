@@ -100,9 +100,11 @@ echo ""
 if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
   cfg: let hm = cfg.home-manager.users.\"$USER_NAME\"; in {
     customSkills = hm.home.ai.customSkills;
+    externallyManagedSkills = hm.home.ai.externallyManagedSkills;
     plugins = hm.home.ai.plugins;
     opencodeSkillsPrune = hm.home.ai.opencodeSkillsPrune or null;
     opencodeSkillsSources = hm.home.ai.opencodeSkillsSources or null;
+    opencodeSkillsExternalSources = hm.home.ai.opencodeSkillsExternalSources or null;
     brewfile = cfg.homebrew.brewfile or null;
     brewOwner = cfg.homebrew.user or null;
   }" 2>/dev/null) || [ -z "$doctor_json" ]; then
@@ -110,15 +112,18 @@ if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
   exit 3
 fi
 skills_json=$(printf '%s' "$doctor_json" | jq -c '.customSkills')
+extskills_json=$(printf '%s' "$doctor_json" | jq -c '.externallyManagedSkills')
 plugins_json=$(printf '%s' "$doctor_json" | jq -c '.plugins')
 prune_flag=$(printf '%s' "$doctor_json" | jq -r '.opencodeSkillsPrune')
 sources_json=$(printf '%s' "$doctor_json" | jq -c '.opencodeSkillsSources')
+extsources_json=$(printf '%s' "$doctor_json" | jq -c '.opencodeSkillsExternalSources')
 brewfile=$(printf '%s' "$doctor_json" | jq -r '.brewfile // empty')
 brew_owner=$(printf '%s' "$doctor_json" | jq -r '.brewOwner // empty')
 
 # ── 1. Skills the reconcile will delete ──────────────────────────────────────
 declare -a declared_skills
 while IFS= read -r s; do declared_skills+=("$s"); done < <(printf '%s' "$skills_json" | jq -r '.[]')
+while IFS= read -r s; do declared_skills+=("$s"); done < <(printf '%s' "$extskills_json" | jq -r '.[]')
 
 SKILLS_DIR="$TARGET_HOME/.claude/skills"
 deleted=0
@@ -208,8 +213,8 @@ if [ "$CONFIG" = "macbook" ]; then
     elif ! jq empty "$OC_LOCK_FILE" 2>/dev/null; then
       lock_state="invalid"
     else
-      while IFS= read -r k; do owned_skills+=("$k"); done < <(jq -r --argjson srcs "$sources_json" \
-        '.skills // {} | to_entries[] | select(.value.source as $s | $srcs | index($s)) | .key' \
+      while IFS= read -r k; do owned_skills+=("$k"); done < <(jq -r --argjson srcs "$sources_json" --argjson extsrcs "$extsources_json" \
+        '.skills // {} | to_entries[] | select(.value.source as $s | ($srcs + ($extsrcs // [])) | index($s)) | .key' \
         "$OC_LOCK_FILE" 2>/dev/null)
     fi
 
@@ -311,7 +316,9 @@ fi
 echo ""
 echo -e "  ${DIM}Preview only — nothing was changed. Re-run after editing the flake if${NC}"
 echo -e "  ${DIM}anything above is unexpected; a deleted skill/plugin needs to be declared${NC}"
-echo -e "  ${DIM}in the flake (home.ai.customSkills / home.ai.plugins) to survive, and a${NC}"
+echo -e "  ${DIM}in the flake (home.ai.customSkills / home.ai.plugins) to survive,${NC}"
+echo -e "  ${DIM}externally-managed skill dirs belong in home.ai.externallyManagedSkills,${NC}"
+echo -e "  ${DIM}opencode-side external sources in home.ai.opencodeSkillsExternalSources, and a${NC}"
 echo -e "  ${DIM}brew formula/cask must be in homebrew.brews/casks (or the host's homebrew/).${NC}"
 echo ""
 

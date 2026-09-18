@@ -196,11 +196,11 @@ After the copies, `customSkillsReconcile` deletes any real directory in
 actually disappears instead of staying loaded.
 A symlink under `~/.claude/skills/` is removed too when it does not match a declared name: no Nix-managed skill is ever a symlink there, they are real copied directories, so any symlink found is foreign, most often an `npx skills`-style install pointing at `~/.agents/skills/`.
 
-`orchestration` and `orca-cli` (from `stablyai/orca`) are deliberately not
-managed here: Orca's own updater treats a Nix-copied directory as
-modified/duplicate and skips it. Install and update them through Orca
-directly; see `docs/dropped-skill-sources.md`. `customSkillsReconcile` leaves
-both alone (`skills/default.nix`'s `externallyManagedSkills`) rather than
+`orchestration`, `orca-cli` and `computer-use` (from `stablyai/orca`) are
+deliberately not managed here: Orca's own updater treats a Nix-copied
+directory as modified/duplicate and skips it. Install and update them through
+Orca directly; see `docs/dropped-skill-sources.md`. `customSkillsReconcile`
+leaves all three alone (via `home.ai.externallyManagedSkills`) rather than
 deleting them as unmanaged on the next deploy.
 
 ## Agents
