@@ -199,9 +199,9 @@ A symlink under `~/.claude/skills/` is removed too when it does not match a decl
 `orchestration` and `orca-cli` (from `stablyai/orca`) are deliberately not
 managed here: Orca's own updater treats a Nix-copied directory as
 modified/duplicate and skips it. Install and update them through Orca
-directly; see `docs/dropped-skill-sources.md`. Because they're then unmanaged,
-`customSkillsReconcile` deletes them on the next deploy unless you reinstall
-after each `./nix.sh` run.
+directly; see `docs/dropped-skill-sources.md`. `customSkillsReconcile` leaves
+both alone (`skills/default.nix`'s `externallyManagedSkills`) rather than
+deleting them as unmanaged on the next deploy.
 
 ## Agents
 
