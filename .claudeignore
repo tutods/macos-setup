@@ -6,8 +6,5 @@ result-*
 # Nix store references (large, never useful context)
 /nix/
 
-# Direnv
-.direnv/
-
 # Git internals
 .git/

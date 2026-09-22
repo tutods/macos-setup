@@ -61,7 +61,7 @@
       # the shell that re-sources this, and worktrunk (brew) activates after
       # the fish rebuild, so both binaries can be transiently absent.
       if command -q fnm
-        fnm env --shell fish --corepack-enabled --resolve-engines | source
+        fnm env --shell fish --use-on-cd --corepack-enabled --resolve-engines | source
       end
 
       # `wt switch` changes directory, so it needs a shell function. Declared
