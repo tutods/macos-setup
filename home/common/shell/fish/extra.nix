@@ -32,14 +32,4 @@
     # fzf.fish plugin and was dead.
     changeDirWidgetOptions = ["--preview 'eza --all --color=always {}'"];
   };
-
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-    stdlib = ''
-      use_fnm() {
-        fnm use --install-if-missing --silent-if-unchanged
-      }
-    '';
-  };
 }
