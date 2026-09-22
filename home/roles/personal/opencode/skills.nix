@@ -21,13 +21,16 @@
 in {
   options.home.ai.opencodeSkillsSources = lib.mkOption {
     type = lib.types.listOf lib.types.str;
-    default = [
-      "vercel-labs/agent-skills"
-      "biomejs/biome"
-      "mindrally/skills"
-      "vercel/turborepo"
-      "remotion-dev/skills"
-    ];
+    # Empty by measurement (2026-09-21): every previously declared source
+    # (vercel-labs/agent-skills, biomejs/biome, mindrally/skills,
+    # vercel/turborepo, remotion-dev/skills — 23 skills, ~1.2k tokens of
+    # description in every opencode request) had ZERO skill loads across all
+    # recorded sessions; only the Orca-sourced skills (orchestration,
+    # orca-cli, computer-use, preserved via opencodeSkillsExternalSources)
+    # were ever loaded. opencode reads this tree, Claude never does.
+    # Re-add a source here only after confirming its skills get used, and
+    # update the manifest hash check: the stamp changes with this list.
+    default = [];
     description = ''
       Skill sources installed into ~/.agents/skills via `npx skills add`,
       as `<owner>/<repo>`. Exposed as an option (not a `let`-bound local) so

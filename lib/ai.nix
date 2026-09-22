@@ -261,13 +261,22 @@ in rec {
   # the `run cp` backup) touches the target, so the result is mode 0644 on
   # every path and a dry-run activation previews the writes instead of
   # performing them.
+  #
+  # `dropKeys` is the escape hatch from "other live keys are kept": a top-level
+  # key the live file carries but Nix deliberately does not declare is dropped
+  # when its name is listed here. Needed exactly when an undeclared live key is
+  # an active override of a value this module documents as intentionally unset
+  # (autoCompactWindow), which the keep-foreign-keys default would otherwise
+  # preserve forever.
   mergeJsonObject = {
     file,
     value,
     keepHookEvents ? [],
+    dropKeys ? [],
   }: let
     valueFile = pkgs.writeText "aiLib-merge-object.json" (builtins.toJSON value);
     keep = builtins.toJSON keepHookEvents;
+    drop = builtins.toJSON dropKeys;
   in ''
     target="${file}"
     run mkdir -p "$(dirname "$target")"
@@ -280,6 +289,7 @@ in rec {
         | ($live.permissions | if type == "object" then . else {} end) as $lp
         | ($nix.permissions  | if type == "object" then . else {} end) as $np
         | ($live + $nix)
+        | with_entries(select(.key as $k | (${drop} | index($k)) | not))
         | .hooks = (($lh | with_entries(select(.key as $k | ${keep} | index($k)))) + $nh)
         | .permissions = ($lp + $np)
       ' "$target" ${valueFile} > "$merged"; then

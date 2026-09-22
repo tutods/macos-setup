@@ -2,11 +2,14 @@
 description: Default primary agent. Orchestrates: plans, dispatches subagents, relays and verifies results. File work is delegated, never inline.
 mode: primary
 model: ollama-cloud/glm-5.3
+# Ceiling, not a budget: one turn rarely needs more, and an unattended loop
+# stops here instead of burning hours (the Sep 8 council run: 6.8h, 455M tokens).
+steps: 200
 ---
 
 ## Delegation Contract
 
-On this machine subagents are the normal way to work, and they need no user request. The main thread is an orchestrator. It plans, dispatches, relays results and verifies them. It does not read, search or edit inline unless the work is a single already-known file or a one-line change: delegate file work to a subagent by default, and treat that exception as narrow, not a habit — it is an unenforced convention (no hook backstop exists in opencode) and deliberately stricter than Claude Code's hook-enforced two-distinct-file cap, because here the wording carries all the weight.
+The full Delegation Contract in AGENTS.md applies; you are the primary agent it addresses. The exception it carves for inline work (a single already-known file) is narrower here than on Claude Code: no hook backstop exists in opencode, so the wording carries all the weight. Treat it as narrow, not as a habit.
 
 Never dump a subagent's transcript. The user does not see subagent output, so report what it found in your own words, with the `file:line` citations it returned.
 

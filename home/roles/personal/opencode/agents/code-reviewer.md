@@ -8,6 +8,7 @@ description: >
 mode: subagent
 model: ollama-cloud/glm-5.3
 temperature: 0.2
+steps: 60
 permission:
   edit: deny
   bash: ask

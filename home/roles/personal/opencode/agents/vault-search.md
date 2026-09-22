@@ -10,6 +10,7 @@ description: >
 mode: subagent
 model: ollama-cloud/glm-5.3-flash
 temperature: 0
+steps: 25
 permission:
   edit: deny
   task: deny

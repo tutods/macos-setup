@@ -35,9 +35,9 @@
       pr = "";
     };
 
-    # Off so the harness's own memory dir isn't a second, unversioned source of
-    # rules alongside ~/.claude/rules/. https://code.claude.com/docs/en/memory
-    autoMemoryEnabled = false;
+    # On: session-learned facts. Rules stay in ~/.claude/rules/, one fact one home.
+    # https://code.claude.com/docs/en/memory
+    autoMemoryEnabled = true;
 
     # No autoCompactWindow set: model-tuned default, see docs/ai-lessons.md.
     autoCompactEnabled = true;
@@ -405,6 +405,11 @@ in {
         "PermissionRequest"
         "PostCompact"
       ];
+      # Deliberately undeclared above so Claude Code uses its model-tuned
+      # default (the comment on autoCompactEnabled explains why). Without this
+      # the merge's keep-foreign-keys rule would preserve a hand-set value
+      # forever, silently overriding the decision.
+      dropKeys = ["autoCompactWindow"];
     }
   );
 }

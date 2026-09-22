@@ -51,14 +51,16 @@ deploy drops it.
 
 `permissions.defaultMode` is `auto`, Claude Code's classifier-gated mode: a tool call the classifier judges safe runs without a prompt, anything else still asks, and the deny list is absolute in every mode regardless (secret paths included). It was briefly `full-auto`, which is not a valid value for this key (the valid set is `default`/`manual`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`) and raised a Settings Error dialog at session start instead of being silently ignored. The generated `settings.json` also used to carry four blanket allow rules, `Bash(*)`, `Edit(*)`, `Write(*)`, `MultiEdit(*)`; all four are gone. `Bash(*)` is a valid rule and matched every Bash call, which cancelled `auto` mode's classifier gating outright. `Write(*)` and `MultiEdit(*)` were dead weight regardless: Claude Code only consults path rules for `Edit` and `Read`, it accepts a path rule on `Write`/`NotebookEdit`/`MultiEdit`, warns about it at startup, then never applies it. The RTK rewrites of read-only commands stay declared in `permissions.allow` so the rewrite hook does not turn them into prompts; every entry left in that list is an rtk read-only form, with no blanket allow behind them. This diverges from opencode on purpose now: see [opencode-setup.md](opencode-setup.md) for opencode's open-with-a-danger-list posture and the reasoning for the split.
 
-`autoMemoryEnabled` is off, so the harness remembers nothing on its own. The
-Obsidian vault is the durable memory, written by the `obsidian-vault` skill and
-read by the `vault-search` agent. Nothing injects vault content at session
+`autoMemoryEnabled` is on: memory files hold session-learned facts, injected
+once per session once the directory accrues content. The Obsidian vault remains
+the durable home for how work happens here — written by the `obsidian-vault`
+skill, read by the `vault-search` agent. Nothing injects vault content at session
 start (the old `vault-context.sh` title index cost ~3k tokens per session and
 was redundant next to `vault-search`); `home.ai.vaultFolders` still declares
 the role-scoped folder set, exported as `CLAUDE_VAULT_FOLDERS` in
 `settings.json` for `vault-lint`'s scope-coverage check.
-Auto-memory stays off because it would add a fixed per-session injection and a second unversioned rules source alongside `~/.claude/rules/`.
+Memory files are unversioned, so rules stay in `~/.claude/rules/` and durable
+knowledge in the vault; memory holds session-learned facts only.
 `autoCompactEnabled` is true with no context-window override set, so compaction
 fires at each session's model-tuned default, see [ai-lessons.md](ai-lessons.md).
 

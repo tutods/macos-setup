@@ -14,9 +14,22 @@
       # install`, that writes hooks into ~/.claude/settings.json, which this
       # repo overwrites on every deploy. Per-repo `code-review-graph build` is
       # still required before its graph answers anything.
+      # --tools mirrors the opencode side (config.nix): the server ships 30
+      # tools whose full schema is ~9.7k tokens, and this machine has only
+      # ever called four of them across every recorded session, so the rest is
+      # prompt cost for nothing. Trimmed set: ~1.7k.
       code-review-graph = {
         command = "${config.home.homeDirectory}/.local/bin/code-review-graph";
-        args = ["serve"];
+        args = [
+          "serve"
+          "--tools"
+          (lib.concatStringsSep "," [
+            "get_minimal_context_tool"
+            "detect_changes_tool"
+            "get_impact_radius_tool"
+            "build_or_update_graph_tool"
+          ])
+        ];
       };
     }
     // config.home.ai.extraMcpServers;

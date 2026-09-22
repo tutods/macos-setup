@@ -14,9 +14,9 @@ sources with Claude wherever the two harnesses agree.
 | Delegation contract | `instructions/delegation.md` + `UserPromptSubmit` hook | `agents/orchestrator.md` (the default primary) + the same contract in the generated `AGENTS.md`, convention only, not enforced by any permission |
 | Inline-edit allowance | 2 distinct files per turn, hook-enforced (`force-delegation.sh` hard-denies the spread) | "a single already-known file", deliberately stricter wording: there is no hook backstop in opencode, so the wording carries the weight enforcement provides on the Claude side |
 | Skills | `~/.claude/skills/` (deployed copies) | `~/.claude/skills` plus `~/.agents/skills` (the `npx skills add` tree, see below) plus a project-relative `.claude/skills` entry, all listed in `skills.paths`. `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` kills the external scans, including project-local `.claude/skills`/`.agents/skills` discovery (same branch in `skill/index.ts`); the relative entry restores project-local parity, resolving against the session directory |
-| Subagents | `~/.claude/agents/*.md` | `~/.config/opencode/agents/*.md` (orchestrator, code-reviewer, dev-lifecycle, vault-lint, vault-search, nix-architect) |
+| Subagents | `~/.claude/agents/*.md` | `~/.config/opencode/agents/*.md` (orchestrator, code-reviewer, dev-lifecycle, vault-lint, vault-search) |
 | Council | Workflow tool, `llm-council.js` | `/council` command + hidden model-seat agents (no workflow engine exists) |
-| MCP servers | merged into `~/.claude.json` | declared in `opencode.json` (Nix owns the file wholesale), with explicit per-server timeouts. `postgres` is deliberately opencode-only: it is personal-stack-specific and doppler-wrapped, and porting it to Claude Code would fail quietly at startup whenever doppler or its env is absent |
+| MCP servers | merged into `~/.claude.json` | declared in `opencode.json` (Nix owns the file wholesale), with explicit per-server timeouts. Every server's tool schemas ride in the system prompt of every request, used or not, so a server earns its place only when its tools beat the bash equivalent; `postgres` was removed for that reason (psql covers it with no always-on cost), and `playwright` moved to per-project opt-in (below). `code-review-graph` is trimmed with `--tools` to the four tools actually called, from the 30 the server ships |
 | Compaction | `autoCompactEnabled = true`, model-tuned default window | `compaction.auto = true` in `config.nix` |
 | LSP | none | `lsp = true` in `config.nix`; `nixd` (via `home/roles/personal/packages.nix`) provides Nix language support |
 | Vault context | none: no automatic injection, `vault-search` on demand | same, the plugin's system-prompt vault index was removed together with Claude's `vault-context.sh` hook |
@@ -90,11 +90,20 @@ exactly the repetition to avoid. Two mechanisms close that gap:
    caches). A destination that is a real directory (tool-installed) is skipped,
    BSD `ln -sfn` onto a real dir would nest a junk symlink inside it. The same
    step creates the skills dir if missing and prunes any stale bridge symlink
-   (one pointing into `~/.claude/plugins` whose target is gone). opencode's
+   (one pointing into `~/.claude/plugins` whose target is gone, one under
+   `marketplaces/`, or one whose plugin is not in the bridged set). opencode's
    default skills scan picks the links up from there. A plugin updated by
    Claude Code keeps the same symlink valid because the link points at the
    versioned cache path; a re-install that bumps the version refreshes the
    link on the next deploy.
+
+   Two filters decide what is bridged, both in `default.nix`:
+   `home.ai.plugins` is the source (only enabled plugins bridge), and
+   `opencodeBridgeExclude` subtracts seven plugins kept for Claude Code but
+   excluded from the opencode bridge — `figma`, `mattpocock-skills`,
+   `superpowers`, `ponytail`, `caveman`, `web-quality-skills`, `frontend-slides` —
+   because opencode never loaded any of their skills (ponytail/caveman are
+   hook-driven in Claude only). The exclusion only stops the symlink.
 2. **Project-local discovery** (`opencode-parity.js`, `config` hook): the
    plugin reads `.claude/settings.json` and `.claude/settings.local.json` in
    the project and appends any `skills` entry paths to `skills.paths`, so a
@@ -132,7 +141,6 @@ apart), but opencode-native:
 | `code-reviewer` | default | Reviews a diff, branch or PR in one isolated context |
 | `dev-lifecycle` | best | Full lifecycle in one context: recon, plan, implement, test, commit, push, draft PR. `steps = 150` for long runs |
 | `vault-lint` / `vault-search` | fast | Obsidian vault health check / content lookup, both read-only with `task`/`webfetch`/`websearch`/`skill` denied so they can never fan out |
-| `nix-architect` | best | Authority on this flake: package placement, module hierarchy, verification loop (`nix fmt` → `nix flake check` → `/deploy`) |
 | `council-*` seats + peer review | one model family each | Hidden subagents, only invoked by `/council` |
 
 Slash commands, deployed as managed files in `~/.config/opencode/commands/`:
@@ -155,11 +163,33 @@ Slash commands, deployed as managed files in `~/.config/opencode/commands/`:
 
 The gates are not uniform across the built-ins, which is why the config is an object rather than `true`. Config-file-gated formatters (biome via `biome.json`, prettier via a `package.json` dep, oxfmt, ruff, pint, ocamlformat, clang-format) stay on: they no-op until a project opts in. Every formatter whose only gate is `which <bin>` on `PATH` is switched off, because it would otherwise reformat a file here with conventions this repo never opted into (this repo formats `.nix` with alejandra, not `nixfmt`). The disabled set was read off opencode 1.18.21's built-in registry: `air`, `cljfmt`, `dart`, `dfmt`, `gleam`, `gofmt`, `htmlbeautifier`, `ktlint`, `latexindent`, `mix`, `nixfmt`, `ormolu`, `rubocop`, `rustfmt`, `shfmt`, `standardrb`, `terraform`, `zig`. `uv` is `PATH`-only too but left on, because opencode drops `ruff` whenever `uv` is disabled. The object form registers every built-in and then applies the overrides, so the rest, biome included, stay enabled.
 
+## Opting a project into playwright
+
+`playwright` is not a global MCP server: 25 browser tools (~5.3k tokens of schema) would ride in the system prompt of every request, in every repo, for a capability only some projects need. Declare it in a project-root `opencode.json` instead, and opencode merges it with the global config for that directory only:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp", "--isolated", "--headless"],
+      "enabled": true,
+      "timeout": 20000
+    }
+  }
+}
+```
+
+Verified against 1.18.31: `opencode mcp list` in a directory holding that file reports the project server alongside the global ones. No permission rule is needed, because opencode's built-in default ruleset is `{"*":"allow", doom_loop:"ask", ...}` and an MCP tool with no rule of its own matches that `*` (confirmed empirically: 319 completed MCP calls, zero permission rows). Add the file to the project's `.gitignore` if it is personal, or commit it if the team wants it.
+
+The same pattern works for any other server that only some repos need. Keep the global set to the servers every session benefits from, since each one's schema is paid on every request.
+
 ## The npx skills tree
 
 `~/.agents/skills` (the `npx skills` tree) is deliberately in use again, opencode only. `skills.nix` installs into it, and `config.nix`'s `skills.paths` lists it alongside `~/.claude/skills` so opencode loads both; Claude never reads this directory. The two skills Claude used to symlink out of it are unaffected: `orchestration` and `orca-cli` are managed by Orca's own updater now (see [ai-setup.md](ai-setup.md)), and `find-skills` was dropped, whose whole job was promoting `npx skills add`. Orca-sourced skills (`stablyai/orca`) — `orchestration`, `orca-cli`, and `computer-use` — are preserved by `home.ai.opencodeSkillsExternalSources`, which the reconcile treats as owned alongside `home.ai.opencodeSkillsSources`.
 
-The sources installed are the ones in [dropped-skill-sources.md](dropped-skill-sources.md) with no `.claude-plugin/marketplace.json`, so they can never become a Claude Code plugin: `vercel-labs/agent-skills`, `biomejs/biome`, `mindrally/skills`, `vercel/turborepo`, `remotion-dev/skills`. `home.activation.opencodeSkillsInstall` runs `npx -y skills@<pinned> add <src> -g -a opencode -s '*' -y --copy` for each (the version is pinned in `skills.nix`, currently 1.5.23, and folded into the manifest hash so a bump re-runs the install), gated by a `command -v npx` check (skips with a warning if missing) and a manifest-hash stamp at `~/.agents/.skill-sources-hash`, so an unchanged source list skips the install loop entirely on redeploy. The stamp is written only when every source installed successfully; a partial run (an offline deploy) stays unstamped and retries next deploy.
+The source list is empty by measurement (2026-09-21): every source the tree ever carried (`vercel-labs/agent-skills`, `biomejs/biome`, `mindrally/skills`, `vercel/turborepo`, `remotion-dev/skills` — 23 skills, ~1.2k tokens of description in every request) recorded zero skill loads across all sessions; only Orca-sourced skills were ever loaded, and those stay via `home.ai.opencodeSkillsExternalSources`. The install loop is therefore a no-op until a source is re-added to `home.ai.opencodeSkillsSources` (the manifest hash changes with the list, so the stamp never masks it), and the reconcile step prunes the orphaned directories on the next deploy because the personal role sets `opencodeSkillsPrune = true`. Re-add a source only with evidence its skills get used — every skill in this tree is paid for in every opencode request, used or not.
 
 `home.activation.opencodeSkillsReconcile` runs after install and diffs `~/.agents/skills` against `.skill-lock.json`'s per-skill `source` field (one source can produce several skill directories, so this matches on that field rather than the source list directly). Any directory the current sources don't own gets listed; `home.ai.opencodeSkillsExternalSources` (default `["stablyai/orca"]`) is merged into the owned set so Orca-installed skills survive. `home.ai.opencodeSkillsPrune` still defaults to `false` in `skills.nix`, which only prints the stale list and the exact `rm -rf` command to run by hand, but `home/roles/personal/opencode/default.nix` sets it to `true` for the personal role, so on this machine the reconcile step deletes those directories on every deploy instead of only printing them.
 
@@ -179,7 +209,7 @@ After `./nix.sh macbook`:
 4. `/agents` shows the ported fleet; `@`-autocomplete shows only non-hidden agents
 5. `/council <question>` convenes the five seats in one message
 6. Skills list equals the repo-deployed set plus the three tool-installed exceptions
-7. `~/.agents/skills` holds a directory for each source declared in `skills.nix` (cross-check `~/.agents/.skill-lock.json`); since the personal role sets `opencodeSkillsPrune = true`, unmanaged directories are deleted on deploy rather than only listed, and the reconcile step's pruned-directory print names exactly what it removed
+7. `~/.agents/skills` holds exactly the Orca-sourced skills (`stablyai/orca` via `home.ai.opencodeSkillsExternalSources`) until a source is re-added to `home.ai.opencodeSkillsSources`; since the personal role sets `opencodeSkillsPrune = true`, unmanaged directories are deleted on deploy rather than only listed, and the reconcile step's pruned-directory print names exactly what it removed
 
 Escape hatches: `OPENCODE_DISABLE_PROJECT_CONFIG=1` skips a broken project
 config; `OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json"}'`

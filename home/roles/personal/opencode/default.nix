@@ -14,7 +14,7 @@
   # script (verify-references.sh is gone, replaced by assertions upstream):
   # every name here must exist as agents/<name>.md, and every agents/*.md
   # must be in this list. nix flake check fails the build otherwise.
-  agentNames = ["orchestrator" "code-reviewer" "dev-lifecycle" "vault-lint" "vault-search" "nix-architect"];
+  agentNames = ["orchestrator" "code-reviewer" "dev-lifecycle" "vault-lint" "vault-search"];
 
   # The plugin files this module deploys, plus the tolerated out-of-band
   # exceptions (docs/opencode-setup.md). Both the home.file entries and the
@@ -26,6 +26,31 @@
   keptPluginFindArgs =
     lib.concatMapStringsSep " " (n: "! -name ${lib.escapeShellArg n}")
     (managedPlugins ++ toleratedPlugins);
+
+  # Plugins kept for Claude Code (hooks/skills work there) whose skills are
+  # never loaded in opencode, so their descriptions are pure always-on cost
+  # there; zero recorded loads in opencode.db, and ponytail/caveman's
+  # hook-driven behavior never fires in opencode at all.
+  opencodeBridgeExclude = [
+    "figma"
+    "mattpocock-skills"
+    "superpowers"
+    "ponytail"
+    "caveman"
+    "web-quality-skills"
+    "frontend-slides"
+  ];
+
+  # Plugin names Claude actually has enabled, from home.ai.plugins (the same
+  # list settings.nix turns into enabledPlugins), minus the exclusions above.
+  # Only these get their skills bridged: the cache also holds plugins that were
+  # installed once and never enabled (or since disabled), and their skills are
+  # pure always-on cost in every opencode request. Space-separated for a single
+  # `case` match in the activation script; plugin names cannot contain spaces.
+  enabledPluginNames =
+    lib.concatStringsSep " "
+    (builtins.filter (n: !builtins.elem n opencodeBridgeExclude)
+      (map (p: lib.head (lib.splitString "@" p)) config.home.ai.plugins));
 
   agentAssertions =
     (map (name: {
@@ -111,6 +136,11 @@ in {
   # loses (and briefly breaks any plugin that does import from it).
   home.activation.opencodePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
     ocDir="${config.home.homeDirectory}/.config/opencode"
+    # Claude plugins the user actually enabled, from home.ai.plugins. The
+    # bridge below and the prune further down both test against this: a cached
+    # plugin that was never enabled (or was disabled later) still sits on disk
+    # with all its skills, and bridging those is pure always-on prompt cost.
+    enabledPlugins="${enabledPluginNames}"
     # Bridge Claude plugin skills to opencode skills. Scoped to the plugin
     # CACHE (installed plugins) only: ~/.claude/plugins also holds full
     # marketplace repo clones under marketplaces/<name>/, whose skills belong
@@ -121,8 +151,20 @@ in {
     if [ -d "$claudePluginCache" ]; then
       $VERBOSE_ECHO "Bridging Claude plugins to opencode skills"
       run find "$claudePluginCache" -type d -name "skills" -exec sh -c '
+        cache="$4"
+        plugin_of() {
+          # <cache>/<marketplace>/<plugin>/<version>/... -> <plugin>
+          rel=''${1#"$cache"/}
+          rest=''${rel#*/}
+          printf "%s" "''${rest%%/*}"
+        }
         for skill in "$1"/*; do
           if [ -d "$skill" ]; then
+            plugin=$(plugin_of "$skill")
+            case " $3 " in
+              *" $plugin "*) ;;
+              *) continue ;;
+            esac
             skillName=$(basename "$skill")
             dest="$2/skills/$skillName"
             # A real (non-symlink) dir there is tool-installed, not ours:
@@ -134,13 +176,33 @@ in {
             ln -sfn "$skill" "$dest"
           fi
         done
-      ' _ {} "$ocDir" \;
+      ' _ {} "$ocDir" "$enabledPlugins" "$claudePluginCache" \;
     fi
-    # Prune stale bridge links: a symlink into ~/.claude/plugins whose target
-    # is gone means the plugin was uninstalled or its cached version moved.
+    # Prune stale bridge links. Three cases, all into ~/.claude/plugins:
+    #  - target under marketplaces/: never a bridge the walk above creates. A
+    #    marketplace entry is a full repo clone holding skills for every plugin
+    #    in it, installed or not; an older bridge walked marketplaces/ too and
+    #    left these links behind. They resolve (the clone is still on disk), so
+    #    the target-gone test never catches them.
+    #  - target under cache/ whose plugin is not in home.ai.plugins: installed
+    #    once, never enabled (or since disabled). Also resolves, also unused.
+    #  - target gone: the plugin was uninstalled or its cached version moved.
     for link in "$ocDir/skills"/*; do
       [ -L "$link" ] || continue
-      case "$(readlink "$link")" in
+      target="$(readlink "$link")"
+      case "$target" in
+        "$claudePluginDir"/marketplaces/*)
+          run rm -f "$link"
+          ;;
+        "$claudePluginCache"/*)
+          rel=''${target#"$claudePluginCache"/}
+          rest=''${rel#*/}
+          plugin=''${rest%%/*}
+          case " $enabledPlugins " in
+            *" $plugin "*) [ -e "$link" ] || run rm -f "$link" ;;
+            *) run rm -f "$link" ;;
+          esac
+          ;;
         "$claudePluginDir"/*)
           [ -e "$link" ] || run rm -f "$link"
           ;;

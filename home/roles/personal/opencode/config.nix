@@ -10,6 +10,12 @@
   # Moonshot, MiniMax, Alibaba, NVIDIA, OpenAI): a reviewer from the family
   # that wrote an answer inherits its blind spots. Concurrency on the Pro
   # plan is 3, so the 5-seat fan-out runs in 2 waves, accepted.
+  # Hidden subagents cost 0 always-on tokens (opencode filters `hidden` out of
+  # the agent list it puts in the prompt); only the visible chair's description
+  # is paid. That is why the council is kept while nix-architect (visible, 214
+  # chars, never dispatched once in 8 weeks) was deleted; /council is the
+  # council's only dispatcher. vault-lint stays despite 0 dispatches: the
+  # shared obsidian-vault skill instructs agents to dispatch it by name.
   # fast/best are no longer referenced by Nix code: markdown-backed agents
   # take their model from frontmatter (which wins the merge), so those two
   # keys stay only as the machine-readable tier ids the frontmatter mirrors.
@@ -55,53 +61,63 @@
   # pattern "*", and only the "*" → allow entry matches —
   # `{"*":"allow" "*.env*":"deny"}` silently allowed everything, which is
   # the "MCP permission rules do not enforce" earlier note in
-  # ai-lessons.md (corrected there too). Plain per-tool-name string rules
-  # and `<server>_*` keys DO work (see mcpToolAllows). Standing
+  # ai-lessons.md (corrected there too). Standing
   # conclusion unchanged: a filesystem MCP server still cannot carry a
   # per-path secret backstop, because per-argument patterns are dead —
   # built-in read + edit + readDenies remain the supported path.
 
-  # Key-level allow rules for MCP tools. MCP tool calls ask under their full
-  # name (sanitize(server) + "_" + sanitize(tool), e.g. github_create_issue)
-  # with request pattern "*" (session/tools.ts), so key-level string rules
-  # are the only shape that can answer them: an attrset's glob values match
-  # against the literal request pattern "*" and never fire per-argument.
-  # With no rule every MCP call defaults to "ask" — the old unattended
-  # dispatch stall. Servers are declared here in reviewed Nix, so their
-  # tools run allowed. A selective deny stays order-safe like bashRules:
-  # "github_*" (ASCII 42) out-sorts any longer key, so a future
-  # "github_merge_pull_request" = "deny" would win under findLast. Keys use
-  # the RAW server name; all five sanitize() to themselves ([a-zA-Z0-9_-]
-  # untouched), and a name needing sanitize would produce a key that never
-  # matches and falls back to ask — safe failure, never silent-allow.
-  mcpToolAllows = lib.mapAttrs' (name: _: lib.nameValuePair "${name}_*" "allow") mcpServers;
+  # No key-level allow rules for MCP tools: opencode's built-in default ruleset
+  # is {"*":"allow", doom_loop:"ask", ...} (read off the 1.18.31 binary), so an
+  # MCP tool with no rule of its own matches that "*" and is allowed. The old
+  # `mcpToolAllows` binding here was written on the opposite premise ("no rule
+  # means ask") and was never referenced, so it changed nothing and is gone.
+  # See docs/ai-lessons.md for the corrected finding.
+  #
+  # The one MCP rule that DOES matter is the read/secret backstop below: it
+  # cannot be expressed per-argument, so built-in read + edit + readDenies stay
+  # the supported path.
 
   # No github MCP server: gh CLI already covers every GitHub op through bash
   # (open-pr/review-pr skills shell out to it), so the MCP wrapper was a
   # redundant npx cold-start plus a second, inconsistently-sourced credential
-  # path (inline GITHUB_TOKEN vs postgres's doppler run below).
+  # path.
+  #
+  # No postgres MCP server: its tool-schema block is injected into the system
+  # prompt of every request whether or not a query runs, and the doppler+npx
+  # cold start made it the slowest server to answer a first call. psql via
+  # bash covers the same ground with no always-on cost.
+  #
+  # No playwright MCP server: 25 tools (~5.3k tokens of schema) in every
+  # request for a capability used in a minority of repos. Declare it in a
+  # project-root opencode.json instead (docs/opencode-setup.md, "Opting a
+  # project into playwright"). No permission rule is needed when a project
+  # does: opencode's built-in default ruleset allows any unlisted MCP tool
+  # (see the mcpToolAllows note above).
   mcpServers = {
-    playwright = {
-      type = "local";
-      command = ["npx" "-y" "@playwright/mcp" "--isolated" "--headless"];
-      enabled = true;
-      timeout = 20000;
-    };
-    postgres = {
-      type = "local";
-      command = ["sh" "-c" "doppler run -- npx -y @modelcontextprotocol/server-postgres"];
-      enabled = true;
-      timeout = 15000;
-    };
     shadcn = {
       type = "local";
       command = ["npx" "-y" "shadcn@latest" "mcp"];
       enabled = true;
       timeout = 15000;
     };
+    # --tools is the token lever: the server ships 30 tools (~9.7k tokens of
+    # schema) and this machine has only ever called four of them. Unlisted
+    # tools are removed from the MCP surface, so the schema block shrinks to
+    # ~1.7k. Keep the list to tools actually used (opencode.db's part table,
+    # tool column); adding one back is a schema cost paid on every request.
     code-review-graph = {
       type = "local";
-      command = ["${config.home.homeDirectory}/.local/bin/code-review-graph" "serve"];
+      command = [
+        "${config.home.homeDirectory}/.local/bin/code-review-graph"
+        "serve"
+        "--tools"
+        (lib.concatStringsSep "," [
+          "get_minimal_context_tool"
+          "detect_changes_tool"
+          "get_impact_radius_tool"
+          "build_or_update_graph_tool"
+        ])
+      ];
       enabled = true;
       timeout = 30000;
     };
@@ -180,8 +196,36 @@
     "shred *"
   ];
 
+  # Read-only git forms, pinned to allow explicitly. Belt-and-braces, not a
+  # live fix: the 7 recorded `git diff` asks all predate the bashRules deploy
+  # (the catch-all already allows them today, the log shows zero since, and
+  # today's bash asks are the intended dangerAsk ones). Pinned so a future
+  # default tightening or an rtk-rewrite miss cannot reintroduce prompts on
+  # read-only git. Shadowing checked: no rule here shares a literal prefix
+  # with any dangerAsk or secretDenies form (e.g. `git branch --list*` never
+  # matches text starting `git branch -D`), so the asks and denies keep winning.
+  readOnlyGitAllow = [
+    "git status*"
+    "git log*"
+    "git diff*"
+    "git show*"
+    "git blame*"
+    "git rev-parse*"
+    "git ls-files*"
+    "git branch --list*"
+    "git remote -v*"
+    "git tag --list*"
+    "git describe*"
+    "rtk git status*"
+    "rtk git log*"
+    "rtk git diff*"
+    "rtk git show*"
+    "rtk git blame*"
+  ];
+
   bashRules =
     secretDenies
+    // lib.genAttrs readOnlyGitAllow (_: "allow")
     // lib.genAttrs dangerAsk (_: "ask")
     // lib.genAttrs dangerDeny (_: "deny")
     // {"*" = "allow";};
@@ -192,6 +236,9 @@
       mode = "subagent";
       hidden = true;
       temperature = 0.4;
+      # A seat answers one prompt. The Sep 8 run showed what an uncapped
+      # council loop does (6.8h, 455M tokens), so every seat hard-stops.
+      steps = 20;
       description = "Council advisor seat. Invoked only by the council command or the orchestrator, never directly.";
       permission.task."*" = "deny";
     })
@@ -286,6 +333,7 @@
         council-chair = {
           mode = "primary";
           model = m.default;
+          steps = 40;
           description = "Primary agent for /council: fans out the advisor seats, runs the blind peer review, writes the chairman synthesis. No file or shell access.";
           prompt = "You are the council chair, a coordination-only primary agent. You never edit files or run shell commands. Dispatch the council seats exactly as the /council command template instructs, collect their answers, run the anonymised peer review, then write the chairman synthesis. All procedure comes from the command template.";
           permission = {
@@ -302,6 +350,7 @@
           mode = "subagent";
           hidden = true;
           temperature = 0.2;
+          steps = 15;
           description = "Blind peer reviewer for the council. Sees anonymised responses only, never advisor identities.";
           permission.task."*" = "deny";
         };
@@ -324,11 +373,22 @@
       # startup. The assertion below only checks key names, which is why an
       # array shipped. "*" = "ask" keeps anything outside these three trees
       # behind a prompt rather than silently allowed.
+      # external_directory: allow the working trees plus scratch/config space.
+      # The "*" = "ask" catch-all stays — an unlisted path still prompts — but
+      # the temp trees are pure friction: opencode itself keeps scratch output
+      # in $TMPDIR and its own tool-output dir under ~/.local/share, and 122
+      # recorded asks were agents verifying work in /tmp. Both spellings are
+      # listed because macOS symlinks /tmp -> /private/tmp and the glob match
+      # is on the literal path text, so /tmp/* does not cover /private/tmp/*.
       external_directory = {
         "*" = "ask";
         "${config.home.homeDirectory}/Obsidian/**" = "allow";
         "${config.home.homeDirectory}/.dotfiles/**" = "allow";
         "${config.home.homeDirectory}/Developer/**" = "allow";
+        "/tmp/*" = "allow";
+        "/private/tmp/*" = "allow";
+        "${config.home.homeDirectory}/.config/opencode/**" = "allow";
+        "${config.home.homeDirectory}/.local/share/opencode/**" = "allow";
       };
     };
 

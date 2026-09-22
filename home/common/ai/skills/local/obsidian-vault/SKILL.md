@@ -7,7 +7,7 @@ description: Search, read, and write durable notes in the Obsidian vault at $HOM
 
 The vault lives at `$HOME/Obsidian`, resolve `$HOME` at run time, never hardcode `/Users/<name>`.
 
-This vault is Claude Code's durable memory: the harness remembers nothing automatically, so writes happen because this skill runs. Two triggers:
+This vault is the durable home for how work happens here: conventions, decisions, lessons, process. Auto-memory holds session-learned facts; the vault holds your way of working, and only this skill writes it. Two triggers:
 
 - **Explicit**: the user asks to remember/save/look something up.
 - **Proactive**: a corrected mistake, an approved decision, a standing convention, or a completed deploy/handoff. No need to be asked.

@@ -51,13 +51,33 @@ if [ ! -f "$cfg" ]; then
   fail_ "$cfg missing"
 elif jq -e . "$cfg" >/dev/null 2>&1; then
   ok "valid JSON"
-  for server in filesystem github playwright postgres shadcn code-review-graph; do
+  # Must match mcpServers in home/roles/personal/opencode/config.nix exactly:
+  # a stale entry here (filesystem/github were listed for months with no such
+  # server) fails the check on a healthy config and hides a real regression.
+  # playwright is deliberately absent: it is opted into per project.
+  for server in shadcn code-review-graph; do
     if jq -e --arg s "$server" '.mcp[$s].enabled == true' "$cfg" >/dev/null 2>&1; then
       ok "mcp.$server enabled"
     else
       fail_ "mcp.$server missing or disabled"
     fi
   done
+  # An always-on server not in that list means someone re-added playwright (or
+  # another server) to the global config, paying its schema in every request.
+  for server in $(jq -r '.mcp // {} | keys[]' "$cfg"); do
+    case " shadcn code-review-graph " in
+      *" $server "*) ;;
+      *) warn "mcp.$server is globally enabled; declare it per project unless every repo uses it" ;;
+    esac
+  done
+  # The CRG tool trim is the token lever: without --tools the server exposes 30
+  # tools (~9.7k tokens of schema/request) instead of the four actually used
+  # (~1.7k). A dropped flag is invisible at runtime, so assert it here.
+  crgTools="$(jq -r '.mcp["code-review-graph"].command | if type == "array" then join(" ") else "" end' "$cfg")"
+  case "$crgTools" in
+    *"--tools"*) ok "code-review-graph tool list trimmed" ;;
+    *) fail_ "code-review-graph has no --tools flag; ~8k tokens/request of unused schema (config.nix)" ;;
+  esac
   if jq -e '.subagent_depth == 1' "$cfg" >/dev/null 2>&1; then
     ok "subagent_depth = 1"
   else
@@ -80,7 +100,7 @@ else
 fi
 
 section "managed files"
-expectedAgents="orchestrator code-reviewer dev-lifecycle vault-lint vault-search nix-architect"
+expectedAgents="orchestrator code-reviewer dev-lifecycle vault-lint vault-search"
 for agent in $expectedAgents; do
   if [ -f "$ocDir/agents/$agent.md" ]; then
     ok "agents/$agent.md"
@@ -145,13 +165,19 @@ if [ -d "$claudePlugins/cache" ]; then
 else
   warn "no $claudePlugins/cache; nothing to bridge"
 fi
-# Same stale-link rule the deploy's prune applies: a symlink into
-# ~/.claude/plugins whose target is gone should have been removed on deploy.
+# Same stale-link rules the deploy's prune applies: a symlink into
+# ~/.claude/plugins/marketplaces/ is never a bridge the walk creates and must
+# have been removed; any other link into ~/.claude/plugins whose target is
+# gone should have been removed too.
 for link in "$skillsDir"/*; do
   [ -L "$link" ] || continue
-  case "$(readlink "$link")" in
+  target="$(readlink "$link")"
+  case "$target" in
+    "$claudePlugins"/marketplaces/*)
+      fail_ "marketplace bridge symlink not pruned (deploy removes these): $link -> $target"
+      ;;
     "$claudePlugins"/*)
-      [ -e "$link" ] || fail_ "stale bridge symlink not pruned (deploy removes these): $link -> $(readlink "$link")"
+      [ -e "$link" ] || fail_ "stale bridge symlink not pruned (deploy removes these): $link -> $target"
       ;;
   esac
 done
@@ -161,7 +187,9 @@ logFile="$(ls -t "$logDir"/opencode.log 2>/dev/null | head -1 || true)"
 if [ -n "$logFile" ] && [ -f "$logFile" ]; then
   # Only count warnings from this deploy onwards: the log is append-only
   # history, and pre-deploy entries describe the old config, not this one.
-  deployTs="$(stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%S' "$cfg" 2>/dev/null || true)"
+  # Log timestamps are UTC; `date -u -j -f` converts the local mtime to the
+  # same format (BSD stat has no UTC output format).
+  deployTs="$(date -u -j -f '%b %d %H:%M:%S %Y' "$(stat -f '%Sm' "$cfg" 2>/dev/null)" '+%Y-%m-%dT%H:%M:%S' 2>/dev/null || true)"
   recent() {
     if [ -n "$deployTs" ]; then
       grep "$1" "$logFile" 2>/dev/null | while IFS= read -r line; do
@@ -181,11 +209,14 @@ if [ -n "$logFile" ] && [ -f "$logFile" ]; then
   fi
   # Targeted: opencode's actual plugin-load failure line, not any line that
   # happens to contain both words (permission logs quote whole heredocs).
-  if grep -q 'failed to load plugin' "$logFile" 2>/dev/null; then
-    fail_ "plugin load errors in $(basename "$logFile") (entries may predate the last deploy):"
-    grep 'failed to load plugin' "$logFile" | tail -3 | cut -c1-200 | sed 's/^/    /'
+  # Same recent() window: the append-only log holds months of history from
+  # configs already fixed.
+  pluginErrs=$(recent 'failed to load plugin' | wc -l | tr -d ' ')
+  if [ "${pluginErrs:-0}" -gt 0 ]; then
+    fail_ "plugin load errors since last deploy in $(basename "$logFile"):"
+    recent 'failed to load plugin' | tail -3 | cut -c1-200 | sed 's/^/    /'
   else
-    ok "no plugin load errors in latest log"
+    ok "no plugin load errors since last deploy"
   fi
 else
   warn "no opencode log found at $logDir (run opencode once, then re-check)"
