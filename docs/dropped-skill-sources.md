@@ -77,3 +77,5 @@ Cut to bring the fixed per-session cost down; see the "What is loaded every sess
 - **`code-review-graph`**: the MCP server, its `pipx` package, and `crg-autobuild.sh`.
 - **Hooks**: `delegation-reminder.sh` and `compaction-sentinel.sh`. The post-compaction re-injection cost tokens on every prompt after a compaction, for a contract the rules file already carries.
 - **opencode's Claude-plugin skill bridge and `skills.nix`**: `~/.agents/skills` is now unmanaged by this repo.
+- **`frontend-slides`**: moved from the shared marketplace list to the `frontend` repo's own `.claude/settings.json`, it is only needed there.
+- **`mp-ai-workbench`/`mp-fe-design`**: moved from the work role to project settings in the `frontend`, `workspace` and `ai-workbench` repos, they were loading in every session on the work machine, Nix repo and vault included.

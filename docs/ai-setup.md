@@ -50,7 +50,9 @@ Two of these are hard gates sharing turn-boundary logic in `lib/turn-key.sh` (a 
 
 ## Plugins
 
-Marketplaces and plugins live in `home/common/ai/plugins.nix` (shared: `caveman`, `mattpocock-skills`, `ponytail`, `frontend-slides`, plus the built-in `code-review`) and the work role's `home/roles/work/ai/default.nix` (`ai-workbench`, Mindera's private marketplace, deliberately unpinned since tracking the team's HEAD is the point and the trust model is first-party). Third-party marketplaces are pinned to a reviewed commit sha (`@<sha>`); a pin after the last `@` that is not a full 40-char lowercase commit sha fails `nix flake check` outright. `scripts/verify-plugins.sh` is the one check that catches a typo'd plugin name, since a bad name otherwise fails silently: Claude Code installs nothing and logs nothing.
+Marketplaces and plugins live in `home/common/ai/plugins.nix`: `caveman`, `mattpocock-skills`, `ponytail`, plus the built-in `code-review`, the fixed set on both machines. Third-party marketplaces are pinned to a reviewed commit sha (`@<sha>`); a pin after the last `@` that is not a full 40-char lowercase commit sha fails `nix flake check` outright. `scripts/verify-plugins.sh` is the one check that catches a typo'd plugin name, since a bad name otherwise fails silently: Claude Code installs nothing and logs nothing.
+
+Stack- or project-specific plugins are enabled per project instead of here: `frontend-slides` in the `frontend` repo's own `.claude/settings.json`, and Mindera's `mp-ai-workbench`/`mp-fe-design` (the `ai-workbench` marketplace) in the `frontend`, `workspace` and `ai-workbench` repos' own settings, since project settings take precedence over user settings and a worktree shares the main checkout's file. A project's `enabledPlugins` can also set a global plugin to `false`, turning it off for that project alone; this repo's own `.claude/settings.json` does that for `mattpocock-skills` and carries the permission allow-list for the mandatory checks below.
 
 To find which plugin ships a skill:
 

@@ -55,22 +55,11 @@ gcloud config list                        # show current config
 |------|---------|
 | `acli` | Atlassian CLI, `acli jira workitem search --jql "..."`, `acli jira project list` |
 | `gcloud` | GCP operations |
-| `ai-workbench` | Mindera's private Claude Code plugin marketplace (`Mindera-People/ai-workbench`), declared in `home/roles/work/ai/default.nix` (`mp-ai-workbench`, `mp-fe-design`) |
+| `ai-workbench` | Mindera's private Claude Code plugin marketplace (`Mindera-People/ai-workbench`), enabled project-scoped (`mp-ai-workbench`, `mp-fe-design`) in the `frontend`, `workspace` and `ai-workbench` repos' own `.claude/settings.json`, not by this flake |
 
 VPN must be connected before accessing internal services.
 
-`ai-workbench` is a private GitHub repo: the logged-in GitHub account needs
-Mindera-People access before Claude Code can install the marketplace, and
-`./scripts/verify-plugins.sh` needs either that repo access or an existing
-local install (`~/.claude/plugins/marketplaces/ai-workbench/`, any `/Users/*`
-home) to verify against; with neither, it fails rather than skips. Run
-locally (not in CI), the script only scans the role matching the current
-machine's hostname, so this check never runs at all from the personal
-MacBook, which can satisfy neither condition.
-
-The local `acli` skill was removed in the token-budget rebuild; Jira and
-Confluence access now goes through the plugin's own `mp-ai-workbench:acli`
-skill instead.
+The work role in this flake no longer declares the `ai-workbench` marketplace or its plugins: they were loading in every session on this machine, including Nix repo and vault sessions, so each MP repo enables them for itself instead. Jira and Confluence access (`acli`, via the plugin's own `mp-ai-workbench:acli` skill) exists only inside a session opened in one of those repos.
 
 ---
 

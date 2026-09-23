@@ -15,7 +15,6 @@
     caveman = "JuliusBrussee/caveman@df2ccd85c94ec3c8289cb62ac020d241ccfb0c60";
     mattpocock = "mattpocock/skills@6654f6b60cd9d5be8b54c6fafe44346dabeb3b76";
     ponytail = "DietrichGebert/ponytail@2ed6c52c9d7e5e56942508591085fd45dea277d3";
-    frontend-slides = "zarazhangrui/frontend-slides@9906a34d640d2111f724544cbc50f7f130569ae1";
   };
 
   home.ai.plugins = [
@@ -26,6 +25,5 @@
     "caveman@caveman"
     "mattpocock-skills@mattpocock"
     "ponytail@ponytail" # lazy-senior-dev / YAGNI enforcement, generic
-    "frontend-slides@frontend-slides" # HTML presentation generator, PPT conversion
   ];
 }
