@@ -21,9 +21,9 @@ role's `ai/default.nix`.
 |---|---|---|
 | `oakoss/agent-skills` | ~21 skills (React, Tailwind, a11y, openapi, zod, vitest, docker, CI, docs) | Largely covered by `secondsky/claude-skills` single-skill plugins, enabled per project. Re-probed 2026-08-13: still no marketplace.json and **no license**, so vendoring is out. |
 | `shadcn/ui` | whole repo | |
-| `vercel-labs/agent-skills` | web-design-guidelines | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
-| `biomejs/biome` | biome-developer, testing-codegen | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
-| `mindrally/skills` | pnpm | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
+| `vercel-labs/agent-skills` | web-design-guidelines | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
+| `biomejs/biome` | biome-developer, testing-codegen | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
+| `mindrally/skills` | pnpm | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
 | `yizhiyanhua-ai/fireworks-tech-graph` | fireworks-tech-graph | |
 
 ## Personal only
@@ -31,9 +31,9 @@ role's `ai/default.nix`.
 | Source | Skills | Status |
 |---|---|---|
 | `oakoss/agent-skills` | tanstack-*, react-email, icon-design, figma-developer, drizzle-orm, package-publishing, seo-optimizer | |
-| `vercel/turborepo` | whole repo | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
+| `vercel/turborepo` | whole repo | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
 | `kostja94/marketing-skills` | whole repo | |
-| `remotion-dev/skills` | whole repo | Installed for opencode via `skills.nix` (`~/.agents/skills`), still no marketplace.json so still unavailable to Claude. |
+| `remotion-dev/skills` | whole repo | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
 
 ## Work only
 
@@ -61,4 +61,19 @@ role's `ai/default.nix`.
   `scripts/verify-plugins.sh`. Re-add only if it gains a discovery-only mode.
 - **`resciencelab/opc-skills`**: upstream writes `skillPath` at `SKILL.md`
   instead of the directory, breaking `claude /doctor`.
-- **`orchestration` / `orca-cli`** (`stablyai/orca`, fetched via `mkFetchedSkills`): Orca's own skill updater treats a Nix-copied directory as modified or a duplicate and refuses to update it, so these are no longer Nix-managed. Install and update them directly through Orca. Protection from the reconciles is now via real options rather than a private binding: on the Claude side `home.ai.externallyManagedSkills` (defaults to `["orca-cli" "orchestration" "computer-use"]`) keeps `customSkillsReconcile` from deleting them as unmanaged; on the opencode side `home.ai.opencodeSkillsExternalSources` (defaults to `["stablyai/orca"]`) keeps `opencodeSkillsReconcile` from pruning them. `computer-use` is a third Orca skill covered by both. Future Orca-installed skills need adding to the `home.ai.externallyManagedSkills` name list (the opencode side is source-based, so new skills from `stablyai/orca` are covered automatically).
+- **`orchestration` / `orca-cli`** (`stablyai/orca`, fetched via `mkFetchedSkills`): Orca's own skill updater treats a Nix-copied directory as modified or a duplicate and refuses to update it, so these are no longer Nix-managed. Install and update them directly through Orca. Protection from the reconcile is via a real option rather than a private binding: `home.ai.externallyManagedSkills` (defaults to `["orca-cli" "orchestration" "computer-use"]`) keeps `customSkillsReconcile` from deleting them as unmanaged. `computer-use` is a third Orca skill covered the same way. `~/.agents/skills` (opencode's skill dir) is now entirely unmanaged by this repo, so there is no opencode-side equivalent to describe.
+
+## Removed in the token-budget rebuild (2026-09-22)
+
+Cut to bring the fixed per-session cost down; see the "What is loaded every session" section of [ai-setup.md](ai-setup.md) for the token accounting behind this pass.
+
+- **Plugins**: `superpowers` (no invoked skill in 30 days of transcripts, and its SessionStart injection was part of the fixed per-session cost), `figma` (no invoked skill in 30 days; also removed the MCP server its bundled `.mcp.json` shipped), `web-quality-skills`, `skills@ai-builder-club`, `claude-code-setup` (no invoked skill in 30 days each).
+- **Marketplaces**: `addy-web-quality-skills`, `ai-builder-club`. No plugin from either is enabled anymore.
+- **Local skills, common**: `api-conventions`, `content-writer`, `conventional-commit`, `deep-review`, `dependency-hygiene`, `harness-engineer`, `nix-setup`, `open-pr`, `pr-feedback`, `react-conventions`, `review-pr`, `seo-audit`, `testing-conventions`, `ts-conventions`, `ts-strict-audit`, `ui-iterate`.
+- **Local skills, work**: `acli`, `babysit-prs`, `deep-review-prs`, `implement-ticket`, `work-stack`.
+- **Local skills, personal**: `optimize-images`, `personal-stack`.
+- Standing rule for all of the above: a project-scoped skill belongs in that project's own `.claude/skills/`; re-adding one here needs a reason true on every repo on the machine, not just the one that prompted it.
+- **Agents**: `code-reviewer`, `dev-lifecycle`. Their callers are gone, and the `code-review` plugin covers review.
+- **`code-review-graph`**: the MCP server, its `pipx` package, and `crg-autobuild.sh`.
+- **Hooks**: `delegation-reminder.sh` and `compaction-sentinel.sh`. The post-compaction re-injection cost tokens on every prompt after a compaction, for a contract the rules file already carries.
+- **opencode's Claude-plugin skill bridge and `skills.nix`**: `~/.agents/skills` is now unmanaged by this repo.

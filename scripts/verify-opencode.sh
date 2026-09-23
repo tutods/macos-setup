@@ -2,23 +2,12 @@
 # opencode setup verification: checks the deployed opencode state against what
 # the flake declares, so a broken deploy surfaces as a failed check instead of
 # a silently degraded session. Backs the /verify-setup opencode command.
-#
-# Checks (macbook / personal machine only):
-#   1. binary + toolchain: opencode, rtk, code-review-graph on PATH/known path
-#   2. opencode.json parses, MCP servers enabled, code-review-graph present
-#   3. auth.json has the ollama-cloud provider entry
-#   4. managed agents + commands deployed where the flake declares them
-#   5. plugin bridge: ~/.claude/plugins skill dirs symlinked into
-#      ~/.config/opencode/skills, no dangling links, no clobbered real dirs
-#   6. opencode log: no plugin load errors, no duplicate-skill warnings
-#
-# Exit 1 on any failure, 0 when clean (warnings don't fail). Deps: jq, git.
-# Read-only: prints, never fixes.
+# macbook / personal machine only. Exit 1 on any failure, 0 when clean
+# (warnings don't fail). Deps: jq. Read-only: prints, never fixes.
 set -uo pipefail
 
 home="${HOME}"
 ocDir="$home/.config/opencode"
-claudePlugins="$home/.claude/plugins"
 logDir="$home/.local/share/opencode/log"
 fail=0
 warn() { printf '  warn: %s\n' "$1"; }
@@ -38,12 +27,6 @@ if command -v rtk >/dev/null 2>&1; then
 else
   fail_ "rtk not on PATH (rtk-rewrite and opencode-parity both degrade silently)"
 fi
-crg="$home/.local/bin/code-review-graph"
-if [ -x "$crg" ] && "$crg" --version >/dev/null 2>&1; then
-  ok "code-review-graph $("$crg" --version 2>/dev/null)"
-else
-  fail_ "code-review-graph missing or broken at $crg"
-fi
 
 section "opencode.json"
 cfg="$ocDir/opencode.json"
@@ -51,42 +34,45 @@ if [ ! -f "$cfg" ]; then
   fail_ "$cfg missing"
 elif jq -e . "$cfg" >/dev/null 2>&1; then
   ok "valid JSON"
-  # Must match mcpServers in home/roles/personal/opencode/config.nix exactly:
-  # a stale entry here (filesystem/github were listed for months with no such
-  # server) fails the check on a healthy config and hides a real regression.
-  # playwright is deliberately absent: it is opted into per project.
-  for server in shadcn code-review-graph; do
-    if jq -e --arg s "$server" '.mcp[$s].enabled == true' "$cfg" >/dev/null 2>&1; then
-      ok "mcp.$server enabled"
-    else
-      fail_ "mcp.$server missing or disabled"
-    fi
-  done
-  # An always-on server not in that list means someone re-added playwright (or
-  # another server) to the global config, paying its schema in every request.
-  for server in $(jq -r '.mcp // {} | keys[]' "$cfg"); do
-    case " shadcn code-review-graph " in
-      *" $server "*) ;;
-      *) warn "mcp.$server is globally enabled; declare it per project unless every repo uses it" ;;
-    esac
-  done
-  # The CRG tool trim is the token lever: without --tools the server exposes 30
-  # tools (~9.7k tokens of schema/request) instead of the four actually used
-  # (~1.7k). A dropped flag is invisible at runtime, so assert it here.
-  crgTools="$(jq -r '.mcp["code-review-graph"].command | if type == "array" then join(" ") else "" end' "$cfg")"
-  case "$crgTools" in
-    *"--tools"*) ok "code-review-graph tool list trimmed" ;;
-    *) fail_ "code-review-graph has no --tools flag; ~8k tokens/request of unused schema (config.nix)" ;;
-  esac
+  if jq -e '(.mcp | keys) == ["shadcn"] and .mcp.shadcn.enabled == true' "$cfg" >/dev/null 2>&1; then
+    ok "mcp is exactly shadcn, enabled"
+  else
+    fail_ "mcp must be exactly {shadcn: enabled}; config.nix declares no other server"
+  fi
   if jq -e '.subagent_depth == 1' "$cfg" >/dev/null 2>&1; then
     ok "subagent_depth = 1"
   else
-    warn "subagent_depth != 1 (expected from config.nix)"
+    fail_ "subagent_depth != 1 (expected from config.nix)"
   fi
   if jq -e '.lsp == true' "$cfg" >/dev/null 2>&1; then
     ok "lsp enabled"
   else
-    warn "lsp not enabled"
+    fail_ "lsp not enabled"
+  fi
+  if jq -e '.skills.paths | index("~/.claude/skills") != null' "$cfg" >/dev/null 2>&1; then
+    ok "skills.paths includes ~/.claude/skills"
+  else
+    fail_ "skills.paths missing ~/.claude/skills"
+  fi
+  if jq -e '.skills.paths | index("~/.agents/skills") == null' "$cfg" >/dev/null 2>&1; then
+    ok "skills.paths excludes ~/.agents/skills (npx skills tree retired)"
+  else
+    fail_ "skills.paths still lists ~/.agents/skills, retired with the npx skills tree"
+  fi
+  if jq -e '.agent["vault-lint"] and .agent["vault-search"]' "$cfg" >/dev/null 2>&1; then
+    ok "agent has vault-lint and vault-search"
+  else
+    fail_ "agent missing vault-lint or vault-search"
+  fi
+  if jq -e '(.agent | has("orchestrator") or has("code-reviewer") or has("dev-lifecycle")) | not' "$cfg" >/dev/null 2>&1; then
+    ok "no orchestrator/code-reviewer/dev-lifecycle agent"
+  else
+    fail_ "orchestrator/code-reviewer/dev-lifecycle agent present, should have been dropped"
+  fi
+  if jq -e 'has("default_agent") | not' "$cfg" >/dev/null 2>&1; then
+    ok "no default_agent key"
+  else
+    fail_ "default_agent key present, config.nix declares none"
   fi
 else
   fail_ "$cfg is not valid JSON"
@@ -100,95 +86,75 @@ else
 fi
 
 section "managed files"
-expectedAgents="orchestrator code-reviewer dev-lifecycle vault-lint vault-search"
-for agent in $expectedAgents; do
-  if [ -f "$ocDir/agents/$agent.md" ]; then
-    ok "agents/$agent.md"
+for f in agents/vault-search.md agents/vault-lint.md commands/council.md commands/nixcheck.md commands/verify-setup.md plugins/opencode-parity.js AGENTS.md; do
+  if [ -f "$ocDir/$f" ]; then
+    ok "$f"
   else
-    fail_ "agents/$agent.md missing"
+    fail_ "$f missing"
   fi
 done
-expectedCommands="council deploy doctor nixcheck verify-setup"
-for cmd in $expectedCommands; do
-  if [ -f "$ocDir/commands/$cmd.md" ]; then
-    ok "commands/$cmd.md"
+
+section "AGENTS.md byte budget"
+agentsMd="$ocDir/AGENTS.md"
+if [ -f "$agentsMd" ]; then
+  bytes=$(wc -c <"$agentsMd" | tr -d ' ')
+  if [ "$bytes" -le 7000 ]; then
+    ok "AGENTS.md is $bytes bytes (<= 7000)"
   else
-    fail_ "commands/$cmd.md missing"
+    fail_ "AGENTS.md is $bytes bytes, over the 7000 byte budget, the whole point of the rebuild"
   fi
-done
-if [ -f "$ocDir/plugins/opencode-parity.js" ]; then
-  ok "plugins/opencode-parity.js"
 else
-  fail_ "plugins/opencode-parity.js missing"
-fi
-if [ -f "$ocDir/AGENTS.md" ]; then
-  ok "AGENTS.md generated"
-else
-  fail_ "AGENTS.md missing"
+  fail_ "$agentsMd missing"
 fi
 
-section "plugin bridge (claude plugins -> opencode skills)"
+section "skill bridge (retired)"
 skillsDir="$ocDir/skills"
-if [ -d "$claudePlugins/cache" ]; then
-  # Same walk home.activation.opencodePlugins does: skills/ dirs under the
-  # plugin CACHE only (never marketplaces/, those are full repo clones of
-  # plugins that may not be installed), one symlink per skill dir inside it.
-  # Names repeat across plugins (frontend-design ships in three of them), so
-  # report per unique name.
-  bridged=0
-  unbridged=""
-  seen=" "
-  for skillsSrc in $(find "$claudePlugins/cache" -type d -name skills 2>/dev/null); do
-    for skill in "$skillsSrc"/*; do
-      [ -d "$skill" ] || continue
-      name="$(basename "$skill")"
-      case "$seen" in *" $name "*) continue ;; esac
-      seen="$seen$name "
-      target="$skillsDir/$name"
-      if [ -L "$target" ] && [ -e "$target" ]; then
-        bridged=$((bridged + 1))
-      elif [ -L "$target" ]; then
-        : # dangling; the stale-link sweep below reports it once
-      elif [ -e "$target" ]; then
-        warn "$target is a real dir, not a bridge symlink (tool-installed; the bridge skips it)"
-      else
-        unbridged="$unbridged $name"
-      fi
-    done
+if [ -d "$skillsDir" ]; then
+  bridged=""
+  for link in "$skillsDir"/*; do
+    [ -L "$link" ] || continue
+    case "$(readlink "$link")" in
+      "$home"/.claude/plugins/*) bridged="$bridged $(basename "$link")" ;;
+    esac
   done
-  ok "$bridged bridge symlink(s) resolve"
-  if [ -n "$(echo "$unbridged" | tr -d ' ')" ]; then
-    count=$(printf '%s' "$unbridged" | wc -w | tr -d ' ')
-    first5=$(printf '%s' "$unbridged" | awk '{print $1, $2, $3, $4, $5}')
-    warn "$count plugin skill(s) not bridged yet (deploy to link), first 5:$first5"
+  if [ -n "$(echo "$bridged" | tr -d ' ')" ]; then
+    fail_ "leftover bridge symlink(s) into ~/.claude/plugins (should be gone):$bridged"
+  else
+    ok "no symlinks into ~/.claude/plugins under $skillsDir"
   fi
 else
-  warn "no $claudePlugins/cache; nothing to bridge"
+  ok "no $skillsDir (nothing to check)"
 fi
-# Same stale-link rules the deploy's prune applies: a symlink into
-# ~/.claude/plugins/marketplaces/ is never a bridge the walk creates and must
-# have been removed; any other link into ~/.claude/plugins whose target is
-# gone should have been removed too.
-for link in "$skillsDir"/*; do
-  [ -L "$link" ] || continue
-  target="$(readlink "$link")"
-  case "$target" in
-    "$claudePlugins"/marketplaces/*)
-      fail_ "marketplace bridge symlink not pruned (deploy removes these): $link -> $target"
-      ;;
-    "$claudePlugins"/*)
-      [ -e "$link" ] || fail_ "stale bridge symlink not pruned (deploy removes these): $link -> $target"
-      ;;
-  esac
-done
+
+section "plugins directory"
+# Mirrors managedPlugins/toleratedPlugins in default.nix; keep in sync.
+managedPlugins="opencode-parity.js"
+toleratedPlugins="supacode-presence.js"
+pluginsDir="$ocDir/plugins"
+if [ -d "$pluginsDir" ]; then
+  unexpected=""
+  for f in "$pluginsDir"/*; do
+    [ -e "$f" ] || continue
+    name="$(basename "$f")"
+    case " $managedPlugins $toleratedPlugins " in
+      *" $name "*) ;;
+      *) unexpected="$unexpected $name" ;;
+    esac
+  done
+  if [ -n "$(echo "$unexpected" | tr -d ' ')" ]; then
+    fail_ "unmanaged plugin(s) in $pluginsDir (the deploy prunes these, so the prune hasn't run or something re-added them):$unexpected"
+  else
+    ok "plugins dir holds only the managed + tolerated set"
+  fi
+else
+  warn "$pluginsDir missing"
+fi
 
 section "opencode log"
 logFile="$(ls -t "$logDir"/opencode.log 2>/dev/null | head -1 || true)"
 if [ -n "$logFile" ] && [ -f "$logFile" ]; then
-  # Only count warnings from this deploy onwards: the log is append-only
-  # history, and pre-deploy entries describe the old config, not this one.
-  # Log timestamps are UTC; `date -u -j -f` converts the local mtime to the
-  # same format (BSD stat has no UTC output format).
+  # Only count warnings since this deploy: log is append-only, timestamps
+  # UTC, BSD stat has no UTC output so convert the local mtime instead.
   deployTs="$(date -u -j -f '%b %d %H:%M:%S %Y' "$(stat -f '%Sm' "$cfg" 2>/dev/null)" '+%Y-%m-%dT%H:%M:%S' 2>/dev/null || true)"
   recent() {
     if [ -n "$deployTs" ]; then
@@ -203,14 +169,12 @@ if [ -n "$logFile" ] && [ -f "$logFile" ]; then
   }
   dupes=$(recent "duplicate skill" | wc -l | tr -d ' ')
   if [ "${dupes:-0}" -gt 0 ]; then
-    fail_ "$dupes duplicate-skill warning(s) since last deploy (bridge vs skills.paths collision?)"
+    fail_ "$dupes duplicate-skill warning(s) since last deploy (~/.claude/skills vs project .claude/skills collision?)"
   else
     ok "no duplicate-skill warnings since last deploy"
   fi
-  # Targeted: opencode's actual plugin-load failure line, not any line that
-  # happens to contain both words (permission logs quote whole heredocs).
-  # Same recent() window: the append-only log holds months of history from
-  # configs already fixed.
+  # Targeted phrase, not any line containing both words (permission logs
+  # quote whole heredocs).
   pluginErrs=$(recent 'failed to load plugin' | wc -l | tr -d ' ')
   if [ "${pluginErrs:-0}" -gt 0 ]; then
     fail_ "plugin load errors since last deploy in $(basename "$logFile"):"

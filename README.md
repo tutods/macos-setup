@@ -65,7 +65,7 @@ configured by hand in a UI.
 | Always-on rules | `home/common/ai/instructions/` | `~/.claude/rules/workflow.md` |
 | Custom skills | `home/common/ai/skills/local/` | `~/.claude/skills/` (real dirs, copied) |
 | External skills | plugin marketplaces, declared in Nix | installed by Claude Code on next launch |
-| MCP servers | `home/common/ai/mcp.nix` | `~/.claude.json` (`mcpServers`, merged) |
+| MCP servers | role `ai/default.nix` (e.g. personal's `shadcn`) | `~/.claude.json` (`mcpServers`, merged) |
 | Settings, hooks, statusline | `home/common/ai/settings.nix` | `~/.claude/settings.json` (merged) |
 | opencode (personal only) | `home/roles/personal/opencode/` | `~/.config/opencode/` (config, agents, commands, plugins, AGENTS.md) |
 
@@ -73,8 +73,7 @@ configured by hand in a UI.
 hooks → [ai-setup.md](docs/ai-setup.md)
 
 **opencode**, the personal machine's second harness: shares the same
-instruction sources and skills, runs its own agent fleet and slash commands,
-and reads Claude's plugin-installed skills through a deploy-time bridge →
+instruction sources and skills, runs its own agent fleet and slash commands →
 [opencode-setup.md](docs/opencode-setup.md)
 
 Rules are scoped to where they are actually true: always-true rules are

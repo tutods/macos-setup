@@ -10,7 +10,7 @@ A **Nix flake** managing two macOS (Apple Silicon) machines using **nix-darwin**
 
 ## Repo Rules
 
-- **Rules are scoped to where they're true.** Always-true → `home/common/ai/instructions/`; true for a stack → a skill in `home/common/ai/skills/local/`; true for one repo → that repo's own `CLAUDE.md`. Never name a specific project inside a machine-wide instruction or skill.
+- **Rules are scoped to where they're true.** Always-true → `home/common/ai/instructions/shared.md` (or `delegation.md` for Claude-only rules); true for one repo → that repo's own `CLAUDE.md`/`.claude/`. Never name a specific project inside a machine-wide instruction.
 - **Configs the app itself writes (e.g. Zed `settings.json`) are seeded as a one-time copy, not a store symlink**: a read-only symlink breaks the app's own save.
 - One-off gotchas live in [docs/ai-lessons.md](docs/ai-lessons.md), check it before debugging setup issues that feel familiar.
 
@@ -52,13 +52,14 @@ Run from the repo root (where `flake.nix` lives).
 nix-collect-garbage -d        # garbage collect old generations
 ```
 
-`deploy-doctor.sh` previews six things a deploy would change destructively:
+`deploy-doctor.sh` previews what a deploy would change destructively:
 unmanaged skill dirs, undeclared plugins, foreign hook events, cleared
-`permissions.allow` rules, the opencode skills reconcile under
-`~/.agents/skills`, and the Homebrew `cleanup = "uninstall"` pass. `nix.sh`
-runs it automatically before every apply and gates on its exit code: 0
-proceeds, 2 (destructive changes predicted) requires interactive confirmation
-or `--force`, 3 (cannot certify) always aborts.
+`permissions.allow` rules, and the Homebrew `cleanup = "uninstall"` pass. It
+does not preview the opencode plugin-dir prune, the only destructive step
+outside `~/.claude`. `nix.sh` runs it automatically before every apply and
+gates on its exit code: 0 proceeds, 2 (destructive changes predicted)
+requires interactive confirmation or `--force`, 3 (cannot certify) always
+aborts.
 
 ## Key Directories
 
