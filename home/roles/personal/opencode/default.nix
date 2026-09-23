@@ -121,12 +121,8 @@ in {
     done
   '';
 
-  # One-off cleanup, 2026-09-22: delete this sweep after two deploys. The
-  # retired Claude-plugin-to-opencode-skill bridge left symlinks under
-  # ~/.config/opencode/skills pointing into ~/.claude/plugins (cache/ and
-  # marketplaces/ both); real tool-installed skill directories there
-  # (graphify, supacode-cli, supacode-deeplinks) are untouched by the
-  # [ -L ] guard.
+  # One-off, 2026-09-22, delete after two deploys: removes the retired plugin-bridge symlinks
+  # (targets under ~/.claude/plugins); the -L guard skips real tool-installed skill dirs.
   home.activation.opencodeSkillBridgeCleanup = lib.hm.dag.entryAfter ["writeBoundary"] ''
     skillsDir="${config.home.homeDirectory}/.config/opencode/skills"
     claudePluginDir="${config.home.homeDirectory}/.claude/plugins"

@@ -4,8 +4,7 @@
   lib,
   ...
 }: let
-  # Ollama Cloud model seats. Source of truth for the tier ids;
-  # instructions/opencode-delegation.md mirrors them for the agents.
+  # Tier ids; instructions/opencode-delegation.md mirrors them, change both together.
   # Council seats are deliberately one model FAMILY each (Z.ai, DeepSeek,
   # Moonshot, MiniMax, Alibaba, NVIDIA, OpenAI): a reviewer from the family
   # that wrote an answer inherits its blind spots. Concurrency on the Pro
