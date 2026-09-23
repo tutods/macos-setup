@@ -2,7 +2,7 @@
 
 `rg`>`grep`, `fd`>`find`, `bat`>`cat`, `eza`>`ls`, `ast-grep` for code shapes, `jq`/`yq` for JSON/YAML, `pnpm`>`npm`/`yarn`, `biome`>eslint+prettier. Nix-managed tools, never `nix-env -i`, `nix shell` for temps.
 
-Never `sed`/`awk`/`perl` to edit, never `echo >`/`printf >`/heredoc to write: Edit/Write tools only. No interactive commands in automated flows. Scripts: `set -euo pipefail`, quote variables.
+Never `sed`/`awk`/`perl` to edit, never `echo >`/`printf >`/heredoc to write: Edit/Write tools only. No interactive commands. Scripts: `set -euo pipefail`, quote variables.
 
 ## Git
 
@@ -14,11 +14,11 @@ Vault is never injected. Never grep it inline, lookups go to `vault-search`. `ob
 
 ## Code
 
-Zero comments default. One line max, only for a hidden constraint, third-party workaround, security invariant, load-bearing ordering. Never narrate code or cite a file by line. No commented-out code, no `TODO`/`FIXME` unless asked, no unflagged stub, no unsolicited README/CHANGELOG/docstrings. Comment hygiene is blocking.
+Zero comments default. One line max, only for a hidden constraint, third-party workaround, security invariant, load-bearing ordering. Never narrate code or cite a file by line. No commented-out code, no `TODO`/`FIXME` unless asked, no unflagged stub, no unsolicited README/CHANGELOG/docstrings.
 
 ## Destructive
 
-Confirm before `rm -rf`, bulk deletes, `git reset --hard`/`clean -fd`/`checkout -- .`/`push --force`, dropping/truncating tables, anything irreversible.
+Confirm before anything irreversible: `rm -rf`, bulk deletes, `git reset --hard`/`clean -fd`/`checkout -- .`/`push --force`, drop/truncate tables.
 
 ## Security
 
@@ -28,20 +28,20 @@ Never dump the environment (`env`, `printenv`, `set`), read one var by name. Nev
 
 Always on, replies included. Open on a fact.
 
-- No em dash: end the sentence or use a comma. No en dash or parens as substitute.
+- No em dash in prose: end the sentence or use a comma. No en dash or parens as substitute. A dash opening a list item is fine.
 - Banned, say the specific thing: delve, leverage, utilize, foster, harness, seamless, robust, comprehensive, crucial, pivotal, landscape, realm, tapestry, ecosystem (unless literally technical), moreover, furthermore, additionally, "it's worth noting".
-- No "not just X, it's Y", no "this isn't about X, it's about Y". No rhetorical counts. No AI self-reference.
-- Commit: "this will", not "this can help to". "We recommend X". No throat-clearing.
+- No "not just X, it's Y" or "this isn't about X, it's about Y", also when split across sentences or phrased as a double negation. No rhetorical counts. No AI self-reference.
+- Commit: "this will", not "this can help to". No throat-clearing.
 - Vary sentence length and openings. Redundant pairings become one word.
 - `unslop` for prose humans read as writing.
 
 ## Evidence and scope
 
-Cite `file:line` read this session, never memory. Read surrounding code before editing. "Should work" is banned: done = typecheck + lint + tests pass, name which ran. Touch only files in the task or approved plan, else stop, list extras, ask. Minimal diff, no drive-by refactors. Broke? `git status`/`git diff` first, show the diff before theorizing, revert first.
+Cite `file:line` read this session, never memory. Read surrounding code before editing. "Should work" is banned: done = typecheck + lint + tests pass, name which ran. Touch only files in the task or approved plan, else stop, list extras, ask. Minimal diff, no drive-by refactors. Broke? `git status`/`git diff` first, show the diff, offer revert first.
 
 ## Decisions and plans
 
-At most 3 concrete options, recommended first, labeled. One decision per question, never re-ask. "Go one by one" is literal. Approved plans run phase by phase, no "continue?" unless a check fails or a gate. Failing step stops with the full error. Check skills first, load 3 max.
+At most 3 concrete options, recommended first, labeled. One decision per question, never re-ask. "Go one by one" is literal. Approved plans run phase by phase, no "continue?" unless a check fails. Failing step stops with the full error. Check skills first, load 3 max.
 
 ## Learned rules
 
@@ -61,4 +61,4 @@ At most 3 concrete options, recommended first, labeled. One decision per questio
 
 ## Model tiers
 
-Least powerful tier that fits. fast: 1-2 files, isolated functions, mechanical. default: multi-file, integration. best: architecture, design review, hard reasoning.
+Least powerful tier that fits. fast: 1-2 files, mechanical. default: multi-file, integration. best: architecture, design review, hard reasoning.

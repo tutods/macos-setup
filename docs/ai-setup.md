@@ -33,6 +33,7 @@ Env vars:
 | Event | Matcher | Script |
 |---|---|---|
 | PreToolUse | Bash | `block-ai-attribution.sh` |
+| PreToolUse | Bash | `destructive-guard.sh` |
 | PreToolUse | Bash | `rtk-rewrite.sh` |
 | PreToolUse | Read\|Grep\|Glob | `delegate-nudge.sh` |
 | PreToolUse | Edit\|Write | `force-delegation.sh` |
@@ -46,7 +47,7 @@ Two of these are hard gates sharing turn-boundary logic in `lib/turn-key.sh` (a 
 
 `subagent-model-gate.sh` denies any Agent dispatch that omits `model`, names anything other than `haiku`, `sonnet` or `opus` (or the matching `claude-*` id), or uses `subagent_type: fork`, which always inherits the parent model. The deny text carries the tier table, so the main thread picks a tier by complexity on the retry; `CLAUDE_CODE_SUBAGENT_MODEL` stays as the fallback for agents whose frontmatter pins nothing.
 
-`block-ai-attribution.sh` rejects AI attribution in commits, PRs and reviews. `rtk-rewrite.sh` rewrites read-only commands through `rtk` for token-cheap output, a silent no-op when `rtk` is absent. `biome-fix.sh` runs `biome check --write` on just the edited file, a no-op unless the project has a biome config.
+`block-ai-attribution.sh` rejects AI attribution in commits, PRs and reviews. `destructive-guard.sh` turns the irreversible commands `shared.md` names (`git reset --hard`, `git clean`, whole-tree checkout or restore, force push, recursive `rm` outside `/tmp`, `find -delete`, `DROP`/`TRUNCATE`) into a permission prompt, so auto mode still stops for a human yes. `rtk-rewrite.sh` rewrites read-only commands through `rtk` for token-cheap output, a silent no-op when `rtk` is absent. `biome-fix.sh` runs `biome check --write` on just the edited file, a no-op unless the project has a biome config.
 
 ## Plugins
 
