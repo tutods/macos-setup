@@ -68,9 +68,9 @@ locally (not in CI), the script only scans the role matching the current
 machine's hostname, so this check never runs at all from the personal
 MacBook, which can satisfy neither condition.
 
-`mp-conventions.md` and `mp-fields.md` are slated to move into
-`Mindera-People/ai-workbench` (pending the owner pushing them there); until
-then they live in the `acli` skill (`home/roles/work/ai/skills/local/acli/references/`).
+The local `acli` skill was removed in the token-budget rebuild; Jira and
+Confluence access now goes through the plugin's own `mp-ai-workbench:acli`
+skill instead.
 
 ---
 
@@ -95,6 +95,5 @@ or an API token in this file.
 4. Restart the shell so secrets load
 5. `gcloud auth login && gcloud auth application-default login`
 6. Connect VPN before accessing internal services
-7. Verify MCP: `claude mcp list` (should show `code-review-graph`)
-8. Authenticate Jira: `acli auth login`
-9. Verify custom skills: `ls ~/.claude/skills`, external skills arrive as plugins (`claude` → `/plugin`)
+7. Authenticate Jira: `acli auth login`
+8. Verify custom skills: `ls ~/.claude/skills`, external skills arrive as plugins (`claude` → `/plugin`)
