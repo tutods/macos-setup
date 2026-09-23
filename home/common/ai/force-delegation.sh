@@ -53,7 +53,7 @@ case "$rank" in '' | *[!0-9]*) exit 0 ;; esac
 [ "$rank" -le "$grace" ] && exit 0
 
 cat <<'JSON'
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Delegation Contract: main-thread mutations are capped at 4 distinct files per turn (a single already-known file or a one-line change; repeat edits to those files are fine). This call would spread to a further file; dispatch a subagent instead (general-purpose for multi-file work, dev-lifecycle for a scoped, fully-specified fix) rather than widening inline."}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Delegation: main-thread mutations are capped at 4 distinct files per turn (repeat edits to those files are fine). This call would spread to a further file; dispatch general-purpose or caveman:cavecrew-builder with the full brief instead of widening inline."}}
 JSON
 
 exit 0

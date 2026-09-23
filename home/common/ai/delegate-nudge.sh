@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
-# PreToolUse(Read|Grep|Glob) nudge. Counts inline recon calls per user turn on
-# the main thread and, once past a threshold, injects a reminder that recon
-# belongs in a subagent. Never denies.
-#
-# Turn-boundary logic (subagent bail via agent_id, prompt_id turn key,
-# counter dir, 2h GC) is shared with force-delegation.sh via lib/turn-key.sh
-# so the two never define "a turn" differently.
-#
-# No `set -e`: every path must degrade to exit 0, so a parse failure here can
-# never block an unrelated tool call.
+# PreToolUse(Read|Grep|Glob) hard gate. Denies a further DISTINCT inline recon
+# target once a turn passes CLAUDE_RECON_LIMIT (default 8); re-reading an
+# already-counted target stays free. Turn-boundary logic (subagent bail,
+# prompt_id turn key, counter dir, 2h GC) is shared with force-delegation.sh
+# via lib/turn-key.sh. No `set -e`: every path must degrade to exit 0 (allow).
 set -uo pipefail
 
-threshold=6
+limit="${CLAUDE_RECON_LIMIT:-8}"
+case "$limit" in '' | *[!0-9]* | 0) limit=8 ;; esac
 
 lib="$(dirname "$0")/lib/turn-key.sh"
 [ -r "$lib" ] || exit 0
@@ -19,31 +15,24 @@ lib="$(dirname "$0")/lib/turn-key.sh"
 
 input=$(cat)
 
-# Parse stdin once; if jq fails, both stay empty and turn_counter bails.
 {
   IFS= read -r agent_id
   IFS= read -r turn
+  IFS= read -r target
 } <<EOF
-$(printf '%s' "$input" | jq -r '.agent_id // "", .prompt_id // ""' 2>/dev/null)
+$(printf '%s' "$input" | jq -r '.agent_id // "", .prompt_id // "", (.tool_input.file_path // .tool_input.pattern // .tool_input.path // "")' 2>/dev/null)
 EOF
 
-turn_counter claude-delegate-nudge "$agent_id" "$turn" || exit 0
+[ -z "$target" ] && exit 0
 
-# One byte per call. append is atomic for a write this small, so parallel recon
-# calls in one message each land their own byte instead of racing a
-# read-increment-write.
-printf '.' >> "$counter"
-count=$(wc -c < "$counter" 2>/dev/null | tr -d ' ')
-case "$count" in '' | *[!0-9]*) count=0 ;; esac
+turn_counter claude-delegate-recon "$agent_id" "$turn" || exit 0
 
-[ "$count" -lt "$threshold" ] && exit 0
+printf '%s\n' "$target" >> "$counter"
 
-# Fire once per turn: mkdir is atomic, so exactly one instance past the
-# threshold creates the marker and emits, the rest see EEXIST and exit.
-mkdir "$counter.fired" 2>/dev/null || exit 0
+rank=$(awk '!seen[$0]++' "$counter" 2>/dev/null | grep -Fxn -- "$target" | head -n1 | cut -d: -f1)
+case "$rank" in '' | *[!0-9]*) exit 0 ;; esac
+[ "$rank" -le "$limit" ] && exit 0
 
-cat <<'JSON'
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"Delegation Contract: that is the sixth inline Read/Grep/Glob this turn on the main thread. Recon goes to Explore or caveman:cavecrew-investigator, multi-file edits to general-purpose, diff/PR review to code-reviewer, vault lookups to vault-search, each with an explicit model. If more searching is coming, dispatch a subagent instead of continuing inline."}}
-JSON
+printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Delegation: %s distinct inline Read/Grep/Glob targets this turn is the cap. Dispatch Explore or caveman:cavecrew-investigator with the full brief. Re-reads are free."}}\n' "$limit"
 
 exit 0

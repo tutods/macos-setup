@@ -27,7 +27,11 @@
     aiLib.rtkReaderSubcommands;
   settings = {
     theme = "dark-daltonized";
-    model = "opusplan";
+
+    # `model` and `modelSettings` are app-written preferences (set via
+    # `/model`), never Nix-declared here. `model` must never be added to
+    # dropKeys either: mergeJsonObject keeps undeclared live keys, so
+    # declaring it here would fight the in-app picker on every deploy.
 
     telemetry.enabled = false;
     attribution = {
@@ -55,8 +59,12 @@
     env.CLAUDE_CODE_GOAL_CHECKIN_MINUTES = "0";
     # ponytail's SubagentStart hook injects its full ruleset into every subagent
     # unless this regex (unanchored, case-insensitive, on agent_type) narrows it
-    # to the agents that actually write code.
-    env.PONYTAIL_SUBAGENT_MATCHER = "general-purpose|builder|dev-lifecycle|implementer|test-author|test-amender";
+    # to the agents that actually write code. dev-lifecycle/implementer/
+    # test-author/test-amender are dead agent types after the rebuild.
+    env.PONYTAIL_SUBAGENT_MATCHER = "general-purpose|cavecrew-builder";
+    # Distinct inline Read/Grep/Glob targets allowed per main-thread turn
+    # before delegate-nudge.sh denies a further one.
+    env.CLAUDE_RECON_LIMIT = "8";
 
     # https://code.claude.com/docs/en/statusline
     statusLine = {
@@ -157,71 +165,6 @@
       "Bash(rtk kubectl get:*)"
     ];
 
-    hooks.SessionStart = [
-      {
-        hooks = [
-          {
-            type = "command";
-            command = "\"$HOME/.claude/hooks/crg-autobuild.sh\"";
-            timeout = 10;
-            statusMessage = "Refreshing code-review-graph";
-          }
-        ];
-      }
-      # Latches the compaction sentinel when a resumed or forked session
-      # inherits an already-compacted transcript, so the reminder below keeps
-      # firing under the new session id. Own group so removing it never
-      # touches the crg hook. See compaction-sentinel.sh.
-      {
-        hooks = [
-          {
-            type = "command";
-            command = "\"$HOME/.claude/hooks/compaction-sentinel.sh\"";
-            timeout = 15;
-            statusMessage = "Checking for a compaction boundary";
-          }
-        ];
-      }
-    ];
-
-    # Latches the compaction sentinel before the boundary lands, so the first
-    # post-compaction prompt already sees it. PreCompact and not PostCompact:
-    # PostCompact is in keepHookEvents below (Orca appends its own entry) and
-    # the deploy merge lets the Nix value win, so declaring it here would drop
-    # Orca's hook.
-    hooks.PreCompact = [
-      {
-        hooks = [
-          {
-            type = "command";
-            command = "\"$HOME/.claude/hooks/compaction-sentinel.sh\"";
-            timeout = 10;
-            statusMessage = "Latching the compaction sentinel";
-          }
-        ];
-      }
-    ];
-
-    # Re-states the Delegation Contract once the session has been compacted
-    # (the rules file alone drifts then); before that boundary the full
-    # contract is already in context and the hook stays silent. It reads that
-    # verdict off the sentinel compaction-sentinel.sh latches, so the check is
-    # one `[ -f ]` and forks nothing; the transcript scan it used to do here
-    # every prompt blew this timeout on the work laptop. See
-    # delegation-reminder.sh.
-    hooks.UserPromptSubmit = [
-      {
-        hooks = [
-          {
-            type = "command";
-            command = "\"$HOME/.claude/hooks/delegation-reminder.sh\"";
-            timeout = 5;
-            statusMessage = "Reinforcing delegation rules";
-          }
-        ];
-      }
-    ];
-
     hooks.PreToolUse = [
       {
         matcher = "Bash";
@@ -254,6 +197,10 @@
           }
         ];
       }
+      # Hard gate, not a nudge: denies a further distinct inline Read/Grep/Glob
+      # target past CLAUDE_RECON_LIMIT this turn; re-reading an already-counted
+      # target stays free. Subagents are never restricted (agent_id present).
+      # See delegate-nudge.sh.
       {
         matcher = "Read|Grep|Glob";
         hooks = [
@@ -261,7 +208,7 @@
             type = "command";
             command = "\"$HOME/.claude/hooks/delegate-nudge.sh\"";
             timeout = 5;
-            statusMessage = "Counting inline recon calls";
+            statusMessage = "Enforcing delegation on inline recon";
           }
         ];
       }
@@ -363,26 +310,12 @@ in {
     source = ./turn-key.sh;
     force = true;
   };
-  home.file.".claude/hooks/delegation-reminder.sh" = {
-    source = ./delegation-reminder.sh;
-    force = true;
-  };
-  # Companion to delegation-reminder.sh: wired to PreCompact and SessionStart,
-  # it latches the sentinel that hook tests.
-  home.file.".claude/hooks/compaction-sentinel.sh" = {
-    source = ./compaction-sentinel.sh;
-    force = true;
-  };
   home.file.".claude/hooks/biome-fix.sh" = {
     source = ./biome-fix.sh;
     force = true;
   };
   home.file.".claude/hooks/rtk-rewrite.sh" = {
     source = ./rtk-rewrite.sh;
-    force = true;
-  };
-  home.file.".claude/hooks/crg-autobuild.sh" = {
-    source = ./crg-autobuild.sh;
     force = true;
   };
 
