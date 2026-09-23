@@ -8,9 +8,6 @@
 //    runs bash commands through the same block-ai-attribution.sh Claude uses
 //    (deny → throw, so opencode blocks the call; every failure path allows),
 //    then rewrites them through rtk when the binary is present.
-//  - event (filtered on session.created)     ~ Claude SessionStart:
-//    backgrounds crg-autobuild.sh. There is no "session.start" hook in the
-//    plugin API (an earlier version registered one; it never fired).
 //  - config                                  ~ project-local skill bridge:
 //    registers .claude/settings.json skills entries into skills.paths.
 //
@@ -74,22 +71,6 @@ export default async () => {
         if (typeof rewritten === "string") output.args.command = rewritten
       } catch (e) {
         console.error("opencode-parity tool.execute.before:", e?.message ?? e)
-      }
-    },
-    // ~ Claude SessionStart. There is no "session.start" plugin hook (an
-    // earlier version registered one and both payloads were silently dead);
-    // the real API is the generic `event` hook, filtered on session.created.
-    event: async ({ event }) => {
-      if (event?.type !== "session.created") return
-      // Same script Claude runs on SessionStart: builds the code-review-graph
-      // for this repo when it has none, so its MCP tools stop answering "No
-      // graph found ... run build first". Backgrounds itself (and takes its
-      // own lock, so concurrent sessions and sub-sessions are safe), no await.
-      try {
-        const { execFile } = await import("node:child_process")
-        execFile(hookPath("crg-autobuild.sh"), { timeout: 10000 }, () => {})
-      } catch (e) {
-        console.error("opencode-parity crg-autobuild:", e?.message ?? e)
       }
     },
     // Project-local skill bridge, ~ Claude reading a project's settings. The

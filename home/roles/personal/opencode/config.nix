@@ -4,8 +4,8 @@
   lib,
   ...
 }: let
-  # Ollama Cloud model seats. Tier table lives in
-  # instructions/opencode-models.md; this is the machine-readable half.
+  # Ollama Cloud model seats. Source of truth for the tier ids;
+  # instructions/opencode-delegation.md mirrors them for the agents.
   # Council seats are deliberately one model FAMILY each (Z.ai, DeepSeek,
   # Moonshot, MiniMax, Alibaba, NVIDIA, OpenAI): a reviewer from the family
   # that wrote an answer inherits its blind spots. Concurrency on the Pro
@@ -53,73 +53,19 @@
   # prompt. Config rules are appended after the defaults and resolved with
   # findLast, and "*" sorts before every deny, so the denies win.
   readDenies = {"*" = "allow";} // lib.genAttrs secretGlobs (_: "deny");
-  # NOTE (2026-09-08, corrected against opencode 1.18.25 source): MCP tools
-  # ask with `permission: <full-tool-name>` (sanitize(server) + "_" +
-  # sanitize(tool), e.g. github_create_issue) and `patterns: ["*"]` — the
-  # literal string (session/tools.ts). So an attrset of glob-values can
-  # never match an MCP ask: each glob is matched against the request
-  # pattern "*", and only the "*" → allow entry matches —
-  # `{"*":"allow" "*.env*":"deny"}` silently allowed everything, which is
-  # the "MCP permission rules do not enforce" earlier note in
-  # ai-lessons.md (corrected there too). Standing
-  # conclusion unchanged: a filesystem MCP server still cannot carry a
-  # per-path secret backstop, because per-argument patterns are dead —
-  # built-in read + edit + readDenies remain the supported path.
-
-  # No key-level allow rules for MCP tools: opencode's built-in default ruleset
-  # is {"*":"allow", doom_loop:"ask", ...} (read off the 1.18.31 binary), so an
-  # MCP tool with no rule of its own matches that "*" and is allowed. The old
-  # `mcpToolAllows` binding here was written on the opposite premise ("no rule
-  # means ask") and was never referenced, so it changed nothing and is gone.
-  # See docs/ai-lessons.md for the corrected finding.
+  # MCP tool asks always carry pattern ["*"], so per-path glob rules can never
+  # gate an MCP tool; built-in read + edit + readDenies are the only backstop
+  # that enforces (corrected finding: docs/ai-lessons.md).
   #
-  # The one MCP rule that DOES matter is the read/secret backstop below: it
-  # cannot be expressed per-argument, so built-in read + edit + readDenies stay
-  # the supported path.
-
-  # No github MCP server: gh CLI already covers every GitHub op through bash
-  # (open-pr/review-pr skills shell out to it), so the MCP wrapper was a
-  # redundant npx cold-start plus a second, inconsistently-sourced credential
-  # path.
-  #
-  # No postgres MCP server: its tool-schema block is injected into the system
-  # prompt of every request whether or not a query runs, and the doppler+npx
-  # cold start made it the slowest server to answer a first call. psql via
-  # bash covers the same ground with no always-on cost.
-  #
-  # No playwright MCP server: 25 tools (~5.3k tokens of schema) in every
-  # request for a capability used in a minority of repos. Declare it in a
-  # project-root opencode.json instead (docs/opencode-setup.md, "Opting a
-  # project into playwright"). No permission rule is needed when a project
-  # does: opencode's built-in default ruleset allows any unlisted MCP tool
-  # (see the mcpToolAllows note above).
+  # No github/postgres/playwright MCP servers: gh/psql via bash cover the same
+  # ground with no always-on schema cost; playwright is opted into per-project
+  # instead (docs/opencode-setup.md).
   mcpServers = {
     shadcn = {
       type = "local";
       command = ["npx" "-y" "shadcn@latest" "mcp"];
       enabled = true;
       timeout = 15000;
-    };
-    # --tools is the token lever: the server ships 30 tools (~9.7k tokens of
-    # schema) and this machine has only ever called four of them. Unlisted
-    # tools are removed from the MCP surface, so the schema block shrinks to
-    # ~1.7k. Keep the list to tools actually used (opencode.db's part table,
-    # tool column); adding one back is a schema cost paid on every request.
-    code-review-graph = {
-      type = "local";
-      command = [
-        "${config.home.homeDirectory}/.local/bin/code-review-graph"
-        "serve"
-        "--tools"
-        (lib.concatStringsSep "," [
-          "get_minimal_context_tool"
-          "detect_changes_tool"
-          "get_impact_radius_tool"
-          "build_or_update_graph_tool"
-        ])
-      ];
-      enabled = true;
-      timeout = 30000;
     };
   };
 
@@ -239,7 +185,7 @@
       # A seat answers one prompt. The Sep 8 run showed what an uncapped
       # council loop does (6.8h, 455M tokens), so every seat hard-stops.
       steps = 20;
-      description = "Council advisor seat. Invoked only by the council command or the orchestrator, never directly.";
+      description = "Council advisor seat. Invoked only by the council command, never directly.";
       permission.task."*" = "deny";
     })
   m.seats;
@@ -249,7 +195,6 @@
 
     model = m.default;
     small_model = m.small;
-    default_agent = "orchestrator";
     # One level: primary -> subagent. Every subagent now carries
     # permission.task."*" = "deny", so a second level had nothing left that
     # could use it. /council fans its seats out from the chair, itself a
@@ -257,14 +202,13 @@
     subagent_depth = 1;
 
     # skills.paths re-adds the Nix-deployed repo skills after
-    # OPENCODE_DISABLE_EXTERNAL_SKILLS turns off both external scans
-    # (~/.claude/skills and ~/.agents/skills), so the skill set is exactly
-    # what this repo declares, deterministically. That env var also disables
-    # the project-local .claude/skills and .agents/skills discovery (same
-    # branch in skill/index.ts), so the relative ".claude/skills" entry
-    # restores project-local parity: relative paths resolve against the
-    # session directory (skill/index.ts:213).
-    skills.paths = ["~/.claude/skills" "~/.agents/skills" ".claude/skills"];
+    # OPENCODE_DISABLE_EXTERNAL_SKILLS turns off the ~/.claude/skills external
+    # scan, so the skill set is exactly what this repo declares,
+    # deterministically. That env var also disables project-local
+    # .claude/skills discovery (same branch in skill/index.ts), so the
+    # relative ".claude/skills" entry restores project-local parity: relative
+    # paths resolve against the session directory (skill/index.ts:213).
+    skills.paths = ["~/.claude/skills" ".claude/skills"];
 
     autoupdate = false;
     lsp = true;
@@ -280,56 +224,21 @@
 
     agent =
       {
-        # Primary orchestrator: the port of the Claude Delegation Contract.
-        # Full-auto like every other agent below; the contract text itself
-        # lives in the generated AGENTS.md, not in a per-turn injection.
-        # No model or prompt here: opencode merges agent markdown OVER
-        # opencode.json (config.ts mergeDeep(json, markdown) — markdown wins),
-        # so both come from agents/orchestrator.md, the single source of truth.
-        # A `prompt = "{file:...}"` here would be dead, the markdown loader
-        # overrides it.
-        orchestrator = {
-          mode = "primary";
-          description = "Default primary agent. Orchestrates: plans, dispatches subagents, relays and verifies results. File work is delegated, never inline.";
-          permission = {
-            edit = "allow";
-            bash = bashRules;
-            read = readDenies;
-            task = {
-              "*" = "allow";
-            };
-          };
-        };
         # Agent models live in the markdown frontmatter, the single source of
         # truth: opencode merges markdown over opencode.json (markdown wins),
         # so a model set here for a markdown-backed agent is silently dead.
         # config.nix carries models only for the config-only agents with no
         # markdown file (the council seats, chair and peer-reviewer below).
-        # The tier table in instructions/opencode-models.md documents the
-        # tiers; a tier change edits the frontmatter and that table together.
-        code-reviewer.permission.task."*" = "deny";
-        # The one agent that runs unsupervised through implement/commit/push,
-        # so it gets edit and bash without a prompt. Not a bare `bash = "allow"`:
-        # that becomes a single {resource:"*",effect:"allow"} rule appended last
-        # and outranks every deny under findLast, handing an unattended agent
-        # zero-prompt `cat ~/.ssh/id_ed25519`.
-        dev-lifecycle = {
-          permission = {
-            edit = "allow";
-            bash = bashRules;
-            read = readDenies;
-            task."*" = "deny";
-          };
-          steps = 150;
-        };
+        # The tier ids above are the source of truth; a tier change edits the
+        # frontmatter and instructions/opencode-delegation.md together.
         vault-lint.permission.task."*" = "deny";
         vault-search.permission.task."*" = "deny";
       }
       // councilAgents
       // {
-        # Dedicated primary for /council: coordination only. No bash at all
-        # (it never commits, unlike the orchestrator), just task spawn + text
-        # synthesis. Inline prompt keeps the agents/ dir untouched.
+        # Dedicated primary for /council: coordination only, no bash at all,
+        # just task spawn + text synthesis. Inline prompt keeps the agents/
+        # dir untouched.
         council-chair = {
           mode = "primary";
           model = m.default;
@@ -362,17 +271,8 @@
       websearch = "allow";
       bash = bashRules;
       read = readDenies;
-      # NOTE: no filesystem MCP server (see the MCP-tools caveat at the
-      # readDenies comment above): its per-tool permission glob rules don't
-      # enforce, so it can't carry the secret-path backstop. Built-in read +
-      # edit cover the same ground with working deny rules. This also removes
-      # the unattended-dispatch stall: MCP tools with no permission rule
-      # default to "ask", which an Orca-injected worker can never answer.
-      # PermissionRuleConfig, not a path list: opencode rejects the whole file
-      # with "Expected PermissionRuleConfig, got [...]" and prints it on every
-      # startup. The assertion below only checks key names, which is why an
-      # array shipped. "*" = "ask" keeps anything outside these three trees
-      # behind a prompt rather than silently allowed.
+      # No filesystem MCP server: per-argument permission globs don't enforce
+      # (see the readDenies comment above); built-in read/edit stay the backstop.
       # external_directory: allow the working trees plus scratch/config space.
       # The "*" = "ask" catch-all stays — an unlisted path still prompts — but
       # the temp trees are pure friction: opencode itself keeps scratch output

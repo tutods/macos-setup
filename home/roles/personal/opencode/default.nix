@@ -1,7 +1,6 @@
-# opencode, personal machine only. Mirrors the Claude setup where the two
-# harnesses share instruction sources, and diverges where opencode's model
-# differs (no marketplaces, no workflow engine, no statusline, no hook
-# events, config is a plain JSON file). See docs/opencode-setup.md.
+# opencode, personal machine only. Generates opencode.json (config.nix),
+# AGENTS.md from the shared instruction sources, and deploys agents,
+# commands and the parity plugin. See docs/opencode-setup.md.
 {
   config,
   lib,
@@ -9,15 +8,16 @@
 }: let
   inherit (builtins) readFile;
 
-  # The opencode agent deploy list, same two-direction contract as
+  # The opencode agent/command deploy lists, same two-direction contract as
   # lib/ai.nix:mkLocalAgents, carried as build-time assertions instead of a
-  # script (verify-references.sh is gone, replaced by assertions upstream):
-  # every name here must exist as agents/<name>.md, and every agents/*.md
-  # must be in this list. nix flake check fails the build otherwise.
-  agentNames = ["orchestrator" "code-reviewer" "dev-lifecycle" "vault-lint" "vault-search"];
+  # script: every name here must exist as agents/<name>.md (or
+  # commands/<name>.md), and every agents/*.md or commands/*.md must be in
+  # its list. nix flake check fails the build otherwise.
+  agentNames = ["vault-search" "vault-lint"];
+  commandNames = ["council" "nixcheck" "verify-setup"];
 
   # The plugin files this module deploys, plus the tolerated out-of-band
-  # exceptions (docs/opencode-setup.md). Both the home.file entries and the
+  # exception (docs/opencode-setup.md). Both the home.file entry and the
   # destructive prune in home.activation.opencodePlugins are DERIVED from
   # these lists, so a plugin added to the deploy can never be deleted by the
   # prune out of sync.
@@ -27,42 +27,21 @@
     lib.concatMapStringsSep " " (n: "! -name ${lib.escapeShellArg n}")
     (managedPlugins ++ toleratedPlugins);
 
-  # Plugins kept for Claude Code (hooks/skills work there) whose skills are
-  # never loaded in opencode, so their descriptions are pure always-on cost
-  # there; zero recorded loads in opencode.db, and ponytail/caveman's
-  # hook-driven behavior never fires in opencode at all.
-  opencodeBridgeExclude = [
-    "figma"
-    "mattpocock-skills"
-    "superpowers"
-    "ponytail"
-    "caveman"
-    "web-quality-skills"
-    "frontend-slides"
-  ];
-
-  # Plugin names Claude actually has enabled, from home.ai.plugins (the same
-  # list settings.nix turns into enabledPlugins), minus the exclusions above.
-  # Only these get their skills bridged: the cache also holds plugins that were
-  # installed once and never enabled (or since disabled), and their skills are
-  # pure always-on cost in every opencode request. Space-separated for a single
-  # `case` match in the activation script; plugin names cannot contain spaces.
-  enabledPluginNames =
-    lib.concatStringsSep " "
-    (builtins.filter (n: !builtins.elem n opencodeBridgeExclude)
-      (map (p: lib.head (lib.splitString "@" p)) config.home.ai.plugins));
-
-  agentAssertions =
+  mkDeployAssertions = kind: dir: names:
     (map (name: {
-        assertion = builtins.pathExists (./agents + "/${name}.md");
-        message = "opencode: '${name}' is in agentNames but agents/${name}.md is missing";
+        assertion = builtins.pathExists (dir + "/${name}.md");
+        message = "opencode: '${name}' is in ${kind}Names but ${kind}s/${name}.md is missing";
       })
-      agentNames)
-    ++ (lib.mapAttrsToList (entry: kind: {
-        assertion = kind != "regular" || !lib.hasSuffix ".md" entry || builtins.elem (lib.removeSuffix ".md" entry) agentNames;
-        message = "opencode: agents/${entry} exists but is not in the agentNames list";
+      names)
+    ++ (lib.mapAttrsToList (entry: fsKind: {
+        assertion = fsKind != "regular" || !lib.hasSuffix ".md" entry || builtins.elem (lib.removeSuffix ".md" entry) names;
+        message = "opencode: ${kind}s/${entry} exists but is not in the ${kind}Names list";
       })
-      (builtins.readDir ./agents));
+      (builtins.readDir dir));
+
+  deployAssertions =
+    mkDeployAssertions "agent" ./agents agentNames
+    ++ mkDeployAssertions "command" ./commands commandNames;
 
   # Global rules for every opencode session. Same single-source-of-truth files
   # Claude reads, so the ~90% generic content cannot drift between harnesses,
@@ -76,21 +55,13 @@
     ''
     + readFile ./instructions/opencode-delegation.md
     + "\n\n"
-    + readFile ../../../common/ai/instructions/shared-instructions.md
-    + "\n\n"
-    + readFile ../../../common/ai/instructions/model-quality.md
-    + "\n\n"
-    + readFile ../../../common/ai/instructions/learned-rules.md
-    + "\n\n"
-    + readFile ./instructions/opencode-models.md
+    + readFile ../../../common/ai/instructions/shared.md
     + "\n\n"
     + readFile ../ai/instructions.md;
 in {
-  imports = [./config.nix ./skills.nix ./maintenance.nix];
+  imports = [./config.nix ./maintenance.nix];
 
-  home.ai.opencodeSkillsPrune = true;
-
-  assertions = agentAssertions;
+  assertions = deployAssertions;
 
   # All opencode files, one home.file. Agents/commands/plugins are read-only
   # inputs, store symlinks are safe (like Claude's mkLocalAgents).
@@ -102,15 +73,17 @@ in {
         })
       {}
       agentNames)
+    // (builtins.foldl' (acc: name:
+        acc
+        // {
+          ".config/opencode/commands/${name}.md".source = ./commands + "/${name}.md";
+        })
+      {}
+      commandNames)
     // {
       # Global rules, generated from the shared instruction sources. Hand
       # edits are lost on the next deploy; change the repo.
       ".config/opencode/AGENTS.md".text = agentsMd;
-      ".config/opencode/commands/council.md".source = ./commands/council.md;
-      ".config/opencode/commands/deploy.md".source = ./commands/deploy.md;
-      ".config/opencode/commands/doctor.md".source = ./commands/doctor.md;
-      ".config/opencode/commands/nixcheck.md".source = ./commands/nixcheck.md;
-      ".config/opencode/commands/verify-setup.md".source = ./commands/verify-setup.md;
     }
     # Plain JS, no imports needed at build time. Read-only inputs, symlinks
     # safe. Deployed from managedPlugins so the activation prune below keeps
@@ -136,79 +109,6 @@ in {
   # loses (and briefly breaks any plugin that does import from it).
   home.activation.opencodePlugins = lib.hm.dag.entryAfter ["writeBoundary"] ''
     ocDir="${config.home.homeDirectory}/.config/opencode"
-    # Claude plugins the user actually enabled, from home.ai.plugins. The
-    # bridge below and the prune further down both test against this: a cached
-    # plugin that was never enabled (or was disabled later) still sits on disk
-    # with all its skills, and bridging those is pure always-on prompt cost.
-    enabledPlugins="${enabledPluginNames}"
-    # Bridge Claude plugin skills to opencode skills. Scoped to the plugin
-    # CACHE (installed plugins) only: ~/.claude/plugins also holds full
-    # marketplace repo clones under marketplaces/<name>/, whose skills belong
-    # to plugins never installed.
-    claudePluginDir="${config.home.homeDirectory}/.claude/plugins"
-    claudePluginCache="$claudePluginDir/cache"
-    run mkdir -p "$ocDir/skills"
-    if [ -d "$claudePluginCache" ]; then
-      $VERBOSE_ECHO "Bridging Claude plugins to opencode skills"
-      run find "$claudePluginCache" -type d -name "skills" -exec sh -c '
-        cache="$4"
-        plugin_of() {
-          # <cache>/<marketplace>/<plugin>/<version>/... -> <plugin>
-          rel=''${1#"$cache"/}
-          rest=''${rel#*/}
-          printf "%s" "''${rest%%/*}"
-        }
-        for skill in "$1"/*; do
-          if [ -d "$skill" ]; then
-            plugin=$(plugin_of "$skill")
-            case " $3 " in
-              *" $plugin "*) ;;
-              *) continue ;;
-            esac
-            skillName=$(basename "$skill")
-            dest="$2/skills/$skillName"
-            # A real (non-symlink) dir there is tool-installed, not ours:
-            # BSD ln -sfn onto a real dir drops a junk nested symlink
-            # INSIDE it instead of replacing it, so leave it alone.
-            if [ -d "$dest" ] && [ ! -L "$dest" ]; then
-              continue
-            fi
-            ln -sfn "$skill" "$dest"
-          fi
-        done
-      ' _ {} "$ocDir" "$enabledPlugins" "$claudePluginCache" \;
-    fi
-    # Prune stale bridge links. Three cases, all into ~/.claude/plugins:
-    #  - target under marketplaces/: never a bridge the walk above creates. A
-    #    marketplace entry is a full repo clone holding skills for every plugin
-    #    in it, installed or not; an older bridge walked marketplaces/ too and
-    #    left these links behind. They resolve (the clone is still on disk), so
-    #    the target-gone test never catches them.
-    #  - target under cache/ whose plugin is not in home.ai.plugins: installed
-    #    once, never enabled (or since disabled). Also resolves, also unused.
-    #  - target gone: the plugin was uninstalled or its cached version moved.
-    for link in "$ocDir/skills"/*; do
-      [ -L "$link" ] || continue
-      target="$(readlink "$link")"
-      case "$target" in
-        "$claudePluginDir"/marketplaces/*)
-          run rm -f "$link"
-          ;;
-        "$claudePluginCache"/*)
-          rel=''${target#"$claudePluginCache"/}
-          rest=''${rel#*/}
-          plugin=''${rest%%/*}
-          case " $enabledPlugins " in
-            *" $plugin "*) [ -e "$link" ] || run rm -f "$link" ;;
-            *) run rm -f "$link" ;;
-          esac
-          ;;
-        "$claudePluginDir"/*)
-          [ -e "$link" ] || run rm -f "$link"
-          ;;
-      esac
-    done
-
     for pluginDir in plugin plugins; do
       dir="$ocDir/$pluginDir"
       [ -d "$dir" ] || continue
@@ -221,11 +121,29 @@ in {
     done
   '';
 
-  # Both external skill scans (~/.claude/skills AND ~/.agents/skills) off:
-  # the skill set becomes exactly what skills.paths re-adds, the Nix-deployed
-  # repo skills, plus opencode's own ~/.config/opencode/skills (documented
-  # exceptions in docs/opencode-setup.md). Without this, every session logs
-  # hundreds of duplicate-skill warnings from the old npx tree.
+  # One-off cleanup, 2026-09-22: delete this sweep after two deploys. The
+  # retired Claude-plugin-to-opencode-skill bridge left symlinks under
+  # ~/.config/opencode/skills pointing into ~/.claude/plugins (cache/ and
+  # marketplaces/ both); real tool-installed skill directories there
+  # (graphify, supacode-cli, supacode-deeplinks) are untouched by the
+  # [ -L ] guard.
+  home.activation.opencodeSkillBridgeCleanup = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    skillsDir="${config.home.homeDirectory}/.config/opencode/skills"
+    claudePluginDir="${config.home.homeDirectory}/.claude/plugins"
+    if [ -d "$skillsDir" ]; then
+      for link in "$skillsDir"/*; do
+        [ -L "$link" ] || continue
+        case "$(readlink "$link")" in
+          "$claudePluginDir"/*) run rm -f "$link" ;;
+        esac
+      done
+    fi
+  '';
+
+  # The ~/.claude/skills external scan off: the skill set becomes exactly
+  # what skills.paths re-adds, the Nix-deployed repo skills, plus opencode's
+  # own ~/.config/opencode/skills (documented exceptions in
+  # docs/opencode-setup.md).
   home.sessionVariables.OPENCODE_DISABLE_EXTERNAL_SKILLS = "1";
 
   # The env var is the only thing that sets the log level: the logLevel key

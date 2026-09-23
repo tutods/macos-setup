@@ -12,9 +12,6 @@
 #   - permissions.allow is fully Nix-owned and rewritten whole on every
 #     deploy, so any click-granted "don't ask again" rule beyond what's
 #     declared is cleared.
-#   - opencodeSkillsReconcile deletes any dir under ~/.agents/skills whose
-#     .skill-lock.json source is not one of skills.nix's declared sources,
-#     when home.ai.opencodeSkillsPrune is true (personal machine only).
 #   - homebrew.onActivation (cleanup = "uninstall" + --force-cleanup) runs
 #     `brew bundle --cleanup --force-cleanup`, force-uninstalling every brew
 #     formula/cask/tap not in the generated Brewfile, no prompt
@@ -102,9 +99,6 @@ if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
     customSkills = hm.home.ai.customSkills;
     externallyManagedSkills = hm.home.ai.externallyManagedSkills;
     plugins = hm.home.ai.plugins;
-    opencodeSkillsPrune = hm.home.ai.opencodeSkillsPrune or null;
-    opencodeSkillsSources = hm.home.ai.opencodeSkillsSources or null;
-    opencodeSkillsExternalSources = hm.home.ai.opencodeSkillsExternalSources or null;
     brewfile = cfg.homebrew.brewfile or null;
     brewOwner = cfg.homebrew.user or null;
   }" 2>/dev/null) || [ -z "$doctor_json" ]; then
@@ -114,9 +108,6 @@ fi
 skills_json=$(printf '%s' "$doctor_json" | jq -c '.customSkills')
 extskills_json=$(printf '%s' "$doctor_json" | jq -c '.externallyManagedSkills')
 plugins_json=$(printf '%s' "$doctor_json" | jq -c '.plugins')
-prune_flag=$(printf '%s' "$doctor_json" | jq -r '.opencodeSkillsPrune')
-sources_json=$(printf '%s' "$doctor_json" | jq -c '.opencodeSkillsSources')
-extsources_json=$(printf '%s' "$doctor_json" | jq -c '.opencodeSkillsExternalSources')
 brewfile=$(printf '%s' "$doctor_json" | jq -r '.brewfile // empty')
 brew_owner=$(printf '%s' "$doctor_json" | jq -r '.brewOwner // empty')
 
@@ -190,66 +181,6 @@ else
   print_ok "no live settings.json yet"
 fi
 
-# ── 5. opencode skills the reconcile will prune (personal machine only) ─────
-# This duplicates the module's own .skill-lock.json + jq lookup instead of
-# sharing code with it.
-if [ "$CONFIG" = "macbook" ]; then
-  # Both attrs came from the combined eval above; on macbook they must exist —
-  # a null here means the options vanished from the flake, not "nothing to do".
-  if [ "$prune_flag" = "null" ] || [ "$sources_json" = "null" ]; then
-    echo "deploy-doctor: $HM.home.ai.opencodeSkillsPrune/Sources missing on macbook — aborting instead of showing a bogus prune preview" >&2
-    exit 3
-  fi
-
-  OC_SKILLS_DIR="$TARGET_HOME/.agents/skills"
-  OC_LOCK_FILE="$TARGET_HOME/.agents/.skill-lock.json"
-  if [ ! -d "$OC_SKILLS_DIR" ]; then
-    print_ok "$OC_SKILLS_DIR does not exist yet"
-  else
-    declare -a owned_skills=()
-    lock_state="ok"
-    if [ ! -f "$OC_LOCK_FILE" ]; then
-      lock_state="missing"
-    elif ! jq empty "$OC_LOCK_FILE" 2>/dev/null; then
-      lock_state="invalid"
-    else
-      while IFS= read -r k; do owned_skills+=("$k"); done < <(jq -r --argjson srcs "$sources_json" --argjson extsrcs "$extsources_json" \
-        '.skills // {} | to_entries[] | select(.value.source as $s | ($srcs + ($extsrcs // [])) | index($s)) | .key' \
-        "$OC_LOCK_FILE" 2>/dev/null)
-    fi
-
-    declare -a unowned_skills=()
-    for path in "$OC_SKILLS_DIR"/*; do
-      [ -d "$path" ] || continue
-      name=$(basename "$path")
-      keep=0
-      for s in "${owned_skills[@]-}"; do [ "$name" = "$s" ] && { keep=1; break; }; done
-      [ "$keep" -eq 0 ] && unowned_skills+=("$name")
-    done
-
-    if [ "${#unowned_skills[@]}" -eq 0 ]; then
-      print_ok "no unmanaged opencode skill dirs"
-    elif [ "${#owned_skills[@]}" -eq 0 ]; then
-      case "$lock_state" in
-        missing) reason="$OC_LOCK_FILE not found" ;;
-        invalid) reason="$OC_LOCK_FILE is not valid JSON" ;;
-        *) reason="no entry in $OC_LOCK_FILE resolves to a declared source" ;;
-      esac
-      print_warn "$reason ${DIM}(module refuses to prune, nothing will be deleted)${NC}"
-    elif [ "$prune_flag" = "true" ]; then
-      for name in "${unowned_skills[@]-}"; do
-        print_del "opencode skill dir $name  ${DIM}(not from a declared source)${NC}"
-      done
-      echo -e "  ${DIM}${#unowned_skills[@]} dir(s) will be deleted on next deploy${NC}"
-    else
-      for name in "${unowned_skills[@]-}"; do
-        print_warn "opencode skill dir $name  ${DIM}(not from a declared source, only listed — opencodeSkillsPrune is false)${NC}"
-      done
-      echo -e "  ${DIM}${#unowned_skills[@]} dir(s) would be pruned if opencodeSkillsPrune were true${NC}"
-    fi
-  fi
-fi
-
 # ── 6. brew formulae/casks/taps the cleanup will uninstall ───────────────────
 # The deploy runs `brew bundle --cleanup --force-cleanup` against the Brewfile
 # nix-darwin generates, uninstalling everything unlisted without prompting.
@@ -317,8 +248,7 @@ echo ""
 echo -e "  ${DIM}Preview only — nothing was changed. Re-run after editing the flake if${NC}"
 echo -e "  ${DIM}anything above is unexpected; a deleted skill/plugin needs to be declared${NC}"
 echo -e "  ${DIM}in the flake (home.ai.customSkills / home.ai.plugins) to survive,${NC}"
-echo -e "  ${DIM}externally-managed skill dirs belong in home.ai.externallyManagedSkills,${NC}"
-echo -e "  ${DIM}opencode-side external sources in home.ai.opencodeSkillsExternalSources, and a${NC}"
+echo -e "  ${DIM}externally-managed skill dirs belong in home.ai.externallyManagedSkills, and a${NC}"
 echo -e "  ${DIM}brew formula/cask must be in homebrew.brews/casks (or the host's homebrew/).${NC}"
 echo ""
 
