@@ -19,29 +19,6 @@
       '';
     };
 
-    extraMcpServers = lib.mkOption {
-      default = {};
-      description = "Role-specific MCP servers merged into ~/.claude.json's mcpServers";
-      type = lib.types.attrsOf (lib.types.submodule {
-        options = {
-          command = lib.mkOption {
-            type = lib.types.str;
-            description = "Command to launch the MCP server";
-          };
-          args = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [];
-            description = "Arguments passed to command";
-          };
-          env = lib.mkOption {
-            type = lib.types.attrsOf lib.types.str;
-            default = {};
-            description = "Environment variables injected at server spawn";
-          };
-        };
-      });
-    };
-
     marketplaces = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = {};

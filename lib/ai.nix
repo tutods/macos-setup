@@ -106,25 +106,28 @@ in rec {
     then base
     else base + "\n\n" + extra;
 
-  # Copies a named set of skill directories from some `src` into
-  # ~/.claude/skills at activation time. Used by mkLocalSkills, which owns
-  # its whole `local/` dir and adds the reverse "every dir on disk must be
-  # declared" assertion on top.
-  mkSkillCopy = {
+  # Copies the declared skill directories from `dir` into ~/.claude/skills at
+  # activation time. Sole caller is home/common/ai/skills/default.nix, which
+  # owns the whole `local/` dir; the reverse "every dir on disk must be
+  # declared" assertion catches drift between the two.
+  mkLocalSkills = {
     lib,
-    label,
-    prefix,
-    src,
+    dir,
     names,
   }: {
     home.ai.customSkills = names;
 
     assertions =
-      map (name: {
-        assertion = builtins.pathExists (src + "/${name}/SKILL.md");
-        message = "${prefix} (${label}): '${name}' is in names but ${toString src}/${name}/SKILL.md is missing";
-      })
-      names;
+      (map (name: {
+          assertion = builtins.pathExists (dir + "/${name}/SKILL.md");
+          message = "mkLocalSkills: '${name}' is in names but ${toString dir}/${name}/SKILL.md is missing";
+        })
+        names)
+      ++ (lib.mapAttrsToList (entry: kind: {
+          assertion = kind != "directory" || builtins.elem entry names;
+          message = "mkLocalSkills: ${toString dir}/${entry} exists but is not in the names list";
+        })
+        (builtins.readDir dir));
 
     # After linkGeneration: Home Manager has torn down the previous generation's
     # symlinks by then, and copying earlier would have them removed. Before
@@ -132,43 +135,20 @@ in rec {
     # repo does not own, so every copy must land first.
     # Every mutation goes through Home Manager's `run` so a dry-run
     # activation previews the commands instead of mutating ~/.claude/skills.
-    home.activation."${prefix}-${label}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
+    home.activation.localSkills = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
       dest="$HOME/.claude/skills"
       run mkdir -p "$dest"
       ${lib.concatMapStringsSep "\n" (name: ''
           run rm -rf "$dest/${name}"
-          run cp -R "${src}/${name}" "$dest/${name}"
+          run cp -R "${dir}/${name}" "$dest/${name}"
           # Source is a 0444 store path; without this the next deploy's rm -rf
           # cannot recurse in to replace the copy.
           run chmod -R u+w "$dest/${name}"
         '')
         names}
-      echo "↣ Custom skills (${label}): ${toString (builtins.length names)} installed"
+      echo "↣ Custom skills: ${toString (builtins.length names)} installed"
     '';
   };
-
-  mkLocalSkills = {
-    lib,
-    label,
-    dir,
-    names,
-  }: let
-    copy = mkSkillCopy {
-      inherit lib label names;
-      prefix = "localSkills";
-      src = dir;
-    };
-  in
-    copy
-    // {
-      assertions =
-        copy.assertions
-        ++ (lib.mapAttrsToList (entry: kind: {
-            assertion = kind != "directory" || builtins.elem entry names;
-            message = "mkLocalSkills (${label}): ${toString dir}/${entry} exists but is not in the names list";
-          })
-          (builtins.readDir dir));
-    };
 
   mkLocalAgents = {
     lib,

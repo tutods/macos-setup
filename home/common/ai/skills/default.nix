@@ -8,29 +8,8 @@
   imports = [
     (aiLib.mkLocalSkills {
       inherit lib;
-      label = "common";
       dir = ./local;
-      names = [
-        "llm-council"
-        "content-writer"
-        "unslop"
-        "ts-strict-audit"
-        "conventional-commit"
-        "open-pr"
-        "review-pr"
-        "pr-feedback"
-        "deep-review"
-        "ui-iterate"
-        "obsidian-vault"
-        "nix-setup"
-        "ts-conventions"
-        "react-conventions"
-        "api-conventions"
-        "testing-conventions"
-        "dependency-hygiene"
-        "seo-audit"
-        "harness-engineer"
-      ];
+      names = ["llm-council" "obsidian-vault" "unslop"];
     })
   ];
 
@@ -52,8 +31,7 @@
   # Nix-managed skills are always real copied directories, so a symlink there
   # is foreign by construction (most often an `npx skills`-style install
   # pointing at ~/.agents/skills).
-  # Runs after every localSkills-* copy (entryBetween in
-  # lib/ai.nix:mkSkillCopy).
+  # Runs after the localSkills copy (entryBetween in lib/ai.nix:mkLocalSkills).
   home.activation.customSkillsReconcile = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
     dest="$HOME/.claude/skills"
     if [ -d "$dest" ]; then

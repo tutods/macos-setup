@@ -11,12 +11,7 @@
     (aiLib.mkLocalAgents {
       inherit lib;
       dir = ./local;
-      names = [
-        "code-reviewer"
-        "dev-lifecycle"
-        "vault-lint"
-        "vault-search"
-      ];
+      names = ["vault-lint" "vault-search"];
     })
   ];
 }
