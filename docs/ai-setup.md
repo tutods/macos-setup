@@ -97,21 +97,7 @@ After `./nix.sh <config>` on a new machine:
 2. Add any needed secrets to `~/.config/fish/secrets.fish`
 3. Verify plugins loaded: `claude` → `/plugin` (marketplaces install on first launch)
 4. Check custom skills landed: `ls ~/.claude/skills`
-5. Clean up leftovers from before the token-budget rebuild:
-
-```bash
-claude mcp remove code-review-graph -s user
-pipx uninstall code-review-graph
-claude plugin uninstall superpowers
-claude plugin uninstall figma
-claude plugin uninstall claude-code-setup
-claude plugin uninstall web-quality-skills
-claude plugin uninstall skills@ai-builder-club
-claude plugin marketplace remove addy-web-quality-skills
-claude plugin marketplace remove ai-builder-club
-rm -rf "${TMPDIR:-/tmp}/claude-compacted"
-```
-
+5. Prune what Nix cannot reach: `./scripts/claude-cleanup.sh` previews, `./scripts/claude-cleanup.sh --apply` executes. It uninstalls plugins no scope enables (the deployed `settings.json` plus every project `.claude/settings*.json` under `$PROJECT_DIR` and live Orca worktrees), removes marketplaces nothing references, drops registry entries for deleted worktrees and the cache versions only they used, and removes code-review-graph's MCP entry and pipx package. Rerun it whenever worktrees or project plugin sets change.
 6. Disable unused claude.ai account connectors in claude.ai's own settings, not reachable from this repo.
 
 See [work-setup.md](work-setup.md) for the complete work machine setup.

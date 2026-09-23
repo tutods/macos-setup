@@ -50,6 +50,7 @@ Run from the repo root (where `flake.nix` lives).
 ./nix.sh macbook --build-only # build only, no sudo required
 ./nix.sh macbook --force      # force rebuild
 nix-collect-garbage -d        # garbage collect old generations
+./scripts/claude-cleanup.sh   # after a deploy: preview Claude Code state Nix cannot reach; --apply prunes it
 ```
 
 `deploy-doctor.sh` previews what a deploy would change destructively:
