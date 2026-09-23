@@ -171,6 +171,12 @@
             timeout = 10;
             statusMessage = "Checking commit/PR for AI attribution";
           }
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/destructive-guard.sh\"";
+            timeout = 5;
+            statusMessage = "Checking for irreversible commands";
+          }
         ];
       }
       # RTK auto-rewrite: rewrites commands through rtk for token-cheap output.
@@ -309,6 +315,10 @@ in {
   };
   home.file.".claude/hooks/subagent-model-gate.sh" = {
     source = ./subagent-model-gate.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/destructive-guard.sh" = {
+    source = ./destructive-guard.sh;
     force = true;
   };
   # Shared turn-boundary logic sourced by delegate-nudge.sh and
