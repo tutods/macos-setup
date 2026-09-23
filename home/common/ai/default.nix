@@ -3,14 +3,12 @@
 {
   imports = [
     ./options.nix
-    ./init.nix
     ./instructions
     ./skills
     ./agents
     ./workflows
     ./settings.nix
     ./plugins.nix
-    ./mcp.nix
     ./statusline.nix
     ./maintenance.nix
   ];
