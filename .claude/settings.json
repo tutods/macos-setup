@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(nix fmt)",
+      "Bash(nix flake check)",
+      "Bash(nix eval:*)",
+      "Bash(nix-instantiate:*)",
+      "Bash(alejandra:*)",
+      "Bash(./scripts/verify-plugins.sh:*)",
+      "Bash(./scripts/deploy-doctor.sh:*)",
+      "Bash(./scripts/verify-opencode.sh:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "mattpocock-skills@mattpocock": false
+  }
+}
