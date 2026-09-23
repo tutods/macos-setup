@@ -4,15 +4,12 @@
   lib,
   ...
 }: let
-  # Concatenated into ~/.claude/rules/workflow.md, loaded in every session. Add
-  # here only if it applies regardless of what is being worked on, anything
-  # stack-specific belongs in a skill, which loads on demand.
+  # Concatenated into ~/.claude/rules/workflow.md, loaded in every session.
+  # delegation.md is Claude-only and capped at 1 KB; shared.md is harness-agnostic
+  # (opencode reads it too) and capped at 4 KB. Stack-specific rules go in a skill.
   sharedFiles = [
     ./delegation.md
-    ./shared-instructions.md
-    ./model-quality.md
-    ./learned-rules.md
-    ./model-selection.md
+    ./shared.md
   ];
 
   sharedContent = lib.concatStringsSep "\n\n" (map builtins.readFile sharedFiles);
