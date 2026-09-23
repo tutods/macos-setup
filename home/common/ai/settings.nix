@@ -221,6 +221,17 @@
           }
         ];
       }
+      {
+        matcher = "Agent";
+        hooks = [
+          {
+            type = "command";
+            command = "\"$HOME/.claude/hooks/subagent-model-gate.sh\"";
+            timeout = 5;
+            statusMessage = "Checking subagent model";
+          }
+        ];
+      }
     ];
 
     # Silent no-op unless the project has a biome config and a PATH-installed
@@ -294,6 +305,10 @@ in {
   };
   home.file.".claude/hooks/force-delegation.sh" = {
     source = ./force-delegation.sh;
+    force = true;
+  };
+  home.file.".claude/hooks/subagent-model-gate.sh" = {
+    source = ./subagent-model-gate.sh;
     force = true;
   };
   # Shared turn-boundary logic sourced by delegate-nudge.sh and

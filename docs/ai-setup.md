@@ -36,12 +36,15 @@ Env vars:
 | PreToolUse | Bash | `rtk-rewrite.sh` |
 | PreToolUse | Read\|Grep\|Glob | `delegate-nudge.sh` |
 | PreToolUse | Edit\|Write | `force-delegation.sh` |
+| PreToolUse | Agent | `subagent-model-gate.sh` |
 | PostToolUse | Edit\|Write | `biome-fix.sh` |
 
 Two of these are hard gates sharing turn-boundary logic in `lib/turn-key.sh` (a non-empty `agent_id` bails out so subagents are never restricted, `prompt_id` is the turn key, counters live in a per-namespace dir with a 2-hour GC), so the two hooks never define "a turn" differently:
 
 - `force-delegation.sh` denies a main-thread Edit/Write past 4 distinct files in a turn; repeat edits to an already-allowed file stay free.
 - `delegate-nudge.sh` denies a further distinct inline Read/Grep/Glob target past `CLAUDE_RECON_LIMIT` (default 8); re-reading an already-counted target stays free.
+
+`subagent-model-gate.sh` denies any Agent dispatch that omits `model`, names anything other than `haiku`, `sonnet` or `opus` (or the matching `claude-*` id), or uses `subagent_type: fork`, which always inherits the parent model. The deny text carries the tier table, so the main thread picks a tier by complexity on the retry; `CLAUDE_CODE_SUBAGENT_MODEL` stays as the fallback for agents whose frontmatter pins nothing.
 
 `block-ai-attribution.sh` rejects AI attribution in commits, PRs and reviews. `rtk-rewrite.sh` rewrites read-only commands through `rtk` for token-cheap output, a silent no-op when `rtk` is absent. `biome-fix.sh` runs `biome check --write` on just the edited file, a no-op unless the project has a biome config.
 
