@@ -4,9 +4,8 @@
   lib,
   ...
 }: let
-  # Concatenated into ~/.claude/rules/workflow.md, loaded in every session.
-  # delegation.md is Claude-only and capped at 1 KB; shared.md is harness-agnostic
-  # (opencode reads it too) and capped at 4 KB. Stack-specific rules go in a skill.
+  # Concatenated into ~/.claude/rules/workflow.md. delegation.md is Claude-only
+  # (≤1 KB); shared.md is harness-agnostic (≤4 KB), opencode reads it too.
   sharedFiles = [
     ./delegation.md
     ./shared.md

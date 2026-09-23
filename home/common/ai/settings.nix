@@ -28,10 +28,8 @@
   settings = {
     theme = "dark-daltonized";
 
-    # `model` and `modelSettings` are app-written preferences (set via
-    # `/model`), never Nix-declared here. `model` must never be added to
-    # dropKeys either: mergeJsonObject keeps undeclared live keys, so
-    # declaring it here would fight the in-app picker on every deploy.
+    # model/modelSettings are app-written (/model); never declare them and never add model to dropKeys,
+    # mergeJsonObject keeps undeclared live keys, so declaring it would fight the picker on every deploy.
 
     telemetry.enabled = false;
     attribution = {
@@ -59,11 +57,9 @@
     env.CLAUDE_CODE_GOAL_CHECKIN_MINUTES = "0";
     # ponytail's SubagentStart hook injects its full ruleset into every subagent
     # unless this regex (unanchored, case-insensitive, on agent_type) narrows it
-    # to the agents that actually write code. dev-lifecycle/implementer/
-    # test-author/test-amender are dead agent types after the rebuild.
+    # to the agents that actually write code.
     env.PONYTAIL_SUBAGENT_MATCHER = "general-purpose|cavecrew-builder";
-    # Distinct inline Read/Grep/Glob targets allowed per main-thread turn
-    # before delegate-nudge.sh denies a further one.
+    # Distinct inline Read/Grep/Glob targets per main-thread turn before delegate-nudge.sh denies.
     env.CLAUDE_RECON_LIMIT = "8";
 
     # https://code.claude.com/docs/en/statusline
@@ -197,10 +193,6 @@
           }
         ];
       }
-      # Hard gate, not a nudge: denies a further distinct inline Read/Grep/Glob
-      # target past CLAUDE_RECON_LIMIT this turn; re-reading an already-counted
-      # target stays free. Subagents are never restricted (agent_id present).
-      # See delegate-nudge.sh.
       {
         matcher = "Read|Grep|Glob";
         hooks = [

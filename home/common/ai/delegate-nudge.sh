@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# PreToolUse(Read|Grep|Glob) hard gate. Denies a further DISTINCT inline recon
-# target once a turn passes CLAUDE_RECON_LIMIT (default 8); re-reading an
-# already-counted target stays free. Turn-boundary logic (subagent bail,
-# prompt_id turn key, counter dir, 2h GC) is shared with force-delegation.sh
-# via lib/turn-key.sh. No `set -e`: every path must degrade to exit 0 (allow).
+# PreToolUse(Read|Grep|Glob): denies a further distinct inline target once a turn passes CLAUDE_RECON_LIMIT; re-reads stay free.
+# Turn logic (subagent bail, prompt_id key, counter dir, GC) is shared with force-delegation.sh via lib/turn-key.sh.
+# No `set -e`: every failure path must exit 0 (allow).
 set -uo pipefail
 
 limit="${CLAUDE_RECON_LIMIT:-8}"

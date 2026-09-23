@@ -106,10 +106,8 @@ in rec {
     then base
     else base + "\n\n" + extra;
 
-  # Copies the declared skill directories from `dir` into ~/.claude/skills at
-  # activation time. Sole caller is home/common/ai/skills/default.nix, which
-  # owns the whole `local/` dir; the reverse "every dir on disk must be
-  # declared" assertion catches drift between the two.
+  # Copies declared skill dirs into ~/.claude/skills at activation. Sole caller: home/common/ai/skills/default.nix;
+  # the reverse assertion (every dir on disk must be declared) catches drift.
   mkLocalSkills = {
     lib,
     dir,
