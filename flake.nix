@@ -12,7 +12,11 @@
 
     nix-homebrew = {
       url = "github:zhaofengli/nix-homebrew";
-      inputs.brew-src.url = "github:Homebrew/brew/6.0.13";
+      # Must match the brew-src ref nix-homebrew pins in its own flake.lock:
+      # the module copies upstream bin/brew's exported-var list verbatim into
+      # the wrapper, while the library keeps the overridden version's startup
+      # contract. A mismatch = KeyError at startup (see docs/ai-lessons.md).
+      inputs.brew-src.url = "github:Homebrew/brew/7.0.4";
     };
 
     # Home manager

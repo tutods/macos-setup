@@ -208,6 +208,17 @@ else
   [ -n "$brew_owner" ] && [ "$brew_owner" != "${USER:-}" ] && brew_as_user=(sudo -u "$brew_owner" -H)
   cleanup_out=$("${brew_as_user[@]+"${brew_as_user[@]}"}" env HOMEBREW_NO_AUTO_UPDATE=1 brew bundle cleanup --file="$pending_brewfile" 2>&1)
   cleanup_rc=$?
+  # A live brew whose wrapper/library generations are mid-transition (e.g. the
+  # brew-src override lagging a nix-homebrew bump) dies with KeyError before
+  # any command runs, and this gate would block the very deploy that heals
+  # it. Retry once with the known shim env; the preview reads installed
+  # packages, which the deploy does not touch, so it stays accurate.
+  if [ "$cleanup_rc" -ne 0 ] && printf '%s\n' "$cleanup_out" | grep -q 'key not found: "HOMEBREW_ORIGINAL_BREW_FILE"'; then
+    cleanup_out=$("${brew_as_user[@]+"${brew_as_user[@]}"}" env HOMEBREW_NO_AUTO_UPDATE=1 \
+      HOMEBREW_ORIGINAL_BREW_FILE="$HOMEBREW_PREFIX/bin/brew" \
+      brew bundle cleanup --file="$pending_brewfile" 2>&1)
+    cleanup_rc=$?
+  fi
   if [ "$cleanup_rc" -eq 0 ]; then
     print_ok "brew: everything installed is in the pending Brewfile, cleanup uninstalls nothing"
   elif printf '%s\n' "$cleanup_out" | grep -q '^Would '; then

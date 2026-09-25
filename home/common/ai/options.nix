@@ -47,13 +47,14 @@
 
     externallyManagedSkills = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = ["orca-cli" "orchestration" "computer-use"];
+      default = ["orca-cli" "orchestration" "computer-use" "synced"];
       description = ''
         Names of skill dirs in ~/.claude/skills NOT managed by this flake
         (installed and updated by external tools, e.g. Orca's own updater).
         `customSkillsReconcile` leaves these alone instead of deleting them as
         unmanaged, and deploy-doctor.sh excludes them from its unmanaged-skill
-        warnings.
+        warnings. `synced` is Claude Code's own skill-sync dir (manifest.json +
+        per-account buckets), written live whenever the app syncs skills.
       '';
     };
 
