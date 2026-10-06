@@ -11,11 +11,19 @@ username="${1:?usage: install-mas-apps.sh <username>}"
 
 [ -x /opt/homebrew/bin/mas ] || exit 0
 
+# Activation runs as root, but the App Store session and the Spotlight index
+# mas reads are per-user: run mas as the target user (mirroring nix-darwin's
+# brew-bundle invocation), letting mas elevate itself via sudo when needed.
+mas=(/opt/homebrew/bin/mas)
+if [ "$(id -u)" -eq 0 ]; then
+  mas=(sudo --user "${username}" --set-home /opt/homebrew/bin/mas)
+fi
+
 echo "↣ App Store apps"
 
 # One snapshot, matched as a variable: `mas list | grep -q` under pipefail can
 # fail via SIGPIPE even when the app IS installed, causing spurious reinstalls.
-installed=$(/opt/homebrew/bin/mas list 2>/dev/null || true)
+installed=$("${mas[@]}" list </dev/null 2>/dev/null || true)
 
 failures=()
 
@@ -23,15 +31,18 @@ failures=()
 while IFS=$'\t' read -r app_id name || [ -n "$app_id" ]; do
   [ -z "$app_id" ] && continue
   # Pure-shell match (no pipe, so no SIGPIPE under pipefail): the id must sit
-  # at the start of a line, followed by a space, mirroring `grep "^id "`.
+  # alone, space-delimited. mas 7 right-aligns ids with a leading space, so
+  # `*" <id> "*` carries the padded lines.
   case "$installed" in
-    "${app_id} "* | *$'\n'"${app_id} "*)
+    "${app_id} "* | *" ${app_id} "* | *$'\n'"${app_id} "*)
       echo "  ✓ ${name} already installed"
       continue
       ;;
   esac
   echo "  ↣ Installing ${name}"
-  if HOME="/Users/${username}" /opt/homebrew/bin/mas install "${app_id}" </dev/null; then
+  # stdin is the manifest, so installs read the terminal instead: mas prompts
+  # there for the sudo password it needs.
+  if "${mas[@]}" install "${app_id}" </dev/tty; then
     echo "  ✓ ${name}"
   else
     echo "  ✗ ${name} failed"
