@@ -6,7 +6,7 @@
 }: let
   # Tier ids; instructions/opencode-delegation.md mirrors them, change both together.
   # Council seats are deliberately one model FAMILY each (Z.ai, DeepSeek,
-  # Moonshot, MiniMax, Alibaba, NVIDIA, OpenAI): a reviewer from the family
+  # Mistral, MiniMax, Alibaba, NVIDIA, OpenAI): a reviewer from the family
   # that wrote an answer inherits its blind spots. Concurrency on the Pro
   # plan is 3, so the 5-seat fan-out runs in 2 waves, accepted.
   # Hidden subagents cost 0 always-on tokens (opencode filters `hidden` out of
@@ -25,7 +25,7 @@
     small = "ollama-cloud/gpt-oss:20b";
     seats = {
       first-principles = "ollama-cloud/deepseek-v4-pro";
-      expansionist = "ollama-cloud/kimi-k3";
+      expansionist = "ollama-cloud/mistral-large-4";
       outsider = "ollama-cloud/minimax-m3";
       executor = "ollama-cloud/qwen3.5:397b";
       contrarian = "ollama-cloud/nemotron-3-ultra";

@@ -24,5 +24,6 @@ in {
     ++ [
       # fast-moving AI CLI, stable lags too far — same rationale as claude-code
       opencodePinned
+      (pkgs.callPackage ./lightroom-cli.nix {})
     ];
 }
