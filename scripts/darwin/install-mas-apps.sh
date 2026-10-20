@@ -25,6 +25,16 @@ echo "↣ App Store apps"
 # fail via SIGPIPE even when the app IS installed, causing spurious reinstalls.
 installed=$("${mas[@]}" list </dev/null 2>/dev/null || true)
 
+# Root activation drops to the user for mas, but the per-user Spotlight query
+# behind `mas list` can still come back empty here while working fine
+# interactively. Blind installs from that state prompt for a password on every
+# deploy for apps already on disk, so warn instead of attempting them.
+if [ -z "$installed" ] && [ "$(id -u)" -eq 0 ]; then
+  echo "  ⚠ mas could not list installed apps from activation; skipping App Store step"
+  echo "warning: install missing App Store apps from the App Store, or run this script by hand as ${username}"
+  exit 0
+fi
+
 failures=()
 
 # `|| [ -n "$app_id" ]` keeps a final TSV line that lacks a trailing newline.
