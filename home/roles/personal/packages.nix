@@ -22,8 +22,9 @@ in {
       qbittorrent
     ])
     ++ [
-      # fast-moving AI CLI, stable lags too far — same rationale as claude-code
+      # fast-moving AI CLIs, stable lags too far — same rationale as claude-code
       opencodePinned
+      pkgsUnstable.codex
       (pkgs.callPackage ./lightroom-cli.nix {})
     ];
 }

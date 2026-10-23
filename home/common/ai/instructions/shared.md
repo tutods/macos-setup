@@ -46,7 +46,7 @@ At most 3 concrete options, recommended first, labeled. One decision per questio
 ## Learned rules
 
 - Nix source is the config: edit it, `./nix.sh`, never hand-edit deployed files.
-- Stack: Claude Code plus opencode on personal. Nothing else.
+- Stack: Claude Code, opencode, and codex on personal. Nothing else.
 - Work lands in the user's tree; worktrees are temporary.
 - Never swap build tooling or framework infra as a side effect.
 - Do it yourself, never another model or API.
