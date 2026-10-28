@@ -35,7 +35,6 @@
   ...
 }: let
   fixFishShell = "${pkgs.bash}/bin/bash ${../scripts/darwin/fix-fish-shell.sh}";
-  installMasApps = "${pkgs.bash}/bin/bash ${../scripts/darwin/install-mas-apps.sh}";
 
   masManifest = pkgs.writeText "mas-apps.tsv" (
     lib.concatStringsSep "\n" (
@@ -75,10 +74,11 @@ in {
         install -d -m 0755 -o "${brewUser}" -g staff "/Users/${brewUser}/.homebrew"
         install -m 0644 -o "${brewUser}" -g staff "${trustManifest}" "${trustFile}"
       fi
-    ''
-    + lib.optionalString (masApps != {}) ''
-      ${installMasApps} "${username}" < "${masManifest}"
     '';
+
+  # nix.sh installs these as the user after switch: from root activation
+  # `mas list` returns a partial list, so installed apps re-prompted for sudo.
+  environment.etc."mas-apps.tsv" = lib.mkIf (masApps != {}) {source = masManifest;};
 
   home-manager = {
     useGlobalPkgs = true;

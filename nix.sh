@@ -52,10 +52,12 @@ stop_spinner() {
 
 # ── Cleanup on interrupt ──────────────────────────────────────────────────────
 _BACKGROUND_PID=""
+_SUDO_KEEPALIVE_PID=""
 
 _cleanup() {
   stop_spinner
   [[ -n "$_BACKGROUND_PID" ]] && kill "$_BACKGROUND_PID" 2>/dev/null || true
+  [[ -n "$_SUDO_KEEPALIVE_PID" ]] && kill "$_SUDO_KEEPALIVE_PID" 2>/dev/null || true
   # The run_cmd temp log would otherwise leak on every Ctrl-C.
   [[ -n "${_CMD_LOG:-}" ]] && rm -f "$_CMD_LOG" 2>/dev/null || true
   # A Ctrl-C inside _tui_select would otherwise leave echo off and autowrap
@@ -510,6 +512,17 @@ clear_hm_backups() {
   return 0
 }
 
+# Runs as the user, never from activation: root's view of `mas list` is partial.
+install_mas_apps() {
+  local manifest=/etc/mas-apps.tsv target_user
+  [[ -f "$manifest" ]] || return 0
+  target_user=$(get_target_user "$1")
+  local as_user=()
+  [[ "$target_user" != "${USER:-}" ]] && as_user=(sudo -u "$target_user")
+  "${as_user[@]+"${as_user[@]}"}" bash ./scripts/darwin/install-mas-apps.sh "$target_user" <"$manifest" ||
+    print_warning "App Store step failed"
+}
+
 # ── Apply ─────────────────────────────────────────────────────────────────────
 apply_config() {
   local config="$1" step="$2"
@@ -541,14 +554,21 @@ apply_config() {
   fi
   echo ""
 
+  # Activation (brew cask upgrades, mas) outlasts sudo's 5-minute ticket.
+  while true; do sudo -n -v 2>/dev/null; sleep 60; done &
+  _SUDO_KEEPALIVE_PID=$!
+
   clear_hm_backups "$config"
 
   local t0=$SECONDS exit_code=0
   run_cmd "Applying ${config}…" "${rebuild_cmd[@]}" || exit_code=$?
+  kill "$_SUDO_KEEPALIVE_PID" 2>/dev/null || true
+  _SUDO_KEEPALIVE_PID=""
 
   if [[ $exit_code -eq 0 ]]; then
     print_success "Applied in $(_fmt_elapsed $(( SECONDS - t0 )))"
     rm -f "$_CMD_LOG"
+    install_mas_apps "$config"
   else
     show_errors "$_CMD_LOG" "Apply"
     rm -f "$_CMD_LOG"

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Installs Mac App Store apps via `mas`. Reads TSV lines "<id>\t<name>" from
-# stdin. Skips apps already installed. Designed to be invoked from a Nix
-# activation script that pipes in a generated TSV manifest.
+# stdin. Skips apps already installed. nix.sh runs it as the user after
+# switch, piping in the /etc/mas-apps.tsv manifest Nix generates.
 #
 # Usage:
-#   install-mas-apps.sh <username> < /nix/store/.../mas-apps.tsv
+#   install-mas-apps.sh <username> < /etc/mas-apps.tsv
 set -euo pipefail
 
 username="${1:?usage: install-mas-apps.sh <username>}"
