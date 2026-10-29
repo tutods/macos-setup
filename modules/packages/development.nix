@@ -17,4 +17,11 @@
     # worktrunk (`wt`) comes from Homebrew, not here: nixpkgs would compile it
     # from Rust source and two of its tests fail in the darwin sandbox.
   ];
+
+  # nixpkgs wraps claude-code with `--set-default CLAUDE_CODE_CERT_STORE
+  # system`, but the native binary cannot read the macOS trust store, so it
+  # is left with no CAs on darwin (nixpkgs#579204, fix PR#579756 pending).
+  # --set-default yields to a preset variable; `bundled,system` is claude's
+  # own default. Drop once the pinned nixpkgs carries the darwin fix.
+  environment.variables.CLAUDE_CODE_CERT_STORE = "bundled,system";
 }
