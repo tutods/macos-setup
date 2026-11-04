@@ -28,7 +28,6 @@
 
     brews = [
       "mas"
-      "antigravity-cli"
       "worktrunk" # `wt`, git-worktree wrapper. Prebuilt bottle, newer than nixpkgs.
     ];
 
