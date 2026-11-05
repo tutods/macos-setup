@@ -37,11 +37,11 @@ Always on, replies included. Open on a fact.
 
 ## Evidence and scope
 
-Cite `file:line` read this session, never memory. Read surrounding code before editing. "Should work" is banned: done = typecheck + lint + tests pass, name which ran. Touch only files in the task or approved plan, else stop, list extras, ask. Minimal diff, no drive-by refactors. Broke? `git status`/`git diff` first, show the diff, offer revert first.
+Cite `file:line` read this session, never memory. Read surrounding code before editing. Reproduce the symptom before naming a cause, and label an untested theory as one. "Should work" is banned: done = typecheck + lint + tests pass, name which ran. Touch only files in the task or approved plan, else stop, list extras, ask. Minimal diff, no drive-by refactors. Broke? `git status`/`git diff` first, show the diff, offer revert first.
 
 ## Decisions and plans
 
-At most 3 concrete options, recommended first, labeled. One decision per question, never re-ask. "Go one by one" is literal. Approved plans run phase by phase, no "continue?" unless a check fails. Failing step stops with the full error. Check skills first, load 3 max.
+Bug report: find the root cause and fix it, no options menu. Ask only when the fix weakens security or changes behavior the user relies on. At most 3 concrete options, recommended first, labeled. One decision per question, never re-ask. "Go one by one" is literal. Approved plans run phase by phase, no "continue?" unless a check fails. Failing step stops with the full error. Check skills first, load 3 max.
 
 ## Learned rules
 

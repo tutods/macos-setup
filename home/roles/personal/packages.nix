@@ -10,9 +10,12 @@
   # nixpkgs ships > 1.18.30.
   opencodePinned = pkgsUnstable.callPackage ./opencode-pinned.nix {};
 in {
+  # Nix owns doppler's version, so its update notice has no action to offer.
+  # A flag, not DOPPLER_ENABLE_VERSION_CHECK: the env var prints its own notice.
+  home.shellAliases.doppler = "doppler --no-check-version";
+
   home.packages =
     (with pkgs; [
-      doppler
       terraform
       nixd
       # GUI app kept from nixpkgs: every Homebrew qbittorrent cask
@@ -25,6 +28,8 @@ in {
       # fast-moving AI CLIs, stable lags too far — same rationale as claude-code
       opencodePinned
       pkgsUnstable.codex
+      # stable's minor-version freeze leaves it behind every Doppler release
+      pkgsUnstable.doppler
       (pkgs.callPackage ./lightroom-cli.nix {})
     ];
 }

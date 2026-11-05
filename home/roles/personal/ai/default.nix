@@ -3,6 +3,19 @@
   lib,
   ...
 }: {
+  imports = [
+    (aiLib.mkLocalSkills {
+      inherit lib;
+      dir = ./skills;
+      names = ["wp-live-site"];
+    })
+    (aiLib.mkLocalAgents {
+      inherit lib;
+      dir = ./agents;
+      names = ["wp-site"];
+    })
+  ];
+
   home.ai.extraInstructions = builtins.readFile ./instructions.md;
 
   # Merges into ~/.claude.json mcpServers, which Claude Code also writes; Nix adds, never removes.

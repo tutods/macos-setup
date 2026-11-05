@@ -133,7 +133,7 @@ in rec {
     # repo does not own, so every copy must land first.
     # Every mutation goes through Home Manager's `run` so a dry-run
     # activation previews the commands instead of mutating ~/.claude/skills.
-    home.activation.localSkills = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
+    home.activation."localSkills-${lib.concatStringsSep "-" names}" = lib.hm.dag.entryBetween ["customSkillsReconcile"] ["writeBoundary" "linkGeneration"] ''
       dest="$HOME/.claude/skills"
       run mkdir -p "$dest"
       ${lib.concatMapStringsSep "\n" (name: ''
