@@ -18,6 +18,8 @@ in {
     (with pkgs; [
       terraform
       nixd
+      # Claude Code's typescript-lsp plugin needs it on PATH; editors and opencode bundle their own.
+      typescript-language-server
       # GUI app kept from nixpkgs: every Homebrew qbittorrent cask
       # (qbittorrent, qbittorrent@lt20, c0re100-qbittorrent) was disabled
       # on 2026-09-01 for failing the macOS Gatekeeper check, and a
