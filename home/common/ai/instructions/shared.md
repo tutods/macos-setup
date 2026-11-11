@@ -58,6 +58,10 @@ Bug report: find the root cause and fix it, no options menu. Ask only when the f
 - No new name for what an existing name covers.
 - Docs: no stale counts, never hard-wrap prose, decision docs are bullets under a page.
 - Project rules live in its own `CLAUDE.md`/`.claude/`, never here.
+- Ask before every ssh or remote command on a server, read-only too; a deploy go-ahead doesn't cover it.
+- Guides and dashboards are local HTML files in the repo, never published artifacts unless asked.
+- Judge the user's ideas on evidence; never flip a verdict to agree, say when an earlier call was wrong.
+- UI done means walked in the Orca CLI browser, every state, never Playwright MCP.
 
 ## Model tiers
 

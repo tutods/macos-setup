@@ -37,9 +37,9 @@
       pr = "";
     };
 
-    # On: session-learned facts. Rules stay in ~/.claude/rules/, one fact one home.
+    # Off: the Obsidian vault is the only learned-fact store; memory duplicated it into every session.
     # https://code.claude.com/docs/en/memory
-    autoMemoryEnabled = true;
+    autoMemoryEnabled = false;
 
     # No autoCompactWindow set: model-tuned default, see docs/ai-lessons.md.
     autoCompactEnabled = true;

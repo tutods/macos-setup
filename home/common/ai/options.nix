@@ -47,7 +47,7 @@
 
     externallyManagedSkills = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = ["orca-cli" "orchestration" "computer-use" "synced"];
+      default = ["orca-cli" "orchestration" "orca-computer-use" "synced"];
       description = ''
         Names of skill dirs in ~/.claude/skills NOT managed by this flake
         (installed and updated by external tools, e.g. Orca's own updater).
