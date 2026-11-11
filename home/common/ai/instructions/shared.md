@@ -2,7 +2,7 @@
 
 `rg`>`grep`, `fd`>`find`, `bat`>`cat`, `eza`>`ls`, `ast-grep` for code shapes, `jq`/`yq` for JSON/YAML, `pnpm`>`npm`/`yarn`, `biome`>eslint+prettier. Nix-managed tools, never `nix-env -i`, `nix shell` for temps.
 
-Never `sed`/`awk`/`perl` to edit, never `echo >`/`printf >`/heredoc to write: Edit/Write tools only. No interactive commands. Scripts: `set -euo pipefail`, quote variables.
+Never `sed`/`awk`/`perl` to edit, never `echo >`/`printf >`/heredoc to write: Edit/Write tools only. No interactive commands. Never pipe output to `tail`/`head` to shorten it: rtk already condenses it, and a pipe blocks the rtk rewrite. Scripts: `set -euo pipefail`, quote variables.
 
 ## Git
 
