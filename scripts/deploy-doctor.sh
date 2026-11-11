@@ -139,13 +139,26 @@ SETTINGS="$TARGET_HOME/.claude/settings.json"
 if [ -f "$SETTINGS" ]; then
   # A corrupt settings.json would print green "nothing drops out" for every
   # section below — a false all-clear from the tool meant to catch deletions.
-  # An unreadable file (another user's 0600 home) is not a corrupt one: say
-  # which, since jq's own "Permission denied" is otherwise swallowed.
-  [ -r "$SETTINGS" ] || {
-    echo "deploy-doctor: $SETTINGS is not readable by $(id -un) — run the deploy as the owning user; aborting instead of showing a bogus all-clear" >&2
-    exit 3
-  }
+  # On the split-account work machine the target user's 0600 settings.json is
+  # unreadable from the admin account the deploy runs as; read it through
+  # sudo -u (as nix.sh does) into a temp copy. Anything else unreadable is
+  # not a corrupt file, so say so instead of swallowing jq's error.
+  settings_copy=""
+  if [ ! -r "$SETTINGS" ]; then
+    settings_copy=$(mktemp "${TMPDIR:-/tmp}/deploy-doctor-settings.XXXXXX") || {
+      echo "deploy-doctor: mktemp failed — cannot read $SETTINGS" >&2
+      exit 3
+    }
+    if [ "$USER_NAME" != "${USER:-}" ] && sudo -u "$USER_NAME" cat "$SETTINGS" >"$settings_copy" 2>/dev/null; then
+      SETTINGS="$settings_copy"
+    else
+      rm -f "$settings_copy"
+      echo "deploy-doctor: $SETTINGS is not readable by $(id -un) (and sudo -u $USER_NAME failed) — aborting instead of showing a bogus all-clear" >&2
+      exit 3
+    fi
+  fi
   jq empty "$SETTINGS" 2>/dev/null || {
+    [ -n "$settings_copy" ] && rm -f "$settings_copy"
     echo "deploy-doctor: $SETTINGS is not valid JSON — aborting instead of showing a bogus all-clear" >&2
     exit 3
   }
@@ -183,6 +196,7 @@ if [ -f "$SETTINGS" ]; then
   done < <(jq -r --argjson keep "$declared_allows" \
     '.permissions.allow // [] | .[] | select(. as $a | $keep | index($a) | not)' "$SETTINGS" 2>/dev/null)
   [ "$allow_dropped" -eq 0 ] && print_ok "no unmanaged permission allows"
+  [ -n "$settings_copy" ] && rm -f "$settings_copy"
 else
   print_ok "no live settings.json yet"
 fi
