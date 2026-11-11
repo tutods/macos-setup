@@ -139,6 +139,12 @@ SETTINGS="$TARGET_HOME/.claude/settings.json"
 if [ -f "$SETTINGS" ]; then
   # A corrupt settings.json would print green "nothing drops out" for every
   # section below — a false all-clear from the tool meant to catch deletions.
+  # An unreadable file (another user's 0600 home) is not a corrupt one: say
+  # which, since jq's own "Permission denied" is otherwise swallowed.
+  [ -r "$SETTINGS" ] || {
+    echo "deploy-doctor: $SETTINGS is not readable by $(id -un) — run the deploy as the owning user; aborting instead of showing a bogus all-clear" >&2
+    exit 3
+  }
   jq empty "$SETTINGS" 2>/dev/null || {
     echo "deploy-doctor: $SETTINGS is not valid JSON — aborting instead of showing a bogus all-clear" >&2
     exit 3
