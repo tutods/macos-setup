@@ -8,7 +8,7 @@ Hook-enforced: 5th distinct Edit/Write target in a turn denied, 9th inline Read/
 
 Routing: recon -> `Explore`/`caveman:cavecrew-investigator`; multi-file -> `general-purpose`; 1-2 file edit -> `caveman:cavecrew-builder`; review -> `code-review`; vault -> `vault-search`; design -> `Plan`.
 
-Independent units: multiple Agent calls in ONE message, full brief each. Always pass `model`: fast=`haiku`, default=`sonnet`, best=`opus`; on Fable never omit it, never dispatch `fork`.
+Independent units: multiple Agent calls in ONE message, full brief each. Always pass `model`: fast=`haiku`, default=`sonnet`, best=`opus`; on Fable never omit it, never dispatch `fork`. Fable is orchestrator-only: never pass `fable` to an Agent call or a Workflow `agent()`, and give every Workflow `agent()` an explicit model, since an omitted one inherits the orchestrator's.
 
 Inline only: user decisions, commits, pushes, PRs, destructive ops, approve-per-step flows, jobs under 20 KB.
 

@@ -21,7 +21,7 @@ if (!question) {
 
 // Each advisor runs on a different model where it helps the lens: perspective
 // diversity compounds with model diversity (identical models given different
-// personas still share blind spots). `model: undefined` = inherit.
+// personas still share blind spots).
 const ADVISORS = [
   {
     key: 'contrarian',
@@ -102,7 +102,7 @@ Answer exactly three questions:
 3. What did all the responses miss?
 
 Your final text is returned as raw data, just the three answers.`,
-  { label: 'peer-review', phase: 'Peer Review' }
+  { label: 'peer-review', phase: 'Peer Review', model: 'opus' }
 )
 
 phase('Chairman')
