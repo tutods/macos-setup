@@ -39,7 +39,6 @@ Load when a word is in doubt. Where pt-PT accepts two words, the first is the sa
 | media | média, meios de comunicação | mídia |
 | team | equipa | equipe, time |
 | contact us | contacte-nos | entre em contato, fale conosco |
-| shopping cart | carrinho de compras | carrinho |
 | order (goods) | encomenda | pedido (fine in pt-PT for a request) |
 
 ## Phone, transport, places
@@ -74,7 +73,7 @@ Load when a word is in doubt. Where pt-PT accepts two words, the first is the sa
 | fridge | frigorífico | geladeira |
 | cup | chávena | xícara |
 | ground floor | rés-do-chão | térreo |
-| rent (payment) / to rent | renda / arrendar | aluguel / alugar |
+| rent (payment) / rental | renda / aluguer (cars, equipment) | aluguel |
 | plumber | canalizador | encanador |
 | lawn | relva | grama |
 | breakfast | pequeno-almoço | café da manhã |
