@@ -88,10 +88,15 @@ in {
       src = "${gh "vercel-labs" "agent-desktop" "54855b6225aec00da4ac65e2d0362fd41cd9fcb3" "sha256-1abZukVr7TXRfGCi+2meQentLXTDJw7snT5ktKpSD4M="}/skills";
       names = ["agent-desktop"];
     })
+    (aiLib.mkFetchedSkills {
+      inherit lib;
+      src = "${gh "getsentry" "skills" "e94f22214528d69899d09c627b3315ddc3544816" "sha256-1oCqfLcNIH/BrxEw6fE7kcsyFpRSZFi7G44VuXccbeA="}/skills";
+      names = ["gha-security-review"];
+    })
     (aiLib.mkLocalSkills {
       inherit lib;
       dir = ./skills;
-      names = ["wp-live-site"];
+      names = ["pt-pt-copy" "wp-live-site"];
     })
     (aiLib.mkLocalAgents {
       inherit lib;
