@@ -6,6 +6,12 @@
       description = "Extra AI instructions appended to shared instructions (role-specific)";
     };
 
+    claudeEnv = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {};
+      description = "Extra entries merged into the env block of Claude's settings.json (role-specific), for GUI-launched sessions that skip the shell profile.";
+    };
+
     vaultFolders = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = ["Conventions" "Lessons" "Decisions" "Process" "Projects" "Clients" "Notes"];
@@ -42,6 +48,16 @@
         Names of skills copied into ~/.claude/skills from in-repo sources.
         Populated by `lib/ai.nix:mkLocalSkills`; skills/default.nix reads it
         to report directories in ~/.claude/skills that this repo doesn't own.
+      '';
+    };
+
+    codexSkillSources = lib.mkOption {
+      type = lib.types.attrsOf lib.types.path;
+      default = {};
+      internal = true;
+      description = ''
+        Skill name to source dir, filled by `lib/ai.nix:installSkills` minus
+        `claudeOnly` entries; read only by the personal Codex sync.
       '';
     };
 

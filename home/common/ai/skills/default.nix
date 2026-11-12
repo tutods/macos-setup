@@ -10,6 +10,7 @@
       inherit lib;
       dir = ./local;
       names = ["llm-council" "obsidian-vault" "unslop"];
+      claudeOnly = ["llm-council"];
     })
   ];
 

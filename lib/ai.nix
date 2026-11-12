@@ -106,26 +106,23 @@ in rec {
     then base
     else base + "\n\n" + extra;
 
-  # Copies declared skill dirs into ~/.claude/skills at activation. Sole caller: home/common/ai/skills/default.nix;
-  # the reverse assertion (every dir on disk must be declared) catches drift.
-  mkLocalSkills = {
+  # Copies declared skill dirs into ~/.claude/skills at activation and records
+  # the non-claudeOnly ones in home.ai.codexSkillSources for the personal Codex sync.
+  installSkills = {
     lib,
     dir,
     names,
+    claudeOnly ? [],
   }: {
     home.ai.customSkills = names;
+    home.ai.codexSkillSources = lib.genAttrs (lib.subtractLists claudeOnly names) (n: "${dir}/${n}");
 
     assertions =
-      (map (name: {
-          assertion = builtins.pathExists (dir + "/${name}/SKILL.md");
-          message = "mkLocalSkills: '${name}' is in names but ${toString dir}/${name}/SKILL.md is missing";
-        })
-        names)
-      ++ (lib.mapAttrsToList (entry: kind: {
-          assertion = kind != "directory" || builtins.elem entry names;
-          message = "mkLocalSkills: ${toString dir}/${entry} exists but is not in the names list";
-        })
-        (builtins.readDir dir));
+      map (n: {
+        assertion = builtins.elem n names;
+        message = "installSkills: claudeOnly entry '${n}' is not in names (${toString dir})";
+      })
+      claudeOnly;
 
     # After linkGeneration: Home Manager has torn down the previous generation's
     # symlinks by then, and copying earlier would have them removed. Before
@@ -147,6 +144,47 @@ in rec {
       echo "↣ Custom skills: ${toString (builtins.length names)} installed"
     '';
   };
+
+  # Callers: home/common/ai/skills/default.nix and the personal role's ai/default.nix;
+  # the reverse assertion (every dir on disk must be declared) catches drift.
+  mkLocalSkills = {
+    lib,
+    dir,
+    names,
+    claudeOnly ? [],
+  }: {
+    imports = [(installSkills {inherit lib dir names claudeOnly;})];
+
+    assertions =
+      (map (name: {
+          assertion = builtins.pathExists (dir + "/${name}/SKILL.md");
+          message = "mkLocalSkills: '${name}' is in names but ${toString dir}/${name}/SKILL.md is missing";
+        })
+        names)
+      ++ (lib.mapAttrsToList (entry: kind: {
+          assertion = kind != "directory" || builtins.elem entry names;
+          message = "mkLocalSkills: ${toString dir}/${entry} exists but is not in the names list";
+        })
+        (builtins.readDir dir));
+  };
+
+  mkFetchedSkills = {
+    lib,
+    src,
+    names,
+    claudeOnly ? [],
+  }: let
+    dir = pkgs.runCommand "fetched-skills-${lib.concatStringsSep "-" names}" {} ''
+      mkdir -p $out
+      ${lib.concatMapStringsSep "\n" (n: ''
+          test -f ${src}/${n}/SKILL.md || { echo "mkFetchedSkills: ${n}/SKILL.md missing in ${src}" >&2; exit 1; }
+          cp -R ${src}/${n} $out/${n}
+        '')
+        names}
+    '';
+  in
+    # No readDir/pathExists on fetched content: that would be import-from-derivation; the check runs at build time.
+    installSkills {inherit lib dir names claudeOnly;};
 
   mkLocalAgents = {
     lib,
@@ -203,6 +241,7 @@ in rec {
     key,
     value,
     extraMerge ? null,
+    mode ? "0644",
   }: let
     mergeClause =
       if extraMerge == null
@@ -222,7 +261,7 @@ in rec {
     else
       ${jqBin} -n --slurpfile vw ${valueFile} '($vw[0]) as $v | {} | ${mergeClause}' > "$merged"
     fi
-    run install -m 0644 "$merged" "$target"
+    run install -m ${mode} "$merged" "$target"
     rm -f "$merged"
   '';
 

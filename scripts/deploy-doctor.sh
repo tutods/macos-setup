@@ -3,6 +3,10 @@
 # Code state before `darwin-rebuild switch` runs, so nothing is eaten silently.
 #
 # The destructive places, all previewed below except the last:
+#   - home.activation.codexSkills (personal only) replaces its Codex skill
+#     copies in ~/.agents/skills and deletes ones it owned (per
+#     ~/.agents/.dotfiles-managed-skills) that are no longer declared; a
+#     declared name already present but unowned is skipped, not overwritten.
 #   - customSkillsReconcile deletes any undeclared entry in ~/.claude/skills,
 #     directory or symlink.
 #   - enabledPlugins is rewritten whole: every plugin not in home.ai.plugins
@@ -99,6 +103,8 @@ if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
     customSkills = hm.home.ai.customSkills;
     externallyManagedSkills = hm.home.ai.externallyManagedSkills;
     plugins = hm.home.ai.plugins;
+    codexSkills = builtins.attrNames hm.home.ai.codexSkillSources;
+    codexSync = hm.home.activation ? codexSkills;
     brewfile = cfg.homebrew.brewfile or null;
     brewOwner = cfg.homebrew.user or null;
   }" 2>/dev/null) || [ -z "$doctor_json" ]; then
@@ -108,6 +114,7 @@ fi
 skills_json=$(printf '%s' "$doctor_json" | jq -c '.customSkills')
 extskills_json=$(printf '%s' "$doctor_json" | jq -c '.externallyManagedSkills')
 plugins_json=$(printf '%s' "$doctor_json" | jq -c '.plugins')
+codex_sync=$(printf '%s' "$doctor_json" | jq -r '.codexSync')
 brewfile=$(printf '%s' "$doctor_json" | jq -r '.brewfile // empty')
 brew_owner=$(printf '%s' "$doctor_json" | jq -r '.brewOwner // empty')
 
@@ -199,6 +206,37 @@ if [ -f "$SETTINGS" ]; then
   [ -n "$settings_copy" ] && rm -f "$settings_copy"
 else
   print_ok "no live settings.json yet"
+fi
+
+# ── 5. Codex skills (personal machine only) ─────────────────────────────────
+# home.activation.codexSkills owns only the names in ~/.agents/.dotfiles-managed-skills:
+# it deletes owned names no longer declared, and skips declared names that
+# exist there but are not owned (foreign Orca / npx skills installs).
+if [ "$codex_sync" = "true" ]; then
+  CODEX_DIR="$TARGET_HOME/.agents/skills"
+  CODEX_MANIFEST="$TARGET_HOME/.agents/.dotfiles-managed-skills"
+  codex_json=$(printf '%s' "$doctor_json" | jq -c '.codexSkills')
+  codex_flagged=0
+  declare -a owned_skills
+  [ -f "$CODEX_MANIFEST" ] && while IFS= read -r s; do [ -n "$s" ] && owned_skills+=("$s"); done <"$CODEX_MANIFEST"
+  for s in "${owned_skills[@]-}"; do
+    [ -z "$s" ] && continue
+    if ! printf '%s' "$codex_json" | jq -e --arg n "$s" 'index($n)' >/dev/null; then
+      print_del "codex skill $s  ${DIM}(was Nix-managed in ~/.agents/skills, no longer declared)${NC}"
+      codex_flagged=$((codex_flagged+1))
+    fi
+  done
+  while IFS= read -r s; do
+    [ -z "$s" ] && continue
+    [ -e "$CODEX_DIR/$s" ] || [ -L "$CODEX_DIR/$s" ] || continue
+    owned=0
+    for o in "${owned_skills[@]-}"; do [ "$o" = "$s" ] && { owned=1; break; }; done
+    if [ "$owned" -eq 0 ]; then
+      print_warn "codex skill $s exists in ~/.agents/skills but is not Nix-managed  ${DIM}(deploy skips it)${NC}"
+      codex_flagged=$((codex_flagged+1))
+    fi
+  done < <(printf '%s' "$codex_json" | jq -r '.[]')
+  [ "$codex_flagged" -eq 0 ] && print_ok "codex skills: nothing to delete or skip"
 fi
 
 # ── 6. brew formulae/casks/taps the cleanup will uninstall ───────────────────

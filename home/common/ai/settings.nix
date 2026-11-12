@@ -38,6 +38,7 @@
     };
 
     # Off: the Obsidian vault is the only learned-fact store; memory duplicated it into every session.
+    # claude-mem (personal trial) is automatic episodic recall only; rules, decisions and lessons stay in the vault.
     # https://code.claude.com/docs/en/memory
     autoMemoryEnabled = false;
 
@@ -332,7 +333,7 @@ in {
   home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] (
     aiLib.mergeJsonObject {
       file = "$HOME/.claude/settings.json";
-      value = settings;
+      value = lib.recursiveUpdate settings {env = config.home.ai.claudeEnv;};
       # Orca (github.com/.../orca) appends these; nothing else may persist a hook.
       keepHookEvents = [
         "Stop"

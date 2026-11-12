@@ -6,4 +6,6 @@
     ./casks/fonts.nix
     ./casks/utils.nix
   ];
+
+  homebrew.brews = ["agent-desktop"];
 }
