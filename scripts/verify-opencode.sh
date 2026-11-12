@@ -25,7 +25,7 @@ fi
 if command -v rtk >/dev/null 2>&1; then
   ok "rtk $(rtk --version 2>/dev/null | head -1)"
 else
-  fail_ "rtk not on PATH (rtk-rewrite and opencode-parity both degrade silently)"
+  fail_ "rtk not on PATH (the Claude rtk hook errors and opencode-parity degrades silently)"
 fi
 
 section "opencode.json"

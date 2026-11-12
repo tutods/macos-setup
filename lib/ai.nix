@@ -71,7 +71,7 @@ in rec {
   # literal command text), see the comments at each rendering site.
   secretReaders = ["cat" "bat" "less" "head" "tail" "base64"];
 
-  # rtk subcommands that read content: rtk-rewrite turns `cat ~/.ssh/id_ed25519`
+  # rtk subcommands that read content: the rtk hook turns `cat ~/.ssh/id_ed25519`
   # into `rtk read ~/.ssh/id_ed25519` before any rule sees it, so the plain
   # reader rows alone stop nothing once rtk is on PATH. Two-word prefixes
   # ("rtk read", never bare "rtk"): a bare "rtk" rule would blanket-match

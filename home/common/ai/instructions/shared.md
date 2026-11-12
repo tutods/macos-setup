@@ -66,3 +66,7 @@ Bug report: find the root cause and fix it, no options menu. Ask only when the f
 ## Model tiers
 
 Least powerful tier that fits. fast: 1-2 files, mechanical. default: multi-file, integration. best: architecture, design review, hard reasoning.
+
+## Command output
+
+Bash output is condensed by rtk: every signal kept, noise dropped. Treat it as the complete result and run commands normally. A truncated result names its recovery path in its own output. Re-run as `rtk bypass <cmd>` only when the result is unusable: empty when output was clearly expected, contradicting its exit code, or garbled.
