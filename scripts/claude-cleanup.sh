@@ -30,10 +30,18 @@ done
 [ -f "$registry" ] || { echo "claude-cleanup: no plugin registry at $registry, nothing to do"; exit 0; }
 
 settings_files=("$claude_dir/settings.json")
-for f in "$dev_dir"/*/.claude/settings.json "$dev_dir"/*/.claude/settings.local.json \
-  "$HOME"/orca/workspaces/*/*/.claude/settings.json "$HOME"/orca/workspaces/*/*/.claude/settings.local.json; do
-  [ -f "$f" ] && settings_files+=("$f")
-done
+while IFS= read -r f; do
+  [ -n "$f" ] && settings_files+=("$f")
+done < <(
+  {
+    find "$dev_dir" -maxdepth 5 \( -name node_modules -o -name .git \) -prune -o \
+      -type f \( -name settings.json -o -name settings.local.json \) -path '*/.claude/*' -print 2>/dev/null
+    find "$HOME/orca/workspaces" -maxdepth 4 -type f \( -name settings.json -o -name settings.local.json \) -path '*/.claude/*' -print 2>/dev/null
+    jq -r '.plugins // . | .[] | .[] | .projectPath // empty' "$registry" | sort -u | while IFS= read -r d; do
+      for n in settings.json settings.local.json; do [ -f "$d/.claude/$n" ] && printf '%s\n' "$d/.claude/$n"; done
+    done
+  } | sort -u
+)
 
 keep_plugins=()
 while IFS= read -r p; do
