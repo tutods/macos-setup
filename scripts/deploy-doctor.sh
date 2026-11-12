@@ -175,7 +175,7 @@ if [ -f "$SETTINGS" ]; then
   # Sanctioned = events the Nix settings declare (grep: settings.nix is Nix,
   # not JSON) + the keepHookEvents literal from settings.nix.
   sanctioned=$( { grep -o 'hooks\.[A-Za-z]\+' home/common/ai/settings.nix 2>/dev/null | cut -d. -f2
-                  grep -o '"[A-Za-z]*"' home/common/ai/settings.nix 2>/dev/null | grep -E '"(Stop|StopFailure|SubagentStart|SubagentStop|TeammateIdle|PostToolUseFailure|PermissionRequest|PostCompact)"' | tr -d '"'; } \
+                  sed -n '/keepHookEvents = \[/,/\];/p' home/common/ai/settings.nix 2>/dev/null | grep -o '"[A-Za-z]*"' | tr -d '"'; } \
                 | sort -u | jq -Rsc 'split("\n") | map(select(length>0))' )
   hooks_dropped=0
   while IFS= read -r ev; do

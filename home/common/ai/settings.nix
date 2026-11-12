@@ -17,7 +17,7 @@
     lib.concatMap (aiLib.secretPrefixSpellings config.home.homeDirectory)
     aiLib.secretPathFamilies;
   # Same paths as the reader denies below, in rtk's reader-subcommand
-  # forms: rtk-rewrite.sh turns `cat ~/.ssh/id_ed25519` into
+  # forms: the rtk hook turns `cat ~/.ssh/id_ed25519` into
   # `rtk read ~/.ssh/id_ed25519` before any allow/deny rule sees it, so the
   # cat form alone stops nothing once rtk is on PATH.
   rtkSecretDenies =
@@ -179,21 +179,14 @@
           }
         ];
       }
-      # RTK auto-rewrite: rewrites commands through rtk for token-cheap output.
-      # Own matcher group (not appended to the attribution hook above) so a
-      # future removal only touches this group, never the attribution hook.
-      # rtk-rewrite.sh is a defensive wrapper: it resolves the rtk binary and
-      # exits 0 (silent passthrough) when rtk (now Nix-provided, see
-      # modules/packages/development.nix) is not on PATH, so a machine without
-      # it loses only the savings, never the session. Deny from the
-      # attribution hook still wins over any rewrite; both hooks run in
-      # parallel. See docs/ai-lessons.md for the revisit decision.
+      # rtk (github.com/rtk-ai/rtk) rewrites the command to its token-compressed form.
+      # Must stay the literal "rtk hook claude": rtk verify/discover only recognise that spelling.
       {
         matcher = "Bash";
         hooks = [
           {
             type = "command";
-            command = "\"$HOME/.claude/hooks/rtk-rewrite.sh\"";
+            command = "rtk hook claude";
             timeout = 10;
             statusMessage = "Rewriting command through rtk";
           }
@@ -331,10 +324,6 @@ in {
     source = ./biome-fix.sh;
     force = true;
   };
-  home.file.".claude/hooks/rtk-rewrite.sh" = {
-    source = ./rtk-rewrite.sh;
-    force = true;
-  };
 
   # Merge, not overwrite: Claude Code writes its own keys here (push-notification
   # toggles) and Orca appends its hook events. Nix owns the keys it declares;
@@ -354,6 +343,12 @@ in {
         "PostToolUseFailure"
         "PermissionRequest"
         "PostCompact"
+        "SessionStart"
+        "SessionEnd"
+        "UserPromptSubmit"
+        "PostToolBatch"
+        "Elicitation"
+        "ElicitationResult"
       ];
       # Deliberately undeclared above so Claude Code uses its model-tuned
       # default (the comment on autoCompactEnabled explains why). Without this
