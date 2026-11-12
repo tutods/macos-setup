@@ -38,7 +38,6 @@
     };
 
     # Off: the Obsidian vault is the only learned-fact store; memory duplicated it into every session.
-    # claude-mem (personal trial) is automatic episodic recall only; rules, decisions and lessons stay in the vault.
     # https://code.claude.com/docs/en/memory
     autoMemoryEnabled = false;
 

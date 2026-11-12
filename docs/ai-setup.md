@@ -67,12 +67,6 @@ After the first deploy, run these once (pruning defaults to `auto`, which could 
 
 Exit: `te toolprune restore` in each repo it pruned, drop the marketplace, plugin and `TE_PYTHON` entries, deploy, `./scripts/claude-cleanup.sh --apply`, then `rm -rf ~/.tokeneconomizer`.
 
-Personal machine only: a recall-only trial of `claude-mem@thedotmack` (`thedotmack/claude-mem`, pinned sha) in `home/roles/personal/ai/default.nix`. It records sessions through its own plugin hooks and injects recent observations at session start; the Obsidian vault stays the only store for rules, decisions and lessons. The `claudeMem` activation merges the declared keys into `~/.claude-mem/settings.json` (flat `CLAUDE_MEM_*` keys, mode 0600) and writes `enabled: false` into `~/.claude-mem/telemetry.json`; `DO_NOT_TRACK=1` is set too. The settings pin the version (no auto-update), run the observer on Haiku through the subscription with no quota fallback, turn off Chroma, transcripts, Telegram, work state, deliverables, the file-read gate and the injected memory instructions, exclude `~/Obsidian`, and disable every bundled skill except the four claude-mem reads at runtime. Keys Nix does not declare are kept.
-
-The first session is a warm-up: the plugin runs `bun install` in its plugin cache and compiles its launcher to `~/.local/bin/claude-mem`, which needs Bun 1.4.1 or newer on macOS, so `pkgsUnstable.bun` is in `home/roles/personal/packages.nix`. Costs: a worker daemon on `127.0.0.1`, Haiku observer calls billed to the plan's usage, and npm dependencies installed at runtime outside Nix.
-
-Exit: drop the marketplace, plugin, `DO_NOT_TRACK`, `claudeMem` activation and `bun` entries, deploy, run `claude-mem stop`, `rm -rf ~/.claude-mem ~/.local/bin/claude-mem`, then `./scripts/claude-cleanup.sh --apply`.
-
 To find which plugin ships a skill:
 
 ```bash

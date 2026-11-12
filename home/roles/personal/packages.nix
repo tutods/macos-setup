@@ -32,8 +32,6 @@ in {
       pkgsUnstable.codex
       # stable's minor-version freeze leaves it behind every Doppler release
       pkgsUnstable.doppler
-      # claude-mem's darwin launcher needs bun >= 1.4.1; stable ships 1.3.x
-      pkgsUnstable.bun
       (pkgs.callPackage ./lightroom-cli.nix {})
       (pkgs.callPackage ./skillspector.nix {})
     ];

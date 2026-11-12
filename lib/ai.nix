@@ -241,7 +241,6 @@ in rec {
     key,
     value,
     extraMerge ? null,
-    mode ? "0644",
   }: let
     mergeClause =
       if extraMerge == null
@@ -261,7 +260,7 @@ in rec {
     else
       ${jqBin} -n --slurpfile vw ${valueFile} '($vw[0]) as $v | {} | ${mergeClause}' > "$merged"
     fi
-    run install -m ${mode} "$merged" "$target"
+    run install -m 0644 "$merged" "$target"
     rm -f "$merged"
   '';
 

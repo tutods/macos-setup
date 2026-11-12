@@ -7,7 +7,7 @@ description: Search, read, and write durable notes in the Obsidian vault at $HOM
 
 The vault lives at `$HOME/Obsidian`, resolve `$HOME` at run time, never hardcode `/Users/<name>`.
 
-This vault is the durable home for how work happens here: conventions, decisions, lessons, process. Auto-memory is off, so the vault is the only durable store for anything learned in a session, and only this skill writes it. The personal machine's claude-mem trial is automatic episodic recall only, never a place for rules, decisions or lessons. A rule that must hold without a lookup goes as one line in the global "Learned rules" instead. Two triggers:
+This vault is the durable home for how work happens here: conventions, decisions, lessons, process. Auto-memory is off, so the vault is the only durable store for anything learned in a session, and only this skill writes it. A rule that must hold without a lookup goes as one line in the global "Learned rules" instead. Two triggers:
 
 - **Explicit**: the user asks to remember/save/look something up.
 - **Proactive**: a corrected mistake, an approved decision, a standing convention, or a completed deploy/handoff. No need to be asked.

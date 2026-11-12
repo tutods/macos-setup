@@ -109,12 +109,10 @@ in {
 
   home.ai.marketplaces = {
     tokeneconomizer = "microsoft/TokenEconomizer@0566b6036749326b865e0ce073cf894f198b4886";
-    thedotmack = "thedotmack/claude-mem@c4a9f5725f420bf9c6e866cdd3b94bd36498af09";
   };
 
   home.ai.plugins = [
     "tokeneconomizer@tokeneconomizer" # trial, see docs/ai-setup.md
-    "claude-mem@thedotmack" # trial
     "context7@claude-plugins-official"
   ];
 
@@ -122,81 +120,7 @@ in {
 
   home.sessionVariables = {
     TE_PYTHON = "${pkgs.python3}/bin/python3";
-    DO_NOT_TRACK = "1";
   };
-
-  # 0600: claude-mem keeps provider keys and sync tokens in settings.json.
-  home.activation.claudeMem = lib.hm.dag.entryAfter ["writeBoundary"] (
-    aiLib.mergeJsonKey {
-      file = "$HOME/.claude-mem/settings.json";
-      key = "claudeMemSettings";
-      mode = "0600";
-      extraMerge = ". + $v";
-      value = {
-        CLAUDE_MEM_AUTO_UPDATE = "false";
-        CLAUDE_MEM_PROVIDER = "claude";
-        CLAUDE_MEM_CLAUDE_AUTH_METHOD = "subscription";
-        CLAUDE_MEM_MODEL = "haiku";
-        CLAUDE_MEM_QUOTA_FALLBACK_PROVIDER = "off";
-        CLAUDE_MEM_QUOTA_THRESHOLD_FIVE_HOUR = "0.6";
-        CLAUDE_MEM_QUOTA_THRESHOLD_SEVEN_DAY = "0.6";
-        CLAUDE_MEM_CLAUDE_OBSERVATION_BATCH_SIZE = "8";
-        CLAUDE_MEM_SKIP_SUBAGENT_OBSERVATIONS = "true";
-        CLAUDE_MEM_MEMORY_INSTRUCTIONS_ENABLED = "false";
-        CLAUDE_MEM_WORK_STATE_ENABLED = "false";
-        CLAUDE_MEM_DELIVERABLES_ENABLED = "false";
-        CLAUDE_MEM_FILE_READ_GATE_ENABLED = "false";
-        CLAUDE_MEM_CHROMA_ENABLED = "false";
-        CLAUDE_MEM_TRANSCRIPTS_ENABLED = "false";
-        CLAUDE_MEM_TELEGRAM_ENABLED = "false";
-        CLAUDE_MEM_CCS_ALIGN_ENABLED = "false";
-        CLAUDE_MEM_GROK_BOT_INJECT_ENABLED = "false";
-        CLAUDE_MEM_WELCOME_HINT_ENABLED = "false";
-        CLAUDE_MEM_REDACT_ENABLED = "true";
-        CLAUDE_MEM_CONTEXT_OBSERVATIONS = "20";
-        CLAUDE_MEM_CONTEXT_SESSION_COUNT = "3";
-        CLAUDE_MEM_IDLE_EXIT_SEC = "1800";
-        CLAUDE_MEM_EXCLUDED_PROJECTS = "${config.home.homeDirectory}/Obsidian/**";
-        # Every bundled skill at the pinned sha except the four runtime-skills.ts requires.
-        CLAUDE_MEM_SKILLS_DISABLED = lib.concatStringsSep "," [
-          "agent-cost-report"
-          "babysit"
-          "backup-setup"
-          "build"
-          "build-and-release"
-          "ccs-align"
-          "childhood"
-          "cloud-sync"
-          "design-is"
-          "do"
-          "handoff"
-          "knowledge-agent"
-          "learn-codebase"
-          "make-plan"
-          "mode-creator"
-          "oh-my-issues"
-          "pathfinder"
-          "release"
-          "screenpipe"
-          "smart-explore"
-          "standup"
-          "timeline-report"
-          "version-bump"
-          "weekly-digests"
-          "what-the"
-          "wowerpoint"
-        ];
-      };
-    }
-    + aiLib.mergeJsonKey {
-      file = "$HOME/.claude-mem/telemetry.json";
-      key = "claudeMemTelemetry";
-      mode = "0600";
-      value = {enabled = false;};
-      # consent.ts drops a file without a string installId, which re-enables the default-on telemetry.
-      extraMerge = ''. + $v | .installId = (if (.installId | type) == "string" then .installId else "" end) | .decidedAt = (if (.decidedAt | type) == "string" then .decidedAt else "" end)'';
-    }
-  );
 
   # Merges into ~/.claude.json mcpServers, which Claude Code also writes; Nix adds, never removes.
   # Dropping a server here leaves it live: claude mcp remove <name> --scope user.
