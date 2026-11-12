@@ -55,9 +55,10 @@ nix-collect-garbage -d        # garbage collect old generations
 
 `deploy-doctor.sh` previews what a deploy would change destructively:
 unmanaged skill dirs, undeclared plugins, foreign hook events, cleared
-`permissions.allow` rules, and the Homebrew `cleanup = "uninstall"` pass. It
-does not preview the opencode plugin-dir prune, the only destructive step
-outside `~/.claude`. `nix.sh` runs it automatically before every apply and
+`permissions.allow` rules, the Homebrew `cleanup = "uninstall"` pass, and the
+personal Codex skill sync in `~/.agents/skills` (a destructive step outside
+`~/.claude`). It does not preview the opencode plugin-dir prune, the only
+unpreviewed one. `nix.sh` runs it automatically before every apply and
 gates on its exit code: 0 proceeds, 2 (destructive changes predicted)
 requires interactive confirmation or `--force`, 3 (cannot certify) always
 aborts.

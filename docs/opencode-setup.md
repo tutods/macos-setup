@@ -36,7 +36,7 @@ Full-auto by default (`edit`/`webfetch`/`websearch` allow, `bash` allow-all), wi
 
 ## Skills
 
-opencode loads `~/.claude/skills` (the Nix-deployed Claude skills) plus the current project's `.claude/skills`. `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` turns off every other scan. Plugin-installed Claude skills are not bridged into opencode any more, that mechanism is gone. `~/.agents/skills` (the old `npx skills add` tree) is unmanaged and unread.
+opencode loads `~/.claude/skills` (the Nix-deployed Claude skills) plus the current project's `.claude/skills`. `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` turns off every other scan. Plugin-installed Claude skills are not bridged into opencode any more, that mechanism is gone. `~/.agents/skills` is not read by opencode; it holds Codex skill copies this repo deploys (listed in `~/.agents/.dotfiles-managed-skills`) next to unmanaged `npx skills`/Orca installs.
 
 ## Documented exceptions (out-of-band content)
 

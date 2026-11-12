@@ -35,6 +35,8 @@ role's `ai/default.nix`.
 | `kostja94/marketing-skills` | whole repo | |
 | `remotion-dev/skills` | whole repo | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
 
+`cloudflare/security-audit-skill` has no marketplace.json and is installed on personal through `aiLib.mkFetchedSkills` (pinned `fetchFromGitHub`). The inline `settings`-source marketplace plugin form exists but was not used: Codex needs the skill folder, and one `fetchFromGitHub` source serves both Claude and Codex.
+
 ## Work only
 
 | Source | Skills |
@@ -56,12 +58,10 @@ role's `ai/default.nix`.
   since no invoked skill needed it. The pinned-toolset arg was:
   `github-mcp-server stdio --toolsets context,repos,issues,pull_requests,actions`,
   with `GITHUB_PERSONAL_ACCESS_TOKEN` mapped from `GITHUB_TOKEN` at spawn.
-- **`find-skills`** (`oakoss/agent-skills`), installs with `pnpm dlx skills
-  add` straight into `~/.claude/skills/`, outside Nix and invisible to
-  `scripts/verify-plugins.sh`. Re-add only if it gains a discovery-only mode.
+- **`find-skills`**: now installed through `mkFetchedSkills` from `vercel-labs/skills`, patched to discovery only (the `npx skills add` step is replaced by the Nix adoption route). The old `oakoss/agent-skills` copy installed straight into `~/.claude/skills/`, outside Nix.
 - **`resciencelab/opc-skills`**: upstream writes `skillPath` at `SKILL.md`
   instead of the directory, breaking `claude /doctor`.
-- **`orchestration` / `orca-cli`** (`stablyai/orca`, fetched via `mkFetchedSkills`): Orca's own skill updater treats a Nix-copied directory as modified or a duplicate and refuses to update it, so these are no longer Nix-managed. Install and update them directly through Orca. Protection from the reconcile is via a real option rather than a private binding: `home.ai.externallyManagedSkills` (defaults to `["orca-cli" "orchestration" "computer-use"]`) keeps `customSkillsReconcile` from deleting them as unmanaged. `computer-use` is a third Orca skill covered the same way. `~/.agents/skills` (opencode's skill dir) is now entirely unmanaged by this repo, so there is no opencode-side equivalent to describe.
+- **`orchestration` / `orca-cli`** (`stablyai/orca`, fetched via `mkFetchedSkills`): Orca's own skill updater treats a Nix-copied directory as modified or a duplicate and refuses to update it, so these are no longer Nix-managed. Install and update them directly through Orca. Protection from the reconcile is via a real option rather than a private binding: `home.ai.externallyManagedSkills` (defaults to `["orca-cli" "orchestration" "orca-computer-use" "synced"]`) keeps `customSkillsReconcile` from deleting them as unmanaged. `orca-computer-use` is a third Orca skill covered the same way. `~/.agents/skills` is unmanaged by this repo except the manifest-listed Codex copies.
 
 ## Removed in the token-budget rebuild (2026-09-22)
 
