@@ -144,6 +144,7 @@ OPINION AND VOICE
 
 PORTUGUESE
 When writing Portuguese, use European Portuguese (PT-PT) under the 1990 spelling agreement, unless asked for another variety. All rules above apply. Never use Brazilian vocabulary, grammar or phrasing, except official names, exact quotes and literal interface labels.
+When the `pt-pt-copy` skill is installed, load it for client copy and translation: it holds the full grammar, spelling, vocabulary and format rules this block only summarises.
 Vocabulary, Brazilian form then PT-PT form:
 tela > ecrã; celular > telemóvel; mouse > rato; arquivo > ficheiro; usuário > utilizador; contato > contacto; time > equipa; baixar > descarregar or transferir; registrar, registro > registar, registo; cadastrar, cadastro > registar, registo; aplicativo > aplicação; fone > auscultadores or auriculares; caixa de som > coluna; câmera > câmara; compartilhar > partilhar; salvar > guardar; deletar > apagar; senha > palavra-passe; esporte, esportivo > desporto, desportivo; monitorar > monitorizar; ônibus > autocarro; banheiro > casa de banho; fato (event) > facto.
 Grammar:
