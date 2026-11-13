@@ -19,6 +19,33 @@
 in {
   home.file.".codex/AGENTS.md".text = agentsMd;
 
+  # Codex itself appends approved commands to rules/default.rules, so that file stays unmanaged.
+  home.file.".codex/rules/nix.rules".source = ./codex.rules;
+
+  # https://learn.chatgpt.com/docs/config-file/config-advanced: profiles are top-level keys in ~/.codex/<name>.config.toml.
+  home.file.".codex/auto.config.toml".text = ''
+    approval_policy = "on-request"
+    sandbox_mode = "workspace-write"
+    approvals_reviewer = "auto_review"
+
+    [sandbox_workspace_write]
+    network_access = true
+  '';
+
+  programs.fish.functions.codex = {
+    description = "codex with the auto profile unless --profile or -p is given";
+    body = ''
+      for a in $argv
+        switch $a
+          case --profile '--profile=*' -p
+            command codex $argv
+            return
+        end
+      end
+      command codex --profile auto $argv
+    '';
+  };
+
   # ~/.agents/skills is Codex's user skill dir; ~/.codex/skills holds Codex's own .system and must stay untouched.
   # The dir is shared with Orca and `npx skills` installs, so a manifest records which names this repo owns.
   home.activation.codexSkills = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
