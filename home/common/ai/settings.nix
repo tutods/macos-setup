@@ -4,15 +4,19 @@
   lib,
   ...
 }: let
-  # Bash() permission rules support only exact matches and `prefix:*` prefix
-  # matches: a mid-string `*` is a literal star, and `~` is never expanded (it
-  # matches a literal tilde in the command text). So every secret family is
-  # emitted in every spelling the model might type: home-scoped families as
-  # literal `~/` and absolute, project-scoped families (mirroring opencode's
-  # `*.env*` and `*secrets/*` globs) as bare and ./-prefixed. The families,
-  # the reader commands and the rtk reader subcommands are the canonical
-  # definitions in lib/ai.nix (aiLib.secretPathFamilies etc.), shared with
-  # opencode's glob rendering in home/roles/personal/opencode/config.nix.
+  # Bash() rules (https://code.claude.com/docs/en/permissions): `*` matches any
+  # text, including spaces, anywhere in the rule. A trailing ` *` (space before
+  # the star) also matches the bare command and requires a word boundary, so it
+  # cannot match `cat ~/.ssh/id_x`; `:*` at the end is the same as ` *`. The
+  # secret-path rules therefore end in a bare `*` with no space. `~` is not
+  # expanded, the rule text is compared with the command as typed. So every
+  # secret family is emitted in every spelling the model might type:
+  # home-scoped families as literal `~/` and absolute, project-scoped families
+  # (mirroring opencode's `*.env*` and `*secrets/*` globs) as bare and
+  # ./-prefixed. The families, the reader commands and the rtk reader
+  # subcommands are the canonical definitions in lib/ai.nix
+  # (aiLib.secretPathFamilies etc.), shared with opencode's glob rendering in
+  # home/roles/personal/opencode/config.nix.
   readerSecretPaths =
     lib.concatMap (aiLib.secretPrefixSpellings config.home.homeDirectory)
     aiLib.secretPathFamilies;
@@ -22,7 +26,7 @@
   # cat form alone stops nothing once rtk is on PATH.
   rtkSecretDenies =
     lib.concatMap (
-      sub: map (path: "Bash(rtk ${sub} ${path}:*)") readerSecretPaths
+      sub: map (path: "Bash(rtk ${sub} ${path}*)") readerSecretPaths
     )
     aiLib.rtkReaderSubcommands;
   settings = {
@@ -82,22 +86,42 @@
         "Read(~/.config/git/private)"
         "Read(**/.env)"
         "Read(**/.env.*)"
+        "Bash(env)"
+        "Bash(printenv)"
+        "Bash(printenv *)"
       ]
       # Defense in depth: the Read() rules above gate only the Read tool, so
       # without these a `cat ~/.ssh/id_ed25519` is one reflexive approval away.
-      # These are `prefix:*` rules (the only wildcard Bash() supports), each
-      # path in every spelling the model types: they catch a command that
-      # STARTS with `<reader> <secret path>` and nothing more — best-effort
-      # against the casual path, since `cd ~/.ssh && cat id_ed25519`, a shell
+      # These are `<reader> <path>*` rules, each path in every spelling the
+      # model types: they catch a command that STARTS with
+      # `<reader> <secret path>` and nothing more — best-effort against the
+      # casual path, since `cd ~/.ssh && cat id_ed25519`, a shell
       # variable, or any unlisted reader command still evades them. The reader
       # list is aiLib.secretReaders (lib/ai.nix), the same canonical source
       # opencode's secretDenies matrix renders from in
       # home/roles/personal/opencode/config.nix.
       ++ lib.concatMap (
-        reader: map (path: "Bash(${reader} ${path}:*)") readerSecretPaths
+        reader: map (path: "Bash(${reader} ${path}*)") readerSecretPaths
       )
       aiLib.secretReaders
       ++ rtkSecretDenies;
+    # Remote and branch-losing commands always prompt, in auto mode too. The
+    # rtk hook rewrites these to `rtk <cmd>` before rules are consulted (env,
+    # printenv, sftp and mosh are not rewritten), so both spellings are listed.
+    permissions.ask = [
+      "Bash(ssh *)"
+      "Bash(scp *)"
+      "Bash(sftp *)"
+      "Bash(mosh *)"
+      "Bash(rsync *)"
+      "Bash(git branch -D *)"
+      "Bash(git stash drop *)"
+      "Bash(rtk ssh *)"
+      "Bash(rtk scp *)"
+      "Bash(rtk rsync *)"
+      "Bash(rtk git branch -D *)"
+      "Bash(rtk git stash drop *)"
+    ];
     permissions.additionalDirectories = ["~/Obsidian"];
     # Classifier-guarded default: reads, in-project edits and read-only Bash run
     # without a prompt; network, destructive Bash and out-of-project writes still
