@@ -11,7 +11,6 @@
 
   home.packages =
     (with pkgs; [
-      terraform
       nixd
       # Claude Code's typescript-lsp plugin needs it on PATH; editors bundle their own.
       typescript-language-server
@@ -26,6 +25,8 @@
       pkgsUnstable.codex
       # stable's minor-version freeze leaves it behind every Doppler release
       pkgsUnstable.doppler
+      # stable lags on releases and security fixes
+      pkgsUnstable.terraform
       (pkgs.callPackage ./lightroom-cli.nix {})
       (pkgs.callPackage ./skillspector.nix {})
     ];

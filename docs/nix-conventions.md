@@ -14,7 +14,12 @@ Rules and conventions for working in this Nix flake repo.
 
 - Run `nix search nixpkgs <name>` to confirm a package exists in stable before adding it
 - Only use `pkgsUnstable` if the stable version is too old for the use case
-- Tools that justify `pkgsUnstable`: `claude-code` and `codex`, fast-moving, need latest
+- Tools that justify `pkgsUnstable`:
+  - `claude-code`, `codex`, `rtk`: fast-moving, need latest
+  - `doppler`: stable's version freeze leaves it behind every release
+  - `ast-grep`, `fd`, `terraform`: stable lags on releases and security fixes
+- Renovate runs lock maintenance daily on weekdays (before 6am), so `nixpkgs-unstable` stays fresh without manual bumps
+- `claude-code`'s nixpkgs wrapper already sets `DISABLE_AUTOUPDATER=1`, so Nix alone owns its version
 
 ## Package Placement
 

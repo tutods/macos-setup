@@ -24,6 +24,7 @@ in {
 
   # https://learn.chatgpt.com/docs/config-file/config-advanced: profiles are top-level keys in ~/.codex/<name>.config.toml.
   home.file.".codex/auto.config.toml".text = ''
+    check_for_update_on_startup = false
     approval_policy = "on-request"
     sandbox_mode = "workspace-write"
     approvals_reviewer = "auto_review"

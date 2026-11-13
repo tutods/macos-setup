@@ -27,7 +27,7 @@
   "separateMultipleMajor": true,
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on Monday"]
+    "schedule": ["before 6am every weekday"]
   },
   "nix": {
     "enabled": true
