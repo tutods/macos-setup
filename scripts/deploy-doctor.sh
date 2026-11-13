@@ -2,7 +2,7 @@
 # Deploy doctor: shows what the next deploy will DELETE or RESET in the Claude
 # Code state before `darwin-rebuild switch` runs, so nothing is eaten silently.
 #
-# The destructive places, all previewed below except the last:
+# The destructive places, all previewed below:
 #   - home.activation.codexSkills (personal only) replaces its Codex skill
 #     copies in ~/.agents/skills and deletes ones it owned (per
 #     ~/.agents/.dotfiles-managed-skills) that are no longer declared; a
@@ -22,10 +22,6 @@
 #     (modules/darwin/homebrew/default.nix). Previewed via a `brew bundle
 #     cleanup` dry run against the pending config's Brewfile — but only when
 #     the target config is this machine's: brew's live state is per-machine.
-#   - NOT previewed: home.activation.opencodePlugins empties
-#     ~/.config/opencode/plugin{,s} of everything but the two names it keeps
-#     (home/roles/personal/opencode/default.nix). Personal machine only, and
-#     the only one of these outside ~/.claude.
 #
 # Usage: ./scripts/deploy-doctor.sh [macbook|work]   (default: this machine's
 # config inferred from the hostname)
@@ -95,7 +91,7 @@ echo ""
 # ── Flake eval, once for everything ──────────────────────────────────────────
 # One full-flake eval selects every attr this script needs; the per-attr evals
 # it replaces each re-evaluated nixpkgs + nix-darwin + the whole HM tree. The
-# opencode attrs exist only on macbook, so they fall back to null via `or`.
+# brew attrs exist only on darwin hosts with homebrew, so they fall back to null via `or`.
 # An empty/failed result would report every skill dir as "will delete", so a
 # failed eval must abort rather than proceed with an empty allowlist.
 if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
@@ -108,7 +104,7 @@ if ! doctor_json=$("${NIX[@]}" "$DARWIN" --apply "
     brewfile = cfg.homebrew.brewfile or null;
     brewOwner = cfg.homebrew.user or null;
   }" 2>/dev/null) || [ -z "$doctor_json" ]; then
-  echo "deploy-doctor: could not eval $HM (customSkills/plugins/opencode attrs) — aborting instead of showing a bogus delete list" >&2
+  echo "deploy-doctor: could not eval $HM (customSkills/plugins attrs) — aborting instead of showing a bogus delete list" >&2
   exit 3
 fi
 skills_json=$(printf '%s' "$doctor_json" | jq -c '.customSkills')
@@ -296,20 +292,6 @@ else
     echo "deploy-doctor: brew bundle cleanup dry run failed (exit $cleanup_rc) — cannot certify brew cleanup:" >&2
     printf '%s\n' "$cleanup_out" | sed 's/^/    /' >&2
     exit 3
-  fi
-fi
-
-# ── 7. opencode provider auth (personal machine only) ────────────────────────
-# ~/.local/share/opencode/auth.json is written interactively by `opencode`
-# /connect and is deliberately never in Nix. The deployed opencode.json points
-# at Ollama Cloud models; with no ollama-cloud entry every model call fails
-# with nothing tying it back to "you never ran /connect".
-if [ "$CONFIG" = "macbook" ]; then
-  OPENCODE_AUTH="$TARGET_HOME/.local/share/opencode/auth.json"
-  if [ -f "$OPENCODE_AUTH" ] && jq -e '.["ollama-cloud"]' "$OPENCODE_AUTH" >/dev/null 2>&1; then
-    print_ok "opencode ollama-cloud auth is set up"
-  else
-    print_warn "opencode auth not set up — run ${BOLD}opencode${NC} then ${BOLD}/connect${NC} and pick the Ollama Cloud provider"
   fi
 fi
 

@@ -59,7 +59,7 @@ Three layers manage software, each has a distinct scope:
 | `fonts.nix` | System fonts (JetBrains Mono, Fira Code, Montserrat, etc.) |
 
 VSCode is managed by Home Manager only (not here). Machine-specific tools
-(e.g. doppler and opencode, personal only) are role user packages in
+(e.g. doppler and codex, personal only) are role user packages in
 `home/roles/personal/packages.nix`, not system packages; there is no per-host
 `packages.nix` anymore.
 
@@ -103,7 +103,7 @@ home/
 │           ├── abbrs.nix       # Expanding abbreviations (git, brew)
 │           └── functions.nix   # Multi-step helpers (goMain, commt, killport, etc.)
 └── roles/                # Context-specific overrides
-    ├── personal/        # Personal machine overrides (ai/, skills/, opencode/, instructions.md)
+    ├── personal/        # Personal machine overrides (ai/, skills/, instructions.md)
     └── work/            # Work machine overrides (ai/, instructions.md)
 ```
 

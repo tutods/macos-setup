@@ -11,7 +11,7 @@
 
 One command rebuilds either machine from scratch — system defaults, packages,
 Homebrew casks, App Store apps, shell, editors, and the whole AI harness setup
-(Claude Code + opencode).
+(Claude Code and Codex).
 
 ```bash
 ./nix.sh macbook
@@ -32,7 +32,7 @@ Built on [Nix flakes](https://nixos.wiki/wiki/Flakes) ·
 |---|---|---|
 | **User** | `tutods` | `daniel.a.sousa` |
 | **Homebrew owner** | `tutods` | `admin.daniel.a.sousa` |
-| **Notes** | Personal: Doppler, Terraform, extra casks and fonts, opencode | Corporate DNS untouched; Atlassian `acli` tap |
+| **Notes** | Personal: Doppler, Terraform, extra casks and fonts | Corporate DNS untouched; Atlassian `acli` tap |
 
 Both are `aarch64-darwin`. Adding a third is a directory copy and one line in
 `flake.nix` → [adding-host-or-user.md](docs/adding-host-or-user.md).
@@ -57,7 +57,7 @@ Both are `aarch64-darwin`. Adding a third is a directory copy and one line in
 
 ## AI setup at a glance
 
-Everything both harnesses read is generated from this repo. Nothing is
+Everything the harnesses read is generated from this repo. Nothing is
 configured by hand in a UI.
 
 | Layer | Source | Lands in |
@@ -67,23 +67,18 @@ configured by hand in a UI.
 | External skills | plugin marketplaces, declared in Nix | installed by Claude Code on next launch |
 | MCP servers | role `ai/default.nix` (e.g. personal's `shadcn`) | `~/.claude.json` (`mcpServers`, merged) |
 | Settings, hooks, statusline | `home/common/ai/settings.nix` | `~/.claude/settings.json` (merged) |
-| opencode (personal only) | `home/roles/personal/opencode/` | `~/.config/opencode/` (config, agents, commands, plugins, AGENTS.md) |
 
 **Claude Code** end to end from Nix: instructions, skills, marketplaces, MCP,
 hooks → [ai-setup.md](docs/ai-setup.md)
-
-**opencode**, the personal machine's second harness: shares the same
-instruction sources and skills, runs its own agent fleet and slash commands →
-[opencode-setup.md](docs/opencode-setup.md)
 
 Rules are scoped to where they are actually true: always-true rules are
 instructions, stack-specific ones are skills that load on demand, repo-specific
 ones live in that repo's own `CLAUDE.md`.
 
-> ⚠️ Both harnesses' plugins fail silently — a typo'd name writes to the config,
-> installs nothing, logs nothing. `scripts/verify-plugins.sh` (CI-enforced) and
-> `scripts/verify-opencode.sh` catch that, plus `scripts/deploy-doctor.sh`
-> previews everything a deploy would delete.
+> ⚠️ Claude Code plugins fail silently — a typo'd name writes to the config,
+> installs nothing, logs nothing. `scripts/verify-plugins.sh` (CI-enforced)
+> catches that, and `scripts/deploy-doctor.sh` previews everything a deploy
+> would delete.
 
 ## First-time setup
 
@@ -124,7 +119,6 @@ nix flake check                     # validate the flake
 | Verification script | When |
 |---------------------|------|
 | `./scripts/verify-plugins.sh` | after touching Claude plugins / marketplaces (runs in CI) |
-| `./scripts/verify-opencode.sh` | after touching the opencode setup (or `/verify-setup` in-session) |
 | `./scripts/deploy-doctor.sh macbook` | before applying — previews what the next deploy deletes |
 
 ## Structure
@@ -156,9 +150,9 @@ nix flake check                     # validate the flake
 │   │   ├── shell/              fish · oh-my-posh
 │   │   └── terminal/           ghostty
 │   └── roles/
-│       ├── personal/           Personal-only packages, plugins, skills, opencode
+│       ├── personal/           Personal-only packages, plugins, skills
 │       └── work/               Work-only: acli, PR review skills
-├── scripts/                    verify-plugins · verify-opencode · deploy-doctor · darwin/ helpers
+├── scripts/                    verify-plugins · deploy-doctor · darwin/ helpers
 └── docs/                       Guides and reference
 ```
 
@@ -180,7 +174,6 @@ nix flake check                     # validate the flake
 | User program | `home/common/` |
 | Claude skill | `home/common/ai/skills/local/` + the `names` list |
 | Claude plugin | `home/common/ai/plugins.nix` or a role's `ai/default.nix` |
-| opencode agent / command | `home/roles/personal/opencode/{agents,commands}/` |
 
 Check a package exists in stable first: `nix search nixpkgs <name>`.
 
@@ -193,7 +186,6 @@ Check a package exists in stable first: `nix search nixpkgs <name>`.
 | 🏗️ | [architecture.md](docs/architecture.md) | Module composition and how a config is assembled |
 | 📐 | [nix-conventions.md](docs/nix-conventions.md) | Conventions for working in this repo |
 | 🤖 | [ai-setup.md](docs/ai-setup.md) | Claude Code: instructions, skills, plugins, MCP |
-| ⚡ | [opencode-setup.md](docs/opencode-setup.md) | opencode: the second harness, personal machine only |
 | 📦 | [dropped-skill-sources.md](docs/dropped-skill-sources.md) | Skill sources that can't ship as plugins |
 | 🎓 | [ai-lessons.md](docs/ai-lessons.md) | Gotchas hit once and worth not repeating |
 | ➕ | [adding-host-or-user.md](docs/adding-host-or-user.md) | Adding a machine or a user |

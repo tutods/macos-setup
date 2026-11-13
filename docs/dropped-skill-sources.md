@@ -21,9 +21,9 @@ role's `ai/default.nix`.
 |---|---|---|
 | `oakoss/agent-skills` | ~21 skills (React, Tailwind, a11y, openapi, zod, vitest, docker, CI, docs) | Largely covered by `secondsky/claude-skills` single-skill plugins, enabled per project. Re-probed 2026-08-13: still no marketplace.json and **no license**, so vendoring is out. |
 | `shadcn/ui` | whole repo | |
-| `vercel-labs/agent-skills` | web-design-guidelines | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
-| `biomejs/biome` | biome-developer, testing-codegen | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
-| `mindrally/skills` | pnpm | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
+| `vercel-labs/agent-skills` | web-design-guidelines | No longer installed anywhere: the old `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
+| `biomejs/biome` | biome-developer, testing-codegen | No longer installed anywhere: the old `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
+| `mindrally/skills` | pnpm | No longer installed anywhere: the old `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
 | `yizhiyanhua-ai/fireworks-tech-graph` | fireworks-tech-graph | |
 
 ## Personal only
@@ -31,9 +31,9 @@ role's `ai/default.nix`.
 | Source | Skills | Status |
 |---|---|---|
 | `oakoss/agent-skills` | tanstack-*, react-email, icon-design, figma-developer, drizzle-orm, package-publishing, seo-optimizer | |
-| `vercel/turborepo` | whole repo | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
+| `vercel/turborepo` | whole repo | No longer installed anywhere: the old `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
 | `kostja94/marketing-skills` | whole repo | |
-| `remotion-dev/skills` | whole repo | No longer installed anywhere: opencode's `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
+| `remotion-dev/skills` | whole repo | No longer installed anywhere: the old `skills.nix` bridge that installed these into `~/.agents/skills` was removed in the token-budget rebuild; still no marketplace.json so still unavailable to Claude either. |
 
 `cloudflare/security-audit-skill` has no marketplace.json and is installed on personal through `aiLib.mkFetchedSkills` (pinned `fetchFromGitHub`). The inline `settings`-source marketplace plugin form exists but was not used: Codex needs the skill folder, and one `fetchFromGitHub` source serves both Claude and Codex.
 
@@ -76,6 +76,6 @@ Cut to bring the fixed per-session cost down; see the "What is loaded every sess
 - **Agents**: `code-reviewer`, `dev-lifecycle`. Their callers are gone, and the `code-review` plugin covers review.
 - **`code-review-graph`**: the MCP server, its `pipx` package, and `crg-autobuild.sh`.
 - **Hooks**: `delegation-reminder.sh` and `compaction-sentinel.sh`. The post-compaction re-injection cost tokens on every prompt after a compaction, for a contract the rules file already carries.
-- **opencode's Claude-plugin skill bridge and `skills.nix`**: `~/.agents/skills` is now unmanaged by this repo.
+- **The Claude-plugin skill bridge and `skills.nix`**: `~/.agents/skills` is now unmanaged by this repo.
 - **`frontend-slides`**: moved from the shared marketplace list to the `frontend` repo's own `.claude/settings.json`, it is only needed there.
 - **`mp-ai-workbench`/`mp-fe-design`**: moved from the work role to project settings in the `frontend`, `workspace` and `ai-workbench` repos, they were loading in every session on the work machine, Nix repo and vault included.

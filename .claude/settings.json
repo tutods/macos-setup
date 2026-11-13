@@ -9,7 +9,6 @@
       "Bash(alejandra:*)",
       "Bash(./scripts/verify-plugins.sh:*)",
       "Bash(./scripts/deploy-doctor.sh:*)",
-      "Bash(./scripts/verify-opencode.sh:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)"

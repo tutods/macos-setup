@@ -20,8 +20,6 @@ Workflow({
 
 Resolve `<home>` to the real home directory. If the question is spread over several messages, consolidate it into one self-contained `args` string, the advisors see nothing but that string.
 
-In opencode, which has no Workflow tool, run the `/council` command instead; it fans out the same advisor seats from its own chair agent.
-
 ## Present the result
 
 The workflow returns `{ question, advisors, review, recommendation }`:

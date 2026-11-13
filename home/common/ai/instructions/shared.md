@@ -46,7 +46,7 @@ Bug report: find the root cause and fix it, no options menu. Ask only when the f
 ## Learned rules
 
 - Nix source is the config: edit it, `./nix.sh`, never hand-edit deployed files.
-- Stack: Claude Code, opencode, and codex on personal. Nothing else.
+- Stack: Claude Code and codex on personal. Nothing else.
 - Work lands in the user's tree; worktrees are temporary.
 - Never swap build tooling or framework infra as a side effect.
 - Do it yourself, never another model or API.

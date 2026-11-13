@@ -12,11 +12,9 @@
   # expanded, the rule text is compared with the command as typed. So every
   # secret family is emitted in every spelling the model might type:
   # home-scoped families as literal `~/` and absolute, project-scoped families
-  # (mirroring opencode's `*.env*` and `*secrets/*` globs) as bare and
-  # ./-prefixed. The families, the reader commands and the rtk reader
+  # as bare and ./-prefixed. The families, the reader commands and the rtk reader
   # subcommands are the canonical definitions in lib/ai.nix
-  # (aiLib.secretPathFamilies etc.), shared with opencode's glob rendering in
-  # home/roles/personal/opencode/config.nix.
+  # (aiLib.secretPathFamilies etc.).
   readerSecretPaths =
     lib.concatMap (aiLib.secretPrefixSpellings config.home.homeDirectory)
     aiLib.secretPathFamilies;
@@ -97,9 +95,7 @@
       # `<reader> <secret path>` and nothing more — best-effort against the
       # casual path, since `cd ~/.ssh && cat id_ed25519`, a shell
       # variable, or any unlisted reader command still evades them. The reader
-      # list is aiLib.secretReaders (lib/ai.nix), the same canonical source
-      # opencode's secretDenies matrix renders from in
-      # home/roles/personal/opencode/config.nix.
+      # list is aiLib.secretReaders (lib/ai.nix).
       ++ lib.concatMap (
         reader: map (path: "Bash(${reader} ${path}*)") readerSecretPaths
       )

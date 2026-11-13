@@ -4,12 +4,7 @@
   pkgs,
   pkgsUnstable,
   ...
-}: let
-  # Temporary override: nixpkgs-unstable's opencode 1.18.30 crashes on every
-  # prompt. See opencode-pinned.nix. Restore pkgsUnstable.opencode below once
-  # nixpkgs ships > 1.18.30.
-  opencodePinned = pkgsUnstable.callPackage ./opencode-pinned.nix {};
-in {
+}: {
   # Nix owns doppler's version, so its update notice has no action to offer.
   # A flag, not DOPPLER_ENABLE_VERSION_CHECK: the env var prints its own notice.
   home.shellAliases.doppler = "doppler --no-check-version";
@@ -18,7 +13,7 @@ in {
     (with pkgs; [
       terraform
       nixd
-      # Claude Code's typescript-lsp plugin needs it on PATH; editors and opencode bundle their own.
+      # Claude Code's typescript-lsp plugin needs it on PATH; editors bundle their own.
       typescript-language-server
       # GUI app kept from nixpkgs: every Homebrew qbittorrent cask
       # (qbittorrent, qbittorrent@lt20, c0re100-qbittorrent) was disabled
@@ -28,7 +23,6 @@ in {
     ])
     ++ [
       # fast-moving AI CLIs, stable lags too far — same rationale as claude-code
-      opencodePinned
       pkgsUnstable.codex
       # stable's minor-version freeze leaves it behind every Doppler release
       pkgsUnstable.doppler

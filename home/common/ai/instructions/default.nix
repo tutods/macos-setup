@@ -5,7 +5,7 @@
   ...
 }: let
   # Concatenated into ~/.claude/rules/workflow.md. delegation.md is Claude-only
-  # (≤1 KB); shared.md is harness-agnostic, opencode reads it too.
+  # (≤1 KB); shared.md is harness-agnostic, Codex reads it too.
   sharedFiles = [
     ./delegation.md
     ./shared.md

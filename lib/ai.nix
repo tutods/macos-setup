@@ -12,61 +12,45 @@
 {pkgs}: let
   jqBin = "${pkgs.jq}/bin/jq";
 in rec {
-  # Single source of truth for the secret-path deny lists both harnesses
-  # render: Claude Code's Bash() prefix rules in home/common/ai/settings.nix
-  # and opencode's anchored-glob rules in
-  # home/roles/personal/opencode/config.nix. Each family carries the shape
-  # metadata both renderings need, explicitly:
-  #   - `relative`: the path prefix (a trailing slash marks a directory
-  #     family, which the glob spelling turns into `<p>*` = "anything under").
+  # Single source of truth for the secret-path deny lists rendered as Claude
+  # Code's Bash() prefix rules in home/common/ai/settings.nix. Each family
+  # carries the shape metadata the rendering needs, explicitly:
+  #   - `relative`: the path prefix (a trailing slash marks a directory family).
   #   - `scope`: which literal spellings the prefix rules emit — "home"
   #     families are typed as `~/<p>` or `$HOME/<p>`, "project" families as
   #     `<p>` or `./<p>`.
-  #   - `opencodeGlob`: the anchored-glob spelling for opencode (where `*`
-  #     also matches `/`, so the leading `*` covers tilde, absolute and
-  #     project-relative text alike). Spelled out per family, never computed:
-  #     if a family cannot render meaningfully in one harness, that must be
-  #     explicit here (opencodeGlob = null excludes it from opencode, loudly,
-  #     in this data), never dropped silently by a renderer.
   secretPathFamilies = [
     {
       relative = ".ssh/";
       scope = "home";
-      opencodeGlob = "*.ssh/*";
     }
     {
       relative = ".aws/";
       scope = "home";
-      opencodeGlob = "*.aws/*";
     }
     {
       relative = ".config/fish/secrets.fish";
       scope = "home";
-      opencodeGlob = "*.config/fish/secrets.fish*";
     }
     {
       relative = ".config/git/private";
       scope = "home";
-      opencodeGlob = "*.config/git/private*";
     }
     {
       relative = ".config/gcloud/";
       scope = "home";
-      opencodeGlob = "*.config/gcloud/*";
     }
     {
       relative = ".env";
       scope = "project";
-      opencodeGlob = "*.env*";
     }
     {
       relative = "secrets/";
       scope = "project";
-      opencodeGlob = "*secrets/*";
     }
   ];
 
-  # Reader commands whose `<reader> <secret path>` invocation both harnesses
+  # Reader commands whose `<reader> <secret path>` invocation Claude Code
   # deny. Best-effort against the casual path (prefix/glob matching over
   # literal command text), see the comments at each rendering site.
   secretReaders = ["cat" "bat" "less" "head" "tail" "base64"];
@@ -85,12 +69,6 @@ in rec {
     if family.scope == "home"
     then ["~/${family.relative}" "${homeDirectory}/${family.relative}"]
     else [family.relative "./${family.relative}"];
-
-  # opencode's glob list. The `!= null` filter here is the ONLY place a family
-  # may be excluded from opencode, and only because its own entry says so.
-  secretOpencodeGlobs =
-    map (f: f.opencodeGlob)
-    (builtins.filter (f: f.opencodeGlob != null) secretPathFamilies);
 
   mkServer = {
     cmd,

@@ -420,9 +420,8 @@ dry_run_config() {
 
 # ── Deploy doctor preview ─────────────────────────────────────────────────────
 # The deploy silently deletes unmanaged skill dirs, drops undeclared plugins
-# and hook events, clears permissions.allow, reconciles the opencode skills
-# tree, and lets Homebrew's cleanup uninstall anything off-Brewfile; the
-# doctor previews all six before applying.
+# and hook events, clears permissions.allow, and lets Homebrew's cleanup uninstall
+# anything off-Brewfile; the doctor previews all of them before applying.
 # Doctor exit protocol (scripts/deploy-doctor.sh): 0 = clean preview, 2 =
 # destructive changes predicted, 3 = cannot certify. Anything the doctor
 # refuses to certify (or a crash) aborts — applying blind was the old bug.

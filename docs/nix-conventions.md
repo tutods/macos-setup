@@ -7,15 +7,14 @@ Rules and conventions for working in this Nix flake repo.
 - Run `nix fmt` before committing any `.nix` file, hard requirement, not a suggestion
 - Run `nix flake check` after any change to `flake.nix` or module files, catches errors before deploy. It builds both host toplevels, and `lib/ai.nix` assertions fail that build if a skill/agent/workflow `names` list and its `local/` directory drift apart (a declared name with no file, or a file with no declaration). This replaced `verify-references.sh`; that script's check for repo paths cited in Markdown that no longer exist was dropped as low value
 - Run `./scripts/verify-plugins.sh` after touching `home.ai.plugins` or `home.ai.marketplaces`, plugins fail silently, so nothing else will tell you a name is wrong. This is the one check `nix flake check` cannot do: it clones the marketplace repos to confirm each plugin resolves remotely
-- Run `./scripts/verify-opencode.sh` after touching anything under `home/roles/personal/opencode/`, same silent-failure reasoning: it checks the deployed config, managed files and the opencode log for post-deploy errors. Personal machine only (opencode has no work-machine module)
-- Run `./scripts/deploy-doctor.sh <host>` before applying, a deploy silently deletes unmanaged skill dirs, drops undeclared plugins and hook events, and clears `permissions.allow`; the doctor previews each of those, the personal Codex skill sync in `~/.agents/skills` (a destructive step outside `~/.claude`), plus the Homebrew `cleanup = "uninstall"` pass (what `brew bundle cleanup` would remove against the pending Brewfile — only when the target config is the current machine, skipped informationally otherwise). It does not preview the opencode plugin-dir prune in `home/roles/personal/opencode/default.nix`, the only unpreviewed destructive step. `nix.sh` runs it automatically before apply and gates on its exit code: 0 = clean preview (proceed), 2 = destructive changes predicted (requires interactive confirmation, or `--force`; non-interactive runs abort), 3 = cannot certify (always aborts)
+- Run `./scripts/deploy-doctor.sh <host>` before applying, a deploy silently deletes unmanaged skill dirs, drops undeclared plugins and hook events, and clears `permissions.allow`; the doctor previews each of those, the personal Codex skill sync in `~/.agents/skills` (a destructive step outside `~/.claude`), plus the Homebrew `cleanup = "uninstall"` pass (what `brew bundle cleanup` would remove against the pending Brewfile — only when the target config is the current machine, skipped informationally otherwise). `nix.sh` runs it automatically before apply and gates on its exit code: 0 = clean preview (proceed), 2 = destructive changes predicted (requires interactive confirmation, or `--force`; non-interactive runs abort), 3 = cannot certify (always aborts)
 - Never skip these even for "trivial" edits
 
 ## Adding Packages
 
 - Run `nix search nixpkgs <name>` to confirm a package exists in stable before adding it
 - Only use `pkgsUnstable` if the stable version is too old for the use case
-- Tools that justify `pkgsUnstable`: `claude-code` and `opencode`, fast-moving, need latest
+- Tools that justify `pkgsUnstable`: `claude-code` and `codex`, fast-moving, need latest
 
 ## Package Placement
 

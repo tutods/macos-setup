@@ -34,7 +34,6 @@ Run the deployment script for the specific machine:
 - **Sudo**: If prompted for a password, enter your macOS user password.
 - **Homebrew**: If Homebrew casks fail to install, run `brew doctor`.
 - **AI Skills**: Custom skills are copied into `~/.claude/skills/` by the deploy itself. External skills are Claude Code plugins, they install the first time you launch `claude`, so give it one run before checking `/plugin`.
-- **opencode auth (personal machine)**: after the deploy has written `~/.config/opencode/opencode.json`, run `opencode` and use `/connect` to add the Ollama Cloud provider. `~/.local/share/opencode/auth.json` is never in Nix and the deployed config points at Ollama Cloud models that fail every call without it.
 
 ## 5. Troubleshooting
 - **Flake Errors**: If you see "no such file or directory" for `flake.nix`, ensure you are in the repo root.
