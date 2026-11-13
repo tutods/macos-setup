@@ -2,8 +2,18 @@
   config,
   lib,
   aiLib,
+  pkgs,
   ...
 }: let
+  tomlq = "${pkgs.yq}/bin/tomlq";
+  autoProfileJson = pkgs.writeText "codex-auto-profile.json" (builtins.toJSON {
+    check_for_update_on_startup = false;
+    approval_policy = "on-request";
+    sandbox_mode = "workspace-write";
+    approvals_reviewer = "auto_review";
+    sandbox_workspace_write.network_access = true;
+  });
+
   sources = config.home.ai.codexSkillSources;
 
   agentsMd = aiLib.appendIfNonEmpty (''
@@ -23,14 +33,23 @@ in {
   home.file.".codex/rules/nix.rules".source = ./codex.rules;
 
   # https://learn.chatgpt.com/docs/config-file/config-advanced: profiles are top-level keys in ~/.codex/<name>.config.toml.
-  home.file.".codex/auto.config.toml".text = ''
-    check_for_update_on_startup = false
-    approval_policy = "on-request"
-    sandbox_mode = "workspace-write"
-    approvals_reviewer = "auto_review"
-
-    [sandbox_workspace_write]
-    network_access = true
+  # Codex writes TUI choices (model, ...) into the active profile file, so it is a writable merged copy, never a store symlink.
+  home.activation.codexAutoProfile = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    target="$HOME/.codex/auto.config.toml"
+    run mkdir -p "$(dirname "$target")"
+    merged=$(mktemp)
+    if [ -e "$target" ]; then
+      if ! ${tomlq} -t --slurpfile vw ${autoProfileJson} '. * $vw[0]' "$target" > "$merged"; then
+        echo "codex: merge into $target failed, fix or remove the file" >&2
+        rm -f "$merged"
+        exit 1
+      fi
+    else
+      ${tomlq} -t -n --slurpfile vw ${autoProfileJson} '$vw[0]' > "$merged"
+    fi
+    [ -L "$target" ] && run rm -f "$target"
+    run install -m 0600 "$merged" "$target"
+    rm -f "$merged"
   '';
 
   programs.fish.functions.codex = {
