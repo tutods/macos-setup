@@ -73,7 +73,7 @@ Load when a word is in doubt. Where pt-PT accepts two words, the first is the sa
 | fridge | frigorífico | geladeira |
 | cup | chávena | xícara |
 | ground floor | rés-do-chão | térreo |
-| rent (payment) / rental | renda / aluguer (cars, equipment) | aluguel |
+| rent (payment) / to rent / rental | renda / arrendar (property), alugar / aluguer (cars, equipment) | aluguel |
 | plumber | canalizador | encanador |
 | lawn | relva | grama |
 | breakfast | pequeno-almoço | café da manhã |
